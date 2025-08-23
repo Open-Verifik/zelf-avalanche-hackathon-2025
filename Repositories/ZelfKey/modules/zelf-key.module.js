@@ -7,6 +7,83 @@ import * as pinata from "../../IPFS/modules/pinata.js";
  * @author Miguel Trevino <miguel@zelf.world>
  */
 
+const createMetadataAndPublicData = async (type, data) => {
+	switch (type) {
+		case "password":
+			return {
+				metadata: {
+					username: `${data.username}`,
+					password: `${data.password}`,
+				},
+				publicData: {
+					type: "website_password",
+					website: `${data.website}`,
+					username: data.username ? "***" + data.username.slice(-3) : "***",
+					timestamp: `${new Date().toISOString()}`,
+				},
+			};
+		case "notes":
+			return {
+				metadata: data.keyValuePairs,
+				publicData: {
+					type: "notes",
+					title: `${data.title}`,
+					pairCount: Object.keys(data.keyValuePairs || {}).length,
+					timestamp: `${new Date().toISOString()}`,
+				},
+			};
+		case "credit_card":
+			return {
+				metadata: {
+					cardNumber: `${data.cardNumber}`,
+					expiryMonth: `${data.expiryMonth}`,
+					expiryYear: `${data.expiryYear}`,
+					cvv: `${data.cvv}`,
+				},
+				publicData: {
+					type: "credit_card",
+					cardName: `${data.cardName}`,
+					cardNumber: `****-****-****-${data.cardNumber.slice(-4)}`,
+					expiryMonth: `${data.expiryMonth}`,
+					expiryYear: `${data.expiryYear}`,
+					bankName: `${data.bankName}`,
+					timestamp: `${new Date().toISOString()}`,
+				},
+			};
+		case "contact":
+			return {
+				metadata: {
+					name: `${data.name}`,
+					email: `${data.email}`,
+					phone: `${data.phone}`,
+					address: `${data.address}`,
+					company: `${data.company}`,
+				},
+				publicData: {
+					type: "contact",
+					name: `${data.name}`,
+				},
+			};
+		case "bank_details":
+			return {
+				metadata: {
+					accountNumber: `${data.accountNumber}`,
+					routingNumber: `${data.routingNumber}`,
+					accountType: `${data.accountType}`,
+					accountHolder: `${data.accountHolder}`,
+				},
+				publicData: {
+					type: "bank_details",
+					bankName: `${data.bankName}`,
+					accountNumber: `****${data.accountNumber.slice(-4)}`,
+					timestamp: `${new Date().toISOString()}`,
+				},
+			};
+		default:
+			throw new Error(`Unsupported data type: ${type}`);
+	}
+};
+
 /**
  * Store website passwords
  * @param {Object} data
@@ -18,30 +95,20 @@ import * as pinata from "../../IPFS/modules/pinata.js";
  * @param {string} data.password - User's master password
  * @returns {Promise<Object>}
  */
-const storePassword = async (data) => {
+const storePassword = async (data, authToken) => {
 	try {
-		const { website, username, password, faceBase64, masterPassword } = data;
+		const { website, faceBase64, masterPassword, type } = data;
 
-		// Create metadata structure for website password
-		const metadata = {
-			username,
-			password,
-		};
+		const { metadata, publicData } = await createMetadataAndPublicData(type, data);
 
-		// Create public data (non-sensitive info)
-		const publicData = {
-			type: "website_password",
-			website,
-			username: username ? "***" + username.slice(-3) : "***", // Partial username for display
-			timestamp: `${new Date().toISOString()}`,
-		};
+		const identifier = `password_${website}_${Date.now()}`;
 
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
 			publicData,
 			metadata,
 			faceBase64,
 			password: masterPassword,
-			identifier: `password`,
+			identifier,
 			requireLiveness: true,
 			tolerance: "REGULAR",
 			os: "DESKTOP",
@@ -52,7 +119,7 @@ const storePassword = async (data) => {
 			metadata,
 			faceBase64,
 			password: masterPassword,
-			identifier: `password`,
+			identifier,
 			requireLiveness: true,
 			tolerance: "REGULAR",
 			os: "DESKTOP",
@@ -61,7 +128,7 @@ const storePassword = async (data) => {
 		let qrCodeIPFS = null;
 
 		try {
-			qrCodeIPFS = await pinata.pinFile(zelfQR, `zelfkey_password_${website}_${Date.now()}.png`, "image/png", {
+			qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
 				...publicData,
 				zelfProof,
 				contentType: "qr_code",
@@ -104,20 +171,13 @@ const storePassword = async (data) => {
  * @param {string} data.password - User's master password
  * @returns {Promise<Object>}
  */
-const storeNotes = async (data) => {
+const storeNotes = async (data, authToken) => {
 	try {
-		const { title, keyValuePairs, faceBase64, masterPassword } = data;
+		const { title, faceBase64, masterPassword, type } = data;
 
-		// Create metadata structure for notes
-		const metadata = keyValuePairs;
+		const identifier = `notes_${title}_${Date.now()}`;
 
-		// Create public data
-		const publicData = {
-			type: "notes",
-			title,
-			pairCount: Object.keys(keyValuePairs || {}).length,
-			timestamp: `${new Date().toISOString()}`,
-		};
+		const { metadata, publicData } = await createMetadataAndPublicData(type, data);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -125,7 +185,7 @@ const storeNotes = async (data) => {
 			metadata,
 			faceBase64,
 			password: masterPassword,
-			identifier: `notes_${title}_${Date.now()}`,
+			identifier,
 			requireLiveness: true,
 			tolerance: "REGULAR",
 			os: "DESKTOP",
@@ -136,7 +196,7 @@ const storeNotes = async (data) => {
 			metadata,
 			faceBase64,
 			password: masterPassword,
-			identifier: `notes_${title}_${Date.now()}`,
+			identifier,
 			requireLiveness: true,
 			tolerance: "REGULAR",
 			os: "DESKTOP",
@@ -144,9 +204,10 @@ const storeNotes = async (data) => {
 
 		// Pin the QR code to IPFS if available
 		let qrCodeIPFS = null;
+
 		if (zelfQR) {
 			try {
-				qrCodeIPFS = await pinata.pinFile(zelfQR, `zelfkey_notes_${title}_${Date.now()}.png`, "image/png", {
+				qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
 					...publicData,
 					contentType: "qr_code",
 				});
@@ -192,9 +253,9 @@ const storeNotes = async (data) => {
  * @param {string} data.password - User's master password
  * @returns {Promise<Object>}
  */
-const storeCreditCard = async (data) => {
+const storeCreditCard = async (data, authToken) => {
 	try {
-		const { cardName, cardNumber, expiryMonth, expiryYear, cvv, bankName, faceBase64, masterPassword } = data;
+		const { cardName, cardNumber, expiryMonth, expiryYear, cvv, bankName, faceBase64, masterPassword, type } = data;
 
 		// Validate credit card data
 		if (!cardNumber || cardNumber.length < 13 || cardNumber.length > 19) {
@@ -212,24 +273,9 @@ const storeCreditCard = async (data) => {
 			throw new Error("Invalid expiry month");
 		}
 
-		// Create metadata structure for credit card
-		const metadata = {
-			cardNumber,
-			expiryMonth,
-			expiryYear,
-			cvv,
-		};
+		const identifier = `creditcard_${bankName}_${Date.now()}`;
 
-		// Create public data (masked sensitive info)
-		const publicData = {
-			type: "credit_card",
-			cardName,
-			cardNumber: `****-****-****-${cardNumber.slice(-4)}`,
-			expiryMonth,
-			expiryYear,
-			bankName,
-			timestamp: `${new Date().toISOString()}`,
-		};
+		const { metadata, publicData } = await createMetadataAndPublicData(type, data);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -237,7 +283,7 @@ const storeCreditCard = async (data) => {
 			metadata,
 			faceBase64,
 			password: masterPassword,
-			identifier: `creditcard_${bankName}_${Date.now()}`,
+			identifier,
 			requireLiveness: true,
 			tolerance: "REGULAR",
 			os: "DESKTOP",
@@ -248,7 +294,7 @@ const storeCreditCard = async (data) => {
 			metadata,
 			faceBase64,
 			password: masterPassword,
-			identifier: `creditcard_${bankName}_${Date.now()}`,
+			identifier,
 		});
 
 		return {
@@ -276,9 +322,9 @@ const storeCreditCard = async (data) => {
  * @param {string} data.password - User's master password
  * @returns {Promise<Object>}
  */
-const storeContact = async (data) => {
+const storeContact = async (data, authToken) => {
 	try {
-		const { name, email, phone, address, company, faceBase64, masterPassword } = data;
+		const { name, email, phone, address, faceBase64, masterPassword, type } = data;
 
 		// Validate contact data
 		if (!email && !phone && !address) {
@@ -293,23 +339,9 @@ const storeContact = async (data) => {
 			throw new Error("Phone number is too short");
 		}
 
-		// Create metadata structure for contact
-		const metadata = {
-			name,
-			email,
-			phone,
-			address,
-			company,
-		};
+		const identifier = `contact_${name}_${Date.now()}`;
 
-		// Create public data
-		const publicData = {
-			type: "contact",
-			name,
-			email: email ? "***" + email.slice(-3) : "***",
-			phone: phone ? "***" + phone.slice(-4) : "***",
-			timestamp: `${new Date().toISOString()}`,
-		};
+		const { metadata, publicData } = await createMetadataAndPublicData(type, data);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -317,7 +349,7 @@ const storeContact = async (data) => {
 			metadata,
 			faceBase64,
 			password: masterPassword,
-			identifier: `contact_${name}_${Date.now()}`,
+			identifier,
 			requireLiveness: true,
 			tolerance: "REGULAR",
 			os: "DESKTOP",
@@ -328,7 +360,7 @@ const storeContact = async (data) => {
 			metadata,
 			faceBase64,
 			password: masterPassword,
-			identifier: `contact_${name}_${Date.now()}`,
+			identifier,
 		});
 
 		return {
@@ -356,9 +388,9 @@ const storeContact = async (data) => {
  * @param {string} data.password - User's master password
  * @returns {Promise<Object>}
  */
-const storeBankDetails = async (data) => {
+const storeBankDetails = async (data, authToken) => {
 	try {
-		const { bankName, accountNumber, routingNumber, accountType, accountHolder, faceBase64, masterPassword } = data;
+		const { bankName, accountNumber, routingNumber, accountType, accountHolder, faceBase64, masterPassword, type } = data;
 
 		// Validate bank details
 		if (!routingNumber || routingNumber.length !== 9) {
@@ -370,22 +402,9 @@ const storeBankDetails = async (data) => {
 			throw new Error("Invalid account type");
 		}
 
-		// Create metadata structure for bank details
-		const metadata = {
-			accountNumber,
-			routingNumber,
-			accountType,
-		};
+		const identifier = `bank_${bankName}_${Date.now()}`;
 
-		// Create public data (masked sensitive info)
-		const publicData = {
-			type: "bank_details",
-			bankName,
-			accountNumber: `****${accountNumber.slice(-4)}`,
-			accountType,
-			accountHolder,
-			timestamp: `${new Date().toISOString()}`,
-		};
+		const { metadata, publicData } = await createMetadataAndPublicData(type, data);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -393,7 +412,7 @@ const storeBankDetails = async (data) => {
 			metadata,
 			faceBase64,
 			password: masterPassword,
-			identifier: `bank_${bankName}_${Date.now()}`,
+			identifier,
 			requireLiveness: true,
 			tolerance: "REGULAR",
 			os: "DESKTOP",
@@ -404,7 +423,7 @@ const storeBankDetails = async (data) => {
 			metadata,
 			faceBase64,
 			password: masterPassword,
-			identifier: `bank_${bankName}_${Date.now()}`,
+			identifier,
 		});
 
 		return {
@@ -429,7 +448,7 @@ const storeBankDetails = async (data) => {
  * @param {string} data.password - User's master password
  * @returns {Promise<Object>}
  */
-const storeData = async (data) => {
+const storeData = async (data, authToken) => {
 	try {
 		const { type, payload, faceBase64, password } = data;
 
@@ -442,23 +461,23 @@ const storeData = async (data) => {
 		let result;
 		switch (type) {
 			case "password":
-				result = await storePassword({ ...payload, faceBase64, masterPassword: password });
+				result = await storePassword({ ...payload, faceBase64, masterPassword: password }, authToken);
 				break;
 
 			case "notes":
-				result = await storeNotes({ ...payload, faceBase64, masterPassword: password });
+				result = await storeNotes({ ...payload, faceBase64, masterPassword: password }, authToken);
 				break;
 
 			case "credit_card":
-				result = await storeCreditCard({ ...payload, faceBase64, masterPassword: password });
+				result = await storeCreditCard({ ...payload, faceBase64, masterPassword: password }, authToken);
 				break;
 
 			case "contact":
-				result = await storeContact({ ...payload, faceBase64, masterPassword: password });
+				result = await storeContact({ ...payload, faceBase64, masterPassword: password }, authToken);
 				break;
 
 			case "bank_details":
-				result = await storeBankDetails({ ...payload, faceBase64, masterPassword: password });
+				result = await storeBankDetails({ ...payload, faceBase64, masterPassword: password }, authToken);
 				break;
 
 			default:
@@ -485,7 +504,7 @@ const storeData = async (data) => {
  * @param {string} data.password - User's master password
  * @returns {Promise<Object>}
  */
-const retrieveData = async (data) => {
+const retrieveData = async (data, authToken) => {
 	try {
 		const { zelfProof, faceBase64, password } = data;
 
@@ -515,7 +534,7 @@ const retrieveData = async (data) => {
  * @param {string} data.faceBase64 - User's face for preview
  * @returns {Promise<Object>}
  */
-const previewData = async (data) => {
+const previewData = async (data, authToken) => {
 	try {
 		const { zelfProof, faceBase64 } = data;
 
@@ -546,16 +565,19 @@ const previewData = async (data) => {
  * @param {string} data.password - User's master password
  * @returns {Promise<Object>} NFT-ready data structure
  */
-const createNFTReadyData = async (data) => {
+const createNFTReadyData = async (data, authToken) => {
 	try {
 		const { zelfProof, faceBase64, password } = data;
 
 		// First, retrieve the data to get the IPFS information
-		const retrievedData = await retrieveData({
-			zelfProof,
-			faceBase64,
-			password,
-		});
+		const retrievedData = await retrieveData(
+			{
+				zelfProof,
+				faceBase64,
+				password,
+			},
+			authToken
+		);
 
 		if (!retrievedData.success || !retrievedData.data.ipfs) {
 			throw new Error("No IPFS data available for NFT creation");

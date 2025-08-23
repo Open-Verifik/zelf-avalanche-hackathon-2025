@@ -380,9 +380,8 @@ describe("ZelfProof Endpoints", () => {
 			expect(response.body.message).toContain("zelfProof is required");
 		});
 
-		it("should reject request with missing faceBase64 field", async () => {
+		it("should reject request with missing zelfProof field", async () => {
 			const payload = {
-				zelfProof: "sample-zelf-proof-string",
 				tolerance: "REGULAR",
 			};
 
@@ -390,7 +389,7 @@ describe("ZelfProof Endpoints", () => {
 
 			expect(response.status).toBe(400);
 			expect(response.body).toHaveProperty("error", "Validation error");
-			expect(response.body.message).toContain("faceBase64 is required");
+			expect(response.body.message).toContain("zelfProof is required");
 		});
 
 		it("should reject request with empty payload", async () => {
@@ -398,6 +397,19 @@ describe("ZelfProof Endpoints", () => {
 
 			expect(response.status).toBe(400);
 			expect(response.body).toHaveProperty("error", "Validation error");
+		});
+
+		it("should pass validation with only zelfProof (faceBase64 not required)", async () => {
+			const payload = {
+				zelfProof: "sample-zelf-proof-string",
+			};
+
+			const response = await request(app).post("/api/zelf-proof/preview").set("Authorization", `Bearer ${authToken}`).send(payload);
+
+			// Should pass validation (400 would be validation error, 500 is business logic error)
+			expect(response.status).not.toBe(400);
+			// The request might fail with 500 due to invalid zelfProof, but that's not a validation error
+			expect(response.status).toBeGreaterThanOrEqual(400);
 		});
 
 		it("should process request without authentication (unprotected route)", async () => {
