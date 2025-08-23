@@ -18,9 +18,9 @@ const encrypt = async (data) => {
 	try {
 		const axios = await axiosInstance.getEncryptionInstance();
 
-		const { publicData, faceBase64, metadata, password, identifier, requireLiveness, tolerance, verifierKey } = data;
+		const { publicData, faceBase64, metadata, password, identifier, requireLiveness, tolerance, verifierKey, livenessLevel, os } = data;
 
-		const encryptedResponse = await axios.post("/zelf-proof/encrypt", {
+		const encryptedResponse = await axios.post("/api/zelf-proof/encrypt", {
 			publicData,
 			faceBase64,
 			metadata,
@@ -29,6 +29,8 @@ const encrypt = async (data) => {
 			requireLiveness,
 			tolerance,
 			verifierKey: verifierKey || undefined,
+			livenessLevel: livenessLevel || "REGULAR",
+			os: os || "DESKTOP",
 		});
 
 		const zelfProof = encryptedResponse.data.zelfProof;
@@ -39,7 +41,7 @@ const encrypt = async (data) => {
 
 		let error = new Error(_error?.message || "Something went wrong");
 
-		switch (_error.code) {
+		switch (_error?.code || _error?.message) {
 			case "ERR_INVALID_IMAGE":
 				error.status = 400;
 
@@ -75,7 +77,7 @@ const encryptQRCode = async (data) => {
 		const { publicData, faceBase64, metadata, password, identifier, requireLiveness, tolerance, verifierKey, os } = data;
 
 		const encryptedResponse = await axios.post(
-			"/zelf-proof/encrypt-qr-code",
+			"/api/zelf-proof/encrypt-qr-code",
 			{
 				publicData,
 				faceBase64,
@@ -98,7 +100,13 @@ const encryptQRCode = async (data) => {
 
 		return { zelfQR };
 	} catch (exception) {
-		return exception?.message;
+		const error = _formattingError(exception.response?.data);
+
+		let _error = new Error(error.message);
+
+		_error.status = error.status;
+
+		throw _error;
 	}
 };
 
@@ -119,7 +127,7 @@ const decrypt = async (data) => {
 
 		const { zelfProof, faceBase64, os, password, verifierKey } = data;
 
-		const encryptedResponse = await axios.post("/zelf-proof/decrypt", {
+		const encryptedResponse = await axios.post("/api/zelf-proof/decrypt", {
 			faceBase64,
 			os,
 			password,
@@ -129,8 +137,6 @@ const decrypt = async (data) => {
 
 		return encryptedResponse?.data;
 	} catch (exception) {
-		console.error({ exception: exception.response?.data });
-
 		const error = _formattingError(exception.response?.data);
 
 		let _error = new Error(error.message);
@@ -155,15 +161,13 @@ const preview = async (data) => {
 
 		const { zelfProof, verifierKey } = data;
 
-		const encryptedResponse = await axios.post("/zelf-proof/preview", {
+		const encryptedResponse = await axios.post("/api/zelf-proof/preview", {
 			zelfProof,
 			verifierKey,
 		});
 
 		return encryptedResponse?.data;
 	} catch (exception) {
-		console.error({ _ex: exception, exception: exception.response?.data });
-
 		const error = _formattingError(exception.response?.data);
 
 		let _error = new Error(error.message);

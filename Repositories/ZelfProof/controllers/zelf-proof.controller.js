@@ -2,7 +2,7 @@ const Module = require("../modules/zelf-proof.module");
 
 const encrypt = async (ctx) => {
 	try {
-		const data = await Module.encrypt(ctx.request.body);
+		const data = await Module.encrypt(ctx.request.body, ctx);
 
 		ctx.body = { ...data };
 	} catch (error) {
@@ -16,7 +16,7 @@ const encrypt = async (ctx) => {
 
 const encryptQRCode = async (ctx) => {
 	try {
-		const data = await Module.encryptQRCode(ctx.request.body);
+		const data = await Module.encryptQRCode(ctx.request.body, ctx);
 
 		ctx.body = { ...data };
 	} catch (error) {
@@ -30,7 +30,7 @@ const encryptQRCode = async (ctx) => {
 
 const decrypt = async (ctx) => {
 	try {
-		const data = await Module.decrypt(ctx.request.body);
+		const data = await Module.decrypt(ctx.request.body, ctx);
 
 		ctx.body = { ...data };
 	} catch (error) {
@@ -44,7 +44,7 @@ const decrypt = async (ctx) => {
 
 const preview = async (ctx) => {
 	try {
-		const data = await Module.preview(ctx.request.body);
+		const data = await Module.preview(ctx.request.body, ctx);
 
 		ctx.body = { ...data };
 	} catch (error) {

@@ -31,15 +31,16 @@ const validate = (schema, data) => {
  */
 const schemas = {
 	encrypt: {
+		livenessDetectionPriorCreation: { required: false },
 		publicData: { required: true, minKeys: 1 },
-		faceBase64: { required: true },
+		livenessLevel: { required: false, enum: ["REGULAR", "SOFT", "HARDENED"] },
 		metadata: { required: true, minKeys: 1 },
 		os: { required: true, enum: ["DESKTOP", "ANDROID", "IOS"] },
+		password: { required: false },
 		identifier: { required: true },
+		faceBase64: { required: true },
 		requireLiveness: { required: false },
 		tolerance: { required: false, enum: ["REGULAR", "SOFT", "HARDENED"] },
-		password: { required: false },
-		verifierKey: { required: false },
 	},
 	decrypt: {
 		faceBase64: { required: true },
@@ -50,6 +51,8 @@ const schemas = {
 	},
 	preview: {
 		zelfProof: { required: true },
+		faceBase64: { required: true },
+		tolerance: { required: false, enum: ["REGULAR", "SOFT", "HARDENED"] },
 		verifierKey: { required: false },
 	},
 };
@@ -61,8 +64,11 @@ const encryptValidation = async (ctx, next) => {
 	const valid = validate(schemas.encrypt, ctx.request.body);
 
 	if (valid.error) {
-		ctx.status = 409;
-		ctx.body = { validationError: valid.error.message };
+		ctx.status = 400;
+		ctx.body = {
+			error: "Validation error",
+			message: valid.error.message,
+		};
 		return;
 	}
 
@@ -76,8 +82,11 @@ const decryptValidation = async (ctx, next) => {
 	const valid = validate(schemas.decrypt, ctx.request.body);
 
 	if (valid.error) {
-		ctx.status = 409;
-		ctx.body = { validationError: valid.error.message };
+		ctx.status = 400;
+		ctx.body = {
+			error: "Validation error",
+			message: valid.error.message,
+		};
 		return;
 	}
 
@@ -91,8 +100,11 @@ const previewValidation = async (ctx, next) => {
 	const valid = validate(schemas.preview, ctx.request.body);
 
 	if (valid.error) {
-		ctx.status = 409;
-		ctx.body = { validationError: valid.error.message };
+		ctx.status = 400;
+		ctx.body = {
+			error: "Validation error",
+			message: valid.error.message,
+		};
 		return;
 	}
 

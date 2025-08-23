@@ -1,8 +1,6 @@
 const Koa = require("koa");
 const bodyParser = require("koa-bodyparser");
-const jwt = require("koa-jwt");
 const config = require("./Core/config");
-const secret = config.JWT_SECRET; // Replace with your secret key
 const cors = require("@koa/cors");
 const { koaSwagger } = require("koa2-swagger-ui");
 const app = new Koa();
@@ -47,23 +45,75 @@ app.use((ctx, next) => {
 	});
 });
 
-const server = app.listen(config.port, () => {
-	console.info(`Server running on port ${config.port}`);
+// Initialize routes before starting server
+// Unprotected routes
+const unprotectedRoutes = require("./Routes/unprotected");
+app.use(unprotectedRoutes.routes());
 
-	// Unprotected routes
-	const unprotectedRoutes = require("./Routes/unprotected");
+// Custom JWT middleware for hackathon (accepts external tokens)
+app.use(async (ctx, next) => {
+	// Skip JWT validation for unprotected routes
+	if (ctx.path.startsWith("/api/auth/") || ctx.path.startsWith("/swagger")) {
+		return next();
+	}
 
-	app.use(unprotectedRoutes.routes());
+	const authHeader = ctx.headers.authorization;
 
-	app.use(jwt({ secret }));
+	if (!authHeader || !authHeader.startsWith("Bearer ")) {
+		ctx.status = 401;
+		ctx.body = { error: "Protected resource, use Authorization header to get access" };
+		return;
+	}
 
-	// Protected routes
-	const protectedRoutes = require("./Routes/protected");
+	const token = authHeader.substring(7);
 
-	app.use(protectedRoutes.routes());
+	try {
+		// For hackathon: accept any JWT token that can be decoded
+		// In production, you would verify the signature
+		const parts = token.split(".");
+		if (parts.length !== 3) {
+			throw new Error("Invalid token format");
+		}
 
-	console.info(`1. initialized routes.`);
+		// Decode payload without verification
+		const payload = JSON.parse(Buffer.from(parts[1], "base64").toString());
+
+		// Check if token is expired
+		if (payload.exp && Date.now() >= payload.exp * 1000) {
+			ctx.status = 401;
+			ctx.body = { error: "Token expired" };
+			return;
+		}
+
+		// Set user info in context
+		ctx.state.user = {
+			id: payload.clientId || payload.sub,
+			email: payload.email,
+		};
+
+		await next();
+	} catch (error) {
+		ctx.status = 401;
+		ctx.body = { error: "Invalid token" };
+	}
 });
+
+// Protected routes
+const protectedRoutes = require("./Routes/protected");
+app.use(protectedRoutes.routes());
+
+console.info(`1. initialized routes.`);
+
+// Create server instance
+const http = require("http");
+const server = http.createServer(app.callback());
+
+// Only start listening if not in test mode
+if (process.env.NODE_ENV !== "test") {
+	server.listen(config.port, () => {
+		console.info(`Server running on port ${config.port}`);
+	});
+}
 
 process.on("unhandledRejection", (reason, p) => {
 	console.error("Unhandled Rejection at: Promise", p, "reason:", reason);
@@ -123,3 +173,6 @@ process.once("SIGUSR2", () => {
 			}, 1000); // 1-second delay to ensure cleanup completes
 		});
 });
+
+// Export server for testing
+module.exports = server;

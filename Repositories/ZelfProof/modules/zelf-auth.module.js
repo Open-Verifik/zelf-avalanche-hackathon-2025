@@ -58,6 +58,8 @@ const authenticateUser = async (email, apiKey) => {
 };
 
 const getAuthInstance = async () => {
+	if (credentials?.token) return;
+
 	const authInstance = axios.create({
 		timeout: 25000,
 		baseURL: config.zelfProof.url,
@@ -65,14 +67,14 @@ const getAuthInstance = async () => {
 
 	authInstance.defaults.headers.common["X-API-Key"] = config.zelfProof.apiKey;
 
-	const credentials = await authInstance.post("/zelf/clients/auth", {
+	const response = await authInstance.post(config.zelfProof.clientAuthUrl, {
 		email: config.zelfProof.email,
 	});
 
-	credentials = credentials.data;
+	credentials = response.data;
 };
 
-const getEncryptionInstance = async () => {
+const getEncryptionInstance = async (ctx) => {
 	_encryptionInstance = axios.create({
 		timeout: 25000,
 		baseURL: config.zelfProof.url,

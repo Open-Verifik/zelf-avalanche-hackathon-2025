@@ -1,0 +1,4 @@
+Never create mock connections for tests. Always connect to the actual server.
+Tests should use the real implementation, not mocks.
+When testing APIs, use the actual endpoints and real server instances.
+Do not move routes between protected and unprotected. All routes should remain unprotected.

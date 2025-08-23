@@ -14,7 +14,7 @@ const configuration = {
 		searchLimit: process.env.SEARCH_LIMIT || 1 * 30 * 10, // 1 request per 2 seconds for 10 minutes
 		decryptLimit: process.env.DECRYPT_LIMIT || 30, // 30 requests max per 10 minutes
 	},
-	JWT_SECRET: process.env.CONNECTION_KEY,
+	JWT_SECRET: process.env.CONNECTION_KEY || "hackathon-test-secret-key-2025",
 	basePath: (path) => {
 		return API_ROOT.replace(/\/$/, "") + "/" + path.replace(/^\//, "");
 	},
@@ -26,6 +26,7 @@ const configuration = {
 		url: process.env.ZELF_URL || "https://api.zelf.world",
 		email: process.env.ZELF_EMAIL,
 		apiKey: process.env.ZELF_API_KEY || "password",
+		clientAuthUrl: process.env.ZELF_PROOF_CLIENT_AUTH_URL || "/api/clients/auth",
 	},
 	pgp: {
 		secretKey: process.env.PGP_SECRET_KEY || "",
