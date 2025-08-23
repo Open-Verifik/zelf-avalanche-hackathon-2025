@@ -1,17 +1,19 @@
-const Koa = require("koa");
-const bodyParser = require("koa-bodyparser");
-const config = require("./Core/config");
-const cors = require("@koa/cors");
-const { koaSwagger } = require("koa2-swagger-ui");
+import Koa from "koa";
+import bodyParser from "koa-bodyparser";
+import config from "./Core/config.js";
+import cors from "@koa/cors";
+import { koaSwagger } from "koa2-swagger-ui";
+import swaggerSpec from "./Core/swagger.config.js";
+import unprotectedRoutes from "./Routes/unprotected.js";
+import protectedRoutes from "./Routes/protected.js";
+import http from "http";
+
 const app = new Koa();
 app.proxy = true; // Trust the proxy's X-Forwarded-For header
 app.use(bodyParser());
 
 // Enable CORS
 app.use(cors());
-
-// Import Swagger configuration
-const swaggerSpec = require("./Core/swagger.config");
 
 // Swagger UI middleware
 app.use(
@@ -47,7 +49,6 @@ app.use((ctx, next) => {
 
 // Initialize routes before starting server
 // Unprotected routes
-const unprotectedRoutes = require("./Routes/unprotected");
 app.use(unprotectedRoutes.routes());
 
 // Custom JWT middleware for hackathon (accepts external tokens)
@@ -99,13 +100,11 @@ app.use(async (ctx, next) => {
 });
 
 // Protected routes
-const protectedRoutes = require("./Routes/protected");
 app.use(protectedRoutes.routes());
 
 console.info(`1. initialized routes.`);
 
 // Create server instance
-const http = require("http");
 const server = http.createServer(app.callback());
 
 // Only start listening if not in test mode
@@ -175,4 +174,4 @@ process.once("SIGUSR2", () => {
 });
 
 // Export server for testing
-module.exports = server;
+export default server;

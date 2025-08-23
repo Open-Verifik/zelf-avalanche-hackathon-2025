@@ -1,5 +1,5 @@
-const axios = require("axios");
-const config = require("../../../Core/config");
+import axios from "axios";
+import config from "../../../Core/config.js";
 
 let credentials = null;
 
@@ -87,7 +87,4 @@ const getEncryptionInstance = async (ctx) => {
 	return _encryptionInstance;
 };
 
-module.exports = {
-	authenticateUser,
-	getEncryptionInstance,
-};
+export { authenticateUser, getEncryptionInstance };

@@ -1,4 +1,4 @@
-const Module = require("../modules/zelf-proof.module");
+import * as Module from "../modules/zelf-proof.module.js";
 
 const encrypt = async (ctx) => {
 	try {
@@ -56,9 +56,4 @@ const preview = async (ctx) => {
 	}
 };
 
-module.exports = {
-	encrypt,
-	encryptQRCode,
-	decrypt,
-	preview,
-};
+export { encrypt, encryptQRCode, decrypt, preview };

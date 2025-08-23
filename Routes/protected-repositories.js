@@ -2,6 +2,11 @@
  * Protected repository routes for the hackathon project
  */
 
-module.exports = (router) => {
+import zelfKeyRoute from "../Repositories/ZelfKey/routes/zelf-key.route.js";
+
+export default (router) => {
 	// Register ZelfProof routes
+
+	// Register ZelfKey routes (unprotected)
+	zelfKeyRoute(router);
 };

@@ -1,8 +1,8 @@
-const { PinataSDK } = require("pinata");
-const { Blob } = require("buffer");
-require("dotenv").config();
-const FormData = require("form-data");
-const axios = require("axios");
+import { PinataSDK } from "pinata";
+import { Blob } from "buffer";
+import dotenv from "dotenv";
+import FormData from "form-data";
+import axios from "axios";
 
 const pinataJwt = process.env.PINATA_JWT;
 const pinataGateway = process.env.PINATA_GATEWAY_URL;
@@ -14,7 +14,7 @@ const pinata = new PinataSDK({
 
 const os = process.env.ENVOS;
 
-const pinataWeb3 = require("pinata-web3");
+import * as pinataWeb3 from "pinata-web3";
 
 const web3Instance = new pinataWeb3.PinataSDK({
 	pinataJwt,
@@ -178,11 +178,4 @@ const unPinFiles = async (CIDs = []) => {
 	return await web3Instance.unpin(CIDs);
 };
 
-module.exports = {
-	upload,
-	retrieve,
-	pinFile,
-	pinFileWindows,
-	filter,
-	unPinFiles,
-};
+export { upload, retrieve, pinFile, pinFileWindows, filter, unPinFiles };

@@ -108,7 +108,74 @@ const getMasterWallet = (provider) => {
 };
 
 /**
- * Create NFT metadata for ZelfKey data
+ * Upload metadata JSON to IPFS via Pinata
+ * @param {Object} metadata - NFT metadata object
+ * @returns {Promise<string>} IPFS URL of the metadata
+ */
+const uploadMetadataToIPFS = async (metadata) => {
+	try {
+		console.log("📤 Uploading metadata to IPFS via Pinata...");
+
+		// Get Pinata configuration from environment
+		const pinataApiKey = process.env.PINATA_API_KEY;
+		const pinataSecretKey = process.env.PINATA_API_SECRET;
+		const pinataGateway = process.env.PINATA_GATEWAY_URL || "https://chocolate-occasional-kite-546.mypinata.cloud";
+
+		if (!pinataApiKey || !pinataSecretKey) {
+			throw new Error("Pinata API credentials not found in environment variables");
+		}
+
+		// Create the metadata JSON blob
+		const metadataBlob = new Blob([JSON.stringify(metadata, null, 2)], {
+			type: "application/json",
+		});
+
+		// Create FormData for Pinata
+		const formData = new FormData();
+		formData.append("file", metadataBlob, "zelfkey-nft-metadata.json");
+		formData.append(
+			"pinataMetadata",
+			JSON.stringify({
+				name: "ZelfKey NFT Metadata",
+				keyvalues: {
+					type: "nft_metadata",
+					project: "zelfkey_avalanche",
+					timestamp: new Date().toISOString(),
+				},
+			})
+		);
+
+		// Upload to Pinata
+		const response = await fetch("https://api.pinata.cloud/pinning/pinFileToIPFS", {
+			method: "POST",
+			headers: {
+				pinata_api_key: pinataApiKey,
+				pinata_secret_api_key: pinataSecretKey,
+			},
+			body: formData,
+		});
+
+		if (!response.ok) {
+			throw new Error(`Pinata upload failed: ${response.status} ${response.statusText}`);
+		}
+
+		const result = await response.json();
+		const ipfsHash = result.IpfsHash;
+		const ipfsUrl = `https://${pinataGateway}/ipfs/${ipfsHash}`;
+
+		console.log(`✅ Metadata uploaded to IPFS!`);
+		console.log(`   Hash: ${ipfsHash}`);
+		console.log(`   URL: ${ipfsUrl}`);
+
+		return ipfsUrl;
+	} catch (error) {
+		console.error("❌ Failed to upload metadata to IPFS:", error.message);
+		throw error;
+	}
+};
+
+/**
+ * Create NFT metadata for ZelfKey data with proper structure
  * @param {Object} zelfKeyData - Data from ZelfKey storage
  * @param {string} ipfsHash - IPFS hash of the QR code
  * @param {string} ipfsGatewayUrl - IPFS gateway URL
@@ -117,12 +184,17 @@ const getMasterWallet = (provider) => {
 const createNFTMetadata = (zelfKeyData, ipfsHash, ipfsGatewayUrl) => {
 	const { publicData, message, timestamp } = zelfKeyData;
 
-	// Base metadata structure
+	// Base metadata structure following NFT standards
 	const metadata = {
 		name: `ZelfKey ${publicData.type.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}`,
-		description: message || `Secure ${publicData.type.replace(/_/g, " ")} stored with ZelfKey`,
-		image: ipfsGatewayUrl,
-		external_url: `https://ipfs.io/ipfs/${ipfsHash}`,
+		description:
+			message ||
+			`Secure ${publicData.type.replace(
+				/_/g,
+				" "
+			)} stored with ZelfKey biometric encryption. This NFT represents encrypted data that can only be accessed through biometric verification.`,
+		image: ipfsGatewayUrl, // This points to the QR code image
+		external_url: "https://zelf.world",
 		attributes: [
 			{
 				trait_type: "Data Type",
@@ -133,12 +205,20 @@ const createNFTMetadata = (zelfKeyData, ipfsHash, ipfsGatewayUrl) => {
 				value: "ZelfKey Biometric Encryption",
 			},
 			{
+				trait_type: "Security Level",
+				value: "Maximum",
+			},
+			{
 				trait_type: "IPFS Hash",
 				value: ipfsHash,
 			},
 			{
 				trait_type: "Timestamp",
 				value: timestamp || new Date().toISOString(),
+			},
+			{
+				trait_type: "Project",
+				value: "ZelfKey Avalanche Integration",
 			},
 		],
 		properties: {
@@ -167,11 +247,15 @@ const createNFTMetadata = (zelfKeyData, ipfsHash, ipfsGatewayUrl) => {
 			metadata.attributes.push(
 				{
 					trait_type: "Website",
-					value: publicData.website,
+					value: publicData.website || "Unknown",
 				},
 				{
 					trait_type: "Username",
-					value: publicData.username,
+					value: publicData.username || "Unknown",
+				},
+				{
+					trait_type: "Security",
+					value: "Biometric Protected",
 				}
 			);
 			break;
@@ -180,11 +264,15 @@ const createNFTMetadata = (zelfKeyData, ipfsHash, ipfsGatewayUrl) => {
 			metadata.attributes.push(
 				{
 					trait_type: "Title",
-					value: publicData.title,
+					value: publicData.title || "Secure Note",
 				},
 				{
-					trait_type: "Key-Value Pairs",
-					value: publicData.pairCount,
+					trait_type: "Content Type",
+					value: "Encrypted Text",
+				},
+				{
+					trait_type: "Access Method",
+					value: "Face Recognition",
 				}
 			);
 			break;
@@ -193,15 +281,19 @@ const createNFTMetadata = (zelfKeyData, ipfsHash, ipfsGatewayUrl) => {
 			metadata.attributes.push(
 				{
 					trait_type: "Card Name",
-					value: publicData.cardName,
+					value: publicData.cardName || "Credit Card",
 				},
 				{
 					trait_type: "Bank",
-					value: publicData.bankName,
+					value: publicData.bankName || "Unknown Bank",
 				},
 				{
-					trait_type: "Card Number",
-					value: publicData.cardNumber,
+					trait_type: "Card Type",
+					value: "Encrypted",
+				},
+				{
+					trait_type: "Security",
+					value: "Biometric Locked",
 				}
 			);
 			break;
@@ -210,15 +302,19 @@ const createNFTMetadata = (zelfKeyData, ipfsHash, ipfsGatewayUrl) => {
 			metadata.attributes.push(
 				{
 					trait_type: "Contact Name",
-					value: publicData.name,
+					value: publicData.name || "Unknown Contact",
 				},
 				{
 					trait_type: "Email",
-					value: publicData.email,
+					value: publicData.email || "No Email",
 				},
 				{
 					trait_type: "Phone",
-					value: publicData.phone,
+					value: publicData.phone || "No Phone",
+				},
+				{
+					trait_type: "Privacy",
+					value: "Biometric Protected",
 				}
 			);
 			break;
@@ -227,15 +323,33 @@ const createNFTMetadata = (zelfKeyData, ipfsHash, ipfsGatewayUrl) => {
 			metadata.attributes.push(
 				{
 					trait_type: "Bank Name",
-					value: publicData.bankName,
+					value: publicData.bankName || "Unknown Bank",
 				},
 				{
 					trait_type: "Account Type",
-					value: publicData.accountType,
+					value: publicData.accountType || "Unknown",
 				},
 				{
 					trait_type: "Account Holder",
-					value: publicData.accountHolder,
+					value: publicData.accountHolder || "Unknown",
+				},
+				{
+					trait_type: "Security",
+					value: "Face Recognition Required",
+				}
+			);
+			break;
+
+		default:
+			// Generic attributes for unknown types
+			metadata.attributes.push(
+				{
+					trait_type: "Content",
+					value: "Encrypted Data",
+				},
+				{
+					trait_type: "Access Control",
+					value: "Biometric Only",
 				}
 			);
 			break;
@@ -307,11 +421,16 @@ const mintNFTFromZelfKey = async (params) => {
 			console.warn("Could not verify minting status:", error.message);
 		}
 
-		// Create NFT metadata
+		// Create NFT metadata with proper structure
 		const metadata = createNFTMetadata(zelfKeyData, zelfKeyData.ipfs.hash, zelfKeyData.ipfs.gatewayUrl);
 
-		// Convert metadata to JSON string
-		const metadataURI = JSON.stringify(metadata);
+		// Upload metadata to IPFS (this is the CORRECT approach for image rendering)
+		console.log("📤 Uploading NFT metadata to IPFS...");
+		const metadataUrl = await uploadMetadataToIPFS(metadata);
+
+		// The tokenURI should point to the METADATA JSON, not the image
+		// This ensures proper image rendering on NFT marketplaces
+		const metadataURI = metadataUrl;
 
 		// Prepare transaction
 		const gasPrice = ethers.parseUnits(networkConfig.gasPrice, "wei");
@@ -679,6 +798,7 @@ module.exports = {
 	getUserNFTs,
 	getContractInfo,
 	createNFTMetadata,
+	uploadMetadataToIPFS,
 	getMasterWallet,
 	getMasterWalletInfo,
 	AVALANCHE_CONFIG,

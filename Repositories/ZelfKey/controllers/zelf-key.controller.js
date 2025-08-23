@@ -1,4 +1,4 @@
-const Module = require("../modules/zelf-key.module");
+import * as Module from "../modules/zelf-key.module.js";
 
 /**
  * ZelfKey Controller - Handles HTTP requests for password manager operations
@@ -125,13 +125,4 @@ const previewData = async (ctx) => {
 	}
 };
 
-module.exports = {
-	storeData,
-	storePassword,
-	storeNotes,
-	storeCreditCard,
-	storeContact,
-	storeBankDetails,
-	retrieveData,
-	previewData,
-};
+export { storeData, storePassword, storeNotes, storeCreditCard, storeContact, storeBankDetails, retrieveData, previewData };

@@ -1,8 +1,6 @@
-const config = require("../../../Core/config");
-
-const Controller = require("../controllers/zelf-proof.controller");
-
-const Middleware = require("../middlewares/zelf-proof.middleware");
+import config from "../../../Core/config.js";
+import * as Controller from "../controllers/zelf-proof.controller.js";
+import * as Middleware from "../middlewares/zelf-proof.middleware.js";
 
 const base = "/zelf-proof";
 
@@ -200,7 +198,7 @@ const base = "/zelf-proof";
  *           example: "faceBase64 is required"
  */
 
-module.exports = (server) => {
+export default (server) => {
 	const PATH = config.basePath(base);
 
 	/**

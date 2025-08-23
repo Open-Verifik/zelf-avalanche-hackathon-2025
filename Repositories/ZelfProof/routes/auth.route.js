@@ -1,6 +1,6 @@
-const config = require("../../../Core/config");
-const Controller = require("../controllers/auth.controller");
-const Middleware = require("../middlewares/auth.middleware");
+import config from "../../../Core/config.js";
+import * as Controller from "../controllers/auth.controller.js";
+import * as Middleware from "../middlewares/auth.middleware.js";
 
 const base = "/auth";
 
@@ -53,7 +53,7 @@ const base = "/auth";
  *           example: "Email or API key is incorrect"
  */
 
-module.exports = (server) => {
+export default (server) => {
 	const PATH = config.basePath(base);
 
 	/**

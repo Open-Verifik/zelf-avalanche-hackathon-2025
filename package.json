@@ -1,8 +1,8 @@
 {
 	"scripts": {
 		"start": "node server.js",
-		"test": "jest",
-		"test:watch": "jest --watch",
+		"test": "node --experimental-vm-modules ./node_modules/.bin/jest",
+		"test:watch": "node --experimental-vm-modules ./node_modules/.bin/jest --watch",
 		"preinstall": "npx npm-force-resolutions",
 		"compile": "hardhat compile",
 		"deploy:mainnet": "hardhat run Avalanche/deploy/deploy-contract.js --network avalanche",

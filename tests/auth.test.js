@@ -2,19 +2,20 @@
  * Unit tests for authentication endpoint
  */
 
-const request = require("supertest");
-const Koa = require("koa");
-const bodyParser = require("koa-bodyparser");
-const config = require("../Core/config");
+import request from "supertest";
+import Koa from "koa";
+import bodyParser from "koa-bodyparser";
+import config from "../Core/config.js";
+import Router from "@koa/router";
+import authRoutes from "../Repositories/ZelfProof/routes/auth.route.js";
 
 // Create a test app
 const app = new Koa();
 app.use(bodyParser());
 
 // Import and register the authentication routes
-const Router = require("@koa/router");
 const router = new Router();
-require("../Repositories/ZelfProof/routes/auth.route")(router);
+authRoutes(router);
 app.use(router.routes());
 
 // Test credentials from config
@@ -105,8 +106,12 @@ describe("Authentication Endpoint Tests", () => {
 });
 
 // Run tests if this file is executed directly
-if (require.main === module) {
-	const { execSync } = require("child_process");
+import { execSync } from "child_process";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+
+if (process.argv[1] === __filename) {
 	try {
 		console.log("Running authentication tests...");
 		console.log("Test credentials:", testCredentials);

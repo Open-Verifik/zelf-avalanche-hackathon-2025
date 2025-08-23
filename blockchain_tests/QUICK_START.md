@@ -25,7 +25,10 @@ AVALANCHE_NFT_CONTRACT_ADDRESS="0x6C995090C530756d59E6eEa5a3bA209863e0E167"
 # Navigate to test directory
 cd blockchain_tests
 
-# Run main NFT minting test (RECOMMENDED)
+# Run complete integration test (RECOMMENDED)
+node test-integration.js
+
+# Or run NFT minting test
 node test-nft-minting-proper.js
 
 # Or run metadata validation test
@@ -59,7 +62,8 @@ Edit test files to change:
 
 | File | Purpose | Runtime |
 |------|---------|---------|
-| `test-nft-minting-proper.js` | **Main test** - Full NFT minting | ~30 seconds |
+| `test-integration.js` | **Complete integration** - ZelfKey → IPFS → NFT | ~45 seconds |
+| `test-nft-minting-proper.js` | NFT minting test | ~30 seconds |
 | `simple-metadata-test.js` | Metadata validation only | ~10 seconds |
 | `test-nft-minting.js` | Legacy test (reference) | ~30 seconds |
 

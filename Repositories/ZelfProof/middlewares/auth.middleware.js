@@ -51,6 +51,4 @@ const authValidation = async (ctx, next) => {
 	await next();
 };
 
-module.exports = {
-	authValidation,
-};
+export { authValidation };

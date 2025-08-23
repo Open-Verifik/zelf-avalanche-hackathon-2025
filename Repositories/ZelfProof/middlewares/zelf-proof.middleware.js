@@ -1,30 +1,4 @@
-/**
- * Simple validation utility for the hackathon project
- */
-const validate = (schema, data) => {
-	const errors = [];
-
-	for (const [key, rules] of Object.entries(schema)) {
-		if (rules.required && !data[key]) {
-			errors.push(`${key} is required`);
-		}
-
-		if (rules.enum && data[key] && !rules.enum.includes(data[key])) {
-			errors.push(`${key} must be one of: [${rules.enum.join(", ")}]`);
-		}
-
-		if (rules.minKeys && data[key] && typeof data[key] === "object") {
-			const keyCount = Object.keys(data[key]).length;
-			if (keyCount < rules.minKeys) {
-				errors.push(`${key} must have at least ${rules.minKeys} keys`);
-			}
-		}
-	}
-
-	return {
-		error: errors.length > 0 ? { message: errors.join(", ") } : null,
-	};
-};
+import { validate } from "../../../Utilities/helper.module.js";
 
 /**
  * Validation schemas
@@ -38,12 +12,12 @@ const schemas = {
 		os: { required: true, enum: ["DESKTOP", "ANDROID", "IOS"] },
 		password: { required: false },
 		identifier: { required: true },
-		faceBase64: { required: true },
+		faceBase64: { required: true, isBase64Image: true },
 		requireLiveness: { required: false },
 		tolerance: { required: false, enum: ["REGULAR", "SOFT", "HARDENED"] },
 	},
 	decrypt: {
-		faceBase64: { required: true },
+		faceBase64: { required: true, isBase64Image: true },
 		os: { required: true, enum: ["DESKTOP", "ANDROID", "IOS"] },
 		zelfProof: { required: true },
 		password: { required: false },
@@ -109,8 +83,4 @@ const previewValidation = async (ctx, next) => {
 	await next();
 };
 
-module.exports = {
-	encryptValidation,
-	decryptValidation,
-	previewValidation,
-};
+export { encryptValidation, decryptValidation, previewValidation };

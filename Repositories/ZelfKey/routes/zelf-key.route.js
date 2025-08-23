@@ -1,5 +1,5 @@
-const Controller = require("../controllers/zelf-key.controller");
-const Middleware = require("../middlewares/zelf-key.middleware");
+import * as Controller from "../controllers/zelf-key.controller.js";
+import * as Middleware from "../middlewares/zelf-key.middleware.js";
 
 /**
  * ZelfKey Routes - Password manager API endpoints
@@ -8,7 +8,7 @@ const Middleware = require("../middlewares/zelf-key.middleware");
 
 const PATH = "/api/zelf-key";
 
-module.exports = (server) => {
+export default (server) => {
 	// Generic store data endpoint (handles all types)
 	server.post(`${PATH}/store`, Middleware.storeDataValidation, Controller.storeData);
 

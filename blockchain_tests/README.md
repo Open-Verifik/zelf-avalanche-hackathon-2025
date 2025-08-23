@@ -4,8 +4,28 @@ This directory contains comprehensive test scripts for the ZelfKey NFT blockchai
 
 ## 📁 Test Files Overview
 
-### 1. `test-nft-minting-proper.js` ⭐ **MAIN TEST**
-**Purpose**: Complete NFT minting test with proper metadata structure and image rendering.
+### 1. `test-integration.js` 🚀 **COMPLETE INTEGRATION TEST**
+**Purpose**: End-to-end test of the complete ZelfKey → IPFS → NFT pipeline.
+
+**What it tests**:
+- ✅ ZelfKey data structure simulation
+- ✅ NFT metadata creation with proper structure
+- ✅ IPFS metadata upload via Pinata
+- ✅ Proper tokenURI pointing to metadata JSON
+- ✅ Complete NFT minting workflow
+- ✅ Image rendering compatibility
+- ✅ Integration between all modules
+
+**Key Features**:
+- Simulates real ZelfKey module data
+- Uses same logic as production modules
+- Follows ERC-721 NFT standards
+- Proper metadata → image URL structure
+- Real mainnet transactions
+- Gas fee calculation and coverage
+
+### 2. `test-nft-minting-proper.js` ⭐ **NFT MINTING TEST**
+**Purpose**: NFT minting test with proper metadata structure and image rendering.
 
 **What it tests**:
 - ✅ Master wallet setup and balance verification
@@ -39,7 +59,22 @@ This directory contains comprehensive test scripts for the ZelfKey NFT blockchai
 - URL validation testing
 - No blockchain transactions (IPFS only)
 
-### 3. `test-nft-minting.js` 🔧 **LEGACY TEST**
+### 3. `simple-metadata-test.js` 📋 **METADATA VALIDATION**
+**Purpose**: Educational test to understand NFT metadata structure.
+
+**What it tests**:
+- ✅ Metadata JSON creation
+- ✅ IPFS upload verification
+- ✅ URL structure validation
+- ✅ NFT standard compliance explanation
+
+**Key Features**:
+- Educational output with explanations
+- Metadata structure visualization
+- URL validation testing
+- No blockchain transactions (IPFS only)
+
+### 4. `test-nft-minting.js` 🔧 **LEGACY TEST**
 **Purpose**: Initial test implementation (kept for reference).
 
 **What it tests**:
@@ -75,7 +110,19 @@ This directory contains comprehensive test scripts for the ZelfKey NFT blockchai
 
 ### Running Tests
 
-#### 1. **Main NFT Minting Test** (Recommended)
+#### 1. **Complete Integration Test** (Recommended)
+```bash
+cd blockchain_tests
+node test-integration.js
+```
+
+**Expected Output**:
+- ZelfKey data simulation
+- NFT metadata creation and IPFS upload
+- Complete NFT minting workflow
+- Integration verification
+
+#### 2. **NFT Minting Test**
 ```bash
 cd blockchain_tests
 node test-nft-minting-proper.js

@@ -1,7 +1,8 @@
-const Router = require("@koa/router");
+import Router from "@koa/router";
+import protectedRepositories from "./protected-repositories.js";
 
 const router = new Router();
 
-require("./protected-repositories")(router);
+protectedRepositories(router);
 
-module.exports = router;
+export default router;

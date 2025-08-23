@@ -1,4 +1,4 @@
-const AuthModule = require("../modules/zelf-auth.module");
+import { authenticateUser } from "../modules/zelf-auth.module.js";
 
 /**
  * Authenticate user and return JWT token
@@ -22,7 +22,7 @@ const authenticate = async (ctx) => {
 		}
 
 		// Authenticate user
-		const result = await AuthModule.authenticateUser(email, apiKey);
+		const result = await authenticateUser(email, apiKey);
 
 		ctx.status = 200;
 		ctx.body = result;
@@ -45,6 +45,4 @@ const authenticate = async (ctx) => {
 	}
 };
 
-module.exports = {
-	authenticate,
-};
+export { authenticate };

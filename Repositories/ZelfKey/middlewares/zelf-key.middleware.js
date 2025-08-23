@@ -1,4 +1,4 @@
-const { validate } = require("../../../Utilities/helper.module");
+import { validate } from "../../../Utilities/helper.module.js";
 
 /**
  * ZelfKey Middleware - Business logic validation for password manager operations
@@ -13,7 +13,7 @@ const schemas = {
 	storeData: {
 		type: { required: true, enum: ["password", "notes", "credit_card", "contact", "bank_details"] },
 		payload: { required: true, minKeys: 1 },
-		faceBase64: { required: true },
+		faceBase64: { required: true, isBase64Image: true },
 		password: { required: true },
 	},
 
@@ -23,7 +23,7 @@ const schemas = {
 		username: { required: true, minLength: 1 },
 		password: { required: true, minLength: 1 },
 		notes: { required: false },
-		faceBase64: { required: true },
+		faceBase64: { required: true, isBase64Image: true },
 		password: { required: true },
 	},
 
@@ -31,7 +31,7 @@ const schemas = {
 	notes: {
 		title: { required: true, minLength: 1, maxLength: 100 },
 		keyValuePairs: { required: true, minKeys: 1, maxKeys: 10 },
-		faceBase64: { required: true },
+		faceBase64: { required: true, isBase64Image: true },
 		password: { required: true },
 	},
 
@@ -43,7 +43,7 @@ const schemas = {
 		expiryYear: { required: true, minLength: 4, maxLength: 4 },
 		cvv: { required: true, minLength: 3, maxLength: 4 },
 		bankName: { required: true, minLength: 1 },
-		faceBase64: { required: true },
+		faceBase64: { required: true, isBase64Image: true },
 		password: { required: true },
 	},
 
@@ -54,7 +54,7 @@ const schemas = {
 		phone: { required: false, minLength: 10 },
 		address: { required: false },
 		company: { required: false },
-		faceBase64: { required: true },
+		faceBase64: { required: true, isBase64Image: true },
 		password: { required: true },
 	},
 
@@ -65,21 +65,21 @@ const schemas = {
 		routingNumber: { required: true, minLength: 9, maxLength: 9 },
 		accountType: { required: true, enum: ["checking", "savings", "business", "investment"] },
 		accountHolder: { required: true, minLength: 1 },
-		faceBase64: { required: true },
+		faceBase64: { required: true, isBase64Image: true },
 		password: { required: true },
 	},
 
 	// Retrieve data schema
 	retrieve: {
 		zelfProof: { required: true },
-		faceBase64: { required: true },
+		faceBase64: { required: true, isBase64Image: true },
 		password: { required: true },
 	},
 
 	// Preview data schema
 	preview: {
 		zelfProof: { required: true },
-		faceBase64: { required: true },
+		faceBase64: { required: true, isBase64Image: true },
 	},
 };
 
@@ -513,7 +513,7 @@ function isValidCreditCard(cardNumber) {
 	return sum % 10 === 0;
 }
 
-module.exports = {
+export {
 	storeDataValidation,
 	storePasswordValidation,
 	storeNotesValidation,

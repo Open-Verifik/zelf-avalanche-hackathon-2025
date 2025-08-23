@@ -1,4 +1,4 @@
-const axiosInstance = require("./zelf-auth.module");
+import { getEncryptionInstance } from "./zelf-auth.module.js";
 
 /**
  * Encrypt into a ZelfProof
@@ -16,7 +16,7 @@ const axiosInstance = require("./zelf-auth.module");
  */
 const encrypt = async (data) => {
 	try {
-		const axios = await axiosInstance.getEncryptionInstance();
+		const axios = await getEncryptionInstance();
 
 		const { publicData, faceBase64, metadata, password, identifier, requireLiveness, tolerance, verifierKey, livenessLevel, os } = data;
 
@@ -72,7 +72,7 @@ const encrypt = async (data) => {
  */
 const encryptQRCode = async (data) => {
 	try {
-		const axios = await axiosInstance.getEncryptionInstance();
+		const axios = await getEncryptionInstance();
 
 		const { publicData, faceBase64, metadata, password, identifier, requireLiveness, tolerance, verifierKey, os, livenessLevel } = data;
 
@@ -118,7 +118,7 @@ const encryptQRCode = async (data) => {
  */
 const decrypt = async (data) => {
 	try {
-		const axios = await axiosInstance.getEncryptionInstance();
+		const axios = await getEncryptionInstance();
 
 		const { zelfProof, faceBase64, os, password, verifierKey } = data;
 
@@ -152,7 +152,7 @@ const decrypt = async (data) => {
  */
 const preview = async (data) => {
 	try {
-		const axios = await axiosInstance.getEncryptionInstance();
+		const axios = await getEncryptionInstance();
 
 		const { zelfProof, verifierKey } = data;
 
@@ -192,9 +192,4 @@ const _formattingError = (error = {}) => {
 	return error;
 };
 
-module.exports = {
-	encrypt,
-	encryptQRCode,
-	decrypt,
-	preview,
-};
+export { encrypt, encryptQRCode, decrypt, preview };

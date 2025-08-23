@@ -2,13 +2,18 @@
  * Unprotected repository routes for the hackathon project
  */
 
-module.exports = (router) => {
+import authRoute from "../Repositories/ZelfProof/routes/auth.route.js";
+import zelfProofRoute from "../Repositories/ZelfProof/routes/zelf-proof.route.js";
+import zelfKeyRoute from "../Repositories/ZelfKey/routes/zelf-key.route.js";
+import sessionRoutes from "../Repositories/Session/routes/session.routes.js";
+
+export default (router) => {
 	// Register authentication routes (unprotected)
-	require("../Repositories/ZelfProof/routes/auth.route")(router);
+	authRoute(router);
 
 	// Register ZelfProof routes (unprotected)
-	require("../Repositories/ZelfProof/routes/zelf-proof.route")(router);
+	zelfProofRoute(router);
 
-	// Register ZelfKey routes (unprotected)
-	require("../Repositories/ZelfKey/routes/zelf-key.route")(router);
+	// Register Session routes (unprotected)
+	sessionRoutes(router);
 };

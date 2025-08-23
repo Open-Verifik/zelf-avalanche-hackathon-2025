@@ -1,4 +1,4 @@
-const config = require("./config");
+import config from "./config.js";
 
 /**
  * Swagger/OpenAPI 3.0 configuration for Zelf Avalanche Hackathon 2025 API
@@ -587,6 +587,70 @@ const swaggerSpec = {
 					},
 				},
 			},
+
+			// Session schemas
+			SessionCreateRequest: {
+				type: "object",
+				required: ["identifier", "address"],
+				properties: {
+					identifier: {
+						type: "string",
+						description: "Unique identifier for the session",
+						example: "user123",
+					},
+					address: {
+						type: "string",
+						description: "Wallet address for the session",
+						example: "0x1234567890abcdef1234567890abcdef12345678",
+					},
+				},
+			},
+			SessionCreateResponse: {
+				type: "object",
+				properties: {
+					data: {
+						type: "object",
+						properties: {
+							token: {
+								type: "string",
+								description: "JWT token for the session",
+								example: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+							},
+						},
+					},
+				},
+			},
+			SessionPublicKeyResponse: {
+				type: "object",
+				properties: {
+					data: {
+						type: "string",
+						description: "PGP public key for encryption",
+						example: "-----BEGIN PGP PUBLIC KEY BLOCK-----\n...\n-----END PGP PUBLIC KEY BLOCK-----",
+					},
+				},
+			},
+			SessionDecryptRequest: {
+				type: "object",
+				required: ["message"],
+				properties: {
+					message: {
+						type: "string",
+						description: "Encrypted message to decrypt",
+						example: "-----BEGIN PGP MESSAGE-----\n...\n-----END PGP MESSAGE-----",
+					},
+				},
+			},
+			SessionDecryptResponse: {
+				type: "object",
+				properties: {
+					data: {
+						type: "string",
+						description: "Decrypted content",
+						example: "Decrypted message content",
+					},
+				},
+			},
 		},
 	},
 	// security: [
@@ -905,6 +969,7 @@ const swaggerSpec = {
 				summary: "Store data with ZelfKey",
 				description:
 					"Store various types of data (passwords, notes, credit cards, contacts, bank details) using biometric face verification and QR code encryption. Data is automatically pinned to IPFS.",
+				security: [{ bearerAuth: [] }],
 				requestBody: {
 					required: true,
 					content: {
@@ -942,6 +1007,22 @@ const swaggerSpec = {
 							},
 						},
 					},
+					401: {
+						description: "Unauthorized - JWT token required",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Protected resource, use Authorization header to get access",
+										},
+									},
+								},
+							},
+						},
+					},
 					500: {
 						description: "Internal server error",
 						content: {
@@ -966,6 +1047,7 @@ const swaggerSpec = {
 				tags: ["ZelfKey - Storage"],
 				summary: "Store website password",
 				description: "Store website password using the specific password endpoint. This is a convenience endpoint for password storage.",
+				security: [{ bearerAuth: [] }],
 				requestBody: {
 					required: true,
 					content: {
@@ -1058,6 +1140,7 @@ const swaggerSpec = {
 				tags: ["ZelfKey - Storage"],
 				summary: "Store notes with key-value pairs",
 				description: "Store notes using key-value pairs (maximum 10 pairs). Useful for storing API keys, configuration data, etc.",
+				security: [{ bearerAuth: [] }],
 				requestBody: {
 					required: true,
 					content: {
@@ -1144,6 +1227,7 @@ const swaggerSpec = {
 				summary: "Store credit card information",
 				description:
 					"Store credit card details with automatic validation (Luhn algorithm, expiry date checks). Credit card numbers are masked in public data.",
+				security: [{ bearerAuth: [] }],
 				requestBody: {
 					required: true,
 					content: {
@@ -1246,6 +1330,7 @@ const swaggerSpec = {
 				tags: ["ZelfKey - Storage"],
 				summary: "Store contact information",
 				description: "Store contact details with automatic masking of sensitive information (email, phone) in public data.",
+				security: [{ bearerAuth: [] }],
 				requestBody: {
 					required: true,
 					content: {
@@ -1345,6 +1430,7 @@ const swaggerSpec = {
 				summary: "Store bank account details",
 				description:
 					"Store bank account information with automatic validation (routing number format, account type validation). Account numbers are masked in public data.",
+				security: [{ bearerAuth: [] }],
 				requestBody: {
 					required: true,
 					content: {
@@ -1444,6 +1530,7 @@ const swaggerSpec = {
 				summary: "Retrieve stored data",
 				description:
 					"Retrieve and decrypt stored data using the zelfProof and biometric face verification. Returns both public data and sensitive metadata.",
+				security: [{ bearerAuth: [] }],
 				requestBody: {
 					required: true,
 					content: {
@@ -1502,6 +1589,7 @@ const swaggerSpec = {
 				summary: "Preview stored data",
 				description:
 					"Preview stored data without full decryption. Useful for validation and basic information retrieval. Only returns public data, not sensitive metadata.",
+				security: [{ bearerAuth: [] }],
 				requestBody: {
 					required: true,
 					content: {
@@ -1554,7 +1642,205 @@ const swaggerSpec = {
 				},
 			},
 		},
+
+		// Session endpoints
+		"/api/sessions/public-key": {
+			get: {
+				tags: ["Sessions"],
+				summary: "Get public key for session encryption",
+				description: "Retrieve a PGP public key for encrypting messages that can be decrypted by the session.",
+				parameters: [
+					{
+						name: "identifier",
+						in: "query",
+						required: true,
+						schema: {
+							type: "string",
+						},
+						description: "Unique identifier for the session",
+						example: "user123",
+					},
+					{
+						name: "name",
+						in: "query",
+						required: false,
+						schema: {
+							type: "string",
+						},
+						description: "Optional name for the key pair",
+						example: "John Doe",
+					},
+					{
+						name: "email",
+						in: "query",
+						required: false,
+						schema: {
+							type: "string",
+							format: "email",
+						},
+						description: "Optional email for the key pair",
+						example: "user@example.com",
+					},
+				],
+				responses: {
+					200: {
+						description: "Public key retrieved successfully",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/SessionPublicKeyResponse" },
+							},
+						},
+					},
+					409: {
+						description: "Validation error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										validationError: {
+											type: "string",
+											example: "identifier is required",
+										},
+									},
+								},
+							},
+						},
+					},
+					500: {
+						description: "Internal server error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Failed to generate public key",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/sessions": {
+			post: {
+				tags: ["Sessions"],
+				summary: "Create a new session",
+				description: "Create a new session with identifier and wallet address, returns a JWT token.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: { $ref: "#/components/schemas/SessionCreateRequest" },
+						},
+					},
+				},
+				responses: {
+					200: {
+						description: "Session created successfully",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/SessionCreateResponse" },
+							},
+						},
+					},
+					409: {
+						description: "Validation error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										validationError: {
+											type: "string",
+											example: "identifier is required",
+										},
+									},
+								},
+							},
+						},
+					},
+					500: {
+						description: "Internal server error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Failed to create session",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/sessions/decrypt-content": {
+			post: {
+				tags: ["Sessions"],
+				summary: "Decrypt encrypted content",
+				description: "Decrypt a PGP encrypted message using the session's private key.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: { $ref: "#/components/schemas/SessionDecryptRequest" },
+						},
+					},
+				},
+				responses: {
+					200: {
+						description: "Content decrypted successfully",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/SessionDecryptResponse" },
+							},
+						},
+					},
+					409: {
+						description: "Validation error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										validationError: {
+											type: "string",
+											example: "message is required",
+										},
+									},
+								},
+							},
+						},
+					},
+					500: {
+						description: "Internal server error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "decryption_failed",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
 	},
 };
 
-module.exports = swaggerSpec;
+export default swaggerSpec;

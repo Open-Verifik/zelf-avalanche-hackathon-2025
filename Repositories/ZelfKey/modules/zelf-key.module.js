@@ -1,5 +1,5 @@
-const ZelfProofModule = require("../../ZelfProof/modules/zelf-proof.module");
-const pinata = require("../../IPFS/modules/pinata");
+import * as ZelfProofModule from "../../ZelfProof/modules/zelf-proof.module.js";
+import * as pinata from "../../IPFS/modules/pinata.js";
 
 /**
  * ZelfKey Module - Password Manager functionality similar to LastPass
@@ -537,13 +537,107 @@ const previewData = async (data) => {
 	}
 };
 
-module.exports = {
-	storeData,
-	storePassword,
-	storeNotes,
-	storeCreditCard,
-	storeContact,
-	storeBankDetails,
-	retrieveData,
-	previewData,
+/**
+ * Create NFT-ready data structure from ZelfKey storage
+ * This function prepares the data for NFT minting with proper metadata
+ * @param {Object} data
+ * @param {string} data.zelfProof - Encrypted ZelfProof string
+ * @param {string} data.faceBase64 - User's face for verification
+ * @param {string} data.password - User's master password
+ * @returns {Promise<Object>} NFT-ready data structure
+ */
+const createNFTReadyData = async (data) => {
+	try {
+		const { zelfProof, faceBase64, password } = data;
+
+		// First, retrieve the data to get the IPFS information
+		const retrievedData = await retrieveData({
+			zelfProof,
+			faceBase64,
+			password,
+		});
+
+		if (!retrievedData.success || !retrievedData.data.ipfs) {
+			throw new Error("No IPFS data available for NFT creation");
+		}
+
+		const { ipfs, publicData } = retrievedData.data;
+
+		// Create NFT-ready structure
+		const nftReadyData = {
+			success: true,
+			zelfKeyData: {
+				publicData,
+				ipfs: {
+					hash: ipfs.hash,
+					gatewayUrl: ipfs.gatewayUrl,
+					pinSize: ipfs.pinSize,
+					timestamp: ipfs.timestamp,
+					name: ipfs.name,
+					metadata: ipfs.metadata,
+					contentType: ipfs.contentType,
+				},
+				message: `NFT-ready data created from ${publicData.type}`,
+				timestamp: new Date().toISOString(),
+			},
+			nftMetadata: {
+				name: `ZelfKey ${publicData.type.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase())}`,
+				description: `Secure ${publicData.type.replace(/_/g, " ")} stored with ZelfKey biometric encryption`,
+				image: ipfs.gatewayUrl,
+				external_url: "https://zelf.world",
+				attributes: [
+					{
+						trait_type: "Data Type",
+						value: publicData.type.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase()),
+					},
+					{
+						trait_type: "Storage Method",
+						value: "ZelfKey Biometric Encryption",
+					},
+					{
+						trait_type: "Security Level",
+						value: "Maximum",
+					},
+					{
+						trait_type: "IPFS Hash",
+						value: ipfs.hash,
+					},
+					{
+						trait_type: "Timestamp",
+						value: ipfs.timestamp,
+					},
+					{
+						trait_type: "Project",
+						value: "ZelfKey Avalanche Integration",
+					},
+				],
+				properties: {
+					files: [
+						{
+							type: "image/png",
+							uri: ipfs.gatewayUrl,
+						},
+					],
+					category: "image",
+					zelfKey: {
+						type: publicData.type,
+						encrypted: true,
+						biometric: true,
+						ipfs: {
+							hash: ipfs.hash,
+							gateway: ipfs.gatewayUrl,
+						},
+					},
+				},
+			},
+			message: "NFT-ready data structure created successfully",
+		};
+
+		return nftReadyData;
+	} catch (error) {
+		console.error("Error creating NFT-ready data:", error);
+		throw new Error(`Failed to create NFT-ready data: ${error.message}`);
+	}
 };
+
+export { storeData, storePassword, storeNotes, storeCreditCard, storeContact, storeBankDetails, retrieveData, previewData, createNFTReadyData };

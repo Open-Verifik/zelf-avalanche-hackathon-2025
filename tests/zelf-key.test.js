@@ -1,12 +1,38 @@
 // Set test environment
 process.env.NODE_ENV = "test";
 
-const request = require("supertest");
-const app = require("../server");
-const config = require("../Core/config");
+import request from "supertest";
+import app from "../server.js";
+import config from "../Core/config.js";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, resolve } from "path";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 describe("ZelfKey Endpoints", () => {
-	const selfiesData = require("../Repositories/ZelfProof/assets/selfies.json");
+	const selfiesData = JSON.parse(readFileSync(resolve(__dirname, "../Repositories/ZelfProof/assets/selfies.json"), "utf8"));
+	let authToken;
+
+	beforeAll(async () => {
+		// Create a session to get JWT token for ZelfKey endpoints
+		try {
+			const sessionResponse = await request(app).post("/api/sessions").send({
+				identifier: "test-user-123",
+				address: "0x1234567890abcdef1234567890abcdef12345678",
+			});
+
+			if (sessionResponse.status === 200) {
+				authToken = sessionResponse.body.data.token;
+				console.log("Successfully obtained JWT token for ZelfKey tests");
+			} else {
+				console.log("Could not get JWT token, ZelfKey tests will expect 401 errors");
+			}
+		} catch (error) {
+			console.log("Could not get JWT token, ZelfKey tests will expect 401 errors");
+		}
+	});
 
 	describe("POST /api/zelf-key/store", () => {
 		describe("Store Website Password", () => {
@@ -23,7 +49,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				if (response.status === 200) {
 					expect(response.body).toHaveProperty("success", true);
@@ -65,7 +91,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				if (response.status === 200) {
 					expect(response.body.publicData.type).toBe("website_password");
@@ -96,7 +122,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				if (response.status === 200) {
 					expect(response.body).toHaveProperty("success", true);
@@ -127,7 +153,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				if (response.status === 200) {
 					expect(response.body.publicData.pairCount).toBe(10);
@@ -153,7 +179,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				if (response.status === 200) {
 					expect(response.body).toHaveProperty("success", true);
@@ -187,7 +213,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				if (response.status === 200) {
 					expect(response.body).toHaveProperty("success", true);
@@ -214,7 +240,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				if (response.status === 200) {
 					expect(response.body.publicData.name).toBe("Minimal Contact");
@@ -240,7 +266,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				if (response.status === 200) {
 					expect(response.body).toHaveProperty("success", true);
@@ -270,7 +296,7 @@ describe("ZelfKey Endpoints", () => {
 				password: "master_password_123",
 			};
 
-			const response = await request(app).post("/api/zelf-key/store/password").send(payload);
+			const response = await request(app).post("/api/zelf-key/store/password").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 			if (response.status === 200) {
 				expect(response.body).toHaveProperty("success", true);
@@ -300,7 +326,7 @@ describe("ZelfKey Endpoints", () => {
 				password: "master_password_123",
 			};
 
-			const response = await request(app).post("/api/zelf-key/store/notes").send(payload);
+			const response = await request(app).post("/api/zelf-key/store/notes").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 			if (response.status === 200) {
 				expect(response.body).toHaveProperty("success", true);
@@ -329,7 +355,7 @@ describe("ZelfKey Endpoints", () => {
 				password: "master_password_123",
 			};
 
-			const response = await request(app).post("/api/zelf-key/store/credit-card").send(payload);
+			const response = await request(app).post("/api/zelf-key/store/credit-card").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 			if (response.status === 200) {
 				expect(response.body).toHaveProperty("success", true);
@@ -358,7 +384,7 @@ describe("ZelfKey Endpoints", () => {
 				password: "master_password_123",
 			};
 
-			const response = await request(app).post("/api/zelf-key/store/contact").send(payload);
+			const response = await request(app).post("/api/zelf-key/store/contact").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 			if (response.status === 200) {
 				expect(response.body).toHaveProperty("success", true);
@@ -387,7 +413,7 @@ describe("ZelfKey Endpoints", () => {
 				password: "master_password_123",
 			};
 
-			const response = await request(app).post("/api/zelf-key/store/bank-details").send(payload);
+			const response = await request(app).post("/api/zelf-key/store/bank-details").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 			if (response.status === 200) {
 				expect(response.body).toHaveProperty("success", true);
@@ -422,7 +448,7 @@ describe("ZelfKey Endpoints", () => {
 			};
 
 			try {
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				if (response.status === 200) {
 					storedZelfProof = response.body.zelfProof;
@@ -444,7 +470,7 @@ describe("ZelfKey Endpoints", () => {
 				password: "master_password_123",
 			};
 
-			const response = await request(app).post("/api/zelf-key/retrieve").send(payload);
+			const response = await request(app).post("/api/zelf-key/retrieve").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 			if (response.status === 200) {
 				expect(response.body).toHaveProperty("success", true);
@@ -487,7 +513,7 @@ describe("ZelfKey Endpoints", () => {
 			};
 
 			try {
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				if (response.status === 200) {
 					storedZelfProof = response.body.zelfProof;
@@ -508,7 +534,7 @@ describe("ZelfKey Endpoints", () => {
 				faceBase64: selfiesData.manSelfie,
 			};
 
-			const response = await request(app).post("/api/zelf-key/preview").send(payload);
+			const response = await request(app).post("/api/zelf-key/preview").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 			if (response.status === 200) {
 				expect(response.body).toHaveProperty("success", true);
@@ -540,7 +566,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -553,7 +579,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -570,7 +596,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -587,7 +613,7 @@ describe("ZelfKey Endpoints", () => {
 					faceBase64: selfiesData.manSelfie,
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -605,7 +631,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -629,7 +655,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -649,7 +675,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -669,7 +695,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -689,7 +715,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -712,7 +738,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -733,7 +759,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -754,7 +780,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -773,7 +799,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -790,7 +816,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -807,7 +833,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -829,7 +855,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -849,7 +875,7 @@ describe("ZelfKey Endpoints", () => {
 					password: "master_password_123",
 				};
 
-				const response = await request(app).post("/api/zelf-key/store").send(payload);
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -858,7 +884,7 @@ describe("ZelfKey Endpoints", () => {
 
 		describe("Empty Payload Validation", () => {
 			it("should reject empty payload", async () => {
-				const response = await request(app).post("/api/zelf-key/store").send({});
+				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send({});
 
 				expect(response.status).toBe(400);
 				expect(response.body).toHaveProperty("error", "Validation error");
@@ -879,7 +905,7 @@ describe("ZelfKey Endpoints", () => {
 				password: "master_password_123",
 			};
 
-			const response = await request(app).post("/api/zelf-key/store").send(payload);
+			const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
 
 			// Since all routes are unprotected, this should be processed, not rejected by auth
 			if (response.status === 200) {
