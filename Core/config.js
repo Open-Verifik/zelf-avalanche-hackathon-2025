@@ -28,6 +28,12 @@ const configuration = {
 		apiKey: process.env.ZELF_API_KEY || "password",
 		clientAuthUrl: process.env.ZELF_PROOF_CLIENT_AUTH_URL || "/api/clients/auth",
 	},
+	pinata: {
+		apiKey: process.env.PINATA_API_KEY,
+		secretApiKey: process.env.PINATA_SECRET_API_KEY,
+		jwt: process.env.PINATA_JWT,
+		gateway: process.env.PINATA_GATEWAY || "https://gateway.pinata.cloud",
+	},
 	pgp: {
 		secretKey: process.env.PGP_SECRET_KEY || "",
 		passphrase: process.env.PGP_PASSPHRASE || "",

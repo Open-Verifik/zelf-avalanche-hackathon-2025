@@ -1,0 +1,125 @@
+{
+	"zelfKey": {
+		"storePassword": {
+			"description": "Store website password using the generic store endpoint",
+			"endpoint": "POST /api/zelf-key/store",
+			"payload": {
+				"type": "password",
+				"payload": {
+					"website": "github.com",
+					"username": "user@email.com",
+					"password": "securepass123",
+					"notes": "Work account"
+				},
+				"faceBase64": "{{manSelfie}}",
+				"password": "master_password_123"
+			}
+		},
+		"storePasswordSpecific": {
+			"description": "Store website password using the specific password endpoint",
+			"endpoint": "POST /api/zelf-key/store/password",
+			"payload": {
+				"website": "specific-endpoint.com",
+				"username": "testuser",
+				"password": "testpass123",
+				"notes": "Testing specific endpoint",
+				"faceBase64": "{{manSelfie}}",
+				"password": "master_password_123"
+			}
+		},
+		"storeNotes": {
+			"description": "Store notes with key-value pairs",
+			"endpoint": "POST /api/zelf-key/store",
+			"payload": {
+				"type": "notes",
+				"payload": {
+					"title": "API Keys",
+					"keyValuePairs": {
+						"OpenAI": "sk-1234567890abcdef",
+						"Stripe": "pk_test_1234567890",
+						"AWS": "AKIA1234567890ABCDEF"
+					}
+				},
+				"faceBase64": "{{manSelfie}}",
+				"password": "master_password_123"
+			}
+		},
+		"storeCreditCard": {
+			"description": "Store credit card information",
+			"endpoint": "POST /api/zelf-key/store",
+			"payload": {
+				"type": "credit_card",
+				"payload": {
+					"cardName": "John Doe",
+					"cardNumber": "4111111111111111",
+					"cvv": "123",
+					"expiryMonth": "12",
+					"expiryYear": "2028",
+					"cardType": "visa"
+				},
+				"faceBase64": "{{manSelfie}}",
+				"password": "master_password_123"
+			}
+		},
+		"storeContact": {
+			"description": "Store contact information",
+			"endpoint": "POST /api/zelf-key/store",
+			"payload": {
+				"type": "contact",
+				"payload": {
+					"name": "John Doe",
+					"email": "john.doe@example.com",
+					"phone": "+1-555-123-4567",
+					"company": "Tech Corp",
+					"address": "123 Main St, City, State 12345"
+				},
+				"faceBase64": "{{manSelfie}}",
+				"password": "master_password_123"
+			}
+		},
+		"storeBankDetails": {
+			"description": "Store bank account details",
+			"endpoint": "POST /api/zelf-key/store",
+			"payload": {
+				"type": "bank_details",
+				"payload": {
+					"bankName": "Wells Fargo",
+					"accountNumber": "1234567890123456",
+					"routingNumber": "121000248",
+					"accountType": "checking",
+					"accountHolder": "John Doe"
+				},
+				"faceBase64": "{{manSelfie}}",
+				"password": "master_password_123"
+			}
+		},
+		"retrieve": {
+			"description": "Retrieve stored data using zelfProof",
+			"endpoint": "POST /api/zelf-key/retrieve",
+			"payload": {
+				"zelfProof": "{{zelfProof}}",
+				"faceBase64": "{{manSelfie}}",
+				"password": "master_password_123"
+			}
+		},
+		"preview": {
+			"description": "Preview stored data without decrypting",
+			"endpoint": "POST /api/zelf-key/preview",
+			"payload": {
+				"zelfProof": "{{zelfProof}}",
+				"faceBase64": "{{manSelfie}}"
+			}
+		}
+	},
+	"environment_variables": {
+		"manSelfie": "Replace with actual base64 encoded selfie from selfies.json",
+		"zelfProof": "Replace with zelfProof returned from store operations",
+		"base_url": "http://localhost:3000"
+	},
+	"notes": {
+		"faceBase64": "You need to replace {{manSelfie}} with an actual base64 encoded selfie from your selfies.json file",
+		"zelfProof": "For retrieve and preview operations, you need to first store some data to get a zelfProof",
+		"password": "This is your master password for encrypting/decrypting the data",
+		"endpoints": "All endpoints are unprotected, so no authentication headers are required"
+	}
+}

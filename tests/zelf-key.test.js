@@ -33,7 +33,19 @@ describe("ZelfKey Endpoints", () => {
 					expect(response.body.publicData.website).toBe("github.com");
 					expect(response.body.publicData.username).toBe("***com");
 					expect(response.body.publicData).toHaveProperty("timestamp");
-					expect(response.body.message).toBe("Website password stored successfully");
+
+					// Check if QR code is returned (data URL format)
+					expect(response.body.zelfProof).toMatch(/^data:image\/png;base64,/);
+
+					// Check IPFS information (may be null if pinning fails)
+					if (response.body.ipfs) {
+						expect(response.body.ipfs).toHaveProperty("hash");
+						expect(response.body.ipfs).toHaveProperty("gatewayUrl");
+						expect(response.body.ipfs).toHaveProperty("pinSize");
+						expect(response.body.ipfs).toHaveProperty("timestamp");
+					}
+
+					expect(response.body.message).toContain("Website password stored successfully as QR code");
 				} else {
 					// External API failure is expected in test environment
 					expect([401, 500]).toContain(response.status);
@@ -59,6 +71,9 @@ describe("ZelfKey Endpoints", () => {
 					expect(response.body.publicData.type).toBe("website_password");
 					expect(response.body.publicData.website).toBe("stackoverflow.com");
 					expect(response.body.publicData.username).toBe("***123");
+
+					// Check if QR code is returned
+					expect(response.body.zelfProof).toMatch(/^data:image\/png;base64,/);
 				} else {
 					expect([401, 500]).toContain(response.status);
 				}
@@ -265,6 +280,9 @@ describe("ZelfKey Endpoints", () => {
 				expect(response.body.publicData.website).toBe("specific-endpoint.com");
 				expect(response.body.publicData.username).toBe("***ser"); // Last 3 chars: "ser"
 				expect(response.body.publicData).toHaveProperty("timestamp");
+
+				// Check if QR code is returned
+				expect(response.body.zelfProof).toMatch(/^data:image\/png;base64,/);
 			} else {
 				expect([401, 500]).toContain(response.status);
 			}
@@ -872,6 +890,9 @@ describe("ZelfKey Endpoints", () => {
 				expect(response.body.publicData.website).toBe("unprotected-test.com");
 				expect(response.body.publicData.username).toBe("***ser"); // Last 3 chars: "ser"
 				expect(response.body.publicData).toHaveProperty("timestamp");
+
+				// Check if QR code is returned
+				expect(response.body.zelfProof).toMatch(/^data:image\/png;base64,/);
 			} else {
 				// External API failure is expected in test environment
 				expect([401, 500]).toContain(response.status);

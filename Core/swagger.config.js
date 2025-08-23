@@ -275,13 +275,325 @@ const swaggerSpec = {
 					},
 				},
 			},
+
+			// ZelfKey schemas
+			ZelfKeyPasswordPayload: {
+				type: "object",
+				required: ["website", "username", "password"],
+				properties: {
+					website: {
+						type: "string",
+						description: "Website URL or name",
+						example: "github.com",
+					},
+					username: {
+						type: "string",
+						description: "Username or email for the website",
+						example: "user@email.com",
+					},
+					password: {
+						type: "string",
+						description: "Password for the website",
+						example: "securepass123",
+					},
+					notes: {
+						type: "string",
+						description: "Additional notes about the password",
+						example: "Work account",
+					},
+				},
+			},
+			ZelfKeyNotesPayload: {
+				type: "object",
+				required: ["title", "keyValuePairs"],
+				properties: {
+					title: {
+						type: "string",
+						description: "Title for the notes",
+						example: "API Keys",
+					},
+					keyValuePairs: {
+						type: "object",
+						description: "Key-value pairs for storing notes (max 10 pairs)",
+						example: {
+							OpenAI: "sk-1234567890abcdef",
+							Stripe: "pk_test_1234567890",
+							AWS: "AKIA1234567890ABCDEF",
+						},
+					},
+				},
+			},
+			ZelfKeyCreditCardPayload: {
+				type: "object",
+				required: ["cardName", "cardNumber", "cvv", "expiryMonth", "expiryYear"],
+				properties: {
+					cardName: {
+						type: "string",
+						description: "Name on the credit card",
+						example: "John Doe",
+					},
+					cardNumber: {
+						type: "string",
+						description: "Credit card number (will be masked in public data)",
+						example: "4111111111111111",
+					},
+					cvv: {
+						type: "string",
+						description: "Card verification value",
+						example: "123",
+					},
+					expiryMonth: {
+						type: "string",
+						description: "Expiry month (1-12)",
+						example: "12",
+					},
+					expiryYear: {
+						type: "string",
+						description: "Expiry year (4 digits)",
+						example: "2028",
+					},
+					cardType: {
+						type: "string",
+						description: "Type of credit card",
+						example: "visa",
+					},
+				},
+			},
+			ZelfKeyContactPayload: {
+				type: "object",
+				required: ["name"],
+				properties: {
+					name: {
+						type: "string",
+						description: "Contact name",
+						example: "John Doe",
+					},
+					email: {
+						type: "string",
+						format: "email",
+						description: "Contact email (will be masked in public data)",
+						example: "john.doe@example.com",
+					},
+					phone: {
+						type: "string",
+						description: "Contact phone number (will be masked in public data)",
+						example: "+1-555-123-4567",
+					},
+					company: {
+						type: "string",
+						description: "Company name",
+						example: "Tech Corp",
+					},
+					address: {
+						type: "string",
+						description: "Contact address",
+						example: "123 Main St, City, State 12345",
+					},
+				},
+			},
+			ZelfKeyBankDetailsPayload: {
+				type: "object",
+				required: ["bankName", "accountNumber", "routingNumber", "accountType", "accountHolder"],
+				properties: {
+					bankName: {
+						type: "string",
+						description: "Name of the bank",
+						example: "Wells Fargo",
+					},
+					accountNumber: {
+						type: "string",
+						description: "Bank account number (will be masked in public data)",
+						example: "1234567890123456",
+					},
+					routingNumber: {
+						type: "string",
+						description: "9-digit routing number",
+						example: "121000248",
+					},
+					accountType: {
+						type: "string",
+						enum: ["checking", "savings"],
+						description: "Type of bank account",
+						example: "checking",
+					},
+					accountHolder: {
+						type: "string",
+						description: "Name of the account holder",
+						example: "John Doe",
+					},
+				},
+			},
+			ZelfKeyStoreRequest: {
+				type: "object",
+				required: ["type", "payload", "faceBase64", "password"],
+				properties: {
+					type: {
+						type: "string",
+						enum: ["password", "notes", "credit_card", "contact", "bank_details"],
+						description: "Type of data to store",
+						example: "password",
+					},
+					payload: {
+						oneOf: [
+							{ $ref: "#/components/schemas/ZelfKeyPasswordPayload" },
+							{ $ref: "#/components/schemas/ZelfKeyNotesPayload" },
+							{ $ref: "#/components/schemas/ZelfKeyCreditCardPayload" },
+							{ $ref: "#/components/schemas/ZelfKeyContactPayload" },
+							{ $ref: "#/components/schemas/ZelfKeyBankDetailsPayload" },
+						],
+						description: "Data payload based on the type",
+					},
+					faceBase64: {
+						type: "string",
+						description: "Base64 encoded face image for biometric verification",
+						example: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
+					},
+					password: {
+						type: "string",
+						description: "Master password for encrypting the data",
+						example: "master_password_123",
+					},
+				},
+			},
+			ZelfKeyStoreResponse: {
+				type: "object",
+				properties: {
+					success: {
+						type: "boolean",
+						description: "Whether the operation was successful",
+						example: true,
+					},
+					zelfProof: {
+						type: "string",
+						description: "QR code data URL containing the encrypted data",
+						example: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+					},
+					ipfs: {
+						type: "object",
+						description: "IPFS pinning information (if successful)",
+						properties: {
+							hash: {
+								type: "string",
+								description: "IPFS hash of the pinned file",
+								example: "QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco",
+							},
+							gatewayUrl: {
+								type: "string",
+								description: "Gateway URL to access the file",
+								example: "https://gateway.pinata.cloud/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco",
+							},
+							pinSize: {
+								type: "number",
+								description: "Size of the pinned file in bytes",
+								example: 12345,
+							},
+							timestamp: {
+								type: "string",
+								description: "Timestamp when the file was pinned",
+								example: "2025-01-27T10:30:00.000Z",
+							},
+							name: {
+								type: "string",
+								description: "Filename of the pinned file",
+								example: "zelfkey_password_github_1706358600000.png",
+							},
+							metadata: {
+								type: "object",
+								description: "Metadata associated with the pinned file",
+							},
+						},
+					},
+					publicData: {
+						type: "object",
+						description: "Public data structure (non-sensitive information)",
+						properties: {
+							type: {
+								type: "string",
+								description: "Type of stored data",
+								example: "website_password",
+							},
+							timestamp: {
+								type: "string",
+								description: "Timestamp when the data was stored",
+								example: "2025-01-27T10:30:00.000Z",
+							},
+						},
+					},
+					message: {
+						type: "string",
+						description: "Success message",
+						example: "Website password stored successfully as QR code",
+					},
+				},
+			},
+			ZelfKeyRetrieveRequest: {
+				type: "object",
+				required: ["zelfProof", "faceBase64", "password"],
+				properties: {
+					zelfProof: {
+						type: "string",
+						description: "QR code data URL or zelfProof string",
+						example: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+					},
+					faceBase64: {
+						type: "string",
+						description: "Base64 encoded face image for biometric verification",
+						example: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
+					},
+					password: {
+						type: "string",
+						description: "Master password used during encryption",
+						example: "master_password_123",
+					},
+				},
+			},
+			ZelfKeyPreviewRequest: {
+				type: "object",
+				required: ["zelfProof", "faceBase64"],
+				properties: {
+					zelfProof: {
+						type: "string",
+						description: "QR code data URL or zelfProof string",
+						example: "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...",
+					},
+					faceBase64: {
+						type: "string",
+						description: "Base64 encoded face image for biometric verification",
+						example: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
+					},
+				},
+			},
+			ZelfKeyDataResponse: {
+				type: "object",
+				properties: {
+					success: {
+						type: "boolean",
+						description: "Whether the operation was successful",
+						example: true,
+					},
+					data: {
+						type: "object",
+						description: "Retrieved or previewed data",
+						properties: {
+							publicData: {
+								type: "object",
+								description: "Public data structure (non-sensitive information)",
+							},
+							metadata: {
+								type: "object",
+								description: "Sensitive data (only available in retrieve operations)",
+							},
+						},
+					},
+				},
+			},
 		},
 	},
-	security: [
-		{
-			bearerAuth: [],
-		},
-	],
+	// security: [
+	// 	{
+	// 		bearerAuth: [],
+	// 	},
+	// ],
 	paths: {
 		// Authentication endpoints
 		"/api/auth/authenticate": {
@@ -360,8 +672,8 @@ const swaggerSpec = {
 			post: {
 				tags: ["ZelfProof - Encryption"],
 				summary: "Encrypt data with ZelfProof",
-				description: "Create an encrypted ZelfProof using biometric face verification. Supports liveness detection and multiple security levels.",
-				security: [{ bearerAuth: [] }],
+				description:
+					"Create an encrypted ZelfProof using biometric face verification. Supports liveness detection and multiple security levels.",
 				requestBody: {
 					required: true,
 					content: {
@@ -419,7 +731,6 @@ const swaggerSpec = {
 				tags: ["ZelfProof - Encryption"],
 				summary: "Encrypt data with ZelfProof and generate QR code",
 				description: "Create an encrypted ZelfProof with QR code generation for easy sharing and verification.",
-				security: [{ bearerAuth: [] }],
 				requestBody: {
 					required: true,
 					content: {
@@ -477,7 +788,6 @@ const swaggerSpec = {
 				tags: ["ZelfProof - Decryption"],
 				summary: "Decrypt ZelfProof data",
 				description: "Decrypt a ZelfProof using biometric face verification to access the original data.",
-				security: [{ bearerAuth: [] }],
 				requestBody: {
 					required: true,
 					content: {
@@ -535,7 +845,6 @@ const swaggerSpec = {
 				tags: ["ZelfProof - Preview"],
 				summary: "Preview ZelfProof data",
 				description: "Preview ZelfProof metadata without full decryption. Useful for validation and basic information retrieval.",
-				security: [{ bearerAuth: [] }],
 				requestBody: {
 					required: true,
 					content: {
@@ -579,6 +888,663 @@ const swaggerSpec = {
 										error: {
 											type: "string",
 											example: "Something went wrong",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+
+		// ZelfKey endpoints
+		"/api/zelf-key/store": {
+			post: {
+				tags: ["ZelfKey - Storage"],
+				summary: "Store data with ZelfKey",
+				description:
+					"Store various types of data (passwords, notes, credit cards, contacts, bank details) using biometric face verification and QR code encryption. Data is automatically pinned to IPFS.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: { $ref: "#/components/schemas/ZelfKeyStoreRequest" },
+						},
+					},
+				},
+				responses: {
+					200: {
+						description: "Data stored successfully",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ZelfKeyStoreResponse" },
+							},
+						},
+					},
+					400: {
+						description: "Validation error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Validation failed",
+										},
+										details: {
+											type: "object",
+											description: "Validation error details",
+										},
+									},
+								},
+							},
+						},
+					},
+					500: {
+						description: "Internal server error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Failed to store data",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/zelf-key/store/password": {
+			post: {
+				tags: ["ZelfKey - Storage"],
+				summary: "Store website password",
+				description: "Store website password using the specific password endpoint. This is a convenience endpoint for password storage.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								required: ["website", "username", "password", "faceBase64", "password"],
+								properties: {
+									website: {
+										type: "string",
+										description: "Website URL or name",
+										example: "github.com",
+									},
+									username: {
+										type: "string",
+										description: "Username or email for the website",
+										example: "user@email.com",
+									},
+									password: {
+										type: "string",
+										description: "Password for the website",
+										example: "securepass123",
+									},
+									notes: {
+										type: "string",
+										description: "Additional notes about the password",
+										example: "Work account",
+									},
+									faceBase64: {
+										type: "string",
+										description: "Base64 encoded face image for biometric verification",
+										example: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
+									},
+									password: {
+										type: "string",
+										description: "Master password for encrypting the data",
+										example: "master_password_123",
+									},
+								},
+							},
+						},
+					},
+				},
+				responses: {
+					200: {
+						description: "Password stored successfully",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ZelfKeyStoreResponse" },
+							},
+						},
+					},
+					400: {
+						description: "Validation error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Validation failed",
+										},
+									},
+								},
+							},
+						},
+					},
+					500: {
+						description: "Internal server error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Failed to store password",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/zelf-key/store/notes": {
+			post: {
+				tags: ["ZelfKey - Storage"],
+				summary: "Store notes with key-value pairs",
+				description: "Store notes using key-value pairs (maximum 10 pairs). Useful for storing API keys, configuration data, etc.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								required: ["title", "keyValuePairs", "faceBase64", "password"],
+								properties: {
+									title: {
+										type: "string",
+										description: "Title for the notes",
+										example: "API Keys",
+									},
+									keyValuePairs: {
+										type: "object",
+										description: "Key-value pairs for storing notes (max 10 pairs)",
+										example: {
+											OpenAI: "sk-1234567890abcdef",
+											Stripe: "pk_test_1234567890",
+										},
+									},
+									faceBase64: {
+										type: "string",
+										description: "Base64 encoded face image for biometric verification",
+										example: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
+									},
+									password: {
+										type: "string",
+										description: "Master password for encrypting the data",
+										example: "master_password_123",
+									},
+								},
+							},
+						},
+					},
+				},
+				responses: {
+					200: {
+						description: "Notes stored successfully",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ZelfKeyStoreResponse" },
+							},
+						},
+					},
+					400: {
+						description: "Validation error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Validation failed",
+										},
+									},
+								},
+							},
+						},
+					},
+					500: {
+						description: "Internal server error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Failed to store notes",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/zelf-key/store/credit-card": {
+			post: {
+				tags: ["ZelfKey - Storage"],
+				summary: "Store credit card information",
+				description:
+					"Store credit card details with automatic validation (Luhn algorithm, expiry date checks). Credit card numbers are masked in public data.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								required: ["cardName", "cardNumber", "cvv", "expiryMonth", "expiryYear", "faceBase64", "password"],
+								properties: {
+									cardName: {
+										type: "string",
+										description: "Name on the credit card",
+										example: "John Doe",
+									},
+									cardNumber: {
+										type: "string",
+										description: "Credit card number (will be masked in public data)",
+										example: "4111111111111111",
+									},
+									cvv: {
+										type: "string",
+										description: "Card verification value",
+										example: "123",
+									},
+									expiryMonth: {
+										type: "string",
+										description: "Expiry month (1-12)",
+										example: "12",
+									},
+									expiryYear: {
+										type: "string",
+										description: "Expiry year (4 digits)",
+										example: "2028",
+									},
+									cardType: {
+										type: "string",
+										description: "Type of credit card",
+										example: "visa",
+									},
+									faceBase64: {
+										type: "string",
+										description: "Base64 encoded face image for biometric verification",
+										example: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
+									},
+									password: {
+										type: "string",
+										description: "Master password for encrypting the data",
+										example: "master_password_123",
+									},
+								},
+							},
+						},
+					},
+				},
+				responses: {
+					200: {
+						description: "Credit card stored successfully",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ZelfKeyStoreResponse" },
+							},
+						},
+					},
+					400: {
+						description: "Validation error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Invalid credit card number",
+										},
+									},
+								},
+							},
+						},
+					},
+					500: {
+						description: "Internal server error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Failed to store credit card",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/zelf-key/store/contact": {
+			post: {
+				tags: ["ZelfKey - Storage"],
+				summary: "Store contact information",
+				description: "Store contact details with automatic masking of sensitive information (email, phone) in public data.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								required: ["name", "faceBase64", "password"],
+								properties: {
+									name: {
+										type: "string",
+										description: "Contact name",
+										example: "John Doe",
+									},
+									email: {
+										type: "string",
+										format: "email",
+										description: "Contact email (will be masked in public data)",
+										example: "john.doe@example.com",
+									},
+									phone: {
+										type: "string",
+										description: "Contact phone number (will be masked in public data)",
+										example: "+1-555-123-4567",
+									},
+									company: {
+										type: "string",
+										description: "Company name",
+										example: "Tech Corp",
+									},
+									address: {
+										type: "string",
+										description: "Contact address",
+										example: "123 Main St, City, State 12345",
+									},
+									faceBase64: {
+										type: "string",
+										description: "Base64 encoded face image for biometric verification",
+										example: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
+									},
+									password: {
+										type: "string",
+										description: "Master password for encrypting the data",
+										example: "master_password_123",
+									},
+								},
+							},
+						},
+					},
+				},
+				responses: {
+					200: {
+						description: "Contact stored successfully",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ZelfKeyStoreResponse" },
+							},
+						},
+					},
+					400: {
+						description: "Validation error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "At least one contact method required",
+										},
+									},
+								},
+							},
+						},
+					},
+					500: {
+						description: "Internal server error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Failed to store contact",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/zelf-key/store/bank-details": {
+			post: {
+				tags: ["ZelfKey - Storage"],
+				summary: "Store bank account details",
+				description:
+					"Store bank account information with automatic validation (routing number format, account type validation). Account numbers are masked in public data.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: {
+								type: "object",
+								required: ["bankName", "accountNumber", "routingNumber", "accountType", "accountHolder", "faceBase64", "password"],
+								properties: {
+									bankName: {
+										type: "string",
+										description: "Name of the bank",
+										example: "Wells Fargo",
+									},
+									accountNumber: {
+										type: "string",
+										description: "Bank account number (will be masked in public data)",
+										example: "1234567890123456",
+									},
+									routingNumber: {
+										type: "string",
+										description: "9-digit routing number",
+										example: "121000248",
+									},
+									accountType: {
+										type: "string",
+										enum: ["checking", "savings"],
+										description: "Type of bank account",
+										example: "checking",
+									},
+									accountHolder: {
+										type: "string",
+										description: "Name of the account holder",
+										example: "John Doe",
+									},
+									faceBase64: {
+										type: "string",
+										description: "Base64 encoded face image for biometric verification",
+										example: "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQ...",
+									},
+									password: {
+										type: "string",
+										description: "Master password for encrypting the data",
+										example: "master_password_123",
+									},
+								},
+							},
+						},
+					},
+				},
+				responses: {
+					200: {
+						description: "Bank details stored successfully",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ZelfKeyStoreResponse" },
+							},
+						},
+					},
+					400: {
+						description: "Validation error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Invalid routing number format",
+										},
+									},
+								},
+							},
+						},
+					},
+					500: {
+						description: "Internal server error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Failed to store bank details",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/zelf-key/retrieve": {
+			post: {
+				tags: ["ZelfKey - Retrieval"],
+				summary: "Retrieve stored data",
+				description:
+					"Retrieve and decrypt stored data using the zelfProof and biometric face verification. Returns both public data and sensitive metadata.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: { $ref: "#/components/schemas/ZelfKeyRetrieveRequest" },
+						},
+					},
+				},
+				responses: {
+					200: {
+						description: "Data retrieved successfully",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ZelfKeyDataResponse" },
+							},
+						},
+					},
+					400: {
+						description: "Validation error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Validation failed",
+										},
+									},
+								},
+							},
+						},
+					},
+					500: {
+						description: "Internal server error or decryption failed",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Failed to retrieve data",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/zelf-key/preview": {
+			post: {
+				tags: ["ZelfKey - Preview"],
+				summary: "Preview stored data",
+				description:
+					"Preview stored data without full decryption. Useful for validation and basic information retrieval. Only returns public data, not sensitive metadata.",
+				requestBody: {
+					required: true,
+					content: {
+						"application/json": {
+							schema: { $ref: "#/components/schemas/ZelfKeyPreviewRequest" },
+						},
+					},
+				},
+				responses: {
+					200: {
+						description: "Preview generated successfully",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ZelfKeyDataResponse" },
+							},
+						},
+					},
+					400: {
+						description: "Validation error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Validation failed",
+										},
+									},
+								},
+							},
+						},
+					},
+					500: {
+						description: "Internal server error",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Failed to preview data",
 										},
 									},
 								},

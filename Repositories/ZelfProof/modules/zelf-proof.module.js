@@ -74,37 +74,32 @@ const encryptQRCode = async (data) => {
 	try {
 		const axios = await axiosInstance.getEncryptionInstance();
 
-		const { publicData, faceBase64, metadata, password, identifier, requireLiveness, tolerance, verifierKey, os } = data;
+		const { publicData, faceBase64, metadata, password, identifier, requireLiveness, tolerance, verifierKey, os, livenessLevel } = data;
 
-		const encryptedResponse = await axios.post(
-			"/api/zelf-proof/encrypt-qr-code",
-			{
-				publicData,
-				faceBase64,
-				metadata,
-				password: password || undefined,
-				identifier,
-				requireLiveness,
-				tolerance,
-				verifierKey: verifierKey || undefined,
-				os,
-			},
-			{ responseType: "arraybuffer" }
-		);
+		const encryptedResponse = await axios.post("/api/zelf-proof/encrypt-qr-code", {
+			publicData,
+			faceBase64,
+			metadata,
+			password: password || undefined,
+			identifier,
+			requireLiveness,
+			livenessLevel: livenessLevel || "REGULAR",
+			tolerance,
+			verifierKey: verifierKey || undefined,
+			os,
+		});
 
 		if (!encryptedResponse?.data) return encryptedResponse;
 
-		const base64Image = Buffer.from(encryptedResponse.data).toString("base64");
-
-		const zelfQR = `data:image/png;base64,${base64Image}`;
-
-		return { zelfQR };
+		return encryptedResponse?.data;
 	} catch (exception) {
+		console.log({ exception });
+
 		const error = _formattingError(exception.response?.data);
 
-		let _error = new Error(error.message);
+		let _error = new Error(error.message || "Something went wrong");
 
-		_error.status = error.status;
+		_error.status = error.status || 500;
 
 		throw _error;
 	}

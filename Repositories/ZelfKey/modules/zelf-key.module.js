@@ -1,4 +1,5 @@
 const ZelfProofModule = require("../../ZelfProof/modules/zelf-proof.module");
+const pinata = require("../../IPFS/modules/pinata");
 
 /**
  * ZelfKey Module - Password Manager functionality similar to LastPass
@@ -32,26 +33,48 @@ const storePassword = async (data) => {
 			type: "website_password",
 			website,
 			username: username ? "***" + username.slice(-3) : "***", // Partial username for display
-			timestamp: new Date().toISOString(),
+			timestamp: `${new Date().toISOString()}`,
 		};
 
-		// Encrypt using ZelfProof module
-		const encryptedResponse = await ZelfProofModule.encrypt({
+		// Encrypt using ZelfProof module with QR Code
+		const encryptedResponse = await ZelfProofModule.encryptQRCode({
 			publicData,
 			metadata,
 			faceBase64,
 			password: masterPassword,
-			identifier: `password_${website}_${Date.now()}`,
+			identifier: `password`,
 			requireLiveness: true,
 			tolerance: "REGULAR",
 			os: "DESKTOP",
 		});
 
+		console.log({ encryptedResponse });
+
+		// Pin the QR code to IPFS
+		let ipfsResult = null;
+		try {
+			ipfsResult = await pinata.pinFile(encryptedResponse.zelfQR, `zelfkey_password_${website}_${Date.now()}.png`, "image/png", {
+				...publicData,
+			});
+		} catch (ipfsError) {
+			console.warn("Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
+		}
+
 		return {
 			success: true,
-			zelfProof: encryptedResponse.zelfProof,
+			zelfProof: encryptedResponse.zelfQR, // This is now the QR code data URL
+			ipfs: ipfsResult
+				? {
+						hash: ipfsResult.IpfsHash,
+						gatewayUrl: ipfsResult.url,
+						pinSize: ipfsResult.PinSize,
+						timestamp: `${new Date().toISOString()}`,
+						name: ipfsResult.name,
+						metadata: ipfsResult.metadata,
+				  }
+				: null,
 			publicData,
-			message: "Website password stored successfully",
+			message: "Website password stored successfully as QR code",
 		};
 	} catch (error) {
 		console.error("Error storing website password:", error);
@@ -86,11 +109,11 @@ const storeNotes = async (data) => {
 			type: "notes",
 			title,
 			pairCount: pairs.length,
-			timestamp: new Date().toISOString(),
+			timestamp: `${new Date().toISOString()}`,
 		};
 
 		// Encrypt using ZelfProof module
-		const encryptedResponse = await ZelfProofModule.encrypt({
+		const encryptedResponse = await ZelfProofModule.encryptQRCode({
 			publicData,
 			metadata,
 			faceBase64,
@@ -146,11 +169,11 @@ const storeCreditCard = async (data) => {
 			expiryMonth,
 			expiryYear,
 			bankName,
-			timestamp: new Date().toISOString(),
+			timestamp: `${new Date().toISOString()}`,
 		};
 
 		// Encrypt using ZelfProof module
-		const encryptedResponse = await ZelfProofModule.encrypt({
+		const encryptedResponse = await ZelfProofModule.encryptQRCode({
 			publicData,
 			metadata,
 			faceBase64,
@@ -204,11 +227,11 @@ const storeContact = async (data) => {
 			name,
 			email: email ? "***" + email.slice(-3) : "***",
 			phone: phone ? "***" + phone.slice(-4) : "***",
-			timestamp: new Date().toISOString(),
+			timestamp: `${new Date().toISOString()}`,
 		};
 
 		// Encrypt using ZelfProof module
-		const encryptedResponse = await ZelfProofModule.encrypt({
+		const encryptedResponse = await ZelfProofModule.encryptQRCode({
 			publicData,
 			metadata,
 			faceBase64,
@@ -261,11 +284,11 @@ const storeBankDetails = async (data) => {
 			accountNumber: `****${accountNumber.slice(-4)}`,
 			accountType,
 			accountHolder,
-			timestamp: new Date().toISOString(),
+			timestamp: `${new Date().toISOString()}`,
 		};
 
 		// Encrypt using ZelfProof module
-		const encryptedResponse = await ZelfProofModule.encrypt({
+		const encryptedResponse = await ZelfProofModule.encryptQRCode({
 			publicData,
 			metadata,
 			faceBase64,
@@ -307,25 +330,38 @@ const storeData = async (data) => {
 		}
 
 		// Route to appropriate storage function
+		let result;
 		switch (type) {
 			case "password":
-				return await storePassword({ ...payload, faceBase64, masterPassword: password });
+				result = await storePassword({ ...payload, faceBase64, masterPassword: password });
+				break;
 
 			case "notes":
-				return await storeNotes({ ...payload, faceBase64, masterPassword: password });
+				result = await storeNotes({ ...payload, faceBase64, masterPassword: password });
+				break;
 
 			case "credit_card":
-				return await storeCreditCard({ ...payload, faceBase64, masterPassword: password });
+				result = await storeCreditCard({ ...payload, faceBase64, masterPassword: password });
+				break;
 
 			case "contact":
-				return await storeContact({ ...payload, faceBase64, masterPassword: password });
+				result = await storeContact({ ...payload, faceBase64, masterPassword: password });
+				break;
 
 			case "bank_details":
-				return await storeBankDetails({ ...payload, faceBase64, masterPassword: password });
+				result = await storeBankDetails({ ...payload, faceBase64, masterPassword: password });
+				break;
 
 			default:
 				throw new Error(`Unsupported data type: ${type}`);
 		}
+
+		// Add IPFS information if available
+		if (result.ipfs) {
+			result.message += ` | IPFS: ${result.ipfs.hash}`;
+		}
+
+		return result;
 	} catch (error) {
 		console.error("Error in storeData:", error);
 		throw error;
