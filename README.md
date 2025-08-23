@@ -60,6 +60,12 @@ zelf-avalanche-hackathon-2025/
 │   ├── controllers/             # HTTP request handlers
 │   ├── routes/                  # API endpoints
 │   └── README.md               # Avalanche-specific docs
+├── blockchain_tests/            # 🧪 Comprehensive test suite
+│   ├── test-nft-minting-proper.js  # Main NFT minting test
+│   ├── simple-metadata-test.js     # Metadata validation test
+│   ├── README.md                   # Test documentation
+│   ├── TEST_SUMMARY.md             # Test execution results
+│   └── QUICK_START.md              # Quick test guide
 ├── hardhat.config.js            # Hardhat configuration
 ├── package.json                 # Dependencies and scripts
 ├── .env                        # Environment variables (gitignored)
@@ -103,7 +109,11 @@ npm install
 ### 3. **Test the System**
 
 ```bash
-# Test NFT module functionality
+# Run comprehensive blockchain tests
+cd blockchain_tests
+node test-nft-minting-proper.js
+
+# Or test Avalanche module functionality
 node Avalanche/test-avalanche-nft.js
 ```
 
@@ -111,6 +121,7 @@ node Avalanche/test-avalanche-nft.js
 
 - **[Avalanche Module README](Avalanche/README.md)** - Complete NFT module documentation
 - **[Deployment Guide](Avalanche/DEPLOYMENT.md)** - Smart contract deployment instructions
+- **[Blockchain Tests](blockchain_tests/README.md)** - Comprehensive test suite documentation
 - **[Helper Functions](HELPER_FUNCTIONS_README.md)** - ZelfKey system documentation
 
 ## 🔐 Security Features
@@ -133,10 +144,13 @@ node Avalanche/test-avalanche-nft.js
 
 The system has been thoroughly tested:
 - ✅ Contract deployment on mainnet
-- ✅ NFT metadata creation
-- ✅ IPFS integration
+- ✅ NFT metadata creation and image rendering
+- ✅ IPFS integration via Pinata
 - ✅ ZelfKey data flow
-- ✅ Gas estimation and deployment
+- ✅ Gas estimation and transaction execution
+- ✅ Security validation (no exposed keys)
+
+**Test Directory**: [`blockchain_tests/`](blockchain_tests/) - Comprehensive test suite with documentation
 
 ## 🤝 Contributing
 
