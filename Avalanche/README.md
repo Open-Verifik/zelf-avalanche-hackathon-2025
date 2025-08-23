@@ -371,6 +371,72 @@ console.log("Explorer URL:", nftResult.explorerUrl);
 console.log("Gas Fees: Covered by service! 🎉");
 ```
 
+## 🎛️ Configurable Logging
+
+The Avalanche module now includes a sophisticated logging system that allows you to control verbosity based on your needs.
+
+### Environment Variables
+
+Add these to your `.env` file to control logging:
+
+```bash
+# Master logging control
+LOGGING_ENABLED=true                    # Set to "false" to disable all logging
+LOG_LEVEL=info                          # Options: "error", "warn", "info", "debug", "verbose"
+
+# Avalanche-specific logging controls
+AVALANCHE_LOGGING=true                  # Set to "false" to disable all Avalanche logging
+AVALANCHE_SHOW_SETUP=true               # Show wallet/contract setup logs
+AVALANCHE_SHOW_GAS=true                 # Show gas estimation and cost logs
+AVALANCHE_SHOW_TX=true                  # Show transaction details
+AVALANCHE_SHOW_VERIFY=true              # Show verification and success logs
+AVALANCHE_SHOW_IMAGE=true               # Show image rendering info
+```
+
+### Logging Categories
+
+- **Setup Logs**: Wallet connection, contract instantiation
+- **Gas Logs**: Gas estimation, cost calculations
+- **Transaction Logs**: Transaction execution, hashes, confirmations
+- **Verification Logs**: Success confirmation, token details
+- **Image Rendering**: Metadata structure validation
+
+### Usage Examples
+
+```bash
+# Minimal logging (only errors and critical info)
+AVALANCHE_LOGGING=true
+AVALANCHE_SHOW_SETUP=false
+AVALANCHE_SHOW_GAS=false
+AVALANCHE_SHOW_TX=false
+AVALANCHE_SHOW_VERIFY=false
+AVALANCHE_SHOW_IMAGE=false
+
+# Development mode (full logging)
+AVALANCHE_LOGGING=true
+AVALANCHE_SHOW_SETUP=true
+AVALANCHE_SHOW_GAS=true
+AVALANCHE_SHOW_TX=true
+AVALANCHE_SHOW_VERIFY=true
+AVALANCHE_SHOW_IMAGE=true
+
+# Production mode (essential logs only)
+AVALANCHE_LOGGING=true
+AVALANCHE_SHOW_SETUP=false
+AVALANCHE_SHOW_GAS=false
+AVALANCHE_SHOW_TX=true
+AVALANCHE_SHOW_VERIFY=true
+AVALANCHE_SHOW_IMAGE=false
+```
+
+### Benefits
+
+- **Clean Production Logs**: Hide verbose setup and gas logs in production
+- **Debug Mode**: Enable all logs during development and testing
+- **Selective Control**: Choose exactly which log categories to show
+- **Performance**: Reduce console output when not needed
+- **Flexibility**: Easy to adjust logging levels without code changes
+
 ## Support
 
 For questions or issues, please refer to:

@@ -78,6 +78,19 @@ const configuration = {
 		processId: process.env.ARNS_PROCESS_ID,
 		index_transaction_id: process.env.ARNS_INDEX_TRANSACTION_ID,
 	},
+	logging: {
+		// Control logging verbosity across the application
+		enabled: process.env.LOGGING_ENABLED !== "false", // Default: true
+		level: process.env.LOG_LEVEL || "info", // Options: "error", "warn", "info", "debug", "verbose"
+		avalanche: {
+			enabled: process.env.AVALANCHE_LOGGING !== "false", // Default: true
+			showSetup: process.env.AVALANCHE_SHOW_SETUP !== "false", // Default: true
+			showGas: process.env.AVALANCHE_SHOW_GAS !== "false", // Default: true
+			showTransaction: process.env.AVALANCHE_SHOW_TX !== "false", // Default: true
+			showVerification: process.env.AVALANCHE_SHOW_VERIFY !== "false", // Default: true
+			showImageRendering: process.env.AVALANCHE_SHOW_IMAGE !== "false", // Default: true
+		},
+	},
 };
 
 export default configuration;

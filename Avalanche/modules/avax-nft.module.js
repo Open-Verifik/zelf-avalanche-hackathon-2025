@@ -1,7 +1,44 @@
 import { ethers } from "ethers";
 import dotenv from "dotenv";
+import configuration from "../../Core/config.js";
 
 dotenv.config();
+
+// Logging utility based on config
+const log = {
+	info: (message, config = {}) => {
+		if (configuration.logging?.avalanche?.enabled !== false) {
+			console.log(message);
+		}
+	},
+	setup: (message, config = {}) => {
+		if (configuration.logging?.avalanche?.showSetup !== false) {
+			console.log(message);
+		}
+	},
+	gas: (message, config = {}) => {
+		if (configuration.logging?.avalanche?.showGas !== false) {
+			console.log(message);
+		}
+	},
+	transaction: (message, config = {}) => {
+		if (configuration.logging?.avalanche?.showTransaction !== false) {
+			console.log(message);
+		}
+	},
+	verification: (message, config = {}) => {
+		if (configuration.logging?.avalanche?.showVerification !== false) {
+			console.log(message);
+		}
+	},
+	imageRendering: (message, config = {}) => {
+		if (configuration.logging?.avalanche?.showImageRendering !== false) {
+			console.log(message);
+		}
+	},
+	always: (message) => console.log(message), // Always show critical info
+	error: (message) => console.error(message), // Always show errors
+};
 
 const CONSTANTS = {
 	// Your deployed contract address
@@ -23,7 +60,7 @@ const CONSTANTS = {
 
 const getMasterWallet = async () => {
 	// 1. Setup provider and wallet
-	console.log("📍 Setting up provider and wallet...");
+	log.setup("📍 Setting up provider and wallet...");
 	const provider = new ethers.JsonRpcProvider(CONSTANTS.rpcUrl);
 
 	// Get master wallet from mnemonic
@@ -33,18 +70,18 @@ const getMasterWallet = async () => {
 	}
 
 	const masterWallet = ethers.Wallet.fromPhrase(mnemonic, provider);
-	console.log(`✅ Master Wallet: ${masterWallet.address}`);
+	log.info(`✅ Master Wallet: ${masterWallet.address}`);
 
 	// Check balance
 	const balance = await provider.getBalance(masterWallet.address);
-	console.log(`💰 Balance: ${ethers.formatEther(balance)} AVAX\n`);
+	log.info(`💰 Balance: ${ethers.formatEther(balance)} AVAX\n`);
 
 	// 2. Create contract instance
-	console.log("📦 Creating contract instance...");
+	log.info("📦 Creating contract instance...");
 
 	const contract = new ethers.Contract(CONSTANTS.contractAddress, CONSTANTS.NFT_ABI, masterWallet);
 
-	console.log(`✅ Contract: ${CONSTANTS.contractAddress}`);
+	log.info(`✅ Contract: ${CONSTANTS.contractAddress}`);
 
 	return {
 		masterWallet,
@@ -62,76 +99,76 @@ const createNFT = async (data, authToken) => {
 
 	const tokenURI = zelfKeyData.ipfsUrl;
 
-	console.log(`🔗 Token URI (metadata): ${tokenURI}`);
-	console.log(`🖼️  Image URL: ${NFTData.url}\n`);
+	log.info(`🔗 Token URI (metadata): ${tokenURI}`);
+	log.info(`🖼️  Image URL: ${NFTData.url}\n`);
 
 	// 5. Mint the NFT
-	console.log("🎯 Minting NFT...");
-	console.log(`   To: ${authToken.address}`);
-	console.log(`   Token URI: ${tokenURI}`);
-	console.log(`   Image: ${NFTData.url}`);
+	log.info("🎯 Minting NFT...");
+	log.info(`   To: ${authToken.address}`);
+	log.info(`   Token URI: ${tokenURI}`);
+	log.info(`   Image: ${NFTData.url}`);
 
 	// Estimate gas
-	console.log("⛽ Estimating gas...");
+	log.gas("⛽ Estimating gas...");
 	const gasEstimate = await contract.mintNFT.estimateGas(authToken.address, tokenURI);
-	console.log(`   Estimated Gas: ${gasEstimate.toString()}`);
+	log.gas(`   Estimated Gas: ${gasEstimate.toString()}`);
 
 	const gasPrice = ethers.parseUnits(CONSTANTS.gasPrice, "wei");
 	const estimatedCost = gasEstimate * gasPrice;
-	console.log(`   Estimated Cost: ${ethers.formatEther(estimatedCost)} AVAX\n`);
+	log.gas(`   Estimated Cost: ${ethers.formatEther(estimatedCost)} AVAX\n`);
 
 	// Mint the NFT
-	console.log("🚀 Executing mint transaction...");
+	log.transaction("🚀 Executing mint transaction...");
 	const tx = await contract.mintNFT(authToken.address, tokenURI, {
 		gasLimit: gasEstimate,
 		gasPrice,
 	});
 
-	console.log(`✅ Transaction sent!`);
-	console.log(`   Hash: ${tx.hash}`);
-	console.log(`   From: ${masterWallet.address}`);
-	console.log(`   To: ${CONSTANTS.contractAddress}`);
-	console.log(`   Gas Price: ${ethers.formatUnits(CONSTANTS.gasPrice, "gwei")} gwei\n`);
+	log.transaction(`✅ Transaction sent!`);
+	log.transaction(`   Hash: ${tx.hash}`);
+	log.transaction(`   From: ${masterWallet.address}`);
+	log.transaction(`   To: ${CONSTANTS.contractAddress}`);
+	log.transaction(`   Gas Price: ${ethers.formatUnits(CONSTANTS.gasPrice, "gwei")} gwei\n`);
 
 	// 6. Wait for confirmation
-	console.log("⏳ Waiting for transaction confirmation...");
+	log.info("⏳ Waiting for transaction confirmation...");
 	const receipt = await tx.wait();
 
-	console.log("🎉 NFT Minted Successfully!");
-	console.log(`   Block Number: ${receipt.blockNumber}`);
-	console.log(`   Gas Used: ${receipt.gasUsed.toString()}`);
-	console.log(`   Status: ${receipt.status === 1 ? "Success" : "Failed"}\n`);
+	log.info("🎉 NFT Minted Successfully!");
+	log.verification(`   Block Number: ${receipt.blockNumber}`);
+	log.verification(`   Gas Used: ${receipt.gasUsed.toString()}`);
+	log.verification(`   Status: ${receipt.status === 1 ? "Success" : "Failed"}\n`);
 
 	// 7. Get the new token ID
-	console.log("🔍 Getting token details...");
+	log.info("🔍 Getting token details...");
 	const totalSupply = await contract.totalSupply();
 	const newTokenId = totalSupply.toString();
 
 	const _estimatedCost = ethers.formatEther(estimatedCost);
 
-	console.log("📊 NFT Details:");
-	console.log(`   Token ID: ${newTokenId}`);
-	console.log(`   Owner: ${authToken.address}`);
-	console.log(`   Contract: ${CONSTANTS.contractAddress}`);
-	console.log(`   Total Supply: ${totalSupply.toString()}`);
-	console.log(`   Explorer: https://snowtrace.io/tx/${tx.hash}\n`);
+	log.info("📊 NFT Details:");
+	log.info(`   Token ID: ${newTokenId}`);
+	log.info(`   Owner: ${authToken.address}`);
+	log.info(`   Contract: ${CONSTANTS.contractAddress}`);
+	log.info(`   Total Supply: ${totalSupply.toString()}`);
+	log.info(`   Explorer: https://snowtrace.io/tx/${tx.hash}\n`);
 
 	// 8. Verify the NFT
-	console.log("✅ Verification Complete!");
-	console.log(`   NFT #${newTokenId} successfully minted`);
-	console.log(`   Sent to: ${authToken.address}`);
-	console.log(`   Gas fees paid by: ${masterWallet.address}`);
-	console.log(`   Cost: ${_estimatedCost} AVAX`);
-	console.log(`   Network: Avalanche Mainnet`);
-	console.log(`   Metadata: ${tokenURI}`);
-	console.log(`   Image: ${NFTData.url}\n`);
+	log.verification("✅ Verification Complete!");
+	log.verification(`   NFT #${newTokenId} successfully minted`);
+	log.verification(`   Sent to: ${authToken.address}`);
+	log.verification(`   Gas fees paid by: ${masterWallet.address}`);
+	log.verification(`   Cost: ${_estimatedCost} AVAX`);
+	log.verification(`   Network: Avalanche Mainnet`);
+	log.verification(`   Metadata: ${tokenURI}`);
+	log.verification(`   Image: ${NFTData.image}\n`);
 
 	// 9. Important notes about image rendering
-	console.log("🔍 About Image Rendering:");
-	console.log("   ✅ Token URI points to metadata JSON (correct)");
-	console.log("   ✅ Metadata JSON contains image URL");
-	console.log("   ✅ NFT marketplaces will now render the image properly");
-	console.log("   ✅ The image should display correctly on Snowtrace and other explorers");
+	log.imageRendering("🔍 About Image Rendering:");
+	log.imageRendering("   ✅ Token URI points to metadata JSON (correct)");
+	log.imageRendering("   ✅ Metadata JSON contains image URL");
+	log.imageRendering("   ✅ NFT marketplaces will now render the image properly");
+	log.imageRendering("   ✅ The image should display correctly on Snowtrace and other explorers");
 
 	return {
 		success: true,
@@ -201,6 +238,8 @@ const insertMetadata = async (NFTData) => {
 		gateway: process.env.PINATA_GATEWAY_URL || "https://chocolate-occasional-kite-546.mypinata.cloud",
 	};
 
+	log.info("📤 Uploading metadata to IPFS via Pinata...");
+
 	const metadataBlob = new Blob([JSON.stringify(NFTData, null, 2)], {
 		type: "application/json",
 	});
@@ -234,6 +273,8 @@ const insertMetadata = async (NFTData) => {
 
 	const ipfsHash = result.IpfsHash;
 	const ipfsUrl = `https://${PINATA_CONFIG.gateway}/ipfs/${ipfsHash}`;
+
+	log.info(`✅ Metadata uploaded to IPFS! Hash: ${ipfsHash}`);
 
 	return {
 		ipfsHash,
