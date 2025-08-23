@@ -143,11 +143,11 @@ const storeDataValidation = async (ctx, next) => {
 	// Additional business logic validation based on type
 	switch (type) {
 		case "notes":
-			// Validate key-value pairs business logic
-			const { keyValuePairs } = payload;
-			const pairs = Object.entries(keyValuePairs || {});
+			// Validate notes business logic: validate key-value pairs
+			const notesKeyValuePairs = payload.keyValuePairs;
+			const notesPairs = Object.entries(notesKeyValuePairs || {});
 
-			if (pairs.length === 0) {
+			if (notesPairs.length === 0) {
 				ctx.status = 400;
 				ctx.body = {
 					error: "Validation error",
@@ -156,8 +156,18 @@ const storeDataValidation = async (ctx, next) => {
 				return;
 			}
 
+			// Validate maximum number of key-value pairs
+			if (notesPairs.length > 10) {
+				ctx.status = 400;
+				ctx.body = {
+					error: "Validation error",
+					message: "Maximum 10 key-value pairs allowed",
+				};
+				return;
+			}
+
 			// Validate each key-value pair
-			for (const [key, value] of pairs) {
+			for (const [key, value] of notesPairs) {
 				if (!key || key.trim().length === 0) {
 					ctx.status = 400;
 					ctx.body = {
@@ -285,6 +295,16 @@ const storeNotesValidation = async (ctx, next) => {
 		ctx.body = {
 			error: "Validation error",
 			message: "At least one key-value pair is required",
+		};
+		return;
+	}
+
+	// Validate maximum number of key-value pairs
+	if (pairs.length > 10) {
+		ctx.status = 400;
+		ctx.body = {
+			error: "Validation error",
+			message: "Maximum 10 key-value pairs allowed",
 		};
 		return;
 	}

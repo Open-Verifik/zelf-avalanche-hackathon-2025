@@ -51,8 +51,6 @@ const schemas = {
 	},
 	preview: {
 		zelfProof: { required: true },
-		faceBase64: { required: true },
-		tolerance: { required: false, enum: ["REGULAR", "SOFT", "HARDENED"] },
 		verifierKey: { required: false },
 	},
 };

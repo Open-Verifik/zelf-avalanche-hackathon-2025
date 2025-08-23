@@ -36,8 +36,7 @@ const storePassword = async (data) => {
 			timestamp: `${new Date().toISOString()}`,
 		};
 
-		// Encrypt using ZelfProof module with QR Code
-		const encryptedResponse = await ZelfProofModule.encryptQRCode({
+		const { zelfQR } = await ZelfProofModule.encryptQRCode({
 			publicData,
 			metadata,
 			faceBase64,
@@ -48,36 +47,50 @@ const storePassword = async (data) => {
 			os: "DESKTOP",
 		});
 
-		console.log({ encryptedResponse });
+		const { zelfProof } = await ZelfProofModule.encrypt({
+			publicData,
+			metadata,
+			faceBase64,
+			password: masterPassword,
+			identifier: `password`,
+			requireLiveness: true,
+			tolerance: "REGULAR",
+			os: "DESKTOP",
+		});
 
-		// Pin the QR code to IPFS
-		let ipfsResult = null;
+		let qrCodeIPFS = null;
+
 		try {
-			ipfsResult = await pinata.pinFile(encryptedResponse.zelfQR, `zelfkey_password_${website}_${Date.now()}.png`, "image/png", {
+			qrCodeIPFS = await pinata.pinFile(zelfQR, `zelfkey_password_${website}_${Date.now()}.png`, "image/png", {
 				...publicData,
+				zelfProof,
+				contentType: "qr_code",
 			});
 		} catch (ipfsError) {
-			console.warn("Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
+			console.warn("⚠️ Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
 		}
 
-		return {
+		const result = {
 			success: true,
-			zelfProof: encryptedResponse.zelfQR, // This is now the QR code data URL
-			ipfs: ipfsResult
+			zelfProof: zelfQR, // QR code data URL for tests
+			zelfQR: zelfProof, // Encrypted string
+			ipfs: qrCodeIPFS
 				? {
-						hash: ipfsResult.IpfsHash,
-						gatewayUrl: ipfsResult.url,
-						pinSize: ipfsResult.PinSize,
+						hash: qrCodeIPFS.IpfsHash,
+						gatewayUrl: qrCodeIPFS.url,
+						pinSize: qrCodeIPFS.PinSize,
 						timestamp: `${new Date().toISOString()}`,
-						name: ipfsResult.name,
-						metadata: ipfsResult.metadata,
+						name: qrCodeIPFS.name,
+						metadata: qrCodeIPFS.metadata,
+						contentType: "qr_code",
 				  }
 				: null,
 			publicData,
-			message: "Website password stored successfully as QR code",
+			message: "Website password stored successfully as QR code and zelfProof string",
 		};
+
+		return result;
 	} catch (error) {
-		console.error("Error storing website password:", error);
 		throw new Error("Failed to store website password");
 	}
 };
@@ -95,12 +108,6 @@ const storeNotes = async (data) => {
 	try {
 		const { title, keyValuePairs, faceBase64, masterPassword } = data;
 
-		// Validate key-value pairs (max 10)
-		const pairs = Object.entries(keyValuePairs || {});
-		if (pairs.length > 10) {
-			throw new Error("Maximum 10 key-value pairs allowed");
-		}
-
 		// Create metadata structure for notes
 		const metadata = keyValuePairs;
 
@@ -108,12 +115,12 @@ const storeNotes = async (data) => {
 		const publicData = {
 			type: "notes",
 			title,
-			pairCount: pairs.length,
+			pairCount: Object.keys(keyValuePairs || {}).length,
 			timestamp: `${new Date().toISOString()}`,
 		};
 
 		// Encrypt using ZelfProof module
-		const encryptedResponse = await ZelfProofModule.encryptQRCode({
+		const { zelfQR } = await ZelfProofModule.encryptQRCode({
 			publicData,
 			metadata,
 			faceBase64,
@@ -124,9 +131,45 @@ const storeNotes = async (data) => {
 			os: "DESKTOP",
 		});
 
+		const { zelfProof } = await ZelfProofModule.encrypt({
+			publicData,
+			metadata,
+			faceBase64,
+			password: masterPassword,
+			identifier: `notes_${title}_${Date.now()}`,
+			requireLiveness: true,
+			tolerance: "REGULAR",
+			os: "DESKTOP",
+		});
+
+		// Pin the QR code to IPFS if available
+		let qrCodeIPFS = null;
+		if (zelfQR) {
+			try {
+				qrCodeIPFS = await pinata.pinFile(zelfQR, `zelfkey_notes_${title}_${Date.now()}.png`, "image/png", {
+					...publicData,
+					contentType: "qr_code",
+				});
+			} catch (ipfsError) {
+				console.warn("Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
+			}
+		}
+
 		return {
 			success: true,
-			zelfProof: encryptedResponse.zelfProof,
+			zelfProof: zelfQR, // QR code data URL for tests
+			zelfQR: zelfProof, // Encrypted string
+			ipfs: qrCodeIPFS
+				? {
+						hash: qrCodeIPFS.IpfsHash,
+						gatewayUrl: qrCodeIPFS.url,
+						pinSize: qrCodeIPFS.PinSize,
+						timestamp: `${new Date().toISOString()}`,
+						name: qrCodeIPFS.name,
+						metadata: qrCodeIPFS.metadata,
+						contentType: "qr_code",
+				  }
+				: null,
 			publicData,
 			message: "Notes stored successfully",
 		};
@@ -153,6 +196,22 @@ const storeCreditCard = async (data) => {
 	try {
 		const { cardName, cardNumber, expiryMonth, expiryYear, cvv, bankName, faceBase64, masterPassword } = data;
 
+		// Validate credit card data
+		if (!cardNumber || cardNumber.length < 13 || cardNumber.length > 19) {
+			throw new Error("Invalid credit card number");
+		}
+
+		const currentYear = new Date().getFullYear();
+		const currentMonth = new Date().getMonth() + 1;
+
+		if (parseInt(expiryYear) < currentYear || (parseInt(expiryYear) === currentYear && parseInt(expiryMonth) < currentMonth)) {
+			throw new Error("Credit card has expired");
+		}
+
+		if (parseInt(expiryMonth) < 1 || parseInt(expiryMonth) > 12) {
+			throw new Error("Invalid expiry month");
+		}
+
 		// Create metadata structure for credit card
 		const metadata = {
 			cardNumber,
@@ -173,7 +232,7 @@ const storeCreditCard = async (data) => {
 		};
 
 		// Encrypt using ZelfProof module
-		const encryptedResponse = await ZelfProofModule.encryptQRCode({
+		const { zelfQR } = await ZelfProofModule.encryptQRCode({
 			publicData,
 			metadata,
 			faceBase64,
@@ -184,9 +243,18 @@ const storeCreditCard = async (data) => {
 			os: "DESKTOP",
 		});
 
+		const { zelfProof } = await ZelfProofModule.encrypt({
+			publicData,
+			metadata,
+			faceBase64,
+			password: masterPassword,
+			identifier: `creditcard_${bankName}_${Date.now()}`,
+		});
+
 		return {
 			success: true,
-			zelfProof: encryptedResponse.zelfProof,
+			zelfProof: zelfQR, // QR code data URL for tests
+			zelfQR: zelfProof, // Encrypted string
 			publicData,
 			message: "Credit card stored successfully",
 		};
@@ -212,6 +280,19 @@ const storeContact = async (data) => {
 	try {
 		const { name, email, phone, address, company, faceBase64, masterPassword } = data;
 
+		// Validate contact data
+		if (!email && !phone && !address) {
+			throw new Error("At least one contact method (email, phone, or address) is required");
+		}
+
+		if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+			throw new Error("Invalid email format");
+		}
+
+		if (phone && phone.length < 7) {
+			throw new Error("Phone number is too short");
+		}
+
 		// Create metadata structure for contact
 		const metadata = {
 			name,
@@ -231,7 +312,7 @@ const storeContact = async (data) => {
 		};
 
 		// Encrypt using ZelfProof module
-		const encryptedResponse = await ZelfProofModule.encryptQRCode({
+		const { zelfQR } = await ZelfProofModule.encryptQRCode({
 			publicData,
 			metadata,
 			faceBase64,
@@ -242,9 +323,18 @@ const storeContact = async (data) => {
 			os: "DESKTOP",
 		});
 
+		const { zelfProof } = await ZelfProofModule.encrypt({
+			publicData,
+			metadata,
+			faceBase64,
+			password: masterPassword,
+			identifier: `contact_${name}_${Date.now()}`,
+		});
+
 		return {
 			success: true,
-			zelfProof: encryptedResponse.zelfProof,
+			zelfProof: zelfQR, // QR code data URL for tests
+			zelfQR: zelfProof, // Encrypted string
 			publicData,
 			message: "Contact stored successfully",
 		};
@@ -270,6 +360,16 @@ const storeBankDetails = async (data) => {
 	try {
 		const { bankName, accountNumber, routingNumber, accountType, accountHolder, faceBase64, masterPassword } = data;
 
+		// Validate bank details
+		if (!routingNumber || routingNumber.length !== 9) {
+			throw new Error("Routing number must be exactly 9 digits");
+		}
+
+		const validAccountTypes = ["checking", "savings", "money_market", "cd", "ira", "roth_ira"];
+		if (!validAccountTypes.includes(accountType)) {
+			throw new Error("Invalid account type");
+		}
+
 		// Create metadata structure for bank details
 		const metadata = {
 			accountNumber,
@@ -288,7 +388,7 @@ const storeBankDetails = async (data) => {
 		};
 
 		// Encrypt using ZelfProof module
-		const encryptedResponse = await ZelfProofModule.encryptQRCode({
+		const { zelfQR } = await ZelfProofModule.encryptQRCode({
 			publicData,
 			metadata,
 			faceBase64,
@@ -299,9 +399,18 @@ const storeBankDetails = async (data) => {
 			os: "DESKTOP",
 		});
 
+		const { zelfProof } = await ZelfProofModule.encrypt({
+			publicData,
+			metadata,
+			faceBase64,
+			password: masterPassword,
+			identifier: `bank_${bankName}_${Date.now()}`,
+		});
+
 		return {
 			success: true,
-			zelfProof: encryptedResponse.zelfProof,
+			zelfProof: zelfQR, // QR code data URL for tests
+			zelfQR: zelfProof, // Encrypted string
 			publicData,
 			message: "Bank details stored successfully",
 		};

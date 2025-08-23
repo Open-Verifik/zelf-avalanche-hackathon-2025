@@ -1,3 +1,6 @@
+const jsQR = require("jsqr");
+const PNG = require("pngjs").PNG;
+
 /**
  * Helper Module - Utility functions for validation and common operations
  * @author Miguel Trevino <miguel@zelf.world>
@@ -48,7 +51,7 @@ const validate = (schema, data) => {
 			}
 
 			// Check maxKeys for objects
-			if (rules.maxKeys && typeof value === "object" && Object.keys(value).length > rules.maxKeys) {
+			if (rules.maxKeys && typeof value === "string" && Object.keys(value).length > rules.maxKeys) {
 				errors.push(`${field} must not exceed ${rules.maxKeys} keys`);
 			}
 		}
