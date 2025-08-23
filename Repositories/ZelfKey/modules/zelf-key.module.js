@@ -19,17 +19,12 @@ const ZelfProofModule = require("../../ZelfProof/modules/zelf-proof.module");
  */
 const storePassword = async (data) => {
 	try {
-		const { website, username, password, notes, faceBase64, masterPassword } = data;
+		const { website, username, password, faceBase64, masterPassword } = data;
 
 		// Create metadata structure for website password
 		const metadata = {
-			type: "website_password",
-			website,
 			username,
 			password,
-			notes: notes || "",
-			timestamp: new Date().toISOString(),
-			version: "1.0",
 		};
 
 		// Create public data (non-sensitive info)
@@ -37,8 +32,7 @@ const storePassword = async (data) => {
 			type: "website_password",
 			website,
 			username: username ? "***" + username.slice(-3) : "***", // Partial username for display
-			hasNotes: !!notes,
-			timestamp: metadata.timestamp,
+			timestamp: new Date().toISOString(),
 		};
 
 		// Encrypt using ZelfProof module
@@ -85,20 +79,14 @@ const storeNotes = async (data) => {
 		}
 
 		// Create metadata structure for notes
-		const metadata = {
-			type: "notes",
-			title,
-			keyValuePairs,
-			timestamp: new Date().toISOString(),
-			version: "1.0",
-		};
+		const metadata = keyValuePairs;
 
 		// Create public data
 		const publicData = {
 			type: "notes",
 			title,
 			pairCount: pairs.length,
-			timestamp: metadata.timestamp,
+			timestamp: new Date().toISOString(),
 		};
 
 		// Encrypt using ZelfProof module
@@ -144,15 +132,10 @@ const storeCreditCard = async (data) => {
 
 		// Create metadata structure for credit card
 		const metadata = {
-			type: "credit_card",
-			cardName,
 			cardNumber,
 			expiryMonth,
 			expiryYear,
 			cvv,
-			bankName,
-			timestamp: new Date().toISOString(),
-			version: "1.0",
 		};
 
 		// Create public data (masked sensitive info)
@@ -163,7 +146,7 @@ const storeCreditCard = async (data) => {
 			expiryMonth,
 			expiryYear,
 			bankName,
-			timestamp: metadata.timestamp,
+			timestamp: new Date().toISOString(),
 		};
 
 		// Encrypt using ZelfProof module
@@ -208,14 +191,11 @@ const storeContact = async (data) => {
 
 		// Create metadata structure for contact
 		const metadata = {
-			type: "contact",
 			name,
 			email,
 			phone,
 			address,
 			company,
-			timestamp: new Date().toISOString(),
-			version: "1.0",
 		};
 
 		// Create public data
@@ -224,8 +204,7 @@ const storeContact = async (data) => {
 			name,
 			email: email ? "***" + email.slice(-3) : "***",
 			phone: phone ? "***" + phone.slice(-4) : "***",
-			company,
-			timestamp: metadata.timestamp,
+			timestamp: new Date().toISOString(),
 		};
 
 		// Encrypt using ZelfProof module
@@ -270,14 +249,9 @@ const storeBankDetails = async (data) => {
 
 		// Create metadata structure for bank details
 		const metadata = {
-			type: "bank_details",
-			bankName,
 			accountNumber,
 			routingNumber,
 			accountType,
-			accountHolder,
-			timestamp: new Date().toISOString(),
-			version: "1.0",
 		};
 
 		// Create public data (masked sensitive info)
@@ -287,7 +261,7 @@ const storeBankDetails = async (data) => {
 			accountNumber: `****${accountNumber.slice(-4)}`,
 			accountType,
 			accountHolder,
-			timestamp: metadata.timestamp,
+			timestamp: new Date().toISOString(),
 		};
 
 		// Encrypt using ZelfProof module

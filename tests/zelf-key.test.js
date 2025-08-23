@@ -32,7 +32,7 @@ describe("ZelfKey Endpoints", () => {
 					expect(response.body.publicData.type).toBe("website_password");
 					expect(response.body.publicData.website).toBe("github.com");
 					expect(response.body.publicData.username).toBe("***com");
-					expect(response.body.publicData.hasNotes).toBe(true);
+					expect(response.body.publicData).toHaveProperty("timestamp");
 					expect(response.body.message).toBe("Website password stored successfully");
 				} else {
 					// External API failure is expected in test environment
@@ -56,7 +56,9 @@ describe("ZelfKey Endpoints", () => {
 				const response = await request(app).post("/api/zelf-key/store").send(payload);
 
 				if (response.status === 200) {
-					expect(response.body.publicData.hasNotes).toBe(false);
+					expect(response.body.publicData.type).toBe("website_password");
+					expect(response.body.publicData.website).toBe("stackoverflow.com");
+					expect(response.body.publicData.username).toBe("***123");
 				} else {
 					expect([401, 500]).toContain(response.status);
 				}
@@ -84,9 +86,11 @@ describe("ZelfKey Endpoints", () => {
 				if (response.status === 200) {
 					expect(response.body).toHaveProperty("success", true);
 					expect(response.body).toHaveProperty("zelfProof");
+					expect(response.body).toHaveProperty("publicData");
 					expect(response.body.publicData.type).toBe("notes");
 					expect(response.body.publicData.title).toBe("API Keys");
 					expect(response.body.publicData.pairCount).toBe(3);
+					expect(response.body.publicData).toHaveProperty("timestamp");
 				} else {
 					expect([401, 500]).toContain(response.status);
 				}
@@ -138,10 +142,15 @@ describe("ZelfKey Endpoints", () => {
 
 				if (response.status === 200) {
 					expect(response.body).toHaveProperty("success", true);
+					expect(response.body).toHaveProperty("zelfProof");
+					expect(response.body).toHaveProperty("publicData");
 					expect(response.body.publicData.type).toBe("credit_card");
 					expect(response.body.publicData.cardName).toBe("John Doe");
 					expect(response.body.publicData.cardNumber).toBe("****-****-****-1111");
+					expect(response.body.publicData.expiryMonth).toBe("12");
+					expect(response.body.publicData.expiryYear).toBe("2028");
 					expect(response.body.publicData.bankName).toBe("Chase Bank");
+					expect(response.body.publicData).toHaveProperty("timestamp");
 				} else {
 					expect([401, 500]).toContain(response.status);
 				}
@@ -167,11 +176,13 @@ describe("ZelfKey Endpoints", () => {
 
 				if (response.status === 200) {
 					expect(response.body).toHaveProperty("success", true);
+					expect(response.body).toHaveProperty("zelfProof");
+					expect(response.body).toHaveProperty("publicData");
 					expect(response.body.publicData.type).toBe("contact");
 					expect(response.body.publicData.name).toBe("Jane Smith");
 					expect(response.body.publicData.email).toBe("***com");
 					expect(response.body.publicData.phone).toBe("***4567");
-					expect(response.body.publicData.company).toBe("Tech Corp");
+					expect(response.body.publicData).toHaveProperty("timestamp");
 				} else {
 					expect([401, 500]).toContain(response.status);
 				}
@@ -218,11 +229,14 @@ describe("ZelfKey Endpoints", () => {
 
 				if (response.status === 200) {
 					expect(response.body).toHaveProperty("success", true);
+					expect(response.body).toHaveProperty("zelfProof");
+					expect(response.body).toHaveProperty("publicData");
 					expect(response.body.publicData.type).toBe("bank_details");
 					expect(response.body.publicData.bankName).toBe("Wells Fargo");
 					expect(response.body.publicData.accountNumber).toBe("****3456");
 					expect(response.body.publicData.accountType).toBe("checking");
 					expect(response.body.publicData.accountHolder).toBe("John Doe");
+					expect(response.body.publicData).toHaveProperty("timestamp");
 				} else {
 					expect([401, 500]).toContain(response.status);
 				}
@@ -244,7 +258,13 @@ describe("ZelfKey Endpoints", () => {
 			const response = await request(app).post("/api/zelf-key/store/password").send(payload);
 
 			if (response.status === 200) {
+				expect(response.body).toHaveProperty("success", true);
+				expect(response.body).toHaveProperty("zelfProof");
+				expect(response.body).toHaveProperty("publicData");
+				expect(response.body.publicData.type).toBe("website_password");
 				expect(response.body.publicData.website).toBe("specific-endpoint.com");
+				expect(response.body.publicData.username).toBe("***ser"); // Last 3 chars: "ser"
+				expect(response.body.publicData).toHaveProperty("timestamp");
 			} else {
 				expect([401, 500]).toContain(response.status);
 			}
@@ -265,7 +285,13 @@ describe("ZelfKey Endpoints", () => {
 			const response = await request(app).post("/api/zelf-key/store/notes").send(payload);
 
 			if (response.status === 200) {
+				expect(response.body).toHaveProperty("success", true);
+				expect(response.body).toHaveProperty("zelfProof");
+				expect(response.body).toHaveProperty("publicData");
+				expect(response.body.publicData.type).toBe("notes");
 				expect(response.body.publicData.title).toBe("Specific Endpoint Test");
+				expect(response.body.publicData.pairCount).toBe(1);
+				expect(response.body.publicData).toHaveProperty("timestamp");
 			} else {
 				expect([401, 500]).toContain(response.status);
 			}
@@ -288,7 +314,16 @@ describe("ZelfKey Endpoints", () => {
 			const response = await request(app).post("/api/zelf-key/store/credit-card").send(payload);
 
 			if (response.status === 200) {
+				expect(response.body).toHaveProperty("success", true);
+				expect(response.body).toHaveProperty("zelfProof");
+				expect(response.body).toHaveProperty("publicData");
+				expect(response.body.publicData.type).toBe("credit_card");
 				expect(response.body.publicData.cardName).toBe("Specific Test");
+				expect(response.body.publicData.cardNumber).toBe("****-****-****-4444");
+				expect(response.body.publicData.expiryMonth).toBe("06");
+				expect(response.body.publicData.expiryYear).toBe("2029");
+				expect(response.body.publicData.bankName).toBe("Test Bank");
+				expect(response.body.publicData).toHaveProperty("timestamp");
 			} else {
 				expect([401, 500]).toContain(response.status);
 			}
@@ -308,7 +343,14 @@ describe("ZelfKey Endpoints", () => {
 			const response = await request(app).post("/api/zelf-key/store/contact").send(payload);
 
 			if (response.status === 200) {
+				expect(response.body).toHaveProperty("success", true);
+				expect(response.body).toHaveProperty("zelfProof");
+				expect(response.body).toHaveProperty("publicData");
+				expect(response.body.publicData.type).toBe("contact");
 				expect(response.body.publicData.name).toBe("Specific Contact");
+				expect(response.body.publicData.email).toBe("***com");
+				expect(response.body.publicData.phone).toBe("***6543");
+				expect(response.body.publicData).toHaveProperty("timestamp");
 			} else {
 				expect([401, 500]).toContain(response.status);
 			}
@@ -330,7 +372,15 @@ describe("ZelfKey Endpoints", () => {
 			const response = await request(app).post("/api/zelf-key/store/bank-details").send(payload);
 
 			if (response.status === 200) {
+				expect(response.body).toHaveProperty("success", true);
+				expect(response.body).toHaveProperty("zelfProof");
+				expect(response.body).toHaveProperty("publicData");
+				expect(response.body.publicData.type).toBe("bank_details");
 				expect(response.body.publicData.bankName).toBe("Specific Bank");
+				expect(response.body.publicData.accountNumber).toBe("****7654");
+				expect(response.body.publicData.accountType).toBe("savings");
+				expect(response.body.publicData.accountHolder).toBe("Specific Holder");
+				expect(response.body.publicData).toHaveProperty("timestamp");
 			} else {
 				expect([401, 500]).toContain(response.status);
 			}
@@ -381,10 +431,20 @@ describe("ZelfKey Endpoints", () => {
 			if (response.status === 200) {
 				expect(response.body).toHaveProperty("success", true);
 				expect(response.body).toHaveProperty("data");
-				expect(response.body.data.metadata.type).toBe("website_password");
-				expect(response.body.data.metadata.website).toBe("retrieve-test.com");
+				expect(response.body.data).toHaveProperty("publicData");
+				expect(response.body.data).toHaveProperty("metadata");
+
+				// Check public data structure
+				expect(response.body.data.publicData.type).toBe("website_password");
+				expect(response.body.data.publicData.website).toBe("retrieve-test.com");
+				expect(response.body.data.publicData.username).toBe("***ser"); // Last 3 chars: "ser"
+				expect(response.body.data.publicData).toHaveProperty("timestamp");
+
+				// Check metadata structure (only sensitive data)
 				expect(response.body.data.metadata.username).toBe("retrieveuser");
 				expect(response.body.data.metadata.password).toBe("retrievepass123");
+				// Website is not in metadata (it's public data)
+				expect(response.body.data.metadata).not.toHaveProperty("website");
 			} else {
 				expect([401, 500]).toContain(response.status);
 			}
@@ -438,6 +498,10 @@ describe("ZelfKey Endpoints", () => {
 				expect(response.body.publicData.type).toBe("notes");
 				expect(response.body.publicData.title).toBe("Preview Test Notes");
 				expect(response.body.publicData.pairCount).toBe(1);
+				expect(response.body.publicData).toHaveProperty("timestamp");
+
+				// Verify that sensitive data is NOT in publicData
+				expect(response.body.publicData).not.toHaveProperty("keyValuePairs");
 			} else {
 				expect([401, 500]).toContain(response.status);
 			}
@@ -802,6 +866,12 @@ describe("ZelfKey Endpoints", () => {
 			// Since all routes are unprotected, this should be processed, not rejected by auth
 			if (response.status === 200) {
 				expect(response.body).toHaveProperty("success", true);
+				expect(response.body).toHaveProperty("zelfProof");
+				expect(response.body).toHaveProperty("publicData");
+				expect(response.body.publicData.type).toBe("website_password");
+				expect(response.body.publicData.website).toBe("unprotected-test.com");
+				expect(response.body.publicData.username).toBe("***ser"); // Last 3 chars: "ser"
+				expect(response.body.publicData).toHaveProperty("timestamp");
 			} else {
 				// External API failure is expected in test environment
 				expect([401, 500]).toContain(response.status);
