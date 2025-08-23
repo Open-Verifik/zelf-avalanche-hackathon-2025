@@ -120,7 +120,7 @@ const storeNotes = async (data) => {
 			message: "Notes stored successfully",
 		};
 	} catch (error) {
-		console.error("Error storing notes:", error);
+		console.error("Error storing notes:", { error });
 		throw new Error("Failed to store notes");
 	}
 };

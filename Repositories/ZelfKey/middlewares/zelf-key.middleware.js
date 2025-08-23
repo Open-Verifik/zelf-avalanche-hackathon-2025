@@ -140,6 +140,106 @@ const storeDataValidation = async (ctx, next) => {
 		return;
 	}
 
+	// Additional business logic validation based on type
+	switch (type) {
+		case "notes":
+			// Validate key-value pairs business logic
+			const { keyValuePairs } = payload;
+			const pairs = Object.entries(keyValuePairs || {});
+
+			if (pairs.length === 0) {
+				ctx.status = 400;
+				ctx.body = {
+					error: "Validation error",
+					message: "At least one key-value pair is required",
+				};
+				return;
+			}
+
+			// Validate each key-value pair
+			for (const [key, value] of pairs) {
+				if (!key || key.trim().length === 0) {
+					ctx.status = 400;
+					ctx.body = {
+						error: "Validation error",
+						message: "Key names cannot be empty",
+					};
+					return;
+				}
+				if (key.length > 50) {
+					ctx.status = 400;
+					ctx.body = {
+						error: "Validation error",
+						message: "Key names cannot exceed 50 characters",
+					};
+					return;
+				}
+				if (typeof value !== "string" || value.length > 1000) {
+					ctx.status = 400;
+					ctx.body = {
+						error: "Validation error",
+						message: "Values must be strings and cannot exceed 1000 characters",
+					};
+					return;
+				}
+			}
+			break;
+
+		case "credit_card":
+			// Validate credit card business logic
+			const { cardNumber, expiryMonth, expiryYear } = payload;
+
+			// Basic Luhn algorithm check for credit card
+			if (!isValidCreditCard(cardNumber)) {
+				ctx.status = 400;
+				ctx.body = {
+					error: "Validation error",
+					message: "Invalid credit card number",
+				};
+				return;
+			}
+
+			// Validate expiry date
+			const currentYear = new Date().getFullYear();
+			const currentMonth = new Date().getMonth() + 1;
+
+			if (parseInt(expiryYear) < currentYear || (parseInt(expiryYear) === currentYear && parseInt(expiryMonth) < currentMonth)) {
+				ctx.status = 400;
+				ctx.body = {
+					error: "Validation error",
+					message: "Credit card has expired",
+				};
+				return;
+			}
+			break;
+
+		case "contact":
+			// Validate contact business logic: at least one contact method required
+			const { email, phone, address } = payload;
+			if (!email && !phone && !address) {
+				ctx.status = 400;
+				ctx.body = {
+					error: "Validation error",
+					message: "At least one contact method (email, phone, or address) is required",
+				};
+				return;
+			}
+			break;
+
+		case "bank_details":
+			// Validate bank details business logic: validate routing number format
+			const { routingNumber } = payload;
+			if (!/^\d{9}$/.test(routingNumber)) {
+				ctx.status = 400;
+				ctx.body = {
+					error: "Validation error",
+					message: "Routing number must be exactly 9 digits",
+				};
+				return;
+			}
+			break;
+	}
+
 	await next();
 };
 
