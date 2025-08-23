@@ -4,12 +4,36 @@ const jwt = require("koa-jwt");
 const config = require("./Core/config");
 const secret = config.JWT_SECRET; // Replace with your secret key
 const cors = require("@koa/cors");
+const { koaSwagger } = require("koa2-swagger-ui");
 const app = new Koa();
 app.proxy = true; // Trust the proxy's X-Forwarded-For header
 app.use(bodyParser());
 
 // Enable CORS
 app.use(cors());
+
+// Import Swagger configuration
+const swaggerSpec = require("./Core/swagger.config");
+
+// Swagger UI middleware
+app.use(
+	koaSwagger({
+		routePrefix: "/swagger", // Swagger UI endpoint
+		swaggerOptions: {
+			url: "/swagger.json", // Swagger JSON endpoint
+			spec: swaggerSpec,
+		},
+	})
+);
+
+// Swagger JSON endpoint
+app.use(async (ctx, next) => {
+	if (ctx.path === "/swagger.json") {
+		ctx.body = swaggerSpec;
+		return;
+	}
+	await next();
+});
 
 // JWT error handling
 app.use((ctx, next) => {

@@ -23,8 +23,9 @@ const configuration = {
 		serverKey: process.env.ZELF_ENCRYPT_SERVER_KEY,
 	},
 	zelfProof: {
-		url: process.env.ZELF_PROOF_URL || "https://api.zelf.world",
-		apiKey: process.env.ZELF_PROOF_API_KEY || "password",
+		url: process.env.ZELF_URL || "https://api.zelf.world",
+		email: process.env.ZELF_EMAIL,
+		apiKey: process.env.ZELF_API_KEY || "password",
 	},
 	pgp: {
 		secretKey: process.env.PGP_SECRET_KEY || "",
