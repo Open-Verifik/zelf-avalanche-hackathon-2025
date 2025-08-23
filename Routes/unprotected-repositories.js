@@ -8,4 +8,7 @@ module.exports = (router) => {
 
 	// Register ZelfProof routes (unprotected)
 	require("../Repositories/ZelfProof/routes/zelf-proof.route")(router);
+
+	// Register ZelfKey routes (unprotected)
+	require("../Repositories/ZelfKey/routes/zelf-key.route")(router);
 };
