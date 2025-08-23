@@ -1,0 +1,9 @@
+{
+  "network": "mainnet",
+  "contractAddress": "0x6C995090C530756d59E6eEa5a3bA209863e0E167",
+  "transactionHash": "0xf35c7fbdd4583843f0cd7d07c82e2d9e439dc4dd30538b3453e97c717cb47e4b",
+  "deployer": "0x1BC125bC681685f216935798453F70fb423eB392",
+  "constructorArgs": [],
+  "timestamp": "2025-08-23T15:05:01.332Z",
+  "explorer": "https://snowtrace.io"
+}
