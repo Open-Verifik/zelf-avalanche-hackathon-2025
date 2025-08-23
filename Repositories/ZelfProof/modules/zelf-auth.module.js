@@ -21,7 +21,7 @@ const authenticateUser = async (email, apiKey) => {
 		authInstance.defaults.headers.common["X-API-Key"] = apiKey;
 
 		// Call the external Zelf API to authenticate
-		const response = await authInstance.post("/zelf/clients/auth", {
+		const response = await authInstance.post("/api/clients/auth", {
 			email: email,
 		});
 
@@ -36,6 +36,18 @@ const authenticateUser = async (email, apiKey) => {
 	} catch (error) {
 		console.error("External API authentication error:", error.response?.data || error.message);
 
+		// Handle specific external API error messages
+		if (error.response?.data?.error) {
+			const apiError = error.response.data.error;
+
+			if (apiError === "client_not_found" || apiError === "client_invalid_api_key") {
+				throw new Error("Invalid credentials");
+			} else if (apiError === "invalid_request" || apiError === "missing_fields") {
+				throw new Error("Invalid request data");
+			}
+		}
+
+		// Fallback to status code handling
 		if (error.response?.status === 401) {
 			throw new Error("Invalid credentials");
 		} else if (error.response?.status === 400) {
