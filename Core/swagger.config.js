@@ -601,7 +601,7 @@ const swaggerSpec = {
 					address: {
 						type: "string",
 						description: "Wallet address for the session",
-						example: "0x1234567890abcdef1234567890abcdef12345678",
+						example: "0xB7b30A282eb6c0fEef1Bd8D268E05f4c2a2Ab565",
 					},
 				},
 			},

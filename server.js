@@ -6,6 +6,7 @@ import { koaSwagger } from "koa2-swagger-ui";
 import swaggerSpec from "./Core/swagger.config.js";
 import unprotectedRoutes from "./Routes/unprotected.js";
 import protectedRoutes from "./Routes/protected.js";
+import jwt from "koa-jwt";
 import http from "http";
 
 const app = new Koa();
@@ -51,53 +52,17 @@ app.use((ctx, next) => {
 // Unprotected routes
 app.use(unprotectedRoutes.routes());
 
-// Custom JWT middleware for hackathon (accepts external tokens)
-app.use(async (ctx, next) => {
-	// Skip JWT validation for unprotected routes
-	if (ctx.path.startsWith("/api/auth/") || ctx.path.startsWith("/swagger")) {
-		return next();
-	}
-
-	const authHeader = ctx.headers.authorization;
-
-	if (!authHeader || !authHeader.startsWith("Bearer ")) {
-		ctx.status = 401;
-		ctx.body = { error: "Protected resource, use Authorization header to get access" };
-		return;
-	}
-
-	const token = authHeader.substring(7);
-
-	try {
-		// For hackathon: accept any JWT token that can be decoded
-		// In production, you would verify the signature
-		const parts = token.split(".");
-		if (parts.length !== 3) {
-			throw new Error("Invalid token format");
-		}
-
-		// Decode payload without verification
-		const payload = JSON.parse(Buffer.from(parts[1], "base64").toString());
-
-		// Check if token is expired
-		if (payload.exp && Date.now() >= payload.exp * 1000) {
-			ctx.status = 401;
-			ctx.body = { error: "Token expired" };
-			return;
-		}
-
-		// Set user info in context
-		ctx.state.user = {
-			id: payload.clientId || payload.sub,
-			email: payload.email,
-		};
-
-		await next();
-	} catch (error) {
-		ctx.status = 401;
-		ctx.body = { error: "Invalid token" };
-	}
-});
+// JWT middleware using koa-jwt
+app.use(
+	jwt({
+		secret: config.JWT_SECRET,
+		algorithms: ["HS256"],
+		// Skip JWT validation for unprotected routes
+		unless: {
+			path: [/^\/api\/auth\//, /^\/swagger/, /^\/swagger\.json$/],
+		},
+	})
+);
 
 // Protected routes
 app.use(protectedRoutes.routes());

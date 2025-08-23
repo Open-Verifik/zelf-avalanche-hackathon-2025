@@ -20,7 +20,7 @@ describe("ZelfKey Endpoints", () => {
 		try {
 			const sessionResponse = await request(app).post("/api/sessions").send({
 				identifier: "test-user-123",
-				address: "0x1234567890abcdef1234567890abcdef12345678",
+				address: "0xB7b30A282eb6c0fEef1Bd8D268E05f4c2a2Ab565",
 			});
 
 			if (sessionResponse.status === 200) {

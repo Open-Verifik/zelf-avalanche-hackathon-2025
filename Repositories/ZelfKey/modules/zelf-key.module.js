@@ -1,5 +1,6 @@
 import * as ZelfProofModule from "../../ZelfProof/modules/zelf-proof.module.js";
 import * as pinata from "../../IPFS/modules/pinata.js";
+import { createNFT } from "../../../Avalanche/modules/avax-nft.module.js";
 
 /**
  * ZelfKey Module - Password Manager functionality similar to LastPass
@@ -97,11 +98,13 @@ const createMetadataAndPublicData = async (type, data) => {
  */
 const storePassword = async (data, authToken) => {
 	try {
-		const { website, faceBase64, masterPassword, type } = data;
+		const { website, faceBase64, masterPassword, name } = data;
 
-		const { metadata, publicData } = await createMetadataAndPublicData(type, data);
+		const { metadata, publicData } = await createMetadataAndPublicData("password", data);
 
-		const identifier = `password_${website}_${Date.now()}`;
+		console.log({ authToken });
+
+		const identifier = name ? `${authToken.address}_${name}` : `password_${website}_${Date.now()}`;
 
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
 			publicData,
@@ -131,11 +134,23 @@ const storePassword = async (data, authToken) => {
 			qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
 				...publicData,
 				zelfProof,
-				contentType: "qr_code",
 			});
 		} catch (ipfsError) {
 			console.warn("⚠️ Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
 		}
+
+		const NFT = await createNFT(
+			{
+				zelfQR,
+				url: qrCodeIPFS.url,
+				name: identifier,
+				publicData,
+				zelfProof,
+			},
+			authToken
+		);
+
+		return { NFT };
 
 		const result = {
 			success: true,
@@ -149,7 +164,6 @@ const storePassword = async (data, authToken) => {
 						timestamp: `${new Date().toISOString()}`,
 						name: qrCodeIPFS.name,
 						metadata: qrCodeIPFS.metadata,
-						contentType: "qr_code",
 				  }
 				: null,
 			publicData,
@@ -158,6 +172,7 @@ const storePassword = async (data, authToken) => {
 
 		return result;
 	} catch (error) {
+		console.error({ error });
 		throw new Error("Failed to store website password");
 	}
 };
@@ -173,11 +188,11 @@ const storePassword = async (data, authToken) => {
  */
 const storeNotes = async (data, authToken) => {
 	try {
-		const { title, faceBase64, masterPassword, type } = data;
+		const { title, faceBase64, masterPassword } = data;
 
 		const identifier = `notes_${title}_${Date.now()}`;
 
-		const { metadata, publicData } = await createMetadataAndPublicData(type, data);
+		const { metadata, publicData } = await createMetadataAndPublicData("notes", data);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -209,7 +224,7 @@ const storeNotes = async (data, authToken) => {
 			try {
 				qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
 					...publicData,
-					contentType: "qr_code",
+					zelfProof,
 				});
 			} catch (ipfsError) {
 				console.warn("Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
@@ -228,7 +243,6 @@ const storeNotes = async (data, authToken) => {
 						timestamp: `${new Date().toISOString()}`,
 						name: qrCodeIPFS.name,
 						metadata: qrCodeIPFS.metadata,
-						contentType: "qr_code",
 				  }
 				: null,
 			publicData,
@@ -255,7 +269,7 @@ const storeNotes = async (data, authToken) => {
  */
 const storeCreditCard = async (data, authToken) => {
 	try {
-		const { cardName, cardNumber, expiryMonth, expiryYear, cvv, bankName, faceBase64, masterPassword, type } = data;
+		const { cardName, cardNumber, expiryMonth, expiryYear, cvv, bankName, faceBase64, masterPassword } = data;
 
 		// Validate credit card data
 		if (!cardNumber || cardNumber.length < 13 || cardNumber.length > 19) {
@@ -275,7 +289,7 @@ const storeCreditCard = async (data, authToken) => {
 
 		const identifier = `creditcard_${bankName}_${Date.now()}`;
 
-		const { metadata, publicData } = await createMetadataAndPublicData(type, data);
+		const { metadata, publicData } = await createMetadataAndPublicData("contact", data);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -341,7 +355,7 @@ const storeContact = async (data, authToken) => {
 
 		const identifier = `contact_${name}_${Date.now()}`;
 
-		const { metadata, publicData } = await createMetadataAndPublicData(type, data);
+		const { metadata, publicData } = await createMetadataAndPublicData("contact", data);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -404,7 +418,7 @@ const storeBankDetails = async (data, authToken) => {
 
 		const identifier = `bank_${bankName}_${Date.now()}`;
 
-		const { metadata, publicData } = await createMetadataAndPublicData(type, data);
+		const { metadata, publicData } = await createMetadataAndPublicData("bank_details", data);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -597,7 +611,6 @@ const createNFTReadyData = async (data, authToken) => {
 					timestamp: ipfs.timestamp,
 					name: ipfs.name,
 					metadata: ipfs.metadata,
-					contentType: ipfs.contentType,
 				},
 				message: `NFT-ready data created from ${publicData.type}`,
 				timestamp: new Date().toISOString(),

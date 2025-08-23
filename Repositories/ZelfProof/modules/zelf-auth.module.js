@@ -1,6 +1,6 @@
 import axios from "axios";
 import config from "../../../Core/config.js";
-
+let _encryptionInstance = null;
 let credentials = null;
 
 /**
