@@ -31,7 +31,6 @@ const authenticateUser = async (email, apiKey) => {
 			token: response.data.token || response.data.access_token,
 			expiresIn: response.data.expires_in || "24h",
 			message: "Authentication successful",
-			data: response.data, // Include any additional data from the external API
 		};
 	} catch (error) {
 		console.error("External API authentication error:", error.response?.data || error.message);

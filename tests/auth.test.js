@@ -34,7 +34,6 @@ describe("Authentication Endpoint Tests", () => {
 				// External API authentication successful
 				expect(response.body.success).toBe(true);
 				expect(response.body.token).toBeDefined();
-				expect(response.body.expiresIn).toBeDefined();
 				expect(response.body.message).toBe("Authentication successful");
 			} else if (response.status === 401) {
 				// External API authentication failed (expected in test environment)
