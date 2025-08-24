@@ -14,6 +14,7 @@ export class PasswordResultComponent implements OnInit {
 	apiResult: any = {};
 	passwordData: any = {};
 	loading = true;
+	showDebug = false;
 
 	constructor(
 		private router: Router,
@@ -50,6 +51,10 @@ export class PasswordResultComponent implements OnInit {
 
 	onAddAnotherPassword(): void {
 		this.router.navigate(["/dashboard/passwords/new"]);
+	}
+
+	toggleDebugView(): void {
+		this.showDebug = !this.showDebug;
 	}
 
 	getResultStatus(): "success" | "error" | "unknown" {

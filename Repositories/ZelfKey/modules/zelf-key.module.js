@@ -160,8 +160,8 @@ const storePassword = async (data, authToken) => {
 
 		const result = {
 			success: true,
-			zelfProof: zelfQR, // QR code data URL for tests
-			zelfQR: zelfProof, // Encrypted string
+			zelfProof, // QR code data URL for tests
+			zelfQR, // Encrypted string
 			NFT,
 			ipfs: qrCodeIPFS
 				? {
