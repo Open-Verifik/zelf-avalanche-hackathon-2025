@@ -149,6 +149,7 @@ const pinFileWindows = async (base64Image, filename = "image.png", mimeType = "i
 		return null;
 	}
 };
+
 const filter = async (property = "name", value) => {
 	let files;
 

@@ -934,17 +934,16 @@ describe("ZelfKey Endpoints", () => {
 			for (const category of validCategories) {
 				const response = await request(app).get(`/api/zelf-key/list?category=${category}`).set("Authorization", `Bearer ${authToken}`);
 
-				// The endpoint might not be fully implemented, but validation should pass
-				// If it returns 400 with validation error, that means validation is working
-				// If it returns 404 or 500, that means the endpoint isn't implemented yet
-				expect([200, 400, 404, 500]).toContain(response.status);
+				// The endpoint should now return 200 with actual data or empty array
+				expect(response.status).toBe(200);
+				expect(response.body).toHaveProperty("success", true);
+				expect(response.body).toHaveProperty("category", category);
+				expect(response.body).toHaveProperty("data");
+				expect(response.body).toHaveProperty("totalCount");
+				expect(Array.isArray(response.body.data)).toBe(true);
 
-				// If it's a validation error, it should be about missing implementation, not category validation
-				if (response.status === 400 && response.body.error === "Validation error") {
-					// This means the middleware validation passed, but there's another issue
-					// (likely missing controller implementation)
-					console.log(`Category validation passed for: ${category}`);
-				}
+				// Log the response for debugging
+				console.log(`Category ${category}: Found ${response.body.totalCount} items`);
 			}
 		});
 

@@ -587,6 +587,88 @@ const swaggerSpec = {
 					},
 				},
 			},
+			ZelfKeyListResponse: {
+				type: "object",
+				properties: {
+					success: {
+						type: "boolean",
+						description: "Whether the operation was successful",
+						example: true,
+					},
+					message: {
+						type: "string",
+						description: "Success message with item count",
+						example: "Found 3 items in category: password",
+					},
+					category: {
+						type: "string",
+						description: "The category that was queried",
+						example: "password",
+					},
+					data: {
+						type: "array",
+						description: "Array of IPFS files for the specified category",
+						items: {
+							type: "object",
+							properties: {
+								id: {
+									type: "string",
+									description: "IPFS hash of the file",
+									example: "QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco",
+								},
+								name: {
+									type: "string",
+									description: "Filename of the stored data",
+									example: "user123_password_github.png",
+								},
+								url: {
+									type: "string",
+									description: "Gateway URL to access the file",
+									example: "https://gateway.pinata.cloud/ipfs/QmXoypizjW3WknFiJnKLwHCnL72vedxjQkDDP1mXWo6uco",
+								},
+								size: {
+									type: "number",
+									description: "Size of the file in bytes",
+									example: 12345,
+								},
+								timestamp: {
+									type: "string",
+									description: "When the file was pinned to IPFS",
+									example: "2025-01-27T10:30:00.000Z",
+								},
+								metadata: {
+									type: "object",
+									description: "Original metadata stored with the file",
+								},
+								publicData: {
+									type: "object",
+									description: "Public data extracted from metadata",
+								},
+								zelfProof: {
+									type: "string",
+									description: "ZelfProof encrypted data (if available)",
+									nullable: true,
+								},
+							},
+						},
+					},
+					timestamp: {
+						type: "string",
+						description: "When the list operation was performed",
+						example: "2025-01-27T10:30:00.000Z",
+					},
+					zelfName: {
+						type: "string",
+						description: "Identifier of the authenticated user",
+						example: "user123",
+					},
+					totalCount: {
+						type: "number",
+						description: "Total number of items found in the category",
+						example: 3,
+					},
+				},
+			},
 
 			// Session schemas
 			SessionCreateRequest: {
@@ -1633,6 +1715,90 @@ const swaggerSpec = {
 										error: {
 											type: "string",
 											example: "Failed to preview data",
+										},
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		"/api/zelf-key/list": {
+			get: {
+				tags: ["ZelfKey - Retrieval"],
+				summary: "List Zelf Keys files by category",
+				description:
+					"Retrieve a list of Zelf Keys stored by the authenticated user for a specific category. Files are filtered by wallet-specific category metadata (e.g., 'user123_password'). This endpoint queries IPFS via Pinata to find all stored data for the user's wallet in the specified category.",
+				security: [{ bearerAuth: [] }],
+				parameters: [
+					{
+						name: "category",
+						in: "query",
+						required: true,
+						schema: {
+							type: "string",
+							enum: ["password", "notes", "credit_card", "contact", "bank_details"],
+						},
+						description: "Category of data to list (must be one of the supported types)",
+						example: "password",
+					},
+				],
+				responses: {
+					200: {
+						description: "Files listed successfully",
+						content: {
+							"application/json": {
+								schema: { $ref: "#/components/schemas/ZelfKeyListResponse" },
+							},
+						},
+					},
+					400: {
+						description: "Validation error - invalid or missing category",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Validation error",
+										},
+										message: {
+											type: "string",
+											example: "category is required",
+										},
+									},
+								},
+							},
+						},
+					},
+					401: {
+						description: "Unauthorized - JWT token required",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Protected resource, use Authorization header to get access",
+										},
+									},
+								},
+							},
+						},
+					},
+					500: {
+						description: "Internal server error or IPFS query failure",
+						content: {
+							"application/json": {
+								schema: {
+									type: "object",
+									properties: {
+										error: {
+											type: "string",
+											example: "Failed to list data",
 										},
 									},
 								},

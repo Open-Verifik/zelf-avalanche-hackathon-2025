@@ -147,23 +147,24 @@ const storePassword = async (data, authToken) => {
 			console.warn("⚠️ Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
 		}
 
-		const NFT = await createNFT(
-			{
-				zelfQR,
-				url: qrCodeIPFS.url,
-				name: identifier,
-				publicData,
-				zelfProof,
-			},
-			authToken
-		);
+		const NFT = null;
 
-		return { NFT };
+		// const NFT = await createNFT(
+		// 	{
+		// 		zelfQR,
+		// 		url: qrCodeIPFS.url,
+		// 		name: identifier,
+		// 		publicData,
+		// 		zelfProof,
+		// 	},
+		// 	authToken
+		// );
 
 		const result = {
 			success: true,
 			zelfProof: zelfQR, // QR code data URL for tests
 			zelfQR: zelfProof, // Encrypted string
+			NFT,
 			ipfs: qrCodeIPFS
 				? {
 						hash: qrCodeIPFS.IpfsHash,
@@ -699,15 +700,36 @@ const listData = async (data, authToken) => {
 			throw new Error(`Invalid category: ${category}`);
 		}
 
-		// For now, return a simple response indicating the category was validated
-		// In a real implementation, this would query the database for items in this category
+		// Query IPFS via Pinata for files with the specific category metadata
+		// The category is stored as `${authToken.identifier}_${category}` in the metadata
+		const categoryFilter = `${authToken.identifier}_${category}`;
+
+		// Import the pinata module to use the filter function
+		const { filter } = await import("../../IPFS/modules/pinata.js");
+
+		// Filter files by the category metadata
+		const files = await filter("category", categoryFilter);
+
+		// Transform the files to include relevant information
+		const transformedData = files.map((file) => ({
+			id: file.ipfs_pin_hash,
+			name: file.name,
+			url: file.url,
+			size: file.size,
+			timestamp: file.date_pinned,
+			name: file.metadata?.name,
+			// Extract the public data from metadata if available
+			publicData: file.metadata?.keyvalues || {},
+		}));
+
 		return {
 			success: true,
-			message: `Listing data for category: ${category}`,
+			message: `Found ${transformedData.length} items in category: ${category}`,
 			category: category,
-			data: [], // Empty array for now, would contain actual data in real implementation
+			data: transformedData,
 			timestamp: new Date().toISOString(),
 			zelfName: authToken.identifier,
+			totalCount: transformedData.length,
 		};
 	} catch (error) {
 		console.error("Error listing data:", error);
