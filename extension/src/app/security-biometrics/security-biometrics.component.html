@@ -1,0 +1,79 @@
+<ng-container *ngIf="!errorTitle">
+    <ng-container *transloco="let t">
+        <zelf-loader [diameter]="256" *ngIf="loading"></zelf-loader>
+
+        <ng-container *ngIf="!loading">
+            <ng-container *ngIf="!showBiometrics">
+                <div class="zelf-card">
+                    <div class="zelf-card__header security-biometrics__header">
+                        <div class="security-biometrics__header-button">
+                            <button
+                                mat-icon-button
+                                class="zelf-icon-button zelf-icon-button--40"
+                                [routerLink]="['../password']"
+                                [queryParams]="{ return: returnState }"
+                            >
+                                <svg viewBox="0 0 22 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M20.0898 5.8277H4.72478L8.08478 2.4677C8.53978 2.0127 8.53978 1.2777 8.08478 0.822695C7.62978 0.367695 6.89478 0.367695 6.43978 0.822695L1.08478 6.1777C0.62978 6.6327 0.62978 7.3677 1.08478 7.8227L6.43978 13.1777C6.89478 13.6327 7.62978 13.6327 8.08478 13.1777C8.53978 12.7227 8.53978 11.9877 8.08478 11.5327L4.72478 8.16103H20.0898C20.7314 8.16103 21.2564 7.63603 21.2564 6.99436C21.2564 6.3527 20.7314 5.8277 20.0898 5.8277Z"
+                                    />
+                                </svg>
+                            </button>
+                        </div>
+
+                        <img class="zelf-card__image" src="assets/images/biometric_zkfp.svg" alt="welcome" />
+
+                        <h2 class="zelf-card__title">{{ t(isNew ? "security.biometric_title" : "security.biometric_decryption_title") }}</h2>
+
+                        <p
+                            class="zelf-card__subtitle"
+                            [innerHTML]="t(isNew ? 'security.biometric_subtitle' : 'security.biometric_decryption_subtitle')"
+                        ></p>
+                    </div>
+
+                    <form [formGroup]="form" class="zelf-card__actions security-biometrics__actions">
+                        <label for="hideBiometricsCheckbox" class="zelf-checkbox">
+                            <input
+                                formControlName="hideBiometricsCheckbox"
+                                id="hideBiometricsCheckbox"
+                                name="hideBiometricsCheckbox"
+                                type="checkbox"
+                            />
+
+                            <svg viewBox="0 0 21 21">
+                                <polyline points="5 10.75 8.5 14.25 16 6"></polyline>
+                            </svg>
+
+                            {{ t("common.dont_show_this_message_again") }}
+                        </label>
+
+                        <button (click)="startBiometrics()" class="zelf-button zelf-button--black zelf-button--wide" mat-flat-button>
+                            {{ t("common.start") }}
+                        </button>
+                    </form>
+                </div>
+            </ng-container>
+
+            <ng-container *ngIf="showBiometrics">
+                <biometrics-general
+                    (canNavigate)="canNavigateAwayHandler($event)"
+                    (error)="onBiometricsFailed($event)"
+                    (imageCaptured)="onBiometricsScanned($event)"
+                ></biometrics-general>
+            </ng-container>
+        </ng-container>
+    </ng-container>
+</ng-container>
+
+<ng-container *ngIf="errorTitle">
+    <welcome-error (goBack)="goBack()" [errorTitle]="errorTitle" [errorMessage]="errorMessage"></welcome-error>
+</ng-container>
+
+<ng-template #cross>
+    <svg width="64" height="64" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+            d="M10 0C4.47 0 0 4.47 0 10C0 15.53 4.47 20 10 20C15.53 20 20 15.53 20 10C20 4.47 15.53 0 10 0ZM14.3 14.3C13.91 14.69 13.28 14.69 12.89 14.3L10 11.41L7.11 14.3C6.72 14.69 6.09 14.69 5.7 14.3C5.31 13.91 5.31 13.28 5.7 12.89L8.59 10L5.7 7.11C5.31 6.72 5.31 6.09 5.7 5.7C6.09 5.31 6.72 5.31 7.11 5.7L10 8.59L12.89 5.7C13.28 5.31 13.91 5.31 14.3 5.7C14.69 6.09 14.69 6.72 14.3 7.11L11.41 10L14.3 12.89C14.68 13.27 14.68 13.91 14.3 14.3Z"
+            fill="#DC362E"
+        />
+    </svg>
+</ng-template>

@@ -1,0 +1,42 @@
+<div class="dashboard-container">
+	<header class="dashboard-header">
+		<div class="user-info">
+			<span class="username">{{ zelfName }}</span>
+			<div class="user-avatar">
+				<div class="avatar-icon"></div>
+			</div>
+		</div>
+	</header>
+
+	<nav class="dashboard-nav">
+		<div class="nav-item" [class.active]="activeTab === 'start'" (click)="navigateToTab('start')">
+			<span class="nav-text">Start</span>
+			<div class="active-indicator" *ngIf="activeTab === 'start'"></div>
+		</div>
+		<div class="nav-item" [class.active]="activeTab === 'passwords'" (click)="navigateToTab('passwords')">
+			<span class="nav-text">Passwords</span>
+			<div class="active-indicator" *ngIf="activeTab === 'passwords'"></div>
+		</div>
+		<div class="nav-item" [class.active]="activeTab === 'notes'" (click)="navigateToTab('notes')">
+			<span class="nav-text">Notes</span>
+			<!-- <div class="badge">317</div> -->
+			<div class="active-indicator" *ngIf="activeTab === 'notes'"></div>
+		</div>
+		<div class="nav-item" [class.active]="activeTab === 'addresses'" (click)="navigateToTab('addresses')">
+			<span class="nav-text">Addresses</span>
+			<div class="active-indicator" *ngIf="activeTab === 'addresses'"></div>
+		</div>
+		<div class="nav-item" [class.active]="activeTab === 'payment-cards'" (click)="navigateToTab('payment-cards')">
+			<span class="nav-text">Payment Cards</span>
+			<div class="active-indicator" *ngIf="activeTab === 'payment-cards'"></div>
+		</div>
+		<div class="nav-item" [class.active]="activeTab === 'bank-accounts'" (click)="navigateToTab('bank-accounts')">
+			<span class="nav-text">Bank Accounts</span>
+			<div class="active-indicator" *ngIf="activeTab === 'bank-accounts'"></div>
+		</div>
+	</nav>
+
+	<main class="dashboard-content">
+		<router-outlet></router-outlet>
+	</main>
+</div>

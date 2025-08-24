@@ -1,0 +1,33 @@
+@use "../../styles/variables";
+@use "../../styles/buttons";
+
+:host {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.welcome-error {
+    &__header-button {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex-direction: row;
+        width: 100%;
+    }
+
+    &__title {
+        font-size: 24px;
+        font-weight: 700;
+        margin: 12px 0 0;
+    }
+
+    &__message {
+        color: variables.$gray;
+        font-size: 16px;
+        margin: 0;
+        text-align: center;
+    }
+}

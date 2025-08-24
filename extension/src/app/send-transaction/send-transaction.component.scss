@@ -1,0 +1,320 @@
+@use "../../styles/variables";
+@use "../../styles/buttons";
+
+:host {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.send-transaction {
+    position: relative;
+
+    &__loader {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        z-index: 2;
+    }
+
+    &__header {
+        align-content: center;
+        column-gap: 12px;
+        display: grid;
+        gap: 24px;
+        grid-template-columns: repeat(10, 1fr);
+        justify-content: start;
+        width: 100%;
+    }
+
+    &__col1,
+    &__col3 {
+        grid-column: span 3;
+        display: flex;
+        align-items: center;
+    }
+
+    &__col1 {
+        justify-content: start;
+    }
+
+    &__col2 {
+        grid-column: span 4;
+        text-align: center;
+        align-items: center;
+    }
+
+    &__col3 {
+        justify-content: end;
+    }
+
+    &__title {
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        text-align: center;
+        vertical-align: middle;
+        color: variables.$black;
+    }
+
+    &__form {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 24px;
+        flex-grow: 1;
+        position: relative;
+    }
+
+    &__loader {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+        z-index: 1;
+    }
+
+    &__content {
+        margin-top: 16px;
+        flex: 1 1 auto;
+        justify-content: flex-start;
+    }
+
+    &__input-label {
+        display: flex;
+        align-items: center;
+        box-sizing: border-box;
+        padding-left: 16px;
+        width: 100%;
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        margin: 0;
+        text-align: left;
+
+        &--mt-8 {
+            margin-top: 8px;
+        }
+    }
+
+    &__input-label-text {
+        margin-right: 4px;
+    }
+
+    &__address-row {
+        align-items: center;
+        cursor: pointer;
+        display: flex;
+        flex-direction: row;
+        gap: 16px;
+        justify-content: flex-start;
+        user-select: none;
+        width: 100%;
+    }
+
+    &__fiat-price {
+        box-sizing: border-box;
+        color: variables.$gray;
+        font-family: "Poppins", Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0.1px;
+        line-height: 20px;
+        margin: 0;
+        padding: 0px 12px;
+        text-align: left;
+        vertical-align: middle;
+        width: 100%;
+    }
+
+    &__address-col {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 4px;
+        width: 100%;
+        margin: 0;
+    }
+
+    &__address-name {
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        vertical-align: middle;
+        color: variables.$black;
+
+        &--zelf-name {
+            font-family: "Menda", "Arial Black", sans-serif;
+            font-weight: 700;
+            font-size: 14px;
+            line-height: 20px;
+            letter-spacing: 0.1px;
+            text-transform: uppercase;
+        }
+    }
+
+    &__address-book {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin-top: 16px;
+        width: 100%;
+        justify-content: flex-start;
+        align-items: flex-start;
+    }
+
+    &__address-name-zelf-name {
+        font-family: "Menda", "Arial Black", sans-serif;
+        font-weight: 700;
+        font-size: 12px;
+        line-height: 16px;
+        letter-spacing: 0.1px;
+        color: variables.$black;
+        margin: 0 16px 0 0 !important;
+    }
+
+    &__address-used {
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 500;
+        font-size: 11px;
+        line-height: 16px;
+        letter-spacing: 0.5px;
+        vertical-align: middle;
+        color: variables.$gray;
+    }
+}
+
+.zelf-object-preview {
+    margin: auto 0;
+    max-width: 484px;
+    width: 100%;
+    border-radius: 16px;
+    padding: 24px 16px;
+    gap: 12px;
+    border: 1px solid variables.$platinum;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    background-color: variables.$white;
+    box-sizing: border-box;
+
+    @media (max-width: variables.$minSmall) {
+        padding: 16px;
+    }
+
+    &__chip {
+        height: 48px;
+        border-radius: 48px;
+        gap: 8px;
+        padding: 0px 16px;
+        border: 1px solid variables.$platinum;
+        background-color: variables.$white;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 8px 24px 0 rgba(0, 0, 0, 0.04);
+        margin-bottom: 12px;
+    }
+
+    &__icon-bubble {
+        background-color: variables.$correctLight;
+        max-height: 32px;
+        max-width: 32px;
+        border-radius: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 32px;
+        width: 32px;
+
+        svg {
+            fill: variables.$correct;
+        }
+    }
+
+    &__chip-text {
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        color: variables.$black;
+        margin: 0;
+        text-transform: uppercase;
+    }
+
+    &__zelf-name {
+        font-family: "Menda", "Arial Black", sans-serif;
+        font-weight: 700;
+        font-size: 24px;
+        line-height: 32px;
+        letter-spacing: 0%;
+        width: 100%;
+        text-align: center;
+        text-transform: uppercase;
+        color: variables.$black;
+        margin: 0;
+        word-wrap: break-word;
+        overflow-wrap: anywhere;
+
+        @media (max-width: variables.$minSmall) {
+            font-size: 18px;
+            line-height: 20px;
+        }
+    }
+
+    &__address {
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 600;
+        font-size: 12px;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        text-align: center;
+        vertical-align: middle;
+        color: variables.$black;
+        margin: 0;
+        word-wrap: break-word;
+        overflow-wrap: anywhere;
+    }
+
+    &__horizontal-rule {
+        width: 100%;
+        border: 1px solid variables.$platinum;
+    }
+
+    &__instructions {
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        text-align: center;
+        vertical-align: middle;
+        color: variables.$gray;
+    }
+
+    &__icon-bubble {
+        &--error {
+            background-color: #dc362e;
+            color: white;
+        }
+    }
+
+    &__error-message {
+        color: #ff5247;
+        text-align: center;
+        font-size: 16px;
+        margin: 16px 0;
+    }
+}

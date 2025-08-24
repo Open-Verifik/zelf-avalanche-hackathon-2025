@@ -8,7 +8,7 @@ import { createNFT } from "../../../Avalanche/modules/avax-nft.module.js";
  * @author Miguel Trevino <miguel@zelf.world>
  */
 
-const createMetadataAndPublicData = async (type, data) => {
+const createMetadataAndPublicData = async (type, data, authToken) => {
 	switch (type) {
 		case "password":
 			return {
@@ -21,6 +21,8 @@ const createMetadataAndPublicData = async (type, data) => {
 					website: `${data.website}`,
 					username: data.username ? "***" + data.username.slice(-3) : "***",
 					timestamp: `${new Date().toISOString()}`,
+					zelfName: `${authToken.identifier}`,
+					category: `${authToken.identifier}_password`,
 				},
 			};
 		case "notes":
@@ -31,6 +33,8 @@ const createMetadataAndPublicData = async (type, data) => {
 					title: `${data.title}`,
 					pairCount: Object.keys(data.keyValuePairs || {}).length,
 					timestamp: `${new Date().toISOString()}`,
+					zelfName: `${authToken.identifier}`,
+					category: `${authToken.identifier}_notes`,
 				},
 			};
 		case "credit_card":
@@ -49,6 +53,8 @@ const createMetadataAndPublicData = async (type, data) => {
 					expiryYear: `${data.expiryYear}`,
 					bankName: `${data.bankName}`,
 					timestamp: `${new Date().toISOString()}`,
+					zelfName: `${authToken.identifier}`,
+					category: `${authToken.identifier}_credit_card`,
 				},
 			};
 		case "contact":
@@ -63,6 +69,8 @@ const createMetadataAndPublicData = async (type, data) => {
 				publicData: {
 					type: "contact",
 					name: `${data.name}`,
+					zelfName: `${authToken.identifier}`,
+					category: `${authToken.identifier}_contact`,
 				},
 			};
 		case "bank_details":
@@ -78,6 +86,8 @@ const createMetadataAndPublicData = async (type, data) => {
 					bankName: `${data.bankName}`,
 					accountNumber: `****${data.accountNumber.slice(-4)}`,
 					timestamp: `${new Date().toISOString()}`,
+					zelfName: `${authToken.identifier}`,
+					category: `${authToken.identifier}_bank_details`,
 				},
 			};
 		default:
@@ -100,9 +110,7 @@ const storePassword = async (data, authToken) => {
 	try {
 		const { website, faceBase64, masterPassword, name } = data;
 
-		const { metadata, publicData } = await createMetadataAndPublicData("password", data);
-
-		console.log({ authToken });
+		const { metadata, publicData } = await createMetadataAndPublicData("password", data, authToken);
 
 		const identifier = name ? `${authToken.address}_${name}` : `password_${website}_${Date.now()}`;
 
@@ -192,7 +200,7 @@ const storeNotes = async (data, authToken) => {
 
 		const identifier = `notes_${title}_${Date.now()}`;
 
-		const { metadata, publicData } = await createMetadataAndPublicData("notes", data);
+		const { metadata, publicData } = await createMetadataAndPublicData("notes", data, authToken);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -289,7 +297,7 @@ const storeCreditCard = async (data, authToken) => {
 
 		const identifier = `creditcard_${bankName}_${Date.now()}`;
 
-		const { metadata, publicData } = await createMetadataAndPublicData("contact", data);
+		const { metadata, publicData } = await createMetadataAndPublicData("contact", data, authToken);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -355,7 +363,7 @@ const storeContact = async (data, authToken) => {
 
 		const identifier = `contact_${name}_${Date.now()}`;
 
-		const { metadata, publicData } = await createMetadataAndPublicData("contact", data);
+		const { metadata, publicData } = await createMetadataAndPublicData("contact", data, authToken);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -418,7 +426,7 @@ const storeBankDetails = async (data, authToken) => {
 
 		const identifier = `bank_${bankName}_${Date.now()}`;
 
-		const { metadata, publicData } = await createMetadataAndPublicData("bank_details", data);
+		const { metadata, publicData } = await createMetadataAndPublicData("bank_details", data, authToken);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -675,4 +683,47 @@ const createNFTReadyData = async (data, authToken) => {
 	}
 };
 
-export { storeData, storePassword, storeNotes, storeCreditCard, storeContact, storeBankDetails, retrieveData, previewData, createNFTReadyData };
+/**
+ * List data by category
+ * @param {Object} data - Query parameters
+ * @param {Object} authToken - Authentication token
+ * @returns {Promise<Object>} List of data items in the specified category
+ */
+const listData = async (data, authToken) => {
+	try {
+		const { category } = data;
+
+		// Validate category
+		const validCategories = ["password", "notes", "credit_card", "contact", "bank_details"];
+		if (!validCategories.includes(category)) {
+			throw new Error(`Invalid category: ${category}`);
+		}
+
+		// For now, return a simple response indicating the category was validated
+		// In a real implementation, this would query the database for items in this category
+		return {
+			success: true,
+			message: `Listing data for category: ${category}`,
+			category: category,
+			data: [], // Empty array for now, would contain actual data in real implementation
+			timestamp: new Date().toISOString(),
+			zelfName: authToken.identifier,
+		};
+	} catch (error) {
+		console.error("Error listing data:", error);
+		throw new Error(`Failed to list data: ${error.message}`);
+	}
+};
+
+export {
+	storeData,
+	storePassword,
+	storeNotes,
+	storeCreditCard,
+	storeContact,
+	storeBankDetails,
+	retrieveData,
+	previewData,
+	createNFTReadyData,
+	listData,
+};

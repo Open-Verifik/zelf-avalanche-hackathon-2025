@@ -1,0 +1,63 @@
+@use "./variables";
+
+.tip-box {
+    align-items: flex-start;
+    border-radius: 16px;
+    border: 1px solid variables.$antiFlashWhite;
+    box-sizing: border-box;
+    display: flex;
+    gap: 12px;
+    padding: 16px;
+    width: 100%;
+
+    &__text {
+        color: variables.$black;
+        font-family: "Poppins", Arial, sans-serif;
+        font-size: 14px;
+        font-weight: 500;
+        line-height: 20px;
+        margin: 0 !important;
+    }
+
+    &__link {
+        text-decoration: underline;
+    }
+}
+
+.tooltip {
+    font: Poppins;
+    position: absolute;
+    background-color: variables.$black;
+    color: variables.$white;
+    font-size: 12px;
+    padding: 8px 12px;
+    border-radius: 9999px;
+    white-space: nowrap;
+    top: -44px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(10px);
+    transition: opacity 0.2s ease, transform 0.2s ease;
+
+    &::after {
+        content: "";
+        position: absolute;
+        bottom: -12px;
+        left: 50%;
+        transform: translateX(-50%);
+        border-width: 6px;
+        border-style: solid;
+        border-color: variables.$black transparent transparent transparent;
+    }
+}
+
+.tooltip-container {
+    position: relative;
+    cursor: pointer;
+
+    &:hover .tooltip {
+        opacity: 1;
+        visibility: visible;
+        transform: translateY(0);
+    }
+}

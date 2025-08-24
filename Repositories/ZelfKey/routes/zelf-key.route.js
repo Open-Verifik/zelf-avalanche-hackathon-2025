@@ -20,6 +20,7 @@ export default (server) => {
 	server.post(`${PATH}/store/bank-details`, Middleware.storeBankDetailsValidation, Controller.storeBankDetails);
 
 	// Retrieve and preview endpoints
+	server.get(`${PATH}/list`, Middleware.listValidation, Controller.listData);
 	server.post(`${PATH}/retrieve`, Middleware.retrieveValidation, Controller.retrieveData);
 	server.post(`${PATH}/preview`, Middleware.previewValidation, Controller.previewData);
 };

@@ -1,0 +1,317 @@
+{
+    "$schema": "./node_modules/@angular/cli/lib/config/schema.json",
+    "version": 1,
+    "newProjectRoot": "projects",
+    "projects": {
+        "zelf-extension": {
+            "prefix": "app",
+            "projectType": "application",
+            "root": "",
+            "sourceRoot": "src",
+            "schematics": {
+                "@schematics/angular:application": {
+                    "strict": true
+                },
+                "@schematics/angular:class": {},
+                "@schematics/angular:directive": {},
+                "@schematics/angular:guard": {},
+                "@schematics/angular:interceptor": {},
+                "@schematics/angular:pipe": {},
+                "@schematics/angular:service": {}
+            },
+            "architect": {
+                "test": {
+                    "builder": "@angular-devkit/build-angular:karma",
+                    "options": {
+                        "main": "src/test.ts",
+                        "polyfills": "src/polyfills.ts",
+                        "tsConfig": "tsconfig.spec.json",
+                        "karmaConfig": "karma.conf.js",
+                        "assets": ["src/favicon.ico", "src/assets"],
+                        "styles": ["src/styles.css"],
+                        "scripts": []
+                    }
+                },
+                "build": {
+                    "defaultConfiguration": "production",
+                    "builder": "@angular-devkit/build-angular:browser",
+                    "options": {
+                        "baseHref": "./index.html",
+                        "outputPath": "dist",
+                        "index": "src/index.html",
+                        "main": "src/main.ts",
+                        "polyfills": "src/polyfills.ts",
+                        "tsConfig": "tsconfig.app.json",
+                        "assets": ["src/favicon.ico", "src/assets", "src/master.css"],
+                        "allowedCommonJsDependencies": [
+                            "@ethereumjs/rlp",
+                            "@tensorflow/tfjs-core",
+                            "@vladmandic/face-api",
+                            "bigint-buffer",
+                            "bip39",
+                            "bs58",
+                            "buffer",
+                            "crc-32",
+                            "cross-fetch",
+                            "flat",
+                            "jsqr",
+                            "lodash",
+                            "moment",
+                            "qr-code-styling",
+                            "qrcode",
+                            "setimmediate",
+                            "tweetnacl",
+                            "webextension-polyfill"
+                        ]
+                    },
+                    "configurations": {
+                        "production": {
+                            "baseHref": "/",
+                            "buildOptimizer": true,
+                            "extractLicenses": true,
+                            "namedChunks": false,
+                            "outputHashing": "none",
+                            "outputPath": "dist/prod/web",
+                            "sourceMap": false,
+                            "vendorChunk": false,
+                            "assets": [
+                                "src/assets",
+                                "src/background.js",
+                                "src/favicon.ico",
+                                "src/master.css",
+                                {
+                                    "input": "node_modules/webextension-polyfill/dist/",
+                                    "output": "/",
+                                    "glob": "*.min.*"
+                                }
+                            ],
+                            "budgets": [
+                                {
+                                    "type": "initial",
+                                    "maximumWarning": "5mb",
+                                    "maximumError": "10mb"
+                                },
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "40kb",
+                                    "maximumError": "50kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment.prod.ts"
+                                }
+                            ]
+                        },
+                        "ext_prod_chrome": {
+                            "buildOptimizer": true,
+                            "extractLicenses": true,
+                            "index": "configurations/extension/chrome/index.html",
+                            "namedChunks": false,
+                            "outputHashing": "none",
+                            "outputPath": "dist/prod/ext/chrome",
+                            "sourceMap": false,
+                            "vendorChunk": false,
+                            "assets": [
+                                "src/assets",
+                                "src/background.js",
+                                "src/favicon.ico",
+                                "src/master.css",
+                                {
+                                    "input": "configurations/extension/chrome",
+                                    "output": "/",
+                                    "glob": "*.*"
+                                },
+                                {
+                                    "input": "node_modules/webextension-polyfill/dist/",
+                                    "output": "/",
+                                    "glob": "*.min.*"
+                                }
+                            ],
+                            "budgets": [
+                                {
+                                    "type": "initial",
+                                    "maximumWarning": "5mb",
+                                    "maximumError": "10mb"
+                                },
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "40kb",
+                                    "maximumError": "50kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment-ext.prod.ts"
+                                }
+                            ],
+                            "optimization": {
+                                "fonts": true,
+                                "scripts": true,
+                                "styles": {
+                                    "inlineCritical": false,
+                                    "minify": true
+                                }
+                            }
+                        },
+                        "ext_prod_firefox": {
+                            "buildOptimizer": true,
+                            "extractLicenses": true,
+                            "index": "configurations/extension/firefox/index.html",
+                            "namedChunks": false,
+                            "outputHashing": "all",
+                            "outputPath": "dist/prod/ext/firefox",
+                            "sourceMap": false,
+                            "vendorChunk": true,
+                            "assets": [
+                                "src/assets",
+                                "src/background.js",
+                                "src/favicon.ico",
+                                "src/master.css",
+                                {
+                                    "input": "configurations/extension/firefox",
+                                    "output": "/",
+                                    "glob": "*.*"
+                                },
+                                {
+                                    "input": "node_modules/webextension-polyfill/dist/",
+                                    "output": "/",
+                                    "glob": "*.min.*"
+                                }
+                            ],
+                            "budgets": [
+                                {
+                                    "type": "initial",
+                                    "maximumWarning": "5mb",
+                                    "maximumError": "10mb"
+                                },
+                                {
+                                    "type": "anyComponentStyle",
+                                    "maximumWarning": "40kb",
+                                    "maximumError": "50kb"
+                                }
+                            ],
+                            "fileReplacements": [
+                                {
+                                    "replace": "src/environments/environment.ts",
+                                    "with": "src/environments/environment-ext.prod.ts"
+                                }
+                            ],
+                            "optimization": {
+                                "fonts": true,
+                                "scripts": true,
+                                "styles": {
+                                    "inlineCritical": false,
+                                    "minify": true
+                                }
+                            }
+                        },
+                        "development": {
+                            "baseHref": "/",
+                            "buildOptimizer": false,
+                            "extractLicenses": false,
+                            "namedChunks": true,
+                            "optimization": false,
+                            "outputPath": "dist/dev/web",
+                            "sourceMap": true,
+                            "vendorChunk": true,
+                            "assets": [
+                                "src/assets",
+                                "src/background.js",
+                                "src/favicon.ico",
+                                "src/master.css",
+                                {
+                                    "input": "node_modules/webextension-polyfill/dist/",
+                                    "output": "/",
+                                    "glob": "*.min.*"
+                                }
+                            ]
+                        },
+                        "ext_dev_chrome": {
+                            "buildOptimizer": false,
+                            "extractLicenses": false,
+                            "index": "configurations/extension/chrome/index.html",
+                            "namedChunks": true,
+                            "optimization": false,
+                            "outputPath": "dist/dev/ext/chrome",
+                            "sourceMap": true,
+                            "vendorChunk": true,
+                            "assets": [
+                                "src/assets",
+                                "src/background.js",
+                                "src/favicon.ico",
+                                "src/master.css",
+                                {
+                                    "input": "configurations/extension/chrome",
+                                    "output": "/",
+                                    "glob": "*.*"
+                                },
+                                {
+                                    "input": "node_modules/webextension-polyfill/dist/",
+                                    "output": "/",
+                                    "glob": "*.min.*"
+                                }
+                            ]
+                        },
+                        "ext_dev_firefox": {
+                            "buildOptimizer": false,
+                            "extractLicenses": false,
+                            "index": "configurations/extension/firefox/index.html",
+                            "namedChunks": true,
+                            "optimization": false,
+                            "outputPath": "dist/dev/ext/firefox",
+                            "sourceMap": true,
+                            "vendorChunk": true,
+                            "assets": [
+                                "src/assets",
+                                "src/background.js",
+                                "src/favicon.ico",
+                                "src/master.css",
+                                {
+                                    "input": "configurations/extension/firefox",
+                                    "output": "/",
+                                    "glob": "*.*"
+                                },
+                                {
+                                    "input": "node_modules/webextension-polyfill/dist/",
+                                    "output": "/",
+                                    "glob": "*.min.*"
+                                }
+                            ]
+                        }
+                    }
+                },
+                "serve": {
+                    "builder": "@angular-devkit/build-angular:dev-server",
+                    "defaultConfiguration": "development",
+                    "configurations": {
+                        "development-tests": {
+                            "buildTarget": "zelf-extension:build:development-tests"
+                        },
+                        "development": {
+                            "buildTarget": "zelf-extension:build:development"
+                        }
+                    }
+                },
+                "extract-i18n": {
+                    "builder": "@angular-devkit/build-angular:extract-i18n",
+                    "options": {
+                        "buildTarget": "zelf-extension:build"
+                    }
+                },
+                "e2e": {
+                    "builder": "@puppeteer/ng-schematics:puppeteer",
+                    "options": {
+                        "devServerTarget": "zelf-extension:serve",
+                        "testRunner": "jasmine"
+                    }
+                }
+            }
+        }
+    },
+    "cli": {
+        "analytics": false
+    }
+}

@@ -1,0 +1,261 @@
+<div class="zelf-card" *transloco="let t">
+    <div class="transaction-receipt__header">
+        <div class="transaction-receipt__col1"></div>
+
+        <div class="transaction-receipt__col2">
+            <p class="transaction-receipt__title">{{ t("common.transaction") }}</p>
+        </div>
+
+        <div class="transaction-receipt__col3"></div>
+    </div>
+
+    <div class="zelf-card__content zelf-card__content--grow">
+        <ng-container *ngIf="!loading && !transaction">
+            <div class="transaction-receipt__empty">
+                <svg xmlns="http://www.w3.org/2000/svg" height="150px" viewBox="0 -960 960 960" width="150px" fill="#e3e3e3">
+                    <path
+                        d="M200-120q-33 0-56.5-23.5T120-200v-160h80v160h160v80H200Zm560 0H600v-80h160v-160h80v160q0 33-23.5 56.5T760-120ZM120-760q0-33 23.5-56.5T200-840h160v80H200v160h-80v-160Zm720 0v160h-80v-160H600v-80h160q33 0 56.5 23.5T840-760ZM480-240q21 0 35.5-14.5T530-290q0-21-14.5-35.5T480-340q-21 0-35.5 14.5T430-290q0 21 14.5 35.5T480-240Zm-36-153h73q0-34 8-52t35-45q35-35 46.5-56.5T618-598q0-54-39-88t-99-34q-50 0-86 26t-52 74l66 27q7-26 26.5-42.5T480-652q29 0 46.5 15.5T544-595q0 20-9.5 37.5T502-521q-33 29-45.5 56T444-393Z"
+                    />
+                </svg>
+
+                <p class="transaction-receipt__not-found">{{ t("errors.not_found") }}</p>
+            </div>
+        </ng-container>
+
+        <ng-container *ngIf="transaction">
+            <div class="transaction-receipt__total">
+                <div
+                    class="zelf-chip"
+                    [ngClass]="{
+                        'zelf-chip--error': transaction.status !== 'success',
+                        'zelf-chip--success': transaction.status === 'success',
+                    }"
+                >
+                    <ng-container *ngIf="!transaction.status || transaction.status === 'pending'">{{ t("common.pending") }}</ng-container>
+                    <ng-container *ngIf="transaction.status === 'failed'">{{ t("common.failed") }}</ng-container>
+                    <ng-container *ngIf="transaction.status === 'success'">{{ t("common.success") }}</ng-container>
+                </div>
+
+                <div class="transaction-receipt__price-amount-container" *ngIf="transaction.type !== 'swap'">
+                    <h2 class="transaction-receipt__price">{{ transaction.amount | number: "1.0-18" }}</h2>
+
+                    <p class="transaction-receipt__price-currency">{{ transaction.asset }}</p>
+                </div>
+
+                <div class="transaction-receipt__price-amount-container" *ngIf="transaction.type === 'swap'">
+                    <h2 class="transaction-receipt__price">{{ transaction.targetAmount | number: "1.0-18" }}</h2>
+
+                    <p class="transaction-receipt__price-currency">{{ transaction.targetSymbol }}</p>
+                </div>
+            </div>
+
+            <div class="transaction-receipt__content">
+                <div class="transaction-receipt__summary">
+                    <div class="zelf-action-row">
+                        <p class="transaction-receipt__label">{{ t("common.date") }}</p>
+
+                        <p class="transaction-receipt__value">{{ transaction.date | date: "dd MMM, yyyy HH:mm" }}</p>
+                    </div>
+
+                    <ng-container *ngIf="transactionType === 'swap'">
+                        <div class="zelf-action-row">
+                            <p class="transaction-receipt__label">{{ t("common.from") }}</p>
+
+                            <div class="transaction-receipt__value-container">
+                                <div class="transaction-receipt__value">
+                                    <div class="transaction-receipt__logo-container">
+                                        <img [src]="tokenProperties.sourceImage" alt="logo" class="transaction-receipt__logo" />
+                                        <img
+                                            [src]="tokenProperties.sourceNetworkImage"
+                                            alt="logo"
+                                            class="transaction-receipt__logo transaction-receipt__logo--network"
+                                        />
+                                    </div>
+
+                                    <span>{{ tokenProperties.sourceSymbol }}</span>
+                                    <span class="transaction-receipt__value-light">{{ tokenProperties.sourceNetwork }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="zelf-action-row">
+                            <p class="transaction-receipt__label">{{ t("common.to") }}</p>
+
+                            <div class="transaction-receipt__value-container">
+                                <div class="transaction-receipt__value">
+                                    <div class="transaction-receipt__logo-container">
+                                        <img [src]="transaction.targetImage" alt="logo" class="transaction-receipt__logo" />
+                                        <img
+                                            [src]="tokenProperties.targetNetworkImage"
+                                            alt="logo"
+                                            class="transaction-receipt__logo transaction-receipt__logo--network"
+                                        />
+                                    </div>
+
+                                    <span>{{ tokenProperties.targetSymbol }}</span>
+                                    <span class="transaction-receipt__value-light">{{ tokenProperties.targetNetworkSymbol }}</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="zelf-action-row transaction-receipt__action-row--auto-height">
+                            <p class="transaction-receipt__label">{{ t("common.total") }}</p>
+
+                            <div class="transaction-receipt__value-container transaction-receipt__value-container--column">
+                                <div class="transaction-receipt__swap-row">
+                                    <div class="transaction-receipt__logo-container">
+                                        <img [src]="tokenProperties.sourceImage" alt="logo" class="transaction-receipt__logo" />
+                                        <img
+                                            [src]="tokenProperties.sourceNetworkImage"
+                                            alt="logo"
+                                            class="transaction-receipt__logo transaction-receipt__logo--network"
+                                        />
+                                    </div>
+
+                                    <p class="transaction-receipt__value">
+                                        {{ transaction.amount | number: "1.2-18" }}
+                                        <span class="transaction-receipt__value-light">{{ tokenProperties.sourceSymbol }}</span>
+                                    </p>
+                                </div>
+
+                                <div class="transaction-receipt__swap-row">
+                                    <svg width="12" height="12" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+                                        <path
+                                            d="M1.20874 9.0007H12.3787L7.49874 13.8807C7.10874 14.2707 7.10874 14.9107 7.49874 15.3007C7.88874 15.6907 8.51874 15.6907 8.90874 15.3007L15.4987 8.7107C15.8887 8.3207 15.8887 7.6907 15.4987 7.3007L8.91874 0.700703C8.52874 0.310703 7.89874 0.310703 7.50874 0.700703C7.11874 1.0907 7.11874 1.7207 7.50874 2.1107L12.3787 7.0007H1.20874C0.65874 7.0007 0.20874 7.4507 0.20874 8.0007C0.20874 8.5507 0.65874 9.0007 1.20874 9.0007Z"
+                                            fill="#181818"
+                                        />
+                                    </svg>
+
+                                    <div class="transaction-receipt__logo-container">
+                                        <img [src]="transaction.targetImage" alt="logo" class="transaction-receipt__logo" />
+                                        <img
+                                            [src]="tokenProperties.sourceNetworkImage"
+                                            alt="logo"
+                                            class="transaction-receipt__logo transaction-receipt__logo--network"
+                                        />
+                                    </div>
+
+                                    <p class="transaction-receipt__value">
+                                        {{ transaction.targetAmount | number: "1.2-18" }}
+                                        <span class="transaction-receipt__value-light">{{ tokenProperties.targetSymbol }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="zelf-action-row" *ngIf="transaction.gasFee || transaction.gasPrice">
+                            <p class="transaction-receipt__label">{{ t("common.network_fee") }}</p>
+
+                            <p class="transaction-receipt__value">
+                                {{ transaction.gasFee || transaction.gasPrice | number: "1.2-8" }}
+                                <span class="transaction-receipt__value-light">{{ transaction.asset }}</span>
+                            </p>
+                        </div>
+                    </ng-container>
+
+                    <ng-container *ngIf="transactionType !== 'swap'">
+                        <div class="zelf-action-row">
+                            <p class="transaction-receipt__label">{{ t("common.withdrawal_network") }}</p>
+
+                            <p class="transaction-receipt__value">{{ transaction.tokenType }}</p>
+                        </div>
+
+                        <div class="zelf-action-row">
+                            <p class="transaction-receipt__label">{{ t("common.address") }}</p>
+
+                            <div class="transaction-receipt__value-container">
+                                <p class="transaction-receipt__value">{{ transaction.to | addressMask }}</p>
+
+                                <button
+                                    (click)="copyToClipboard(transaction.to)"
+                                    mat-flat-button
+                                    class="zelf-icon-button zelf-icon-button--40 zelf-icon-button--border-soft"
+                                >
+                                    <ng-container *ngTemplateOutlet="clipboardIcon"></ng-container>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="zelf-action-row">
+                            <p class="transaction-receipt__label">{{ t("common.transaction_id") }}</p>
+
+                            <div class="transaction-receipt__value-container">
+                                <p class="transaction-receipt__value">{{ hash | addressMask }}</p>
+
+                                <button
+                                    (click)="copyToClipboard(hash)"
+                                    mat-flat-button
+                                    class="zelf-icon-button zelf-icon-button--40 zelf-icon-button--border-soft"
+                                >
+                                    <ng-container *ngTemplateOutlet="clipboardIcon"></ng-container>
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="zelf-action-row" *ngIf="transaction.gasFee || transaction.gasPrice">
+                            <p class="transaction-receipt__label">{{ t("common.fee") }}</p>
+
+                            <p class="transaction-receipt__value">
+                                {{ transaction.gasFee || transaction.gasPrice | number: "1.2-18" }} {{ networkSymbol }}
+                            </p>
+                        </div>
+
+                        <div class="zelf-action-row transaction-receipt__action-row--auto-height">
+                            <p class="transaction-receipt__label">{{ t("common.total") }}</p>
+
+                            <div class="transaction-receipt__value-container transaction-receipt__value-container--column">
+                                <div class="transaction-receipt__swap-row">
+                                    <p class="transaction-receipt__value" *ngIf="networkSymbol === transaction.asset">
+                                        {{ transaction.total | number: "1.0-18" }} {{ networkSymbol }}
+                                    </p>
+
+                                    <p class="transaction-receipt__value" *ngIf="networkSymbol !== transaction.asset">
+                                        {{ transaction.gasFee | number: "1.2-18" }} {{ networkSymbol }}
+                                    </p>
+                                </div>
+
+                                <div class="transaction-receipt__swap-row" *ngIf="networkSymbol !== transaction.asset">
+                                    <p class="transaction-receipt__value">
+                                        <small>{{ transaction.amount | number: "1.0-18" }} {{ transaction.asset }}</small>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </ng-container>
+
+                    <div class="zelf-action-row" *ngIf="transaction.confirmations">
+                        <p class="transaction-receipt__label">{{ t("send.confirmations") }}</p>
+
+                        <p class="transaction-receipt__value">{{ transaction.confirmations }}</p>
+                    </div>
+                </div>
+            </div>
+        </ng-container>
+
+        <zelf-loader *ngIf="loading"></zelf-loader>
+    </div>
+
+    <div class="zelf-card__actions zelf-card__actions--column">
+        <button (click)="shareTransaction()" class="zelf-button zelf-button--outlined zelf-button--wide" mat-flat-button type="submit">
+            <span>{{ t("transaction.share_transaction") }}</span>
+
+            <svg width="14" height="16" viewBox="0 0 18 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M15 14.1191C14.24 14.1191 13.56 14.4191 13.04 14.8891L5.91 10.7391C5.96 10.5091 6 10.2791 6 10.0391C6 9.79906 5.96 9.56906 5.91 9.33906L12.96 5.22906C13.5 5.72906 14.21 6.03906 15 6.03906C16.66 6.03906 18 4.69906 18 3.03906C18 1.37906 16.66 0.0390625 15 0.0390625C13.34 0.0390625 12 1.37906 12 3.03906C12 3.27906 12.04 3.50906 12.09 3.73906L5.04 7.84906C4.5 7.34906 3.79 7.03906 3 7.03906C1.34 7.03906 0 8.37906 0 10.0391C0 11.6991 1.34 13.0391 3 13.0391C3.79 13.0391 4.5 12.7291 5.04 12.2291L12.16 16.3891C12.11 16.5991 12.08 16.8191 12.08 17.0391C12.08 18.6491 13.39 19.9591 15 19.9591C16.61 19.9591 17.92 18.6491 17.92 17.0391C17.92 15.4291 16.61 14.1191 15 14.1191Z"
+                />
+            </svg>
+        </button>
+
+        <button (click)="goToHistory()" class="zelf-button zelf-button--black zelf-button--wide" mat-flat-button type="submit">
+            {{ t("transaction.go_to_my_history") }}
+        </button>
+    </div>
+</div>
+
+<ng-template #clipboardIcon>
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path
+            d="M15.5 20H5.5V7C5.5 6.45 5.05 6 4.5 6C3.95 6 3.5 6.45 3.5 7V20C3.5 21.1 4.4 22 5.5 22H15.5C16.05 22 16.5 21.55 16.5 21C16.5 20.45 16.05 20 15.5 20ZM20.5 16V4C20.5 2.9 19.6 2 18.5 2H9.5C8.4 2 7.5 2.9 7.5 4V16C7.5 17.1 8.4 18 9.5 18H18.5C19.6 18 20.5 17.1 20.5 16ZM18.5 16H9.5V4H18.5V16Z"
+        />
+    </svg>
+</ng-template>

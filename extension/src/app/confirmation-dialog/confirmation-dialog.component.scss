@@ -1,0 +1,33 @@
+@use "../../styles/variables";
+@use "../../styles/buttons";
+
+:host {
+    display: block;
+    padding: 32px;
+}
+
+.dialog {
+    &__title {
+        font-size: 24px;
+        font-weight: 500;
+        margin-bottom: 16px;
+        font-family: "Menda", "Arial Black", sans-serif;
+        text-transform: uppercase;
+        margin: 0;
+        text-align: center;
+        line-height: 26px;
+    }
+
+    &__message {
+        font-size: 16px;
+        font-family: "Poppins", Arial, sans-serif;
+        margin-top: 16px;
+        margin-bottom: 8px;
+    }
+
+    &__actions {
+        display: flex;
+        justify-content: space-between;
+        margin-top: 32px;
+    }
+}

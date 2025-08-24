@@ -1,0 +1,72 @@
+@use "../../styles/variables";
+@use "../../styles/buttons";
+@use "../../styles/elements";
+
+:host {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.welcome-import {
+    &__card,
+    &__header {
+        gap: 12px;
+    }
+
+    &__header-button {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex-direction: row;
+        width: 100%;
+    }
+
+    &__form {
+        width: 100%;
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        flex-grow: 1;
+    }
+
+    &__grid {
+        display: grid;
+        gap: 8px;
+        grid-template-columns: repeat(3, 1fr);
+    }
+
+    &__grid-item {
+        display: inline-flex;
+        justify-content: flex-start;
+        align-items: center;
+        padding: 8px;
+        border-radius: 24px;
+        height: 32px;
+        gap: 0;
+        grid-column: span 1;
+
+        & .zelf-input__prefix-text {
+            margin-right: 8px;
+        }
+
+        & .zelf-input__control {
+            min-width: 0;
+            width: 100%;
+            padding-left: 0;
+            padding-right: 0;
+        }
+
+        & .zelf-icon-button {
+            margin-right: 0 !important;
+        }
+    }
+
+    &__actions {
+        display: flex;
+        flex-grow: 1;
+        align-items: flex-end;
+    }
+}

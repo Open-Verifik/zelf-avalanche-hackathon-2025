@@ -125,4 +125,19 @@ const previewData = async (ctx) => {
 	}
 };
 
-export { storeData, storePassword, storeNotes, storeCreditCard, storeContact, storeBankDetails, retrieveData, previewData };
+/**
+ * List data by category
+ * @param {Object} ctx - Koa context
+ */
+const listData = async (ctx) => {
+	try {
+		const data = await Module.listData(ctx.request.query, ctx.state.user);
+		ctx.body = { ...data };
+	} catch (error) {
+		console.error(error);
+		ctx.status = error.status || 500;
+		ctx.body = { error: error.message };
+	}
+};
+
+export { storeData, storePassword, storeNotes, storeCreditCard, storeContact, storeBankDetails, retrieveData, previewData, listData };

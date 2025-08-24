@@ -6,12 +6,17 @@ import { validate } from "../../../Utilities/helper.module.js";
  */
 
 /**
+ * Supported data categories for ZelfKey storage
+ */
+const SUPPORTED_CATEGORIES = ["password", "notes", "credit_card", "contact", "bank_details"];
+
+/**
  * Validation schemas for different data types
  */
 const schemas = {
 	// Generic store data schema
 	storeData: {
-		type: { required: true, enum: ["password", "notes", "credit_card", "contact", "bank_details"] },
+		type: { required: true, enum: SUPPORTED_CATEGORIES },
 		payload: { required: true, minKeys: 1 },
 		faceBase64: { required: true, isBase64Image: true },
 		password: { required: true },
@@ -80,6 +85,10 @@ const schemas = {
 	preview: {
 		zelfProof: { required: true },
 		faceBase64: { required: true, isBase64Image: true },
+	},
+	// List data schema
+	list: {
+		category: { required: true, enum: SUPPORTED_CATEGORIES },
 	},
 };
 
@@ -460,6 +469,22 @@ const retrieveValidation = async (ctx, next) => {
 	await next();
 };
 
+const listValidation = async (ctx, next) => {
+	const valid = validate(schemas.list, ctx.request.query);
+
+	if (valid.error) {
+		ctx.status = 400;
+
+		ctx.body = {
+			error: "Validation error",
+			message: valid.error.message,
+		};
+		return;
+	}
+
+	await next();
+};
+
 /**
  * Preview data validation middleware
  */
@@ -514,6 +539,7 @@ function isValidCreditCard(cardNumber) {
 }
 
 export {
+	SUPPORTED_CATEGORIES,
 	storeDataValidation,
 	storePasswordValidation,
 	storeNotesValidation,
@@ -522,4 +548,5 @@ export {
 	storeBankDetailsValidation,
 	retrieveValidation,
 	previewValidation,
+	listValidation,
 };

@@ -1,0 +1,104 @@
+@use "../../styles/variables";
+@use "../../styles/buttons";
+
+* {
+    box-sizing: border-box;
+}
+
+:host {
+    background-color: variables.$antiFlashWhite;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    min-height: 100vh;
+    min-width: 100%;
+}
+
+@media screen and (max-width: variables.$medium) {
+    :host {
+        background-color: variables.$white;
+    }
+}
+
+.zelf-app {
+    width: 100%;
+    margin: 0 auto;
+
+    &__header {
+        align-items: center;
+        display: flex;
+        justify-content: space-between;
+        height: 96px;
+        padding: 1rem;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to bottom, variables.$antiFlashWhite 70%, transparent);
+        z-index: 999;
+
+        @media screen and (max-width: variables.$medium) {
+            height: 72px;
+            background: linear-gradient(to bottom, variables.$white 70%, transparent);
+        }
+    }
+
+    &__logo-container {
+        cursor: pointer;
+    }
+
+    &__content {
+        width: 100%;
+        overflow: auto;
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        padding: 100px 0 64px;
+
+        @media screen and (max-width: variables.$medium) {
+            padding: 56px 0 32px;
+        }
+    }
+
+    &__footer {
+        height: 48px;
+        align-items: center;
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+        width: 100%;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        background: linear-gradient(to top, variables.$antiFlashWhite 70%, transparent);
+        z-index: 999;
+        padding: 0 1rem;
+
+        @media screen and (max-width: variables.$medium) {
+            background: linear-gradient(to top, variables.$white 70%, transparent);
+            justify-content: flex-end;
+            padding: 6px;
+        }
+
+        &-menu-trigger {
+            display: none;
+        }
+
+        @media screen and (max-width: variables.$medium) {
+            &-menu-trigger {
+                display: flex;
+            }
+
+            &-links {
+                display: none;
+            }
+        }
+    }
+
+    &__logo svg {
+        fill: variables.$black;
+    }
+}

@@ -1,0 +1,163 @@
+.zelf-keys-payment-cards {
+	padding: 24px;
+	height: 100%;
+
+	.header {
+		margin-bottom: 32px;
+
+		h2 {
+			font-size: 28px;
+			font-weight: 600;
+			color: #1a1a1a;
+			margin: 0 0 8px 0;
+		}
+
+		p {
+			font-size: 16px;
+			color: #666;
+			margin: 0;
+		}
+	}
+
+	.content {
+		.cards-grid {
+			display: grid;
+			grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+			gap: 24px;
+
+			.card-item {
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				border-radius: 16px;
+				padding: 24px;
+				color: white;
+				box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+				transition:
+					transform 0.2s,
+					box-shadow 0.2s;
+
+				&:hover {
+					transform: translateY(-4px);
+					box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);
+				}
+
+				.card-header {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					margin-bottom: 24px;
+
+					.card-type {
+						font-size: 12px;
+						font-weight: 700;
+						letter-spacing: 1px;
+						padding: 6px 12px;
+						border-radius: 20px;
+						background: rgba(255, 255, 255, 0.2);
+						backdrop-filter: blur(10px);
+
+						&.visa {
+							background: rgba(255, 255, 255, 0.2);
+						}
+
+						&.mastercard {
+							background: rgba(255, 255, 255, 0.2);
+						}
+					}
+
+					.card-actions {
+						display: flex;
+						gap: 8px;
+
+						button {
+							padding: 6px 12px;
+							border: none;
+							border-radius: 6px;
+							font-size: 12px;
+							font-weight: 500;
+							cursor: pointer;
+							transition: all 0.2s;
+							background: rgba(255, 255, 255, 0.2);
+							color: white;
+							backdrop-filter: blur(10px);
+
+							&:hover {
+								background: rgba(255, 255, 255, 0.3);
+								transform: scale(1.05);
+							}
+						}
+					}
+				}
+
+				.card-number {
+					font-size: 20px;
+					font-weight: 600;
+					letter-spacing: 2px;
+					margin-bottom: 24px;
+					font-family: "Courier New", monospace;
+				}
+
+				.card-details {
+					display: flex;
+					justify-content: space-between;
+
+					.card-holder,
+					.card-expiry {
+						display: flex;
+						flex-direction: column;
+
+						.label {
+							font-size: 10px;
+							opacity: 0.8;
+							margin-bottom: 4px;
+							text-transform: uppercase;
+							letter-spacing: 0.5px;
+						}
+
+						.value {
+							font-size: 14px;
+							font-weight: 600;
+						}
+					}
+				}
+			}
+
+			.add-card {
+				background: #f8f9fa;
+				border: 2px dashed #dee2e6;
+				border-radius: 16px;
+				padding: 40px 20px;
+				text-align: center;
+				cursor: pointer;
+				transition: all 0.2s;
+				display: flex;
+				flex-direction: column;
+				align-items: center;
+				justify-content: center;
+
+				&:hover {
+					background: #e9ecef;
+					border-color: #adb5bd;
+				}
+
+				.add-icon {
+					font-size: 48px;
+					color: #6c757d;
+					margin-bottom: 16px;
+				}
+
+				h3 {
+					font-size: 18px;
+					font-weight: 600;
+					color: #495057;
+					margin: 0 0 8px 0;
+				}
+
+				p {
+					font-size: 14px;
+					color: #6c757d;
+					margin: 0;
+				}
+			}
+		}
+	}
+}

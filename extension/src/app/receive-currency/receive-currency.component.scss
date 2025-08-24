@@ -1,0 +1,193 @@
+@use "../../styles/variables";
+@use "../../styles/buttons";
+
+:host {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.receive-currency {
+    width: 100%;
+    max-width: 524px;
+
+    &__header {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr);
+        column-gap: 12px;
+        align-content: center;
+        justify-content: start;
+        gap: 24px;
+        width: 100%;
+    }
+
+    &__col1,
+    &__col3 {
+        grid-column: span 3;
+        display: flex;
+        align-items: center;
+    }
+
+    &__col1 {
+        justify-content: start;
+    }
+
+    &__col2 {
+        grid-column: span 4;
+        text-align: center;
+        align-items: center;
+    }
+
+    &__col3 {
+        justify-content: end;
+    }
+
+    &__title {
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 500;
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        text-align: center;
+        vertical-align: middle;
+        color: variables.$black;
+    }
+
+    &__content {
+        flex: 1 1 auto;
+        justify-content: flex-start;
+        position: relative;
+    }
+
+    &__loader {
+        position: absolute;
+        inset: 0;
+        margin: auto;
+    }
+}
+
+.network-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    padding: 16px;
+    border-radius: 16px;
+    background-color: transparent;
+    transition: background-color 0.3s variables.$smoothBezier;
+    width: 100%;
+    box-sizing: border-box;
+    cursor: pointer;
+
+    &__icon {
+        height: 40px;
+        width: 40px;
+        min-height: 40px;
+        min-width: 40px;
+        object-fit: contain;
+    }
+
+    &__name {
+        font-size: 1rem;
+        font-weight: 500;
+        color: variables.$black;
+    }
+
+    &__info {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        justify-content: flex-start;
+        align-items: flex-start;
+        flex: 1 1 auto;
+    }
+
+    &__network-info {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        justify-content: center;
+        align-items: flex-start;
+    }
+
+    &__network {
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        text-align: center;
+        vertical-align: middle;
+        margin: 0;
+    }
+
+    &__network-chip {
+        height: 20;
+        border-radius: 24px;
+        gap: 10px;
+        padding: 2px 8px;
+        margin: 0;
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 500;
+        font-size: 11px;
+        line-height: 16px;
+        letter-spacing: 0.5px;
+        text-align: center;
+        vertical-align: middle;
+        background-color: variables.$platinum;
+        color: variables.$taupeGray;
+    }
+
+    &__name {
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 600;
+        font-size: 11px;
+        line-height: 16px;
+        letter-spacing: 0.5px;
+        vertical-align: middle;
+        margin: 0;
+        color: variables.$taupeGray;
+    }
+
+    &__balance {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        justify-content: center;
+        align-items: flex-end;
+    }
+
+    &__balance-amount {
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 600;
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        vertical-align: middle;
+    }
+
+    &__fiat-amount {
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 600;
+        font-size: 11px;
+        line-height: 16px;
+        letter-spacing: 0.5px;
+        text-align: center;
+        vertical-align: middle;
+        color: variables.$taupeGray;
+    }
+
+    &__buttons {
+        display: flex;
+        flex-direction: row;
+        gap: 8px;
+        justify-content: center;
+        align-items: center;
+    }
+
+    &:hover {
+        background-color: variables.$antiFlashWhite;
+    }
+}

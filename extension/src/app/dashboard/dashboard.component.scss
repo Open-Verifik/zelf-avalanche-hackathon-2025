@@ -1,0 +1,108 @@
+.dashboard-container {
+	height: 100vh;
+	display: flex;
+	flex-direction: column;
+	background: #f8f9fa;
+
+	.dashboard-header {
+		background: white;
+		padding: 20px 24px;
+		border-bottom: 1px solid #e0e0e0;
+		box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+
+		.user-info {
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+
+			.username {
+				font-size: 24px;
+				font-weight: 700;
+				color: #1a1a1a;
+			}
+
+			.user-avatar {
+				.avatar-icon {
+					width: 48px;
+					height: 48px;
+					background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+					border-radius: 50%;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					color: white;
+					font-size: 20px;
+					font-weight: 600;
+				}
+			}
+		}
+	}
+
+	.dashboard-nav {
+		background: white;
+		padding: 0 24px;
+		border-bottom: 1px solid #e0e0e0;
+		display: flex;
+		gap: 8px;
+		overflow-x: auto;
+
+		.nav-item {
+			position: relative;
+			padding: 16px 20px;
+			cursor: pointer;
+			transition: all 0.2s;
+			white-space: nowrap;
+			display: flex;
+			align-items: center;
+			gap: 8px;
+
+			&:hover {
+				background: #f8f9fa;
+			}
+
+			&.active {
+				background: #e3f2fd;
+				color: #1976d2;
+
+				.nav-text {
+					color: #1976d2;
+					font-weight: 600;
+				}
+
+				.active-indicator {
+					position: absolute;
+					bottom: 0;
+					left: 0;
+					right: 0;
+					height: 3px;
+					background: #1976d2;
+					border-radius: 3px 3px 0 0;
+				}
+			}
+
+			.nav-text {
+				font-size: 16px;
+				font-weight: 500;
+				color: #666;
+				transition: color 0.2s;
+			}
+
+			.badge {
+				background: #ff4757;
+				color: white;
+				font-size: 12px;
+				font-weight: 600;
+				padding: 4px 8px;
+				border-radius: 12px;
+				min-width: 20px;
+				text-align: center;
+			}
+		}
+	}
+
+	.dashboard-content {
+		flex: 1;
+		overflow: auto;
+		background: #f8f9fa;
+	}
+}

@@ -1,0 +1,49 @@
+{
+	"description": "Zelf Keys - Secure Digital Identity and Key Management Extension",
+	"host_permissions": ["*://*/*"],
+	"manifest_version": 3,
+	"name": "Zelf Keys",
+	"permissions": ["activeTab", "clipboardWrite", "clipboardRead", "contextMenus", "menus", "storage", "tabs"],
+	"version": "1.1.12",
+	"action": {
+		"default_popup": "popup.html",
+		"default_path": "index.html",
+		"default_title": "Zelf Keys",
+		"default_icon": "assets/icons/icon256.png"
+	},
+	"browser_specific_settings": {
+		"gecko": {
+			"id": "zelf@zelf.world"
+		}
+	},
+	"content_scripts": [
+		{
+			"matches": ["<all_urls>"],
+			"js": ["browser-polyfill.min.js", "main.js"]
+		}
+	],
+	"content_security_policy": {
+		"extension_pages": "script-src 'self'; object-src 'self';"
+	},
+	"icons": {
+		"16": "assets/icons/icon16.png",
+		"48": "assets/icons/icon48.png",
+		"128": "assets/icons/icon128.png",
+		"256": "assets/icons/icon256.png"
+	},
+	"sidebar_action": {
+		"default_panel": "index.html",
+		"open_at_install": false,
+		"default_title": "Zelf Keys",
+		"default_icon": {
+			"16": "assets/icons/icon16.png",
+			"48": "assets/icons/icon48.png"
+		}
+	},
+	"web_accessible_resources": [
+		{
+			"resources": ["index.html", "styles.css", "main.js", "runtime.js", "polyfills.js", "background.js"],
+			"matches": ["<all_urls>"]
+		}
+	]
+}

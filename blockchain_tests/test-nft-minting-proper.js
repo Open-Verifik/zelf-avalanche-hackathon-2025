@@ -22,13 +22,7 @@ const TEST_CONFIG = {
 };
 
 // Simple NFT Contract ABI (only what we need for minting)
-const NFT_ABI = [
-	"function name() view returns (string)",
-	"function symbol() view returns (string)",
-	"function totalSupply() view returns (uint256)",
-	"function owner() view returns (address)",
-	"function mintNFT(address to, string memory tokenURI) returns (uint256)",
-];
+const 
 
 // Pinata API configuration (for uploading metadata to IPFS)
 const PINATA_CONFIG = {

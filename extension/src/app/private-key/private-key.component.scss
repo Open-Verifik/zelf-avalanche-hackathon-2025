@@ -1,0 +1,96 @@
+@use "../../styles/variables";
+
+:host {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 16px;
+}
+
+.private-key {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    max-width: 400px;
+
+    &__exit {
+        align-items: center;
+        background-color: transparent;
+        border-radius: 9999px;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        height: 48px;
+        justify-content: center;
+        margin: 8px;
+        min-height: 48px;
+        min-width: 48px;
+        outline: none;
+        padding: 8px;
+        position: absolute;
+        right: 0;
+        top: 0;
+        transition: color 0.3s variables.$smoothBezier, background-color 0.3s variables.$smoothBezier;
+        width: 48px;
+
+        svg {
+            transition: fill 0.3s variables.$smoothBezier;
+            fill: variables.$black;
+            height: 16px;
+            width: 16px;
+        }
+
+        &:hover {
+            background-color: #b589f0;
+            color: white;
+
+            svg {
+                fill: white;
+            }
+        }
+    }
+
+    &__body {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        width: 100%;
+        justify-content: center;
+        align-items: center;
+    }
+
+    &__icon {
+        margin-top: 28px;
+        fill: variables.$black;
+    }
+
+    &__title {
+        font-size: 18px;
+        font-weight: 600;
+        font-family: "Menda", "Arial Black", sans-serif;
+        color: variables.$black;
+        text-transform: uppercase;
+        margin: 12px 0 0;
+    }
+
+    &__text {
+        font-size: 14px;
+        margin: 0;
+        text-align: center;
+    }
+
+    &__actions {
+        width: 100%;
+        margin-top: 16px;
+        display: flex;
+        gap: 8px;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+}

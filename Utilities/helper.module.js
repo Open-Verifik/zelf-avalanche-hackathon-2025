@@ -12,14 +12,19 @@
 const validate = (schema, data) => {
 	const errors = [];
 
+	// Ensure data is an object
+	if (!data || typeof data !== "object") {
+		data = {};
+	}
+
 	// Check required fields
 	for (const [field, rules] of Object.entries(schema)) {
-		if (rules.required && !data.hasOwnProperty(field)) {
+		if (rules.required && !(field in data)) {
 			errors.push(`${field} is required`);
 			continue;
 		}
 
-		if (data.hasOwnProperty(field)) {
+		if (field in data) {
 			const value = data[field];
 
 			// Check minLength

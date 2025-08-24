@@ -1,0 +1,65 @@
+@use "../../styles/variables";
+@use "../../styles/buttons";
+
+:host {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
+}
+
+.welcome-onboarding {
+    &__header-button {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        flex-direction: row;
+        width: 100%;
+    }
+}
+
+.carousel {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 600px;
+    overflow: visible;
+
+    &__item-container {
+        min-height: 490px;
+    }
+
+    &__subtitle {
+        margin-top: 12px;
+    }
+
+    &__item {
+        align-items: center;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    &__progress {
+        background-color: variables.$platinum;
+        border-radius: 6px;
+        height: 6px;
+        overflow: hidden;
+        position: relative;
+        width: 96px;
+        margin: 16px 0 8px;
+
+        &-bar {
+            background-color: variables.$secondaryColor;
+            border-radius: 6px;
+            height: 100%;
+            left: 0;
+            position: absolute;
+            top: 0;
+            width: 0;
+            transition: width 10s;
+        }
+    }
+}
