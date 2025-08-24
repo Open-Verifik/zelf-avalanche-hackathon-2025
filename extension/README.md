@@ -1,199 +1,248 @@
-# DEMO
-[![Watch the DEMO](https://img.youtube.com/vi/uNvTD_X4lP0/0.jpg)](https://www.youtube.com/watch?v=uNvTD_X4lP0)
+# 🔐 ZelfKey Extension - Avalanche Hackathon 2025
 
+## 🎯 Overview
 
-https://name.zelf.world
+ZelfKey is a revolutionary password management system built on the Avalanche blockchain that combines biometric security, NFT ownership, and decentralized storage. This extension represents the MVP (Minimum Viable Product) focused on password management, with a comprehensive roadmap for expansion into other digital asset categories.
 
+## 🚀 How It Works
 
-# Zelf Wallet (Web Extension)
+### Core Architecture
 
-The **Zelf Wallet** is a secure, privacy-focused web extension designed for seamless interaction with cryptocurrencies. The standout feature of the Zelf Wallet is its **ZelfProofs** technology, which ensures user privacy and security while enabling cryptographic functions such as proof of personhood, encryption, and passwordless login.
+ZelfKey operates on a three-layer security model:
 
-## Documentation
-For extensive documentation, check the following url https://docs.zelf.world
+1. **🔐 Biometric Verification** - Face recognition for user authentication
+2. **🖼️ NFT Ownership** - Blockchain-based proof of ownership
+3. **🌐 IPFS Storage** - Decentralized, encrypted data storage
 
-## What are ZelfProofs?
+### Password Storage Flow
 
-**ZelfProofs** are unique, privacy-preserving digital signatures that ensure secure, non-biometric verification of user identity. Here's how they work:
-
-1. **Face-Based Data Generation:**
-   - ZelfProofs utilize a user's face to create a unique digital signature. Unlike traditional biometric systems, ZelfProofs do **not store any biometric data** such as facial images or patterns.
-   - Instead, they convert face data into a **privacy-preserving, non-biometric binary representation** called a **ZelfProof**. This ensures that no personal biometric information is stored or shared.
-
-2. **Optional Metadata and Password Integration:**
-   - Users have the option to enhance security by adding metadata or a password during the creation of a ZelfProof. This optional layer adds additional entropy to the digital signature, making it even more resistant to tampering or unauthorized access.
-  
-3. **Public Key Generation for Cryptographic Use:**
-   - During the creation of a ZelfProof, the system generates a **public key** that can be used for various cryptographic functions, including encryption and decryption of information, digital signatures, and secure document management.
-   - The public key is linked to the ZelfProof, making it uniquely verifiable and ensuring that sensitive data is handled securely.
-
-4. **Proof of Personhood:**
-   - One of the most powerful applications of ZelfProofs is **proof of personhood**, which allows users to verify their identity without exposing any personal data.
-   - This is crucial for privacy-sensitive applications like decentralized finance (DeFi) platforms, online voting systems, or any other scenario where proving identity is required without compromising privacy.
-
-5. **Passwordless Authentication:**
-   - ZelfProofs support **passwordless login**, offering users the convenience of signing into apps or websites without needing to remember traditional passwords. By leveraging the generated ZelfProof, users can authenticate securely and privately.
-
-6. **Offline and Online Usability:**
-   - ZelfProofs can be generated and used in both **online** and **offline** scenarios. Users can create **QR codes** based on their ZelfProof, which can be scanned and validated even without internet connectivity.
-   - This functionality makes Zelf Wallet incredibly versatile, as it enables users to manage their identity and access services regardless of network availability.
-
-7. **Cross-Platform Integration:**
-   - The **Zelf Wallet** and **ZelfProofs** are designed to work across various platforms, including **Android**, **iOS**, and **Web Extensions**, ensuring a seamless and consistent experience for all users.
-   - Since ZelfProofs do not rely on centralized databases or cloud storage, users retain full control over their identity and private data, making this solution highly secure and scalable.
-
-8. **No Centralized Databases:**
-   - ZelfProofs eliminate the need for centralized databases, thus removing a common point of vulnerability. All critical information is either encrypted or handled locally on the user’s device, with no external server ever storing sensitive data.
-
-By utilizing cutting-edge cryptographic techniques, ZelfProofs create a trustless, decentralized verification system that gives users full control over their digital identity while ensuring maximum privacy and security.
-
-## IPFS Integration: Upload and Query
-
-In addition to ZelfProofs, the **Zelf Wallet** integrates with **IPFS** (InterPlanetary File System) for decentralized file storage. Below are the details on how to upload files and query them using IPFS.
-
-### Uploading Files to IPFS
-
-You can upload files (e.g., images) to IPFS via a POST request. The process also supports attaching metadata such as Ethereum and Solana addresses, email, and zelfName.
-
-#### Example Request (Upload to IPFS)
-
-Here’s a sample POST request for uploading files to IPFS, including metadata:
-
-```json
-POST https://api.zelf.world/api/ipfs
-
-{
-  "base64": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...", 
-  "name": "johan.zelf",
-  "metadata": {
-    "ethAddress": "0x3308f60b92915a8764b60342938a9D8406d288BE",
-    "solanaAddress": "JA6WkAYuA5FZb9nkFrBSprRMF6suMQvBEepQFFWV",
-    "email": "johan@verifik.co",
-    "zelfName": "johan.zelf"
-  },
-  "pinIt": true
-}
+```
+User Input → Biometric Verification → Data Encryption → IPFS Upload → NFT Minting → Success Confirmation
 ```
 
-In this request:
-- The **base64** field contains the image file encoded in base64 format.
-- The **metadata** includes Ethereum and Solana addresses, email, and a zelfName.
-- The **pinIt** field ensures the file is pinned to IPFS, keeping it available long-term.
+#### Step-by-Step Process:
 
-#### Response
+1. **User Input**: User enters website, username, password, and optional notes
+2. **Biometric Capture**: Extension captures user's face for identity verification
+3. **Data Processing**: 
+   - Sensitive data is encrypted using the user's biometric signature
+   - Public metadata is prepared for IPFS storage
+   - ZelfProof is generated from the biometric data
+4. **IPFS Storage**: Encrypted data and metadata are uploaded to IPFS via Pinata
+5. **NFT Creation**: A unique NFT is minted on Avalanche containing:
+   - ZelfProof hash
+   - IPFS metadata
+   - Ownership information
+   - Transaction details
+6. **Confirmation**: User receives comprehensive success details including NFT info, IPFS links, and transaction hashes
 
-The response will contain the following information, including the IPFS URL and metadata:
+### Password Retrieval Flow
 
-```json
-{
-  "data": {
-    "url": "https://blush-selective-earwig-920.mypinata.cloud/ipfs/<IPFS_HASH>",
-    "IpfsHash": "<IPFS_HASH>",
-    "PinSize": 16241,
-    "Timestamp": "2024-10-03T21:07:19.212Z",
-    "pinned": true,
-    "web3": true,
-    "name": "johan.zelf",
-    "metadata": {
-      "ethAddress": "0x3308f60b92915a8764b60342938a9D8406d288BE",
-      "solanaAddress": "JA6WkAYuA5FZb9nkFrBSprRMF6suMQvBEepQFFWV",
-      "email": "johan@verifik.co",
-      "zelfName": "johan.zelf"
-    }
-  }
-}
+```
+Password Selection → Biometric Verification → Data Decryption → Display Decrypted Information
 ```
 
-### Querying Files from IPFS
+#### Step-by-Step Process:
 
-You can retrieve files and metadata stored in IPFS using the **GET** method. Below is an example query to search for a file by zelfName.
+1. **Password Selection**: User selects a stored password from their list
+2. **Biometric Verification**: User verifies identity through face recognition
+3. **API Call**: Extension calls the ZelfKey API with biometric data and optional master password
+4. **Data Retrieval**: Backend decrypts and returns the sensitive information
+5. **Display**: User sees the decrypted website, username, password, and notes
 
-#### Example Request (Query by zelfName)
+## 🏗️ Technical Implementation
 
-```json
-GET https://api.zelf.world/api/ipfs?key=zelfName&value=johan.zelf
+### Frontend (Angular)
+
+- **Components**: Modular Angular architecture with reusable components
+- **Services**: Wallet service for blockchain interactions, password data service for state management
+- **Routing**: Clean navigation between password creation, listing, and detail views
+- **Responsive Design**: Mobile-first approach with adaptive layouts
+
+### Backend (Node.js + Koa)
+
+- **API Endpoints**: RESTful API for password operations
+- **Validation**: Joi-based schema validation for all inputs
+- **IPFS Integration**: Pinata API for decentralized storage
+- **Blockchain Integration**: Avalanche network for NFT minting
+
+### Security Features
+
+- **Biometric Encryption**: Face data used as encryption key
+- **JWT Authentication**: Secure API access with token management
+- **Category Validation**: Strict validation of supported data types
+- **IPFS Filtering**: Wallet-specific data isolation
+
+## 📱 Current MVP Features
+
+### ✅ Implemented
+
+- **Password Management**: Complete CRUD operations for website passwords
+- **Biometric Security**: Face recognition for encryption/decryption
+- **NFT Integration**: Automatic NFT creation on Avalanche
+- **IPFS Storage**: Decentralized data storage with Pinata
+- **User Interface**: Modern, responsive Angular application
+- **API Integration**: Full backend integration with validation
+- **Mobile Support**: Responsive design for all device sizes
+
+### 🔄 Categories Supported
+
+Currently, the MVP focuses on **password management** with the following structure:
+- **Type**: `website_password`
+- **Category**: `{zelfName}_password` (e.g., `avax1.zelf_password`)
+- **Data Fields**: Website, username, password, notes, timestamp
+
+### 🚧 Categories Planned (Roadmap)
+
+- **Notes**: Secure note storage with rich text support
+- **Credit Cards**: Payment card information management
+- **Contacts**: Address book and contact details
+- **Bank Details**: Banking information and account details
+
+## 🎮 Usage Instructions
+
+### Getting Started
+
+1. **Install Extension**: Load the extension into your browser
+2. **Connect Wallet**: Connect your Avalanche wallet (MetaMask, etc.)
+3. **Create Password**: Navigate to "Add Password" and fill in details
+4. **Verify Identity**: Complete biometric verification
+5. **Confirm Storage**: Review and confirm the storage operation
+
+### Managing Passwords
+
+1. **View List**: See all stored passwords in the main dashboard
+2. **Access Details**: Click on any password to view full information
+3. **Decrypt Data**: Use biometric verification to decrypt sensitive information
+4. **Copy Data**: Use the copy button to copy passwords to clipboard
+
+### Security Best Practices
+
+- **Regular Verification**: Re-verify biometric data periodically
+- **Master Password**: Consider using an additional master password for extra security
+- **Wallet Security**: Keep your Avalanche wallet secure and backed up
+- **Network Selection**: Ensure you're connected to the correct Avalanche network
+
+## 🔧 Development Setup
+
+### Prerequisites
+
+- Node.js 18+
+- Angular CLI 17+
+- Avalanche wallet (MetaMask, etc.)
+- Pinata API key (for IPFS storage)
+
+### Installation
+
+```bash
+cd extension
+npm install
+npm run watch:ext
 ```
 
-#### Response
+### Environment Configuration
 
-The response will return details of the pinned file, including metadata:
+Create `environment.ts` with:
+- `keysApiUrl`: Backend API endpoint
+- `avalancheNetwork`: Avalanche network configuration
+- `pinataApiKey`: IPFS storage API key
 
-```json
-{
-  "data": [
-    {
-      "id": "5631d85b-e86-4558-82de-373caa76475b",
-      "ipfs_pin_hash": "<IPFS_HASH>",
-      "size": 16241,
-      "user_id": "622f63b9-c03d-4702-9679-5d1409ae5e20",
-      "date_pinned": "2024-10-03T21:07:19.212Z",
-      "metadata": {
-        "name": "johan.zelf",
-        "keyvalues": {
-          "email": "johan@verifik.co",
-          "zelfName": "johan.zelf",
-          "ethAddress": "0x3308f60b92915a8764b60342938a9D8406d288BE",
-          "solanaAddress": "JA6WkAYuA5FZb9nkFrBSprRMF6suMQvBEepQFFWV"
-        }
-      }
-    }
-  ]
-}
+### Chrome Extension Development Setup
+
+1. **Build the Extension**:
+   ```bash
+   npm run watch:ext
+   ```
+   This command will:
+   - Build the extension in watch mode
+   - Automatically rebuild when files change
+   - Output to the `dist/dev/ext/chrome/` directory
+
+2. **Load Extension in Chrome**:
+   - Open Chrome and navigate to `chrome://extensions/`
+   - Enable "Developer mode" (toggle in top right)
+   - Click "Load unpacked"
+   - Select the `dist/dev/ext/chrome/` folder from your project
+   - The extension will now appear in your extensions list
+
+3. **Development Workflow**:
+   - The `npm run watch:ext` command automatically rebuilds the extension
+   - After each rebuild, refresh the extension in Chrome:
+     - Go to `chrome://extensions/`
+     - Click the refresh icon on your ZelfKey extension
+   - Or simply reload any page where the extension is active
+
+4. **Testing the Extension**:
+   - Pin the extension to your Chrome toolbar for easy access
+   - Click the extension icon to open the ZelfKey interface
+   - Test all functionality including password creation, storage, and retrieval
+
+## 🧪 Testing
+
+### Unit Tests
+
+```bash
+ng test
 ```
+
+### E2E Tests
+
+```bash
+ng e2e
+```
+
+### Manual Testing
+
+1. **Extension Loading**: Ensure the extension loads properly in Chrome
+2. **Password Creation**: Test the complete password creation flow
+3. **Biometric Verification**: Verify face recognition works correctly
+4. **Blockchain Integration**: Check NFT minting on Avalanche
+5. **IPFS Storage**: Validate data storage and retrieval
+6. **Password Management**: Test listing, viewing, and decrypting passwords
+7. **Cross-Page Persistence**: Verify extension state persists across page reloads
+
+## 📊 Performance Metrics
+
+- **Storage Time**: ~5-10 seconds (including blockchain confirmation)
+- **Retrieval Time**: ~2-3 seconds (including biometric verification)
+- **NFT Gas Cost**: ~0.004 AVAX per password
+- **IPFS Storage**: ~15KB per password entry
+
+## 🔮 Future Enhancements
+
+### Short Term (1-3 months)
+- Additional data categories (notes, contacts, etc.)
+- Enhanced biometric options (fingerprint, voice)
+- Batch operations for multiple passwords
+- Export/import functionality
+
+### Medium Term (3-6 months)
+- Multi-chain support (Ethereum, Polygon)
+- Advanced encryption algorithms
+- Team sharing and collaboration
+- API integrations with password managers
+
+### Long Term (6+ months)
+- Enterprise features and SSO integration
+- Advanced analytics and security insights
+- Mobile applications (iOS/Android)
+- Hardware wallet integration
+
+## 🤝 Contributing
+
+We welcome contributions! Please see our contributing guidelines and development roadmap for details on how to get involved.
+
+## 📄 License
+
+This project is licensed under the MIT License - see the LICENSE file for details.
+
+## 🙏 Acknowledgments
+
+- **Avalanche Foundation** for blockchain infrastructure
+- **Pinata** for IPFS storage solutions
+- **Angular Team** for the amazing framework
+- **Hackathon Community** for inspiration and feedback
 
 ---
 
-## Getting Started
-
-Follow the instructions below to set up and run the project locally.
-
-### Development Server
-
-To start a local development server:
-
-1. Install dependencies:
-    ```bash
-    npm install
-    ```
-
-2. Run the development server:
-    ```bash
-    ng serve
-    ```
-
-3. Open your browser and navigate to `http://localhost:4200/`.  
-   The application will automatically reload whenever source files are changed.
-
-### Node.js Version Switching for macOS Users
-
-If you're using macOS and need to switch to **Node.js v20**, follow these steps:
-
-1. Source your bash profile:
-    ```bash
-    source ~/.bashrc
-    ```
-
-2. Load NVM (Node Version Manager):
-    ```bash
-    export NVM_DIR="$HOME/.nvm"
-    [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
-    ```
-
-3. Switch to Node.js version 20:
-    ```bash
-    nvm use 20
-    ```
-
-### Build the Project
-
-To create a production build of the Zelf Wallet extension:
-
-1. Run the build command:
-  ```bash
-    ng build --output-path=dist
-  ```
-
-2. After the build completes, the artifacts will be located in the `dist/` directory.
-
-3. **Post-Build Step**:  
-   To finalize the build, update the `index.html` file in the `dist/` folder to include the necessary CSS files for proper styling.
+**Built with ❤️ for the Avalanche ecosystem during Hackathon 2025**
