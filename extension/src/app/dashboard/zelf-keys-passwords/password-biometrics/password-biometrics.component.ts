@@ -1,5 +1,6 @@
-import { Component, OnInit, OnDestroy, EventEmitter, Output, ViewChild, ElementRef, ChangeDetectorRef, Renderer2 } from "@angular/core";
+import { Component, OnInit, OnDestroy, EventEmitter, Output, ViewChild, ElementRef, ChangeDetectorRef, Renderer2, Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { FormsModule } from "@angular/forms";
 import { TranslocoModule, TranslocoService } from "@jsverse/transloco";
 import { RouterModule, Router, ActivatedRoute } from "@angular/router";
 import { WebcamComponent, WebcamImage, WebcamInitError, WebcamModule } from "ngx-webcam";
@@ -20,6 +21,7 @@ import * as faceapi from "@vladmandic/face-api";
 	standalone: true,
 	imports: [
 		CommonModule,
+		FormsModule,
 		FlexLayoutModule,
 		MatButtonModule,
 		MatProgressBarModule,
@@ -37,9 +39,12 @@ export class PasswordBiometricsComponent implements OnInit, OnDestroy {
 	@ViewChild("toSend", { static: false }) public ToSendCanvasRef: ElementRef | undefined;
 	@ViewChild("webcam", { static: false }) public webcamRef?: WebcamComponent;
 
+	@Input() isDecryptMode: boolean = false;
 	@Output() canNavigate: EventEmitter<boolean> = new EventEmitter<boolean>();
 	@Output() error: EventEmitter<any> = new EventEmitter<any>();
 	@Output() imageCaptured: EventEmitter<string> = new EventEmitter<string>();
+	@Output() biometricsSuccess: EventEmitter<any> = new EventEmitter<any>();
+	@Output() biometricsCancel: EventEmitter<void> = new EventEmitter<void>();
 
 	private unsubscriber$: Subject<void> = new Subject<void>();
 	private _takePicture: Subject<void> = new Subject<void>();
@@ -80,6 +85,7 @@ export class PasswordBiometricsComponent implements OnInit, OnDestroy {
 	lastFace: any;
 	passwordData: any = {};
 	aspectRatio = 0.75;
+	masterPassword: string = "";
 
 	constructor(
 		private _changeDetectorRef: ChangeDetectorRef,
@@ -111,10 +117,35 @@ export class PasswordBiometricsComponent implements OnInit, OnDestroy {
 	}
 
 	async initZelfKeySession(): Promise<void> {
-		const response = await this._walletService.initZelfKeySession();
+		// The wallet service now caches the JWT token
+		await this._walletService.initZelfKeySession();
 
-		if (response.data.token) {
-			this.apiKeysSessionJWT = response.data.token;
+		// Get the cached token
+		const jwt = this._walletService.getZelfKeyJWT();
+
+		if (jwt) {
+			this.apiKeysSessionJWT = jwt;
+		}
+	}
+
+	/**
+	 * Handle successful biometrics verification in decrypt mode
+	 */
+	onBiometricsSuccess(faceBase64: string, password?: string): void {
+		if (this.isDecryptMode) {
+			this.biometricsSuccess.emit({
+				faceBase64, // Send just the raw base64 string like store mode
+				password: this.masterPassword || password,
+			});
+		}
+	}
+
+	/**
+	 * Handle biometrics cancellation in decrypt mode
+	 */
+	onBiometricsCancel(): void {
+		if (this.isDecryptMode) {
+			this.biometricsCancel.emit();
 		}
 	}
 
@@ -432,31 +463,42 @@ export class PasswordBiometricsComponent implements OnInit, OnDestroy {
 		try {
 			const base64Data = this.response.base64Image.split(",")[1];
 
-			const payload = {
-				website: this.passwordData.url,
-				username: this.passwordData.email,
-				password: this.passwordData.password,
-				notes: this.passwordData.notes,
-				name: this.passwordData.title,
-				faceBase64: base64Data,
-			};
+			if (this.isDecryptMode) {
+				// In decrypt mode, emit the biometric data to the parent component
+				this.onBiometricsSuccess(base64Data);
+			} else {
+				// In create mode, store the new password
+				const payload = {
+					website: this.passwordData.url,
+					username: this.passwordData.email,
+					password: this.passwordData.password,
+					notes: this.passwordData.notes,
+					name: this.passwordData.title,
+					faceBase64: base64Data,
+				};
 
-			const response = await this._httpWrapperService.sendRequest("post", `${environment.keysApiUrl}/api/zelf-key/store/password`, payload, {
-				headers: {
-					Authorization: `Bearer ${this.apiKeysSessionJWT}`,
-				},
-			});
+				const response = await this._httpWrapperService.sendRequest(
+					"post",
+					`${environment.keysApiUrl}/api/zelf-key/store/password`,
+					payload,
+					{
+						headers: {
+							Authorization: `Bearer ${this.apiKeysSessionJWT}`,
+						},
+					}
+				);
 
-			this.imageCaptured.emit(this.response.base64Image);
+				this.imageCaptured.emit(this.response.base64Image);
 
-			this._router.navigate(["/dashboard/passwords/result"], {
-				queryParams: {
-					result: JSON.stringify(response),
-					passwordData: encodeURIComponent(JSON.stringify(this.passwordData)),
-				},
-			});
+				this._router.navigate(["/dashboard/passwords/result"], {
+					queryParams: {
+						result: JSON.stringify(response),
+						passwordData: encodeURIComponent(JSON.stringify(this.passwordData)),
+					},
+				});
+			}
 		} catch (error) {
-			console.error("Error storing password:", error);
+			console.error("Error in biometric capture:", error);
 			this.error.emit(error);
 		}
 	}
@@ -494,9 +536,15 @@ export class PasswordBiometricsComponent implements OnInit, OnDestroy {
 	}
 
 	onBack(): void {
-		this._router.navigate(["/dashboard/passwords/new"], {
-			queryParams: { passwordData: encodeURIComponent(JSON.stringify(this.passwordData)) },
-		});
+		if (this.isDecryptMode) {
+			// In decrypt mode, emit cancel event
+			this.onBiometricsCancel();
+		} else {
+			// In create mode, navigate back to password form
+			this._router.navigate(["/dashboard/passwords/new"], {
+				queryParams: { passwordData: encodeURIComponent(JSON.stringify(this.passwordData)) },
+			});
+		}
 	}
 
 	private _checkVideoStreamReady = () => {

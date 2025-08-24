@@ -31,6 +31,8 @@ export class WalletService {
 	private _assetImageMap: Map<string, string> = new Map();
 	private _faceapi: BehaviorSubject<any> = new BehaviorSubject(null);
 	private _userFingerPrint!: UserFingerPrint;
+	private _zelfKeyJWT: string | null = null;
+	private _zelfKeyJWTExpiry: number | null = null;
 
 	private _BTC_REGEX = /^(?:(?:bc1|tb1|1|32)[a-zA-HJ-NP-Z0-9]{25,59})$/;
 	private _ETH_REGEX = /^(0x)?[0-9a-fA-F]{40}$/;
@@ -544,13 +546,102 @@ export class WalletService {
 	}
 
 	async initZelfKeySession(): Promise<any> {
+		// Check if we have a valid cached JWT token
+		if (this._zelfKeyJWT && this._zelfKeyJWTExpiry && Date.now() < this._zelfKeyJWTExpiry) {
+			return { data: { token: this._zelfKeyJWT } };
+		}
+
 		const { wallet } = await this.getAllWalletsFromStorage();
 
 		if (!wallet?.ethAddress) return;
 
-		return this._httpWrapper.sendRequest("post", `${environment.keysApiUrl}/api/sessions`, {
+		const response = await this._httpWrapper.sendRequest("post", `${environment.keysApiUrl}/api/sessions`, {
 			address: wallet.ethAddress,
 			identifier: wallet.name,
+		});
+
+		// Cache the JWT token with expiry (24 hours)
+		if (response?.data?.token) {
+			this._zelfKeyJWT = response.data.token;
+			this._zelfKeyJWTExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+		}
+
+		return response;
+	}
+
+	/**
+	 * Get the cached ZelfKey JWT token
+	 * @returns The JWT token or null if not available/expired
+	 */
+	getZelfKeyJWT(): string | null {
+		if (this._zelfKeyJWT && this._zelfKeyJWTExpiry && Date.now() < this._zelfKeyJWTExpiry) {
+			return this._zelfKeyJWT;
+		}
+
+		// Clear expired token
+		this._zelfKeyJWT = null;
+		this._zelfKeyJWTExpiry = null;
+		return null;
+	}
+
+	/**
+	 * Clear the cached ZelfKey JWT token
+	 */
+	clearZelfKeyJWT(): void {
+		this._zelfKeyJWT = null;
+		this._zelfKeyJWTExpiry = null;
+	}
+
+	/**
+	 * List stored passwords from IPFS
+	 * @returns Promise with the list of stored passwords
+	 */
+	async listStoredPasswords(): Promise<any> {
+		const jwt = this.getZelfKeyJWT();
+
+		if (!jwt) {
+			// Try to initialize session if no JWT available
+			await this.initZelfKeySession();
+			const newJwt = this.getZelfKeyJWT();
+			if (!newJwt) {
+				throw new Error("Unable to authenticate with ZelfKey API");
+			}
+		}
+
+		return this._httpWrapper.sendRequest(
+			"get",
+			`${environment.keysApiUrl}/api/zelf-key/list?category=password`,
+			{},
+			{
+				headers: {
+					Authorization: `Bearer ${this.getZelfKeyJWT()}`,
+				},
+			}
+		);
+	}
+
+	/**
+	 * Retrieve/decrypt a stored password
+	 * @param payload - The decryption payload
+	 * @returns Promise with the decrypted password data
+	 */
+	async retrievePassword(payload: any): Promise<any> {
+		const jwt = this.getZelfKeyJWT();
+
+		if (!jwt) {
+			// Try to initialize session if no JWT available
+			await this.initZelfKeySession();
+			const newJwt = this.getZelfKeyJWT();
+			if (!newJwt) {
+				throw new Error("Unable to authenticate with ZelfKey API");
+			}
+		}
+
+		return this._httpWrapper.sendRequest("post", `${environment.keysApiUrl}/api/zelf-key/retrieve`, payload, {
+			headers: {
+				Authorization: `Bearer ${this.getZelfKeyJWT()}`,
+				"Content-Type": "application/json",
+			},
 		});
 	}
 

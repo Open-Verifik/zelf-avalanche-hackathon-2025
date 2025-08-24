@@ -66,6 +66,13 @@ const routes: Routes = [
 							),
 					},
 					{
+						path: "passwords/detail",
+						loadComponent: () =>
+							import("./dashboard/zelf-keys-passwords/password-detail/password-detail.component").then(
+								(m) => m.PasswordDetailComponent
+							),
+					},
+					{
 						path: "notes",
 						loadComponent: () => import("./dashboard/zelf-keys-notes/zelf-keys-notes.component").then((m) => m.ZelfKeysNotesComponent),
 					},

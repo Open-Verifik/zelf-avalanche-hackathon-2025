@@ -1,6 +1,41 @@
 "use strict";
 (self["webpackChunkzelf_extension"] = self["webpackChunkzelf_extension"] || []).push([["common"],{
 
+/***/ 9526:
+/*!***************************************************!*\
+  !*** ./src/app/services/password-data.service.ts ***!
+  \***************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   PasswordDataService: () => (/* binding */ PasswordDataService)
+/* harmony export */ });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ 37580);
+
+class PasswordDataService {
+  currentPassword = null;
+  setCurrentPassword(password) {
+    this.currentPassword = password;
+  }
+  getCurrentPassword() {
+    return this.currentPassword;
+  }
+  clearCurrentPassword() {
+    this.currentPassword = null;
+  }
+  static ɵfac = function PasswordDataService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || PasswordDataService)();
+  };
+  static ɵprov = /*@__PURE__*/_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"]({
+    token: PasswordDataService,
+    factory: PasswordDataService.ɵfac,
+    providedIn: "root"
+  });
+}
+
+/***/ }),
+
 /***/ 32404:
 /*!*********************************************!*\
   !*** ./src/app/services/network.service.ts ***!
