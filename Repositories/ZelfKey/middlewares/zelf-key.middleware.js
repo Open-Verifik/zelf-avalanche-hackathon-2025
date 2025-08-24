@@ -78,7 +78,7 @@ const schemas = {
 	retrieve: {
 		zelfProof: { required: true },
 		faceBase64: { required: true, isBase64Image: true },
-		password: { required: true },
+		password: { required: false },
 	},
 
 	// Preview data schema
