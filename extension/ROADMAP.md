@@ -110,10 +110,10 @@ Our MVP successfully demonstrates the revolutionary ZelfProof concept:
 
 | Category | Amount | Justification |
 |----------|---------|---------------|
-| **Development Team** | $40,000 | 2 developers, 3 months |
-| **Infrastructure** | $15,000 | Cloud services, security tools, monitoring |
-| **Security & Compliance** | $10,000 | Basic audits, compliance tools |
-| **Marketing & Community** | $10,000 | User acquisition, community building |
+| **Development Team** | $40,000 | 2 blockchain developers, 1 frontend developer & one designer 3 months |
+| **Infrastructure** | $15,000 | Cloud services, security tools, monitoring  for 1 year |
+| **Security & Compliance** | $10,000 | Basic audits, compliance tools | 
+| **Marketing & Community** | $10,000 | User acquisition, community building [this could be for later] |
 | **Research & Innovation** | $5,000 | Feature research, blockchain optimization |
 
 ### Why This Funding is Critical
