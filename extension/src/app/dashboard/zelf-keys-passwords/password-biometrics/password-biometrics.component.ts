@@ -15,6 +15,7 @@ import { MediaStreamService } from "app/services/media-stream.service";
 import { WalletService } from "../../../wallet.service";
 import { environment } from "environments/environment";
 import * as faceapi from "@vladmandic/face-api";
+import { ChromeService } from "../../../chrome.service";
 
 @Component({
 	selector: "app-password-biometrics",
@@ -95,12 +96,18 @@ export class PasswordBiometricsComponent implements OnInit, OnDestroy {
 		private _translocoService: TranslocoService,
 		private _walletService: WalletService,
 		private _router: Router,
-		private _route: ActivatedRoute
+		private _route: ActivatedRoute,
+		private chromeService: ChromeService
 	) {
 		this.apiKeysSessionJWT = "";
 	}
 
-	ngOnInit(): void {
+	async ngOnInit(): Promise<void> {
+		// Ensure extension is in full screen mode for better security during biometric authentication
+		if (this.chromeService.isExtension) {
+			await this.chromeService.ensureFullScreen("dashboard/passwords/biometrics");
+		}
+
 		this._route.queryParams.subscribe((params) => {
 			if (params["passwordData"]) {
 				try {

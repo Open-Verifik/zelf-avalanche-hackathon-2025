@@ -3631,15 +3631,51 @@ class ChromeService {
       }
     })();
   }
-  openSidePanel() {
+  ensureFullScreen(path) {
     var _this6 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!_this6.isExtension) return;
+      try {
+        const currentTab = yield browser.tabs.getCurrent();
+        if (currentTab) {
+          // We're already in a tab, update the URL to navigate to the desired path
+          const url = browser.runtime.getURL("index.html");
+          yield browser.tabs.update(currentTab.id, {
+            url: `${url}#${path}`
+          });
+          // Ensure the tab is focused and active
+          yield browser.tabs.update(currentTab.id, {
+            active: true
+          });
+          // Try to maximize the window if possible
+          if (currentTab.windowId) {
+            try {
+              yield browser.windows.update(currentTab.windowId, {
+                state: "maximized"
+              });
+            } catch (error) {
+              // Fallback to normal state if maximized fails
+              console.log("Could not maximize window, using normal state");
+            }
+          }
+        } else {
+          // Not in a tab, open a new full page
+          yield _this6.openFullPage(path);
+        }
+      } catch (exception) {
+        console.error("Failed to ensure full screen:", exception);
+      }
+    })();
+  }
+  openSidePanel() {
+    var _this7 = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (!_this7.isExtension) return;
       const [window] = yield browser.windows.getAll({
         populate: true
       });
       if (!window?.id) return;
-      if (_this6.isPopout) {
+      if (_this7.isPopout) {
         const views = browser.extension.getViews({
           type: "popup"
         });
@@ -3649,7 +3685,7 @@ class ChromeService {
           active: true,
           lastFocusedWindow: true
         });
-        if (tabs.length > 1 && tabs[0].id === _this6._tabId) yield _this6.closeTab();
+        if (tabs.length > 1 && tabs[0].id === _this7._tabId) yield _this7.closeTab();
       }
       if (!chrome?.sidePanel) return;
       yield chrome.sidePanel.open({
@@ -3658,10 +3694,10 @@ class ChromeService {
     })();
   }
   removeItem(key) {
-    var _this7 = this;
+    var _this8 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       return new Promise((resolve, reject) => {
-        if (_this7.isExtension) {
+        if (_this8.isExtension) {
           browser.storage.local.remove(key).then(resolve).catch(reject);
           return;
         }
@@ -3675,10 +3711,10 @@ class ChromeService {
     })();
   }
   setItem(key, value) {
-    var _this8 = this;
+    var _this9 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       return new Promise((resolve, reject) => {
-        if (_this8.isExtension) {
+        if (_this9.isExtension) {
           browser.storage.local.set({
             [key]: value
           }).then(resolve).catch(reject);
@@ -3695,10 +3731,10 @@ class ChromeService {
     })();
   }
   clearLocalStorage() {
-    var _this9 = this;
+    var _this0 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       return new Promise((resolve, reject) => {
-        if (_this9.isExtension) {
+        if (_this0.isExtension) {
           browser.storage.local.clear().then(resolve).catch(reject);
           return;
         }
@@ -3712,10 +3748,10 @@ class ChromeService {
     })();
   }
   getItemSession(key) {
-    var _this0 = this;
+    var _this1 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       return new Promise((resolve, reject) => {
-        if (_this0.isExtension) {
+        if (_this1.isExtension) {
           browser.storage.session.get(key).then(result => {
             resolve(result[key]);
           }).catch(reject);
@@ -3737,10 +3773,10 @@ class ChromeService {
     })();
   }
   setItemSession(key, value) {
-    var _this1 = this;
+    var _this10 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       return new Promise((resolve, reject) => {
-        if (_this1.isExtension) {
+        if (_this10.isExtension) {
           browser.storage.session.set({
             [key]: value
           }).then(resolve).catch(reject);
@@ -3757,10 +3793,10 @@ class ChromeService {
     })();
   }
   removeItemSession(key) {
-    var _this10 = this;
+    var _this11 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       return new Promise((resolve, reject) => {
-        if (_this10.isExtension) {
+        if (_this11.isExtension) {
           browser.storage.session.remove(key).then(resolve).catch(reject);
         } else {
           try {
@@ -3774,10 +3810,10 @@ class ChromeService {
     })();
   }
   clearSessionStorage() {
-    var _this11 = this;
+    var _this12 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       return new Promise((resolve, reject) => {
-        if (_this11.isExtension) {
+        if (_this12.isExtension) {
           browser.storage.session.clear().then(resolve).catch(reject);
         } else {
           try {

@@ -1,6 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TranslocoModule } from "@jsverse/transloco";
+import { ChromeService } from "../../chrome.service";
 
 @Component({
 	selector: "app-zelf-keys-bank-accounts",
@@ -10,7 +11,12 @@ import { TranslocoModule } from "@jsverse/transloco";
 	styleUrls: ["./zelf-keys-bank-accounts.component.scss"],
 })
 export class ZelfKeysBankAccountsComponent implements OnInit {
-	constructor() {}
+	constructor(private chromeService: ChromeService) {}
 
-	ngOnInit(): void {}
+	async ngOnInit(): Promise<void> {
+		// Ensure extension is in full screen mode for better user experience
+		if (this.chromeService.isExtension) {
+			await this.chromeService.ensureFullScreen("dashboard/bank-accounts");
+		}
+	}
 }

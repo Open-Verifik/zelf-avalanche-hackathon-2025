@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common";
 import { TranslocoModule } from "@jsverse/transloco";
 import { RouterModule, Router, ActivatedRoute } from "@angular/router";
 import { FormsModule } from "@angular/forms";
+import { ChromeService } from "../../../chrome.service";
 
 @Component({
 	selector: "app-password-form",
@@ -28,10 +29,16 @@ export class PasswordFormComponent implements OnInit {
 
 	constructor(
 		private router: Router,
-		private route: ActivatedRoute
+		private route: ActivatedRoute,
+		private chromeService: ChromeService
 	) {}
 
-	ngOnInit(): void {
+	async ngOnInit(): Promise<void> {
+		// Ensure extension is in full screen mode for better security when handling passwords
+		if (this.chromeService.isExtension) {
+			await this.chromeService.ensureFullScreen("dashboard/passwords/new");
+		}
+
 		// Check if this is a new password or editing existing
 		const id = this.route.snapshot.paramMap.get("id");
 		this.isNewPassword = id === "new";

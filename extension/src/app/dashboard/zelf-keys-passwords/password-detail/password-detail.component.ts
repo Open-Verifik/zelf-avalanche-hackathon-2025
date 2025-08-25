@@ -6,6 +6,7 @@ import { Subject, takeUntil } from "rxjs";
 import { WalletService } from "../../../wallet.service";
 import { PasswordDataService } from "../../../services/password-data.service";
 import { PasswordBiometricsComponent } from "../password-biometrics/password-biometrics.component";
+import { ChromeService } from "../../../chrome.service";
 
 @Component({
 	selector: "app-password-detail",
@@ -28,10 +29,16 @@ export class PasswordDetailComponent implements OnInit, OnDestroy {
 		private router: Router,
 		private route: ActivatedRoute,
 		private walletService: WalletService,
-		private passwordDataService: PasswordDataService
+		private passwordDataService: PasswordDataService,
+		private chromeService: ChromeService
 	) {}
 
-	ngOnInit(): void {
+	async ngOnInit(): Promise<void> {
+		// Ensure extension is in full screen mode for better security when viewing password details
+		if (this.chromeService.isExtension) {
+			await this.chromeService.ensureFullScreen("dashboard/passwords/detail");
+		}
+
 		this.loadPasswordData();
 	}
 

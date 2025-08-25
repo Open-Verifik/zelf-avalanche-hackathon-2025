@@ -11,19 +11,34 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony export */ __webpack_require__.d(__webpack_exports__, {
 /* harmony export */   ZelfKeysPaymentCardsComponent: () => (/* binding */ ZelfKeysPaymentCardsComponent)
 /* harmony export */ });
-/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/common */ 84460);
-/* harmony import */ var _jsverse_transloco__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @jsverse/transloco */ 88065);
-/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@angular-devkit/build-angular/node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 81890);
+/* harmony import */ var _angular_common__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/common */ 84460);
+/* harmony import */ var _jsverse_transloco__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @jsverse/transloco */ 88065);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _chrome_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../chrome.service */ 85043);
+
+
 
 
 
 class ZelfKeysPaymentCardsComponent {
-  constructor() {}
-  ngOnInit() {}
+  chromeService;
+  constructor(chromeService) {
+    this.chromeService = chromeService;
+  }
+  ngOnInit() {
+    var _this = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      // Ensure extension is in full screen mode for better user experience
+      if (_this.chromeService.isExtension) {
+        yield _this.chromeService.ensureFullScreen("dashboard/payment-cards");
+      }
+    })();
+  }
   static ɵfac = function ZelfKeysPaymentCardsComponent_Factory(__ngFactoryType__) {
-    return new (__ngFactoryType__ || ZelfKeysPaymentCardsComponent)();
+    return new (__ngFactoryType__ || ZelfKeysPaymentCardsComponent)(_angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵdirectiveInject"](_chrome_service__WEBPACK_IMPORTED_MODULE_1__.ChromeService));
   };
-  static ɵcmp = /*@__PURE__*/_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineComponent"]({
+  static ɵcmp = /*@__PURE__*/_angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵdefineComponent"]({
     type: ZelfKeysPaymentCardsComponent,
     selectors: [["app-zelf-keys-payment-cards"]],
     decls: 59,
@@ -31,72 +46,72 @@ class ZelfKeysPaymentCardsComponent {
     consts: [[1, "zelf-keys-payment-cards"], [1, "header"], [1, "content"], [1, "cards-grid"], [1, "card-item"], [1, "card-header"], [1, "card-type", "visa"], [1, "card-actions"], [1, "btn-edit"], [1, "btn-delete"], [1, "card-number"], [1, "card-details"], [1, "card-holder"], [1, "label"], [1, "value"], [1, "card-expiry"], [1, "card-type", "mastercard"], [1, "add-card"], [1, "add-icon"]],
     template: function ZelfKeysPaymentCardsComponent_Template(rf, ctx) {
       if (rf & 1) {
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](0, "div", 0)(1, "div", 1)(2, "h2");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](3, "Payment Cards");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](4, "p");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](5, "Securely store your payment card information");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]()();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](6, "div", 2)(7, "div", 3)(8, "div", 4)(9, "div", 5)(10, "div", 6);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](11, "VISA");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](12, "div", 7)(13, "button", 8);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](14, "Edit");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](15, "button", 9);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](16, "Delete");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]()()();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](17, "div", 10);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](18, "\u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 1234");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](19, "div", 11)(20, "div", 12)(21, "span", 13);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](22, "Card Holder");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](23, "span", 14);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](24, "John Doe");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]()();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](25, "div", 15)(26, "span", 13);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](27, "Expires");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](28, "span", 14);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](29, "12/26");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]()()()();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](30, "div", 4)(31, "div", 5)(32, "div", 16);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](33, "MASTERCARD");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](34, "div", 7)(35, "button", 8);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](36, "Edit");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](37, "button", 9);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](38, "Delete");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]()()();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](39, "div", 10);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](40, "\u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 5678");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](41, "div", 11)(42, "div", 12)(43, "span", 13);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](44, "Card Holder");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](45, "span", 14);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](46, "Jane Smith");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]()();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](47, "div", 15)(48, "span", 13);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](49, "Expires");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](50, "span", 14);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](51, "08/25");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]()()()();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](52, "div", 17)(53, "div", 18);
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](54, "+");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](55, "h3");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](56, "Add New Card");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementStart"](57, "p");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵtext"](58, "Securely store a new payment card");
-        _angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵelementEnd"]()()()()();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](0, "div", 0)(1, "div", 1)(2, "h2");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](3, "Payment Cards");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](4, "p");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](5, "Securely store your payment card information");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]()();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](6, "div", 2)(7, "div", 3)(8, "div", 4)(9, "div", 5)(10, "div", 6);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](11, "VISA");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](12, "div", 7)(13, "button", 8);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](14, "Edit");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](15, "button", 9);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](16, "Delete");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]()()();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](17, "div", 10);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](18, "\u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 1234");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](19, "div", 11)(20, "div", 12)(21, "span", 13);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](22, "Card Holder");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](23, "span", 14);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](24, "John Doe");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]()();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](25, "div", 15)(26, "span", 13);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](27, "Expires");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](28, "span", 14);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](29, "12/26");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]()()()();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](30, "div", 4)(31, "div", 5)(32, "div", 16);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](33, "MASTERCARD");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](34, "div", 7)(35, "button", 8);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](36, "Edit");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](37, "button", 9);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](38, "Delete");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]()()();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](39, "div", 10);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](40, "\u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 \u2022\u2022\u2022\u2022 5678");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](41, "div", 11)(42, "div", 12)(43, "span", 13);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](44, "Card Holder");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](45, "span", 14);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](46, "Jane Smith");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]()();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](47, "div", 15)(48, "span", 13);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](49, "Expires");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](50, "span", 14);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](51, "08/25");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]()()()();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](52, "div", 17)(53, "div", 18);
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](54, "+");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](55, "h3");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](56, "Add New Card");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]();
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementStart"](57, "p");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵtext"](58, "Securely store a new payment card");
+        _angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵelementEnd"]()()()()();
       }
     },
-    dependencies: [_angular_common__WEBPACK_IMPORTED_MODULE_1__.CommonModule, _jsverse_transloco__WEBPACK_IMPORTED_MODULE_2__.TranslocoModule],
+    dependencies: [_angular_common__WEBPACK_IMPORTED_MODULE_3__.CommonModule, _jsverse_transloco__WEBPACK_IMPORTED_MODULE_4__.TranslocoModule],
     styles: [".zelf-keys-payment-cards[_ngcontent-%COMP%] {\n  padding: 24px;\n  height: 100%;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .header[_ngcontent-%COMP%] {\n  margin-bottom: 32px;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .header[_ngcontent-%COMP%]   h2[_ngcontent-%COMP%] {\n  font-size: 28px;\n  font-weight: 600;\n  color: #1a1a1a;\n  margin: 0 0 8px 0;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .header[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  font-size: 16px;\n  color: #666;\n  margin: 0;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%] {\n  display: grid;\n  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));\n  gap: 24px;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%] {\n  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);\n  border-radius: 16px;\n  padding: 24px;\n  color: white;\n  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);\n  transition: transform 0.2s, box-shadow 0.2s;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]:hover {\n  transform: translateY(-4px);\n  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.25);\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-header[_ngcontent-%COMP%] {\n  display: flex;\n  justify-content: space-between;\n  align-items: center;\n  margin-bottom: 24px;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-header[_ngcontent-%COMP%]   .card-type[_ngcontent-%COMP%] {\n  font-size: 12px;\n  font-weight: 700;\n  letter-spacing: 1px;\n  padding: 6px 12px;\n  border-radius: 20px;\n  background: rgba(255, 255, 255, 0.2);\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-header[_ngcontent-%COMP%]   .card-type.visa[_ngcontent-%COMP%] {\n  background: rgba(255, 255, 255, 0.2);\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-header[_ngcontent-%COMP%]   .card-type.mastercard[_ngcontent-%COMP%] {\n  background: rgba(255, 255, 255, 0.2);\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-header[_ngcontent-%COMP%]   .card-actions[_ngcontent-%COMP%] {\n  display: flex;\n  gap: 8px;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-header[_ngcontent-%COMP%]   .card-actions[_ngcontent-%COMP%]   button[_ngcontent-%COMP%] {\n  padding: 6px 12px;\n  border: none;\n  border-radius: 6px;\n  font-size: 12px;\n  font-weight: 500;\n  cursor: pointer;\n  transition: all 0.2s;\n  background: rgba(255, 255, 255, 0.2);\n  color: white;\n  -webkit-backdrop-filter: blur(10px);\n          backdrop-filter: blur(10px);\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-header[_ngcontent-%COMP%]   .card-actions[_ngcontent-%COMP%]   button[_ngcontent-%COMP%]:hover {\n  background: rgba(255, 255, 255, 0.3);\n  transform: scale(1.05);\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-number[_ngcontent-%COMP%] {\n  font-size: 20px;\n  font-weight: 600;\n  letter-spacing: 2px;\n  margin-bottom: 24px;\n  font-family: \"Courier New\", monospace;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-details[_ngcontent-%COMP%] {\n  display: flex;\n  justify-content: space-between;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-details[_ngcontent-%COMP%]   .card-holder[_ngcontent-%COMP%], \n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-details[_ngcontent-%COMP%]   .card-expiry[_ngcontent-%COMP%] {\n  display: flex;\n  flex-direction: column;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-details[_ngcontent-%COMP%]   .card-holder[_ngcontent-%COMP%]   .label[_ngcontent-%COMP%], \n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-details[_ngcontent-%COMP%]   .card-expiry[_ngcontent-%COMP%]   .label[_ngcontent-%COMP%] {\n  font-size: 10px;\n  opacity: 0.8;\n  margin-bottom: 4px;\n  text-transform: uppercase;\n  letter-spacing: 0.5px;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-details[_ngcontent-%COMP%]   .card-holder[_ngcontent-%COMP%]   .value[_ngcontent-%COMP%], \n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .card-item[_ngcontent-%COMP%]   .card-details[_ngcontent-%COMP%]   .card-expiry[_ngcontent-%COMP%]   .value[_ngcontent-%COMP%] {\n  font-size: 14px;\n  font-weight: 600;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .add-card[_ngcontent-%COMP%] {\n  background: #f8f9fa;\n  border: 2px dashed #dee2e6;\n  border-radius: 16px;\n  padding: 40px 20px;\n  text-align: center;\n  cursor: pointer;\n  transition: all 0.2s;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n  justify-content: center;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .add-card[_ngcontent-%COMP%]:hover {\n  background: #e9ecef;\n  border-color: #adb5bd;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .add-card[_ngcontent-%COMP%]   .add-icon[_ngcontent-%COMP%] {\n  font-size: 48px;\n  color: #6c757d;\n  margin-bottom: 16px;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .add-card[_ngcontent-%COMP%]   h3[_ngcontent-%COMP%] {\n  font-size: 18px;\n  font-weight: 600;\n  color: #495057;\n  margin: 0 0 8px 0;\n}\n.zelf-keys-payment-cards[_ngcontent-%COMP%]   .content[_ngcontent-%COMP%]   .cards-grid[_ngcontent-%COMP%]   .add-card[_ngcontent-%COMP%]   p[_ngcontent-%COMP%] {\n  font-size: 14px;\n  color: #6c757d;\n  margin: 0;\n}\n/*# sourceMappingURL=data:application/json;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbInplbGYta2V5cy1wYXltZW50LWNhcmRzLmNvbXBvbmVudC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0MsYUFBQTtFQUNBLFlBQUE7QUFDRDtBQUNDO0VBQ0MsbUJBQUE7QUFDRjtBQUNFO0VBQ0MsZUFBQTtFQUNBLGdCQUFBO0VBQ0EsY0FBQTtFQUNBLGlCQUFBO0FBQ0g7QUFFRTtFQUNDLGVBQUE7RUFDQSxXQUFBO0VBQ0EsU0FBQTtBQUFIO0FBS0U7RUFDQyxhQUFBO0VBQ0EsNERBQUE7RUFDQSxTQUFBO0FBSEg7QUFLRztFQUNDLDZEQUFBO0VBQ0EsbUJBQUE7RUFDQSxhQUFBO0VBQ0EsWUFBQTtFQUNBLDBDQUFBO0VBQ0EsMkNBQ0M7QUFKTDtBQU9JO0VBQ0MsMkJBQUE7RUFDQSwwQ0FBQTtBQUxMO0FBUUk7RUFDQyxhQUFBO0VBQ0EsOEJBQUE7RUFDQSxtQkFBQTtFQUNBLG1CQUFBO0FBTkw7QUFRSztFQUNDLGVBQUE7RUFDQSxnQkFBQTtFQUNBLG1CQUFBO0VBQ0EsaUJBQUE7RUFDQSxtQkFBQTtFQUNBLG9DQUFBO0VBQ0EsbUNBQUE7VUFBQSwyQkFBQTtBQU5OO0FBUU07RUFDQyxvQ0FBQTtBQU5QO0FBU007RUFDQyxvQ0FBQTtBQVBQO0FBV0s7RUFDQyxhQUFBO0VBQ0EsUUFBQTtBQVROO0FBV007RUFDQyxpQkFBQTtFQUNBLFlBQUE7RUFDQSxrQkFBQTtFQUNBLGVBQUE7RUFDQSxnQkFBQTtFQUNBLGVBQUE7RUFDQSxvQkFBQTtFQUNBLG9DQUFBO0VBQ0EsWUFBQTtFQUNBLG1DQUFBO1VBQUEsMkJBQUE7QUFUUDtBQVdPO0VBQ0Msb0NBQUE7RUFDQSxzQkFBQTtBQVRSO0FBZUk7RUFDQyxlQUFBO0VBQ0EsZ0JBQUE7RUFDQSxtQkFBQTtFQUNBLG1CQUFBO0VBQ0EscUNBQUE7QUFiTDtBQWdCSTtFQUNDLGFBQUE7RUFDQSw4QkFBQTtBQWRMO0FBZ0JLOztFQUVDLGFBQUE7RUFDQSxzQkFBQTtBQWROO0FBZ0JNOztFQUNDLGVBQUE7RUFDQSxZQUFBO0VBQ0Esa0JBQUE7RUFDQSx5QkFBQTtFQUNBLHFCQUFBO0FBYlA7QUFnQk07O0VBQ0MsZUFBQTtFQUNBLGdCQUFBO0FBYlA7QUFtQkc7RUFDQyxtQkFBQTtFQUNBLDBCQUFBO0VBQ0EsbUJBQUE7RUFDQSxrQkFBQTtFQUNBLGtCQUFBO0VBQ0EsZUFBQTtFQUNBLG9CQUFBO0VBQ0EsYUFBQTtFQUNBLHNCQUFBO0VBQ0EsbUJBQUE7RUFDQSx1QkFBQTtBQWpCSjtBQW1CSTtFQUNDLG1CQUFBO0VBQ0EscUJBQUE7QUFqQkw7QUFvQkk7RUFDQyxlQUFBO0VBQ0EsY0FBQTtFQUNBLG1CQUFBO0FBbEJMO0FBcUJJO0VBQ0MsZUFBQTtFQUNBLGdCQUFBO0VBQ0EsY0FBQTtFQUNBLGlCQUFBO0FBbkJMO0FBc0JJO0VBQ0MsZUFBQTtFQUNBLGNBQUE7RUFDQSxTQUFBO0FBcEJMIiwiZmlsZSI6InplbGYta2V5cy1wYXltZW50LWNhcmRzLmNvbXBvbmVudC5zY3NzIiwic291cmNlc0NvbnRlbnQiOlsiLnplbGYta2V5cy1wYXltZW50LWNhcmRzIHtcblx0cGFkZGluZzogMjRweDtcblx0aGVpZ2h0OiAxMDAlO1xuXG5cdC5oZWFkZXIge1xuXHRcdG1hcmdpbi1ib3R0b206IDMycHg7XG5cblx0XHRoMiB7XG5cdFx0XHRmb250LXNpemU6IDI4cHg7XG5cdFx0XHRmb250LXdlaWdodDogNjAwO1xuXHRcdFx0Y29sb3I6ICMxYTFhMWE7XG5cdFx0XHRtYXJnaW46IDAgMCA4cHggMDtcblx0XHR9XG5cblx0XHRwIHtcblx0XHRcdGZvbnQtc2l6ZTogMTZweDtcblx0XHRcdGNvbG9yOiAjNjY2O1xuXHRcdFx0bWFyZ2luOiAwO1xuXHRcdH1cblx0fVxuXG5cdC5jb250ZW50IHtcblx0XHQuY2FyZHMtZ3JpZCB7XG5cdFx0XHRkaXNwbGF5OiBncmlkO1xuXHRcdFx0Z3JpZC10ZW1wbGF0ZS1jb2x1bW5zOiByZXBlYXQoYXV0by1maWxsLCBtaW5tYXgoMzIwcHgsIDFmcikpO1xuXHRcdFx0Z2FwOiAyNHB4O1xuXG5cdFx0XHQuY2FyZC1pdGVtIHtcblx0XHRcdFx0YmFja2dyb3VuZDogbGluZWFyLWdyYWRpZW50KDEzNWRlZywgIzY2N2VlYSAwJSwgIzc2NGJhMiAxMDAlKTtcblx0XHRcdFx0Ym9yZGVyLXJhZGl1czogMTZweDtcblx0XHRcdFx0cGFkZGluZzogMjRweDtcblx0XHRcdFx0Y29sb3I6IHdoaXRlO1xuXHRcdFx0XHRib3gtc2hhZG93OiAwIDRweCAyMHB4IHJnYmEoMCwgMCwgMCwgMC4xNSk7XG5cdFx0XHRcdHRyYW5zaXRpb246XG5cdFx0XHRcdFx0dHJhbnNmb3JtIDAuMnMsXG5cdFx0XHRcdFx0Ym94LXNoYWRvdyAwLjJzO1xuXG5cdFx0XHRcdCY6aG92ZXIge1xuXHRcdFx0XHRcdHRyYW5zZm9ybTogdHJhbnNsYXRlWSgtNHB4KTtcblx0XHRcdFx0XHRib3gtc2hhZG93OiAwIDhweCAzMHB4IHJnYmEoMCwgMCwgMCwgMC4yNSk7XG5cdFx0XHRcdH1cblxuXHRcdFx0XHQuY2FyZC1oZWFkZXIge1xuXHRcdFx0XHRcdGRpc3BsYXk6IGZsZXg7XG5cdFx0XHRcdFx0anVzdGlmeS1jb250ZW50OiBzcGFjZS1iZXR3ZWVuO1xuXHRcdFx0XHRcdGFsaWduLWl0ZW1zOiBjZW50ZXI7XG5cdFx0XHRcdFx0bWFyZ2luLWJvdHRvbTogMjRweDtcblxuXHRcdFx0XHRcdC5jYXJkLXR5cGUge1xuXHRcdFx0XHRcdFx0Zm9udC1zaXplOiAxMnB4O1xuXHRcdFx0XHRcdFx0Zm9udC13ZWlnaHQ6IDcwMDtcblx0XHRcdFx0XHRcdGxldHRlci1zcGFjaW5nOiAxcHg7XG5cdFx0XHRcdFx0XHRwYWRkaW5nOiA2cHggMTJweDtcblx0XHRcdFx0XHRcdGJvcmRlci1yYWRpdXM6IDIwcHg7XG5cdFx0XHRcdFx0XHRiYWNrZ3JvdW5kOiByZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMik7XG5cdFx0XHRcdFx0XHRiYWNrZHJvcC1maWx0ZXI6IGJsdXIoMTBweCk7XG5cblx0XHRcdFx0XHRcdCYudmlzYSB7XG5cdFx0XHRcdFx0XHRcdGJhY2tncm91bmQ6IHJnYmEoMjU1LCAyNTUsIDI1NSwgMC4yKTtcblx0XHRcdFx0XHRcdH1cblxuXHRcdFx0XHRcdFx0Ji5tYXN0ZXJjYXJkIHtcblx0XHRcdFx0XHRcdFx0YmFja2dyb3VuZDogcmdiYSgyNTUsIDI1NSwgMjU1LCAwLjIpO1xuXHRcdFx0XHRcdFx0fVxuXHRcdFx0XHRcdH1cblxuXHRcdFx0XHRcdC5jYXJkLWFjdGlvbnMge1xuXHRcdFx0XHRcdFx0ZGlzcGxheTogZmxleDtcblx0XHRcdFx0XHRcdGdhcDogOHB4O1xuXG5cdFx0XHRcdFx0XHRidXR0b24ge1xuXHRcdFx0XHRcdFx0XHRwYWRkaW5nOiA2cHggMTJweDtcblx0XHRcdFx0XHRcdFx0Ym9yZGVyOiBub25lO1xuXHRcdFx0XHRcdFx0XHRib3JkZXItcmFkaXVzOiA2cHg7XG5cdFx0XHRcdFx0XHRcdGZvbnQtc2l6ZTogMTJweDtcblx0XHRcdFx0XHRcdFx0Zm9udC13ZWlnaHQ6IDUwMDtcblx0XHRcdFx0XHRcdFx0Y3Vyc29yOiBwb2ludGVyO1xuXHRcdFx0XHRcdFx0XHR0cmFuc2l0aW9uOiBhbGwgMC4ycztcblx0XHRcdFx0XHRcdFx0YmFja2dyb3VuZDogcmdiYSgyNTUsIDI1NSwgMjU1LCAwLjIpO1xuXHRcdFx0XHRcdFx0XHRjb2xvcjogd2hpdGU7XG5cdFx0XHRcdFx0XHRcdGJhY2tkcm9wLWZpbHRlcjogYmx1cigxMHB4KTtcblxuXHRcdFx0XHRcdFx0XHQmOmhvdmVyIHtcblx0XHRcdFx0XHRcdFx0XHRiYWNrZ3JvdW5kOiByZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMyk7XG5cdFx0XHRcdFx0XHRcdFx0dHJhbnNmb3JtOiBzY2FsZSgxLjA1KTtcblx0XHRcdFx0XHRcdFx0fVxuXHRcdFx0XHRcdFx0fVxuXHRcdFx0XHRcdH1cblx0XHRcdFx0fVxuXG5cdFx0XHRcdC5jYXJkLW51bWJlciB7XG5cdFx0XHRcdFx0Zm9udC1zaXplOiAyMHB4O1xuXHRcdFx0XHRcdGZvbnQtd2VpZ2h0OiA2MDA7XG5cdFx0XHRcdFx0bGV0dGVyLXNwYWNpbmc6IDJweDtcblx0XHRcdFx0XHRtYXJnaW4tYm90dG9tOiAyNHB4O1xuXHRcdFx0XHRcdGZvbnQtZmFtaWx5OiBcIkNvdXJpZXIgTmV3XCIsIG1vbm9zcGFjZTtcblx0XHRcdFx0fVxuXG5cdFx0XHRcdC5jYXJkLWRldGFpbHMge1xuXHRcdFx0XHRcdGRpc3BsYXk6IGZsZXg7XG5cdFx0XHRcdFx0anVzdGlmeS1jb250ZW50OiBzcGFjZS1iZXR3ZWVuO1xuXG5cdFx0XHRcdFx0LmNhcmQtaG9sZGVyLFxuXHRcdFx0XHRcdC5jYXJkLWV4cGlyeSB7XG5cdFx0XHRcdFx0XHRkaXNwbGF5OiBmbGV4O1xuXHRcdFx0XHRcdFx0ZmxleC1kaXJlY3Rpb246IGNvbHVtbjtcblxuXHRcdFx0XHRcdFx0LmxhYmVsIHtcblx0XHRcdFx0XHRcdFx0Zm9udC1zaXplOiAxMHB4O1xuXHRcdFx0XHRcdFx0XHRvcGFjaXR5OiAwLjg7XG5cdFx0XHRcdFx0XHRcdG1hcmdpbi1ib3R0b206IDRweDtcblx0XHRcdFx0XHRcdFx0dGV4dC10cmFuc2Zvcm06IHVwcGVyY2FzZTtcblx0XHRcdFx0XHRcdFx0bGV0dGVyLXNwYWNpbmc6IDAuNXB4O1xuXHRcdFx0XHRcdFx0fVxuXG5cdFx0XHRcdFx0XHQudmFsdWUge1xuXHRcdFx0XHRcdFx0XHRmb250LXNpemU6IDE0cHg7XG5cdFx0XHRcdFx0XHRcdGZvbnQtd2VpZ2h0OiA2MDA7XG5cdFx0XHRcdFx0XHR9XG5cdFx0XHRcdFx0fVxuXHRcdFx0XHR9XG5cdFx0XHR9XG5cblx0XHRcdC5hZGQtY2FyZCB7XG5cdFx0XHRcdGJhY2tncm91bmQ6ICNmOGY5ZmE7XG5cdFx0XHRcdGJvcmRlcjogMnB4IGRhc2hlZCAjZGVlMmU2O1xuXHRcdFx0XHRib3JkZXItcmFkaXVzOiAxNnB4O1xuXHRcdFx0XHRwYWRkaW5nOiA0MHB4IDIwcHg7XG5cdFx0XHRcdHRleHQtYWxpZ246IGNlbnRlcjtcblx0XHRcdFx0Y3Vyc29yOiBwb2ludGVyO1xuXHRcdFx0XHR0cmFuc2l0aW9uOiBhbGwgMC4ycztcblx0XHRcdFx0ZGlzcGxheTogZmxleDtcblx0XHRcdFx0ZmxleC1kaXJlY3Rpb246IGNvbHVtbjtcblx0XHRcdFx0YWxpZ24taXRlbXM6IGNlbnRlcjtcblx0XHRcdFx0anVzdGlmeS1jb250ZW50OiBjZW50ZXI7XG5cblx0XHRcdFx0Jjpob3ZlciB7XG5cdFx0XHRcdFx0YmFja2dyb3VuZDogI2U5ZWNlZjtcblx0XHRcdFx0XHRib3JkZXItY29sb3I6ICNhZGI1YmQ7XG5cdFx0XHRcdH1cblxuXHRcdFx0XHQuYWRkLWljb24ge1xuXHRcdFx0XHRcdGZvbnQtc2l6ZTogNDhweDtcblx0XHRcdFx0XHRjb2xvcjogIzZjNzU3ZDtcblx0XHRcdFx0XHRtYXJnaW4tYm90dG9tOiAxNnB4O1xuXHRcdFx0XHR9XG5cblx0XHRcdFx0aDMge1xuXHRcdFx0XHRcdGZvbnQtc2l6ZTogMThweDtcblx0XHRcdFx0XHRmb250LXdlaWdodDogNjAwO1xuXHRcdFx0XHRcdGNvbG9yOiAjNDk1MDU3O1xuXHRcdFx0XHRcdG1hcmdpbjogMCAwIDhweCAwO1xuXHRcdFx0XHR9XG5cblx0XHRcdFx0cCB7XG5cdFx0XHRcdFx0Zm9udC1zaXplOiAxNHB4O1xuXHRcdFx0XHRcdGNvbG9yOiAjNmM3NTdkO1xuXHRcdFx0XHRcdG1hcmdpbjogMDtcblx0XHRcdFx0fVxuXHRcdFx0fVxuXHRcdH1cblx0fVxufVxuIl19 */\n/*# sourceMappingURL=data:application/json;charset=utf-8;base64,eyJ2ZXJzaW9uIjozLCJzb3VyY2VzIjpbIndlYnBhY2s6Ly8uL3NyYy9hcHAvZGFzaGJvYXJkL3plbGYta2V5cy1wYXltZW50LWNhcmRzL3plbGYta2V5cy1wYXltZW50LWNhcmRzLmNvbXBvbmVudC5zY3NzIl0sIm5hbWVzIjpbXSwibWFwcGluZ3MiOiJBQUFBO0VBQ0MsYUFBQTtFQUNBLFlBQUE7QUFDRDtBQUNDO0VBQ0MsbUJBQUE7QUFDRjtBQUNFO0VBQ0MsZUFBQTtFQUNBLGdCQUFBO0VBQ0EsY0FBQTtFQUNBLGlCQUFBO0FBQ0g7QUFFRTtFQUNDLGVBQUE7RUFDQSxXQUFBO0VBQ0EsU0FBQTtBQUFIO0FBS0U7RUFDQyxhQUFBO0VBQ0EsNERBQUE7RUFDQSxTQUFBO0FBSEg7QUFLRztFQUNDLDZEQUFBO0VBQ0EsbUJBQUE7RUFDQSxhQUFBO0VBQ0EsWUFBQTtFQUNBLDBDQUFBO0VBQ0EsMkNBQ0M7QUFKTDtBQU9JO0VBQ0MsMkJBQUE7RUFDQSwwQ0FBQTtBQUxMO0FBUUk7RUFDQyxhQUFBO0VBQ0EsOEJBQUE7RUFDQSxtQkFBQTtFQUNBLG1CQUFBO0FBTkw7QUFRSztFQUNDLGVBQUE7RUFDQSxnQkFBQTtFQUNBLG1CQUFBO0VBQ0EsaUJBQUE7RUFDQSxtQkFBQTtFQUNBLG9DQUFBO0VBQ0EsbUNBQUE7VUFBQSwyQkFBQTtBQU5OO0FBUU07RUFDQyxvQ0FBQTtBQU5QO0FBU007RUFDQyxvQ0FBQTtBQVBQO0FBV0s7RUFDQyxhQUFBO0VBQ0EsUUFBQTtBQVROO0FBV007RUFDQyxpQkFBQTtFQUNBLFlBQUE7RUFDQSxrQkFBQTtFQUNBLGVBQUE7RUFDQSxnQkFBQTtFQUNBLGVBQUE7RUFDQSxvQkFBQTtFQUNBLG9DQUFBO0VBQ0EsWUFBQTtFQUNBLG1DQUFBO1VBQUEsMkJBQUE7QUFUUDtBQVdPO0VBQ0Msb0NBQUE7RUFDQSxzQkFBQTtBQVRSO0FBZUk7RUFDQyxlQUFBO0VBQ0EsZ0JBQUE7RUFDQSxtQkFBQTtFQUNBLG1CQUFBO0VBQ0EscUNBQUE7QUFiTDtBQWdCSTtFQUNDLGFBQUE7RUFDQSw4QkFBQTtBQWRMO0FBZ0JLOztFQUVDLGFBQUE7RUFDQSxzQkFBQTtBQWROO0FBZ0JNOztFQUNDLGVBQUE7RUFDQSxZQUFBO0VBQ0Esa0JBQUE7RUFDQSx5QkFBQTtFQUNBLHFCQUFBO0FBYlA7QUFnQk07O0VBQ0MsZUFBQTtFQUNBLGdCQUFBO0FBYlA7QUFtQkc7RUFDQyxtQkFBQTtFQUNBLDBCQUFBO0VBQ0EsbUJBQUE7RUFDQSxrQkFBQTtFQUNBLGtCQUFBO0VBQ0EsZUFBQTtFQUNBLG9CQUFBO0VBQ0EsYUFBQTtFQUNBLHNCQUFBO0VBQ0EsbUJBQUE7RUFDQSx1QkFBQTtBQWpCSjtBQW1CSTtFQUNDLG1CQUFBO0VBQ0EscUJBQUE7QUFqQkw7QUFvQkk7RUFDQyxlQUFBO0VBQ0EsY0FBQTtFQUNBLG1CQUFBO0FBbEJMO0FBcUJJO0VBQ0MsZUFBQTtFQUNBLGdCQUFBO0VBQ0EsY0FBQTtFQUNBLGlCQUFBO0FBbkJMO0FBc0JJO0VBQ0MsZUFBQTtFQUNBLGNBQUE7RUFDQSxTQUFBO0FBcEJMO0FBR0Esd3ZOQUF3dk4iLCJzb3VyY2VzQ29udGVudCI6WyIuemVsZi1rZXlzLXBheW1lbnQtY2FyZHMge1xuXHRwYWRkaW5nOiAyNHB4O1xuXHRoZWlnaHQ6IDEwMCU7XG5cblx0LmhlYWRlciB7XG5cdFx0bWFyZ2luLWJvdHRvbTogMzJweDtcblxuXHRcdGgyIHtcblx0XHRcdGZvbnQtc2l6ZTogMjhweDtcblx0XHRcdGZvbnQtd2VpZ2h0OiA2MDA7XG5cdFx0XHRjb2xvcjogIzFhMWExYTtcblx0XHRcdG1hcmdpbjogMCAwIDhweCAwO1xuXHRcdH1cblxuXHRcdHAge1xuXHRcdFx0Zm9udC1zaXplOiAxNnB4O1xuXHRcdFx0Y29sb3I6ICM2NjY7XG5cdFx0XHRtYXJnaW46IDA7XG5cdFx0fVxuXHR9XG5cblx0LmNvbnRlbnQge1xuXHRcdC5jYXJkcy1ncmlkIHtcblx0XHRcdGRpc3BsYXk6IGdyaWQ7XG5cdFx0XHRncmlkLXRlbXBsYXRlLWNvbHVtbnM6IHJlcGVhdChhdXRvLWZpbGwsIG1pbm1heCgzMjBweCwgMWZyKSk7XG5cdFx0XHRnYXA6IDI0cHg7XG5cblx0XHRcdC5jYXJkLWl0ZW0ge1xuXHRcdFx0XHRiYWNrZ3JvdW5kOiBsaW5lYXItZ3JhZGllbnQoMTM1ZGVnLCAjNjY3ZWVhIDAlLCAjNzY0YmEyIDEwMCUpO1xuXHRcdFx0XHRib3JkZXItcmFkaXVzOiAxNnB4O1xuXHRcdFx0XHRwYWRkaW5nOiAyNHB4O1xuXHRcdFx0XHRjb2xvcjogd2hpdGU7XG5cdFx0XHRcdGJveC1zaGFkb3c6IDAgNHB4IDIwcHggcmdiYSgwLCAwLCAwLCAwLjE1KTtcblx0XHRcdFx0dHJhbnNpdGlvbjpcblx0XHRcdFx0XHR0cmFuc2Zvcm0gMC4ycyxcblx0XHRcdFx0XHRib3gtc2hhZG93IDAuMnM7XG5cblx0XHRcdFx0Jjpob3ZlciB7XG5cdFx0XHRcdFx0dHJhbnNmb3JtOiB0cmFuc2xhdGVZKC00cHgpO1xuXHRcdFx0XHRcdGJveC1zaGFkb3c6IDAgOHB4IDMwcHggcmdiYSgwLCAwLCAwLCAwLjI1KTtcblx0XHRcdFx0fVxuXG5cdFx0XHRcdC5jYXJkLWhlYWRlciB7XG5cdFx0XHRcdFx0ZGlzcGxheTogZmxleDtcblx0XHRcdFx0XHRqdXN0aWZ5LWNvbnRlbnQ6IHNwYWNlLWJldHdlZW47XG5cdFx0XHRcdFx0YWxpZ24taXRlbXM6IGNlbnRlcjtcblx0XHRcdFx0XHRtYXJnaW4tYm90dG9tOiAyNHB4O1xuXG5cdFx0XHRcdFx0LmNhcmQtdHlwZSB7XG5cdFx0XHRcdFx0XHRmb250LXNpemU6IDEycHg7XG5cdFx0XHRcdFx0XHRmb250LXdlaWdodDogNzAwO1xuXHRcdFx0XHRcdFx0bGV0dGVyLXNwYWNpbmc6IDFweDtcblx0XHRcdFx0XHRcdHBhZGRpbmc6IDZweCAxMnB4O1xuXHRcdFx0XHRcdFx0Ym9yZGVyLXJhZGl1czogMjBweDtcblx0XHRcdFx0XHRcdGJhY2tncm91bmQ6IHJnYmEoMjU1LCAyNTUsIDI1NSwgMC4yKTtcblx0XHRcdFx0XHRcdGJhY2tkcm9wLWZpbHRlcjogYmx1cigxMHB4KTtcblxuXHRcdFx0XHRcdFx0Ji52aXNhIHtcblx0XHRcdFx0XHRcdFx0YmFja2dyb3VuZDogcmdiYSgyNTUsIDI1NSwgMjU1LCAwLjIpO1xuXHRcdFx0XHRcdFx0fVxuXG5cdFx0XHRcdFx0XHQmLm1hc3RlcmNhcmQge1xuXHRcdFx0XHRcdFx0XHRiYWNrZ3JvdW5kOiByZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMik7XG5cdFx0XHRcdFx0XHR9XG5cdFx0XHRcdFx0fVxuXG5cdFx0XHRcdFx0LmNhcmQtYWN0aW9ucyB7XG5cdFx0XHRcdFx0XHRkaXNwbGF5OiBmbGV4O1xuXHRcdFx0XHRcdFx0Z2FwOiA4cHg7XG5cblx0XHRcdFx0XHRcdGJ1dHRvbiB7XG5cdFx0XHRcdFx0XHRcdHBhZGRpbmc6IDZweCAxMnB4O1xuXHRcdFx0XHRcdFx0XHRib3JkZXI6IG5vbmU7XG5cdFx0XHRcdFx0XHRcdGJvcmRlci1yYWRpdXM6IDZweDtcblx0XHRcdFx0XHRcdFx0Zm9udC1zaXplOiAxMnB4O1xuXHRcdFx0XHRcdFx0XHRmb250LXdlaWdodDogNTAwO1xuXHRcdFx0XHRcdFx0XHRjdXJzb3I6IHBvaW50ZXI7XG5cdFx0XHRcdFx0XHRcdHRyYW5zaXRpb246IGFsbCAwLjJzO1xuXHRcdFx0XHRcdFx0XHRiYWNrZ3JvdW5kOiByZ2JhKDI1NSwgMjU1LCAyNTUsIDAuMik7XG5cdFx0XHRcdFx0XHRcdGNvbG9yOiB3aGl0ZTtcblx0XHRcdFx0XHRcdFx0YmFja2Ryb3AtZmlsdGVyOiBibHVyKDEwcHgpO1xuXG5cdFx0XHRcdFx0XHRcdCY6aG92ZXIge1xuXHRcdFx0XHRcdFx0XHRcdGJhY2tncm91bmQ6IHJnYmEoMjU1LCAyNTUsIDI1NSwgMC4zKTtcblx0XHRcdFx0XHRcdFx0XHR0cmFuc2Zvcm06IHNjYWxlKDEuMDUpO1xuXHRcdFx0XHRcdFx0XHR9XG5cdFx0XHRcdFx0XHR9XG5cdFx0XHRcdFx0fVxuXHRcdFx0XHR9XG5cblx0XHRcdFx0LmNhcmQtbnVtYmVyIHtcblx0XHRcdFx0XHRmb250LXNpemU6IDIwcHg7XG5cdFx0XHRcdFx0Zm9udC13ZWlnaHQ6IDYwMDtcblx0XHRcdFx0XHRsZXR0ZXItc3BhY2luZzogMnB4O1xuXHRcdFx0XHRcdG1hcmdpbi1ib3R0b206IDI0cHg7XG5cdFx0XHRcdFx0Zm9udC1mYW1pbHk6IFwiQ291cmllciBOZXdcIiwgbW9ub3NwYWNlO1xuXHRcdFx0XHR9XG5cblx0XHRcdFx0LmNhcmQtZGV0YWlscyB7XG5cdFx0XHRcdFx0ZGlzcGxheTogZmxleDtcblx0XHRcdFx0XHRqdXN0aWZ5LWNvbnRlbnQ6IHNwYWNlLWJldHdlZW47XG5cblx0XHRcdFx0XHQuY2FyZC1ob2xkZXIsXG5cdFx0XHRcdFx0LmNhcmQtZXhwaXJ5IHtcblx0XHRcdFx0XHRcdGRpc3BsYXk6IGZsZXg7XG5cdFx0XHRcdFx0XHRmbGV4LWRpcmVjdGlvbjogY29sdW1uO1xuXG5cdFx0XHRcdFx0XHQubGFiZWwge1xuXHRcdFx0XHRcdFx0XHRmb250LXNpemU6IDEwcHg7XG5cdFx0XHRcdFx0XHRcdG9wYWNpdHk6IDAuODtcblx0XHRcdFx0XHRcdFx0bWFyZ2luLWJvdHRvbTogNHB4O1xuXHRcdFx0XHRcdFx0XHR0ZXh0LXRyYW5zZm9ybTogdXBwZXJjYXNlO1xuXHRcdFx0XHRcdFx0XHRsZXR0ZXItc3BhY2luZzogMC41cHg7XG5cdFx0XHRcdFx0XHR9XG5cblx0XHRcdFx0XHRcdC52YWx1ZSB7XG5cdFx0XHRcdFx0XHRcdGZvbnQtc2l6ZTogMTRweDtcblx0XHRcdFx0XHRcdFx0Zm9udC13ZWlnaHQ6IDYwMDtcblx0XHRcdFx0XHRcdH1cblx0XHRcdFx0XHR9XG5cdFx0XHRcdH1cblx0XHRcdH1cblxuXHRcdFx0LmFkZC1jYXJkIHtcblx0XHRcdFx0YmFja2dyb3VuZDogI2Y4ZjlmYTtcblx0XHRcdFx0Ym9yZGVyOiAycHggZGFzaGVkICNkZWUyZTY7XG5cdFx0XHRcdGJvcmRlci1yYWRpdXM6IDE2cHg7XG5cdFx0XHRcdHBhZGRpbmc6IDQwcHggMjBweDtcblx0XHRcdFx0dGV4dC1hbGlnbjogY2VudGVyO1xuXHRcdFx0XHRjdXJzb3I6IHBvaW50ZXI7XG5cdFx0XHRcdHRyYW5zaXRpb246IGFsbCAwLjJzO1xuXHRcdFx0XHRkaXNwbGF5OiBmbGV4O1xuXHRcdFx0XHRmbGV4LWRpcmVjdGlvbjogY29sdW1uO1xuXHRcdFx0XHRhbGlnbi1pdGVtczogY2VudGVyO1xuXHRcdFx0XHRqdXN0aWZ5LWNvbnRlbnQ6IGNlbnRlcjtcblxuXHRcdFx0XHQmOmhvdmVyIHtcblx0XHRcdFx0XHRiYWNrZ3JvdW5kOiAjZTllY2VmO1xuXHRcdFx0XHRcdGJvcmRlci1jb2xvcjogI2FkYjViZDtcblx0XHRcdFx0fVxuXG5cdFx0XHRcdC5hZGQtaWNvbiB7XG5cdFx0XHRcdFx0Zm9udC1zaXplOiA0OHB4O1xuXHRcdFx0XHRcdGNvbG9yOiAjNmM3NTdkO1xuXHRcdFx0XHRcdG1hcmdpbi1ib3R0b206IDE2cHg7XG5cdFx0XHRcdH1cblxuXHRcdFx0XHRoMyB7XG5cdFx0XHRcdFx0Zm9udC1zaXplOiAxOHB4O1xuXHRcdFx0XHRcdGZvbnQtd2VpZ2h0OiA2MDA7XG5cdFx0XHRcdFx0Y29sb3I6ICM0OTUwNTc7XG5cdFx0XHRcdFx0bWFyZ2luOiAwIDAgOHB4IDA7XG5cdFx0XHRcdH1cblxuXHRcdFx0XHRwIHtcblx0XHRcdFx0XHRmb250LXNpemU6IDE0cHg7XG5cdFx0XHRcdFx0Y29sb3I6ICM2Yzc1N2Q7XG5cdFx0XHRcdFx0bWFyZ2luOiAwO1xuXHRcdFx0XHR9XG5cdFx0XHR9XG5cdFx0fVxuXHR9XG59XG4iXSwic291cmNlUm9vdCI6IiJ9 */"]
   });
 }

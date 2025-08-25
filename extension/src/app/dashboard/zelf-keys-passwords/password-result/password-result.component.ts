@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TranslocoModule } from "@jsverse/transloco";
 import { RouterModule, Router, ActivatedRoute } from "@angular/router";
+import { ChromeService } from "../../../chrome.service";
 
 @Component({
 	selector: "app-password-result",
@@ -18,10 +19,16 @@ export class PasswordResultComponent implements OnInit {
 
 	constructor(
 		private router: Router,
-		private route: ActivatedRoute
+		private route: ActivatedRoute,
+		private chromeService: ChromeService
 	) {}
 
-	ngOnInit(): void {
+	async ngOnInit(): Promise<void> {
+		// Ensure extension is in full screen mode for better security when showing password results
+		if (this.chromeService.isExtension) {
+			await this.chromeService.ensureFullScreen("dashboard/passwords/result");
+		}
+
 		// Get result data from route query params
 		this.route.queryParams.subscribe((params) => {
 			if (params["result"]) {

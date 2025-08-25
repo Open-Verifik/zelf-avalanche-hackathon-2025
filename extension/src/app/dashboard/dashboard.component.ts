@@ -4,6 +4,7 @@ import { TranslocoModule } from "@jsverse/transloco";
 import { RouterModule, Router, ActivatedRoute } from "@angular/router";
 import { WalletService } from "../wallet.service";
 import { WalletModel } from "../wallet";
+import { ChromeService } from "../chrome.service";
 
 @Component({
 	selector: "app-dashboard",
@@ -20,7 +21,8 @@ export class DashboardComponent implements OnInit {
 	constructor(
 		private walletService: WalletService,
 		private router: Router,
-		private route: ActivatedRoute
+		private route: ActivatedRoute,
+		private chromeService: ChromeService
 	) {}
 
 	async ngOnInit(): Promise<void> {
@@ -45,8 +47,25 @@ export class DashboardComponent implements OnInit {
 		});
 	}
 
-	navigateToTab(tab: string): void {
+	async navigateToTab(tab: string): Promise<void> {
 		this.activeTab = tab;
+
+		// Ensure extension opens in full screen for better user experience
+		// This is especially important for the passwords tab and other sensitive data
+		if (this.chromeService.isExtension) {
+			// Check if we're currently in a popup or side panel
+			if (this.chromeService.isPopout || this.chromeService.isSidePanel) {
+				// Open the specific tab in full page mode
+				await this.chromeService.openFullPage(`dashboard/${tab}`);
+				return;
+			} else {
+				// Ensure we're in full screen mode for the current tab
+				await this.chromeService.ensureFullScreen(`dashboard/${tab}`);
+				return;
+			}
+		}
+
+		// If not in extension mode, navigate normally
 		if (tab === "start") {
 			this.router.navigate(["/dashboard"]);
 		} else {

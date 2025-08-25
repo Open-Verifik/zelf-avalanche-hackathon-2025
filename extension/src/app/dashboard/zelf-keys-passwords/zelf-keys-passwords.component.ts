@@ -5,6 +5,7 @@ import { RouterModule, Router } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
 import { WalletService } from "../../wallet.service";
 import { PasswordDataService } from "../../services/password-data.service";
+import { ChromeService } from "../../chrome.service";
 
 @Component({
 	selector: "app-zelf-keys-passwords",
@@ -22,10 +23,17 @@ export class ZelfKeysPasswordsComponent implements OnInit, OnDestroy {
 	constructor(
 		private router: Router,
 		private walletService: WalletService,
-		private passwordDataService: PasswordDataService
+		private passwordDataService: PasswordDataService,
+		private chromeService: ChromeService
 	) {}
 
-	ngOnInit(): void {
+	async ngOnInit(): Promise<void> {
+		// Ensure extension is in full screen mode for better security and user experience
+		// This is especially important for password management
+		if (this.chromeService.isExtension) {
+			await this.chromeService.ensureFullScreen("dashboard/passwords");
+		}
+
 		this.loadStoredPasswords();
 	}
 
