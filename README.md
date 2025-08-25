@@ -6,6 +6,18 @@
 
 lThis project successfully integrates the **ZelfKey security system** with **Avalanche blockchain** to create and manage NFTs from encrypted QR codes. The system allows users to store sensitive data (passwords, notes, credit cards, etc.) as encrypted QR codes on IPFS, then mint them as NFTs on Avalanche **directly to their authenticated session address** - creating a seamless bridge between web authentication and blockchain ownership!
 
+## 📋 **🚀 [Development Roadmap & Grant Proposal](ROADMAP.md)**
+
+> **We are seeking $80,000 in funding to expand our ZelfProof-powered password manager beyond the MVP, creating the most private and secure digital asset management solution on the Avalanche blockchain.**
+
+**Key Highlights:**
+- **ZelfProof Technology**: World's first zero-knowledge face proof system
+- **Market Opportunity**: $15 billion password manager market + $50 billion privacy tech market
+- **Avalanche Integration**: Establishing Avalanche as the privacy-first blockchain
+- **3-Month Development**: Transform MVP to production-ready platform
+
+**[📖 Read Full Roadmap →](ROADMAP.md)**
+
 ## ✨ Key Features
 
 - **🔐 ZelfKey Integration**: Secure data storage with biometric face verification
