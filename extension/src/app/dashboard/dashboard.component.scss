@@ -3,7 +3,7 @@
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	background: #f8f9fa;
+	background: transparent;
 	padding: 20px;
 	box-sizing: border-box;
 
@@ -24,7 +24,7 @@
 			justify-content: space-between;
 			padding: 24px 32px;
 			border-bottom: 1px solid #f0f0f0;
-			background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
+			background: white;
 
 			.header-left {
 				.logo {
@@ -178,7 +178,7 @@
 		.dashboard-content {
 			flex: 1;
 			overflow: auto;
-			background: #fafbfc;
+			background: white;
 			padding: 32px;
 			min-height: 400px;
 		}
