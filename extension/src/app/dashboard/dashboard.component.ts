@@ -73,6 +73,10 @@ export class DashboardComponent implements OnInit {
 		}
 	}
 
+	navigateToWallet(): void {
+		this.router.navigate(["/home"]);
+	}
+
 	get zelfName(): string {
 		return this.wallet?.name ? this.wallet.name.toUpperCase() : "USER.ZELF";
 	}
