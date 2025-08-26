@@ -57,10 +57,7 @@ const routes: Routes = [
 						loadComponent: () =>
 							import("./dashboard/zelf-keys-passwords/password-form/password-form.component").then((m) => m.PasswordFormComponent),
 					},
-					{
-						path: "passwords/biometrics",
-						loadComponent: () => import("./dashboard/shared/data-biometrics.component").then((m) => m.DataBiometricsComponent),
-					},
+
 					{
 						path: "passwords/result",
 						loadComponent: () =>
@@ -83,10 +80,7 @@ const routes: Routes = [
 						path: "notes/new",
 						loadComponent: () => import("./dashboard/zelf-keys-notes/note-form/note-form.component").then((m) => m.NoteFormComponent),
 					},
-					{
-						path: "notes/biometrics",
-						loadComponent: () => import("./dashboard/shared/data-biometrics.component").then((m) => m.DataBiometricsComponent),
-					},
+					// Removed notes/biometrics route - using modal instead
 					{
 						path: "notes/result",
 						loadComponent: () =>

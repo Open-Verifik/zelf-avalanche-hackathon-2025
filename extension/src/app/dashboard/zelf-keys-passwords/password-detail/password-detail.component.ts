@@ -5,13 +5,13 @@ import { RouterModule, Router, ActivatedRoute } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
 import { WalletService } from "../../../wallet.service";
 import { PasswordDataService } from "../../../services/password-data.service";
-import { PasswordBiometricsComponent } from "../password-biometrics/password-biometrics.component";
+import { DataBiometricsComponent } from "../../shared/data-biometrics.component";
 import { ChromeService } from "../../../chrome.service";
 
 @Component({
 	selector: "app-password-detail",
 	standalone: true,
-	imports: [CommonModule, TranslocoModule, RouterModule, PasswordBiometricsComponent],
+	imports: [CommonModule, TranslocoModule, RouterModule, DataBiometricsComponent],
 	templateUrl: "./password-detail.component.html",
 	styleUrls: ["./password-detail.component.scss"],
 })
@@ -54,16 +54,14 @@ export class PasswordDetailComponent implements OnInit, OnDestroy {
 		try {
 			// Get password data from the service
 			const passwordData = this.passwordDataService.getCurrentPassword();
-			if (passwordData) {
-				this.password = passwordData;
-				console.log("Password data loaded from service:", this.password);
-			} else {
-				// Fallback: try to get from route params if needed
-				console.error("No password data found in service");
+
+			if (!passwordData) {
 				this.error = "Password data not found";
+				return;
 			}
+
+			this.password = passwordData;
 		} catch (error) {
-			console.error("Error loading password data:", error);
 			this.error = "Failed to load password data";
 		} finally {
 			this.loading = false;
@@ -75,7 +73,23 @@ export class PasswordDetailComponent implements OnInit, OnDestroy {
 	}
 
 	onBiometricsSuccess(biometricData: any): void {
-		this.decryptPassword(biometricData);
+		// Use the data that was already retrieved from the biometrics component
+		if (biometricData.retrievedData) {
+			this.decryptedData = {
+				...biometricData.retrievedData.metadata,
+				// Also include some public data for display
+				website: biometricData.retrievedData.publicData?.website,
+				zelfName: biometricData.retrievedData.publicData?.zelfName,
+				timestamp: biometricData.retrievedData.publicData?.timestamp,
+				type: biometricData.retrievedData.publicData?.type,
+				category: biometricData.retrievedData.publicData?.category,
+				difficulty: biometricData.retrievedData.difficulty,
+			};
+			this.showBiometrics = false;
+		} else {
+			console.error("No retrieved data found in biometrics response");
+			this.error = "Failed to retrieve password data";
+		}
 	}
 
 	onBiometricsCancel(): void {

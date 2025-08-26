@@ -3940,14 +3940,14 @@ const routes = [{
     loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_material_fesm2022_button_mjs"), __webpack_require__.e("default-node_modules_angular_cdk_fesm2022_overlay-module-BUj0D19H_mjs"), __webpack_require__.e("default-src_app_zelf-loader_zelf-loader_component_ts"), __webpack_require__.e("default-node_modules_buffer_index_js"), __webpack_require__.e("default-src_app_eth_service_ts-src_app_services_bitcoin_service_ts-src_app_services_sui_servi-f36a10"), __webpack_require__.e("default-node_modules_angular_cdk_fesm2022_dialog_mjs"), __webpack_require__.e("default-src_app_services_blockchain-transactions_service_ts"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_module-BnDTus5c_mjs"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_bottom-sheet_mjs"), __webpack_require__.e("default-node_modules_angular_flex-layout_fesm2020_angular-flex-layout_mjs"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_menu_mjs"), __webpack_require__.e("default-src_app_pipes_first-letter_pipe_ts-src_app_pipes_zelf-name_pipe_ts-node_modules_angul-52eacd"), __webpack_require__.e("src_app_home_home_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./home/home.component */ 27824)).then(m => m.HomeComponent)
   }, {
     path: "dashboard",
-    loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_dashboard_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/dashboard.component */ 2320)).then(m => m.DashboardComponent),
+    loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_dashboard_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/dashboard.component */ 62320)).then(m => m.DashboardComponent),
     children: [{
       path: "",
       redirectTo: "start",
       pathMatch: "full"
     }, {
       path: "start",
-      loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_start_start_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/start/start.component */ 511)).then(m => m.StartComponent)
+      loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_start_start_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/start/start.component */ 40511)).then(m => m.StartComponent)
     },
     // Redirect singular 'password' to plural 'passwords' to fix routing issues
     {
@@ -3972,40 +3972,36 @@ const routes = [{
       pathMatch: "full"
     }, {
       path: "passwords",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_dashboard_shared_data-card_component_ts"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_zelf-keys-passwords_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/zelf-keys-passwords.component */ 587)).then(m => m.ZelfKeysPasswordsComponent)
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_dashboard_shared_data-card_component_ts"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_zelf-keys-passwords_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/zelf-keys-passwords.component */ 60587)).then(m => m.ZelfKeysPasswordsComponent)
     }, {
       path: "passwords/new",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_password-form_password-form_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-form/password-form.component */ 2613)).then(m => m.PasswordFormComponent)
-    }, {
-      path: "passwords/biometrics",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_material_fesm2022_button_mjs"), __webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("default-src_app_zelf-loader_zelf-loader_component_ts"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_progress-spinner_mjs"), __webpack_require__.e("default-node_modules_angular_flex-layout_fesm2020_angular-flex-layout_mjs"), __webpack_require__.e("default-src_app_services_media-stream_service_ts-node_modules_angular_material_fesm2022_progr-6a79e9"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_shared_data-biometrics_component_ts-node_modules_rxjs_dist_esm_internal_obs-a5c0cf")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/shared/data-biometrics.component */ 9874)).then(m => m.DataBiometricsComponent)
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_password-form_password-form_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-form/password-form.component */ 62613)).then(m => m.PasswordFormComponent)
     }, {
       path: "passwords/result",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_password-result_password-result_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-result/password-result.component */ 4717)).then(m => m.PasswordResultComponent)
+      loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_zelf-keys-passwords_password-result_password-result_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-result/password-result.component */ 84717)).then(m => m.PasswordResultComponent)
     }, {
       path: "passwords/detail",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_material_fesm2022_button_mjs"), __webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("default-src_app_zelf-loader_zelf-loader_component_ts"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_progress-spinner_mjs"), __webpack_require__.e("default-node_modules_angular_flex-layout_fesm2020_angular-flex-layout_mjs"), __webpack_require__.e("default-src_app_services_media-stream_service_ts-node_modules_angular_material_fesm2022_progr-6a79e9"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_password-detail_password-detail_component_ts-node_modul-6643f9")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-detail/password-detail.component */ 7133)).then(m => m.PasswordDetailComponent)
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_material_fesm2022_button_mjs"), __webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("default-src_app_zelf-loader_zelf-loader_component_ts"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_progress-spinner_mjs"), __webpack_require__.e("default-node_modules_angular_flex-layout_fesm2020_angular-flex-layout_mjs"), __webpack_require__.e("default-src_app_services_media-stream_service_ts-node_modules_angular_material_fesm2022_progr-6a79e9"), __webpack_require__.e("default-src_app_dashboard_shared_data-biometrics_component_ts-node_modules_rxjs_dist_esm_inte-7a2926"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_password-detail_password-detail_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-detail/password-detail.component */ 27133)).then(m => m.PasswordDetailComponent)
     }, {
       path: "notes",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_dashboard_shared_data-card_component_ts"), __webpack_require__.e("src_app_dashboard_zelf-keys-notes_zelf-keys-notes_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-notes/zelf-keys-notes.component */ 8552)).then(m => m.ZelfKeysNotesComponent)
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_dashboard_shared_data-card_component_ts"), __webpack_require__.e("src_app_dashboard_zelf-keys-notes_zelf-keys-notes_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-notes/zelf-keys-notes.component */ 76171)).then(m => m.ZelfKeysNotesComponent)
     }, {
       path: "notes/new",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-notes_note-form_note-form_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-notes/note-form/note-form.component */ 1086)).then(m => m.NoteFormComponent)
-    }, {
-      path: "notes/biometrics",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_material_fesm2022_button_mjs"), __webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("default-src_app_zelf-loader_zelf-loader_component_ts"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_progress-spinner_mjs"), __webpack_require__.e("default-node_modules_angular_flex-layout_fesm2020_angular-flex-layout_mjs"), __webpack_require__.e("default-src_app_services_media-stream_service_ts-node_modules_angular_material_fesm2022_progr-6a79e9"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_shared_data-biometrics_component_ts-node_modules_rxjs_dist_esm_internal_obs-a5c0cf")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/shared/data-biometrics.component */ 9874)).then(m => m.DataBiometricsComponent)
-    }, {
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_material_fesm2022_button_mjs"), __webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("default-src_app_zelf-loader_zelf-loader_component_ts"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_progress-spinner_mjs"), __webpack_require__.e("default-node_modules_angular_flex-layout_fesm2020_angular-flex-layout_mjs"), __webpack_require__.e("default-src_app_services_media-stream_service_ts-node_modules_angular_material_fesm2022_progr-6a79e9"), __webpack_require__.e("default-src_app_dashboard_shared_data-biometrics_component_ts-node_modules_rxjs_dist_esm_inte-7a2926"), __webpack_require__.e("src_app_dashboard_zelf-keys-notes_note-form_note-form_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-notes/note-form/note-form.component */ 51086)).then(m => m.NoteFormComponent)
+    },
+    // Removed notes/biometrics route - using modal instead
+    {
       path: "notes/result",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-notes_note-result_note-result_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-notes/note-result/note-result.component */ 9642)).then(m => m.NoteResultComponent)
+      loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_zelf-keys-notes_note-result_note-result_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-notes/note-result/note-result.component */ 69642)).then(m => m.NoteResultComponent)
     }, {
       path: "addresses",
       loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_zelf-keys-addresses_zelf-keys-addresses_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-addresses/zelf-keys-addresses.component */ 5395)).then(m => m.ZelfKeysAddressesComponent)
     }, {
       path: "payment-cards",
-      loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_zelf-keys-payment-cards_zelf-keys-payment-cards_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-payment-cards/zelf-keys-payment-cards.component */ 6851)).then(m => m.ZelfKeysPaymentCardsComponent)
+      loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_zelf-keys-payment-cards_zelf-keys-payment-cards_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-payment-cards/zelf-keys-payment-cards.component */ 56851)).then(m => m.ZelfKeysPaymentCardsComponent)
     }, {
       path: "bank-accounts",
-      loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_zelf-keys-bank-accounts_zelf-keys-bank-accounts_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-bank-accounts/zelf-keys-bank-accounts.component */ 1391)).then(m => m.ZelfKeysBankAccountsComponent)
+      loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_zelf-keys-bank-accounts_zelf-keys-bank-accounts_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-bank-accounts/zelf-keys-bank-accounts.component */ 71391)).then(m => m.ZelfKeysBankAccountsComponent)
     }]
   }, {
     path: "manage-domains",

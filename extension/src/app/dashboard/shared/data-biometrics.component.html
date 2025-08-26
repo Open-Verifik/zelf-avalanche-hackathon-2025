@@ -65,6 +65,60 @@
 				<p *ngIf="isDecryptMode">Please look at the camera to verify your identity and decrypt your {{ getDataTypeTitle().toLowerCase() }}</p>
 			</div>
 
+			<!-- Decrypt Mode Info -->
+			<div class="decrypt-info" *ngIf="isDecryptMode">
+				<div class="decrypt-details">
+					<strong>Decrypting:</strong> {{ getDataTypeTitle() }} with ZelfProof
+					<div class="zelfproof-preview" *ngIf="itemData.zelfProof">{{ itemData.zelfProof.substring(0, 50) }}...</div>
+				</div>
+			</div>
+
+			<!-- Liveness Detection Controls -->
+			<div class="liveness-controls" *ngIf="!livenessDetection.isActive">
+				<button class="btn-liveness" (click)="startLivenessDetection()">🔄 Start Active Liveness Detection</button>
+				<small>For enhanced security, move your face to different angles</small>
+			</div>
+
+			<!-- Liveness Detection Progress -->
+			<div class="liveness-progress" *ngIf="livenessDetection.isActive">
+				<h3>Active Liveness Detection</h3>
+				<div class="liveness-steps">
+					<div
+						*ngFor="let step of livenessDetection.steps; let i = index"
+						class="liveness-step"
+						[class.active]="i === livenessDetection.currentStep"
+						[class.completed]="step.completed"
+					>
+						<div class="step-indicator">
+							<span *ngIf="step.completed">✅</span>
+							<span *ngIf="!step.completed && i === livenessDetection.currentStep">🔄</span>
+							<span *ngIf="!step.completed && i !== livenessDetection.currentStep">⏳</span>
+						</div>
+						<div class="step-info">
+							<div class="step-name">{{ step.name }}</div>
+							<div class="step-angle">{{ step.angle }}°</div>
+						</div>
+					</div>
+				</div>
+
+				<div class="liveness-instructions" *ngIf="livenessDetection.isActive">
+					<div class="current-step">
+						{{ livenessDetection.steps[livenessDetection.currentStep].name }}: Turn your head
+						{{
+							livenessDetection.steps[livenessDetection.currentStep].angle > 0
+								? "right"
+								: livenessDetection.steps[livenessDetection.currentStep].angle < 0
+									? "left"
+									: "center"
+						}}
+					</div>
+					<div class="hold-instruction" *ngIf="livenessDetection.isHolding">
+						Hold position...
+						{{ Math.ceil((livenessDetection.requiredHoldTime - (Date.now() - livenessDetection.holdStartTime)) / 1000) }}s
+					</div>
+				</div>
+			</div>
+
 			<!-- Optional Master Password Input -->
 			<div class="password-input-container">
 				<div class="password-toggle">

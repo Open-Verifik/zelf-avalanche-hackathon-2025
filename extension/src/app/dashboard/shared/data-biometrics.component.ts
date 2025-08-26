@@ -21,6 +21,7 @@ import { DataPassingService } from "../../services/data-passing.service";
 export interface BiometricData {
 	faceBase64: string;
 	password?: string;
+	retrievedData?: any;
 }
 
 @Component({
@@ -47,6 +48,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	@ViewChild("webcam", { static: false }) public webcamRef?: WebcamComponent;
 
 	@Input() isDecryptMode: boolean = false;
+	@Input() itemData: any = {};
 	@Output() canNavigate: EventEmitter<boolean> = new EventEmitter<boolean>();
 	@Output() error: EventEmitter<any> = new EventEmitter<any>();
 	@Output() imageCaptured: EventEmitter<string> = new EventEmitter<string>();
@@ -90,7 +92,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	apiKeysSessionJWT: string;
 	errorFace: any = null;
 	lastFace: any;
-	itemData: any = {};
 	aspectRatio = 0.75;
 	masterPassword: string = "";
 
@@ -98,6 +99,26 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	dataType: string = "";
 	dataTitle: string = "";
 	useMasterPassword: boolean = false;
+
+	// Make Math and Date available in template
+	Math = Math;
+	Date = Date;
+
+	// Active Liveness Detection properties
+	livenessDetection = {
+		isActive: false,
+		currentStep: 0,
+		totalSteps: 3,
+		steps: [
+			{ name: "Center", angle: 0, tolerance: 15, completed: false },
+			{ name: "Left", angle: -30, tolerance: 15, completed: false },
+			{ name: "Right", angle: 30, tolerance: 15, completed: false },
+		],
+		faceAngles: [] as number[],
+		requiredHoldTime: 1000, // 1 second to hold position
+		holdStartTime: 0,
+		isHolding: false,
+	};
 
 	constructor(
 		private _changeDetectorRef: ChangeDetectorRef,
@@ -135,11 +156,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 			this.dataTitle = "Bank Account";
 		}
 
-		// Ensure extension is in full screen mode for better security during biometric authentication
-		if (this.chromeService.isExtension) {
-			await this.chromeService.ensureFullScreen(`dashboard/${this.dataType}/biometrics`);
-		}
-
 		// Get data from service instead of query params
 		this._getDataFromService();
 
@@ -151,21 +167,26 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	}
 
 	/**
-	 * Get data from the data passing service
+	 * Get data from the data passing service or input
 	 */
 	private _getDataFromService(): void {
-		// Get data from service based on data type
-		const serviceData = this.dataPassingService.getData(this.dataType);
-
-		if (serviceData) {
-			this.itemData = serviceData;
-
-			// Set master password if available
-			if ((this.dataType === "notes" || this.dataType === "passwords") && this.itemData.masterPassword) {
-				this.masterPassword = this.itemData.masterPassword;
-			}
+		// If itemData is provided as input (for decrypt mode), use it
+		if (this.itemData && Object.keys(this.itemData).length > 0) {
+			// Use input itemData
 		} else {
-			this.itemData = {};
+			// Otherwise, get data from service based on data type
+			const serviceData = this.dataPassingService.getData(this.dataType);
+
+			if (serviceData) {
+				this.itemData = serviceData;
+			} else {
+				this.itemData = {};
+			}
+		}
+
+		// Set master password if available
+		if ((this.dataType === "notes" || this.dataType === "passwords") && this.itemData.masterPassword) {
+			this.masterPassword = this.itemData.masterPassword;
 		}
 	}
 
@@ -224,6 +245,130 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 		this.useMasterPassword = !this.useMasterPassword;
 		if (!this.useMasterPassword) {
 			this.masterPassword = ""; // Clear password when toggling off
+		}
+	}
+
+	/**
+	 * Start active liveness detection
+	 */
+	startLivenessDetection(): void {
+		this.livenessDetection.isActive = true;
+		this.livenessDetection.currentStep = 0;
+		this.livenessDetection.steps.forEach((step) => (step.completed = false));
+		this.livenessDetection.faceAngles = [];
+		this._changeDetectorRef.markForCheck();
+	}
+
+	/**
+	 * Calculate face angle from face landmarks
+	 */
+	private _calculateFaceAngle(face: any): number {
+		if (!face.landmarks || face.landmarks.length < 68) return 0;
+
+		// Use eye landmarks to calculate head rotation
+		const leftEye = face.landmarks.slice(36, 42); // Left eye points
+		const rightEye = face.landmarks.slice(42, 48); // Right eye points
+
+		// Calculate center of each eye
+		const leftEyeCenter = {
+			x: leftEye.reduce((sum: number, point: any) => sum + point.x, 0) / leftEye.length,
+			y: leftEye.reduce((sum: number, point: any) => sum + point.y, 0) / leftEye.length,
+		};
+
+		const rightEyeCenter = {
+			x: rightEye.reduce((sum: number, point: any) => sum + point.x, 0) / rightEye.length,
+			y: rightEye.reduce((sum: number, point: any) => sum + point.y, 0) / rightEye.length,
+		};
+
+		// Calculate angle based on eye positions
+		const eyeDistance = Math.sqrt(Math.pow(rightEyeCenter.x - leftEyeCenter.x, 2) + Math.pow(rightEyeCenter.y - leftEyeCenter.y, 2));
+
+		// Normalize and convert to degrees
+		const normalizedDistance = (rightEyeCenter.x - leftEyeCenter.x) / eyeDistance;
+		const angle = Math.asin(normalizedDistance) * (180 / Math.PI);
+
+		return angle;
+	}
+
+	/**
+	 * Check if face is at the correct angle for current step
+	 */
+	private _isFaceAtCorrectAngle(face: any): boolean {
+		const currentStep = this.livenessDetection.steps[this.livenessDetection.currentStep];
+		const faceAngle = this._calculateFaceAngle(face);
+
+		// Check if face is within tolerance of required angle
+		const angleDiff = Math.abs(faceAngle - currentStep.angle);
+		return angleDiff <= currentStep.tolerance;
+	}
+
+	/**
+	 * Update liveness detection progress
+	 */
+	private _updateLivenessProgress(face: any): void {
+		if (!this.livenessDetection.isActive) return;
+
+		const currentStep = this.livenessDetection.steps[this.livenessDetection.currentStep];
+
+		if (this._isFaceAtCorrectAngle(face)) {
+			if (!this.livenessDetection.isHolding) {
+				this.livenessDetection.isHolding = true;
+				this.livenessDetection.holdStartTime = Date.now();
+			}
+
+			// Check if held long enough
+			const holdTime = Date.now() - this.livenessDetection.holdStartTime;
+			if (holdTime >= this.livenessDetection.requiredHoldTime) {
+				// Mark step as completed
+				currentStep.completed = true;
+				this.livenessDetection.faceAngles.push(this._calculateFaceAngle(face));
+
+				// Move to next step
+				if (this.livenessDetection.currentStep < this.livenessDetection.totalSteps - 1) {
+					this.livenessDetection.currentStep++;
+					this.livenessDetection.isHolding = false;
+				} else {
+					// All steps completed
+					this._onLivenessDetectionComplete();
+				}
+
+				this._changeDetectorRef.markForCheck();
+			}
+		} else {
+			// Reset holding if face moves away
+			this.livenessDetection.isHolding = false;
+		}
+	}
+
+	/**
+	 * Handle liveness detection completion
+	 */
+	private _onLivenessDetectionComplete(): void {
+		this.livenessDetection.isActive = false;
+		// Capture the final image and proceed
+		this._captureFinalImage();
+	}
+
+	/**
+	 * Capture final image after liveness detection
+	 */
+	private _captureFinalImage(): void {
+		if (this.webcamRef?.nativeVideoElement) {
+			const video = this.webcamRef.nativeVideoElement;
+			const canvas = document.createElement("canvas");
+			const ctx = canvas.getContext("2d");
+
+			if (ctx) {
+				canvas.width = video.videoWidth;
+				canvas.height = video.videoHeight;
+				ctx.drawImage(video, 0, 0);
+
+				const img = new Image();
+				img.onload = () => {
+					this._takePictureLiveness(img);
+				};
+				img.src = canvas.toDataURL("image/jpeg");
+			}
 		}
 	}
 
@@ -501,8 +646,11 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 					this.face.successPosition = 0;
 				}
 
-				if (this.face.successPosition > 2) {
-					// Capture after 3 successful frames
+				// Update liveness detection if active
+				if (this.livenessDetection.isActive) {
+					this._updateLivenessProgress(this.lastFace);
+				} else if (this.face.successPosition > 2) {
+					// Capture after 3 successful frames (original behavior)
 					this.face.successPosition = 0;
 					this._takePicture.next(); // Trigger image capture
 					clearInterval(this._intervals.detectFace); // Stop detection after capture
@@ -570,11 +718,16 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 		try {
 			const base64Data = this.response.base64Image.split(",")[1];
 
+			console.log("🔍 DEBUG - Biometric capture mode:", this.isDecryptMode ? "DECRYPT" : "STORE");
+			console.log("🔍 DEBUG - Data type:", this.dataType);
+
 			if (this.isDecryptMode) {
-				// In decrypt mode, emit the biometric data to the parent component
-				this.onBiometricsSuccess(base64Data);
+				// In decrypt mode, retrieve the data based on category
+				console.log("🔍 DEBUG - Calling retrieve method");
+				await this._retrieveDataByCategory(base64Data);
 			} else {
 				// In create mode, store the data based on category
+				console.log("🔍 DEBUG - Calling store method");
 				await this._storeDataByCategory(base64Data);
 			}
 		} catch (error) {
@@ -725,9 +878,68 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 		}
 	}
 
+	private async _retrieveDataByCategory(faceBase64: string): Promise<any> {
+		try {
+			console.log("🔍 DEBUG - Starting retrieve process");
+
+			// Get the correct data source based on data type
+			const dataSource = this._getDataSource();
+			console.log("🔍 DEBUG - Data source for retrieve:", dataSource);
+
+			// For retrieve mode, we need zelfProof and optional password
+			if (!dataSource.publicData.zelfProof) {
+				console.error("❌ DEBUG - No zelfProof found in data source");
+				throw new Error(`No zelfProof available for ${this.dataType}. Cannot proceed with retrieval.`);
+			}
+
+			const retrievePayload = {
+				zelfProof: dataSource.publicData.zelfProof,
+				faceBase64: faceBase64,
+				...(this.useMasterPassword && this.masterPassword && { password: this.masterPassword }), // Optional password
+			};
+
+			console.log("🔍 DEBUG - Retrieve payload:", retrievePayload);
+			console.log("🔍 DEBUG - Calling retrieve endpoint:", `${environment.keysApiUrl}/api/zelf-key/retrieve`);
+
+			// Call the retrieve endpoint
+			const response = await this._httpWrapperService.sendRequest("post", `${environment.keysApiUrl}/api/zelf-key/retrieve`, retrievePayload, {
+				headers: {
+					Authorization: `Bearer ${this.apiKeysSessionJWT}`,
+				},
+			});
+
+			// Store the retrieved data in the service
+			await this.dataPassingService.storeResult(this.dataType, response);
+
+			// Navigate to result page for retrieved data
+			this._navigateToResult(response);
+
+			return response;
+		} catch (error) {
+			console.error(`Error retrieving ${this.dataType} data:`, error);
+			this.error.emit(error);
+			throw error;
+		}
+	}
+
 	private _navigateToResult(apiResponse?: any): void {
 		// Get the correct data source for navigation
 		const dataSource = this._getDataSource();
+
+		// Determine if this is store or retrieve mode
+		const isRetrieveMode = this.isDecryptMode;
+		const modeText = isRetrieveMode ? "retrieved" : "stored";
+		const messageText = isRetrieveMode ? "Note retrieved successfully" : "Note stored successfully";
+
+		// For decrypt mode, emit result instead of navigating
+		if (this.isDecryptMode) {
+			this.biometricsSuccess.emit({
+				faceBase64: this.response.base64Image.split(",")[1],
+				password: this.masterPassword,
+				retrievedData: apiResponse?.data,
+			});
+			return;
+		}
 
 		// Switch case for different categories
 		switch (this.dataType) {
@@ -737,14 +949,16 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						result: encodeURIComponent(
 							JSON.stringify({
 								success: true,
-								message: "Note stored successfully",
+								message: messageText,
 								publicData: {
-									title: dataSource.title,
+									title: dataSource.title || apiResponse?.data?.title,
 									type: "notes",
 									timestamp: new Date().toISOString(),
 								},
 								zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
 								zelfQR: apiResponse?.data?.zelfQR || "data:image/png;base64,sample_qr_code",
+								// Include retrieved data if in retrieve mode
+								...(isRetrieveMode && { retrievedData: apiResponse?.data }),
 							})
 						),
 					},
@@ -757,14 +971,16 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						result: encodeURIComponent(
 							JSON.stringify({
 								success: true,
-								message: "Password stored successfully",
+								message: isRetrieveMode ? "Password retrieved successfully" : "Password stored successfully",
 								publicData: {
-									title: dataSource.title,
+									title: dataSource.title || apiResponse?.data?.title,
 									type: "password",
 									timestamp: new Date().toISOString(),
 								},
 								zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
 								zelfQR: apiResponse?.data?.zelfQR || "data:image/png;base64,sample_qr_code",
+								// Include retrieved data if in retrieve mode
+								...(isRetrieveMode && { retrievedData: apiResponse?.data }),
 							})
 						),
 					},
@@ -777,14 +993,16 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						result: encodeURIComponent(
 							JSON.stringify({
 								success: true,
-								message: "Address stored successfully",
+								message: isRetrieveMode ? "Address retrieved successfully" : "Address stored successfully",
 								publicData: {
-									title: dataSource.title,
+									title: dataSource.title || apiResponse?.data?.title,
 									type: "address",
 									timestamp: new Date().toISOString(),
 								},
 								zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
 								zelfQR: apiResponse?.data?.zelfQR || "data:image/png;base64,sample_qr_code",
+								// Include retrieved data if in retrieve mode
+								...(isRetrieveMode && { retrievedData: apiResponse?.data }),
 							})
 						),
 					},
@@ -797,14 +1015,16 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						result: encodeURIComponent(
 							JSON.stringify({
 								success: true,
-								message: "Payment card stored successfully",
+								message: isRetrieveMode ? "Payment card retrieved successfully" : "Payment card stored successfully",
 								publicData: {
-									title: dataSource.title,
+									title: dataSource.title || apiResponse?.data?.title,
 									type: "payment-card",
 									timestamp: new Date().toISOString(),
 								},
 								zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
 								zelfQR: apiResponse?.data?.zelfQR || "data:image/png;base64,sample_qr_code",
+								// Include retrieved data if in retrieve mode
+								...(isRetrieveMode && { retrievedData: apiResponse?.data }),
 							})
 						),
 					},
@@ -817,14 +1037,16 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						result: encodeURIComponent(
 							JSON.stringify({
 								success: true,
-								message: "Bank account stored successfully",
+								message: isRetrieveMode ? "Bank account retrieved successfully" : "Bank account stored successfully",
 								publicData: {
-									title: dataSource.title,
+									title: dataSource.title || apiResponse?.data?.title,
 									type: "bank-account",
 									timestamp: new Date().toISOString(),
 								},
 								zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
 								zelfQR: apiResponse?.data?.zelfQR || "data:image/png;base64,sample_qr_code",
+								// Include retrieved data if in retrieve mode
+								...(isRetrieveMode && { retrievedData: apiResponse?.data }),
 							})
 						),
 					},

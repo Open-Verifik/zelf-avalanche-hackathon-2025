@@ -7,6 +7,7 @@ import { WalletService } from "../../wallet.service";
 import { PasswordDataService } from "../../services/password-data.service";
 import { ChromeService } from "../../chrome.service";
 import { DataCardComponent } from "../shared/data-card.component";
+import { DataPassingService } from "../../services/data-passing.service";
 
 @Component({
 	selector: "app-zelf-keys-passwords",
@@ -25,7 +26,8 @@ export class ZelfKeysPasswordsComponent implements OnInit, OnDestroy {
 		private router: Router,
 		private walletService: WalletService,
 		private passwordDataService: PasswordDataService,
-		private chromeService: ChromeService
+		private chromeService: ChromeService,
+		private dataPassingService: DataPassingService
 	) {}
 
 	async ngOnInit(): Promise<void> {
@@ -36,6 +38,8 @@ export class ZelfKeysPasswordsComponent implements OnInit, OnDestroy {
 		}
 
 		this.loadStoredPasswords();
+		// clean up the data in local storage for the passwords inside data passing service
+		this.dataPassingService.clearData("passwords");
 	}
 
 	ngOnDestroy(): void {
@@ -50,21 +54,16 @@ export class ZelfKeysPasswordsComponent implements OnInit, OnDestroy {
 		try {
 			const response = await this.walletService.listStoredPasswords();
 
-			console.log("Full response:", response);
-
 			if (response?.data && Array.isArray(response.data)) {
 				this.storedPasswords = response.data;
-				console.log("Stored passwords:", this.storedPasswords);
 			} else if (response?.data && Array.isArray(response.data.data)) {
 				// Handle nested data structure
 				this.storedPasswords = response.data.data;
-				console.log("Stored passwords (nested):", this.storedPasswords);
 			} else {
 				console.log("No valid data structure found in response");
 				this.storedPasswords = [];
 			}
 		} catch (error) {
-			console.error("Error loading stored passwords:", error);
 			this.error = "Failed to load stored passwords. Please try again.";
 			this.storedPasswords = [];
 		} finally {
@@ -83,7 +82,6 @@ export class ZelfKeysPasswordsComponent implements OnInit, OnDestroy {
 	onPasswordClick(password: any): void {
 		// Store the password data in the service
 		this.passwordDataService.setCurrentPassword(password);
-		console.log("Password data stored in service:", password);
 
 		// Navigate to password detail view
 		this.router.navigate(["/dashboard/passwords/detail"]);

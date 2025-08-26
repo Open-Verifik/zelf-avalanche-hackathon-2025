@@ -1,7 +1,7 @@
 "use strict";
 (self["webpackChunkzelf_extension"] = self["webpackChunkzelf_extension"] || []).push([["default-src_app_dashboard_shared_data-card_component_ts"],{
 
-/***/ 1695:
+/***/ 81695:
 /*!*********************************************************!*\
   !*** ./src/app/dashboard/shared/data-card.component.ts ***!
   \*********************************************************/

@@ -104,9 +104,6 @@ export class PasswordBiometricsComponent implements OnInit, OnDestroy {
 
 	async ngOnInit(): Promise<void> {
 		// Ensure extension is in full screen mode for better security during biometric authentication
-		if (this.chromeService.isExtension) {
-			await this.chromeService.ensureFullScreen("dashboard/passwords/biometrics");
-		}
 
 		this._route.queryParams.subscribe((params) => {
 			if (params["passwordData"]) {

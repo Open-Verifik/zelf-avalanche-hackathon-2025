@@ -1,7 +1,223 @@
 "use strict";
 (self["webpackChunkzelf_extension"] = self["webpackChunkzelf_extension"] || []).push([["src_app_dashboard_zelf-keys-passwords_password-form_password-form_component_ts"],{
 
-/***/ 2613:
+/***/ 59284:
+/*!**************************************************!*\
+  !*** ./src/app/services/data-passing.service.ts ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   DataPassingService: () => (/* binding */ DataPassingService)
+/* harmony export */ });
+/* harmony import */ var _Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@angular-devkit/build-angular/node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 81890);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! @angular/core */ 37580);
+/* harmony import */ var _chrome_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../chrome.service */ 85043);
+
+
+
+class DataPassingService {
+  chromeService;
+  dataStore = {};
+  resultStore = {};
+  constructor(chromeService) {
+    this.chromeService = chromeService;
+    // Load any existing data from localStorage on service initialization
+    // Use setTimeout to avoid blocking constructor
+    setTimeout(() => {
+      this.loadFromStorage();
+    }, 0);
+  }
+  /**
+   * Store form data for a specific form type
+   */
+  storeData(formType, data) {
+    var _this = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this.dataStore[formType] = data;
+      yield _this.saveToStorage();
+    })();
+  }
+  /**
+   * Retrieve form data for a specific form type
+   */
+  getData(formType) {
+    const data = this.dataStore[formType];
+    return data || null;
+  }
+  /**
+   * Store API result for a specific form type
+   */
+  storeResult(formType, result) {
+    var _this2 = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this2.resultStore[formType] = result;
+      yield _this2.saveToStorage();
+    })();
+  }
+  /**
+   * Retrieve API result for a specific form type
+   */
+  getResult(formType) {
+    const result = this.resultStore[formType];
+    return result || null;
+  }
+  /**
+   * Clear form data for a specific form type
+   */
+  clearData(formType) {
+    // also store it from the chrome storage
+    this.chromeService.removeItem(`zelfDataPassing`);
+    delete this.dataStore[formType];
+  }
+  /**
+   * Clear result data for a specific form type
+   */
+  clearResult(formType) {
+    delete this.resultStore[formType];
+  }
+  /**
+   * Clear all data for a specific form type (both form and result)
+   */
+  clearAll(formType) {
+    var _this3 = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this3.clearData(formType);
+      _this3.clearResult(formType);
+      yield _this3.saveToStorage();
+    })();
+  }
+  /**
+   * Check if form data exists for a specific form type
+   */
+  hasData(formType) {
+    return !!this.dataStore[formType];
+  }
+  /**
+   * Check if result data exists for a specific form type
+   */
+  hasResult(formType) {
+    return !!this.resultStore[formType];
+  }
+  /**
+   * Get all stored data for debugging
+   */
+  getAllData() {
+    return {
+      formData: {
+        ...this.dataStore
+      },
+      resultData: {
+        ...this.resultStore
+      }
+    };
+  }
+  /**
+   * Save data to localStorage for persistence
+   */
+  saveToStorage() {
+    var _this4 = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      try {
+        const storageData = {
+          dataStore: _this4.dataStore,
+          resultStore: _this4.resultStore,
+          timestamp: Date.now()
+        };
+        if (_this4.chromeService.isExtension) {
+          // Use Chrome storage for extension
+          yield _this4.chromeService.setItem("zelfDataPassing", storageData);
+        } else {
+          // Use localStorage for web
+          localStorage.setItem("zelfDataPassing", JSON.stringify(storageData));
+        }
+      } catch (error) {
+        console.error("Error saving to storage:", error);
+      }
+    })();
+  }
+  /**
+   * Load data from localStorage on service initialization
+   */
+  loadFromStorage() {
+    var _this5 = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      try {
+        let storageData = null;
+        if (_this5.chromeService.isExtension) {
+          // Use Chrome storage for extension
+          storageData = yield _this5.chromeService.getItem("zelfDataPassing");
+        } else {
+          // Use localStorage for web
+          const localData = localStorage.getItem("zelfDataPassing");
+          storageData = localData ? JSON.parse(localData) : null;
+        }
+        if (storageData) {
+          const maxAge = 24 * 60 * 60 * 1000; // 24 hours
+          // Check if data is not too old
+          if (Date.now() - storageData.timestamp < maxAge) {
+            _this5.dataStore = storageData.dataStore || {};
+            _this5.resultStore = storageData.resultStore || {};
+          } else {
+            _this5.clearAllStorage();
+          }
+        }
+      } catch (error) {
+        console.error("Error loading from storage:", error);
+        // Clear potentially corrupted data
+        _this5.clearAllStorage();
+      }
+    })();
+  }
+  /**
+   * Clear all data from both memory and storage
+   */
+  clearAllStorage() {
+    this.dataStore = {};
+    this.resultStore = {};
+    try {
+      if (this.chromeService.isExtension) {
+        this.chromeService.removeItem("zelfDataPassing");
+      } else {
+        localStorage.removeItem("zelfDataPassing");
+      }
+    } catch (error) {
+      console.error("Error clearing storage:", error);
+    }
+  }
+  /**
+   * Manually clear storage for a specific form type
+   */
+  clearStorageForType(formType) {
+    var _this6 = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      yield _this6.clearAll(formType);
+    })();
+  }
+  /**
+   * Get storage info for debugging
+   */
+  getStorageInfo() {
+    return {
+      isExtension: this.chromeService.isExtension,
+      hasChromeService: !!this.chromeService,
+      storageKeys: Object.keys(this.dataStore).concat(Object.keys(this.resultStore))
+    };
+  }
+  static ɵfac = function DataPassingService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || DataPassingService)(_angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵinject"](_chrome_service__WEBPACK_IMPORTED_MODULE_1__.ChromeService));
+  };
+  static ɵprov = /*@__PURE__*/_angular_core__WEBPACK_IMPORTED_MODULE_2__["ɵɵdefineInjectable"]({
+    token: DataPassingService,
+    factory: DataPassingService.ɵfac,
+    providedIn: "root"
+  });
+}
+
+/***/ }),
+
+/***/ 62613:
 /*!****************************************************************************************!*\
   !*** ./src/app/dashboard/zelf-keys-passwords/password-form/password-form.component.ts ***!
   \****************************************************************************************/
@@ -19,7 +235,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_3__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/router */ 12596);
 /* harmony import */ var _chrome_service__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../../../chrome.service */ 85043);
-/* harmony import */ var _services_data_passing_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../services/data-passing.service */ 9284);
+/* harmony import */ var _services_data_passing_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../../services/data-passing.service */ 59284);
 
 
 
@@ -115,8 +331,6 @@ class PasswordFormComponent {
         type: "passwords"
       };
       yield _this2.dataPassingService.storeData("passwords", formData);
-      // Navigate to biometrics step
-      _this2.router.navigate(["/dashboard/passwords/biometrics"]);
     })();
   }
   static ɵfac = function PasswordFormComponent_Factory(__ngFactoryType__) {

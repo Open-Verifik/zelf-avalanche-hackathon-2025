@@ -86,8 +86,5 @@ export class PasswordFormComponent implements OnInit {
 		};
 
 		await this.dataPassingService.storeData("passwords", formData);
-
-		// Navigate to biometrics step
-		this.router.navigate(["/dashboard/passwords/biometrics"]);
 	}
 }

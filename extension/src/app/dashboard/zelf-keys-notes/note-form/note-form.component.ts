@@ -5,11 +5,12 @@ import { RouterModule, Router, ActivatedRoute } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 import { ChromeService } from "../../../chrome.service";
 import { DataPassingService } from "../../../services/data-passing.service";
+import { DataBiometricsComponent } from "../../shared/data-biometrics.component";
 
 @Component({
 	selector: "app-note-form",
 	standalone: true,
-	imports: [CommonModule, TranslocoModule, RouterModule, FormsModule],
+	imports: [CommonModule, TranslocoModule, RouterModule, FormsModule, DataBiometricsComponent],
 	templateUrl: "./note-form.component.html",
 	styleUrls: ["./note-form.component.scss"],
 })
@@ -32,6 +33,7 @@ export class NoteFormComponent implements OnInit {
 	isNewNote = true;
 	formValid = false;
 	maxKeyValuePairs = 10;
+	showBiometrics = false;
 
 	constructor(
 		private router: Router,
@@ -103,6 +105,15 @@ export class NoteFormComponent implements OnInit {
 		this.router.navigate(["/dashboard/notes"]);
 	}
 
+	onBiometricsSuccess(biometricData: any): void {
+		// Navigate to result page after successful biometrics
+		this.router.navigate(["/dashboard/notes/result"]);
+	}
+
+	onBiometricsCancel(): void {
+		this.showBiometrics = false;
+	}
+
 	async onSave(): Promise<void> {
 		if (!this.formValid) {
 			return;
@@ -116,7 +127,7 @@ export class NoteFormComponent implements OnInit {
 
 		await this.dataPassingService.storeData("notes", formData);
 
-		// Navigate to biometrics step
-		this.router.navigate(["/dashboard/notes/biometrics"]);
+		// Show biometrics modal instead of navigating
+		this.showBiometrics = true;
 	}
 }

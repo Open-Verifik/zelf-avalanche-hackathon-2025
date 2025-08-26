@@ -124,4 +124,23 @@
 			</div>
 		</form>
 	</div>
+
+	<!-- Biometrics Modal -->
+	<div *ngIf="showBiometrics" class="biometrics-modal">
+		<div class="modal-content">
+			<div class="modal-header">
+				<h3>Verify Your Identity</h3>
+				<p>Please verify your face to create this note</p>
+			</div>
+			<div class="modal-body">
+				<app-data-biometrics
+					[isDecryptMode]="false"
+					[itemData]="noteData"
+					(biometricsSuccess)="onBiometricsSuccess($event)"
+					(biometricsCancel)="onBiometricsCancel()"
+				>
+				</app-data-biometrics>
+			</div>
+		</div>
+	</div>
 </div>

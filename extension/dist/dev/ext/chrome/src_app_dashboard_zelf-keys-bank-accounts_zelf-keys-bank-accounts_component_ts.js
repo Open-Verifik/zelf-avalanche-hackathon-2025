@@ -1,7 +1,7 @@
 "use strict";
 (self["webpackChunkzelf_extension"] = self["webpackChunkzelf_extension"] || []).push([["src_app_dashboard_zelf-keys-bank-accounts_zelf-keys-bank-accounts_component_ts"],{
 
-/***/ 1391:
+/***/ 71391:
 /*!****************************************************************************************!*\
   !*** ./src/app/dashboard/zelf-keys-bank-accounts/zelf-keys-bank-accounts.component.ts ***!
   \****************************************************************************************/

@@ -84,6 +84,8 @@ export class DataPassingService {
 	 * Clear form data for a specific form type
 	 */
 	clearData(formType: string): void {
+		// also store it from the chrome storage
+		this.chromeService.removeItem(`zelfDataPassing`);
 		delete this.dataStore[formType];
 	}
 

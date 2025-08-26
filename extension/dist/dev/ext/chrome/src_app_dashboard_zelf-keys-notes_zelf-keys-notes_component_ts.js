@@ -1,7 +1,7 @@
 "use strict";
 (self["webpackChunkzelf_extension"] = self["webpackChunkzelf_extension"] || []).push([["src_app_dashboard_zelf-keys-notes_zelf-keys-notes_component_ts"],{
 
-/***/ 8552:
+/***/ 76171:
 /*!************************************************************************!*\
   !*** ./src/app/dashboard/zelf-keys-notes/zelf-keys-notes.component.ts ***!
   \************************************************************************/
@@ -16,7 +16,7 @@ __webpack_require__.r(__webpack_exports__);
 /* harmony import */ var _jsverse_transloco__WEBPACK_IMPORTED_MODULE_8__ = __webpack_require__(/*! @jsverse/transloco */ 88065);
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_9__ = __webpack_require__(/*! @angular/router */ 18431);
 /* harmony import */ var rxjs__WEBPACK_IMPORTED_MODULE_5__ = __webpack_require__(/*! rxjs */ 10819);
-/* harmony import */ var _shared_data_card_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../shared/data-card.component */ 1695);
+/* harmony import */ var _shared_data_card_component__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! ../shared/data-card.component */ 81695);
 /* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_4__ = __webpack_require__(/*! @angular/core */ 37580);
 /* harmony import */ var _angular_router__WEBPACK_IMPORTED_MODULE_6__ = __webpack_require__(/*! @angular/router */ 12596);
 /* harmony import */ var _wallet_service__WEBPACK_IMPORTED_MODULE_2__ = __webpack_require__(/*! ../../wallet.service */ 69556);
