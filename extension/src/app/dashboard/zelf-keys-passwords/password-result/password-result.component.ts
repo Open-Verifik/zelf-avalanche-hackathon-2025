@@ -32,15 +32,12 @@ export class PasswordResultComponent implements OnInit {
 		}
 
 		// Get data from service instead of query params
-		console.log("🔍 DEBUG PasswordResult - Getting data from service");
 
 		// Get API result from service
 		const apiResult = this.dataPassingService.getResult("passwords");
 		if (apiResult) {
 			this.apiResult = apiResult;
-			console.log("✅ DEBUG - Retrieved API result from service:", this.apiResult);
 		} else {
-			console.log("⚠️ DEBUG - No API result found in service");
 			this.apiResult = { error: "No API result available" };
 		}
 
@@ -48,9 +45,6 @@ export class PasswordResultComponent implements OnInit {
 		const passwordData = this.dataPassingService.getData("passwords");
 		if (passwordData) {
 			this.passwordData = passwordData;
-			console.log("✅ DEBUG - Retrieved password data from service:", this.passwordData);
-		} else {
-			console.log("⚠️ DEBUG - No password data found in service");
 		}
 
 		this.loading = false;
@@ -60,15 +54,31 @@ export class PasswordResultComponent implements OnInit {
 		this.router.navigate(["/dashboard/passwords"]);
 	}
 
-	onAddAnotherPassword(): void {
+	async onAddAnotherPassword(): Promise<void> {
 		// Clear the stored data when starting fresh
-		this.dataPassingService.clearAll("passwords");
-		console.log("🔍 DEBUG - Cleared all password data from service");
+		await this.dataPassingService.clearAll("passwords");
 		this.router.navigate(["/dashboard/passwords/new"]);
 	}
 
 	toggleDebugView(): void {
 		this.showDebug = !this.showDebug;
+	}
+
+	async copyZelfProof(): Promise<void> {
+		if (this.apiResult.zelfProof) {
+			try {
+				await navigator.clipboard.writeText(this.apiResult.zelfProof);
+				// You could add a toast notification here
+			} catch (error) {
+				// Fallback for older browsers
+				const textArea = document.createElement("textarea");
+				textArea.value = this.apiResult.zelfProof;
+				document.body.appendChild(textArea);
+				textArea.select();
+				document.execCommand("copy");
+				document.body.removeChild(textArea);
+			}
+		}
 	}
 
 	getResultStatus(): "success" | "error" | "unknown" {

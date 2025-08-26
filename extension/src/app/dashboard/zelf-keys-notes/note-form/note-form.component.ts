@@ -103,7 +103,7 @@ export class NoteFormComponent implements OnInit {
 		this.router.navigate(["/dashboard/notes"]);
 	}
 
-	onSave(): void {
+	async onSave(): Promise<void> {
 		if (!this.formValid) {
 			return;
 		}
@@ -114,8 +114,7 @@ export class NoteFormComponent implements OnInit {
 			type: "notes",
 		};
 
-		this.dataPassingService.storeData("notes", formData);
-		console.log("🔍 DEBUG - Note data stored in service:", formData);
+		await this.dataPassingService.storeData("notes", formData);
 
 		// Navigate to biometrics step
 		this.router.navigate(["/dashboard/notes/biometrics"]);

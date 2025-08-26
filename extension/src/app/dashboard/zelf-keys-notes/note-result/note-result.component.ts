@@ -32,15 +32,12 @@ export class NoteResultComponent implements OnInit {
 		}
 
 		// Get data from service instead of query params
-		console.log("🔍 DEBUG NoteResult - Getting data from service");
 
 		// Get API result from service
 		const apiResult = this.dataPassingService.getResult("notes");
 		if (apiResult) {
 			this.apiResult = apiResult;
-			console.log("✅ DEBUG - Retrieved API result from service:", this.apiResult);
 		} else {
-			console.log("⚠️ DEBUG - No API result found in service");
 			this.error = "No API result available";
 		}
 	}
@@ -59,10 +56,25 @@ export class NoteResultComponent implements OnInit {
 		this.router.navigate(["/dashboard/notes"]);
 	}
 
-	onAddAnotherNote(): void {
+	async onAddAnotherNote(): Promise<void> {
 		// Clear the stored data when starting fresh
-		this.dataPassingService.clearAll("notes");
-		console.log("🔍 DEBUG - Cleared all note data from service");
+		await this.dataPassingService.clearAll("notes");
 		this.router.navigate(["/dashboard/notes/new"]);
+	}
+
+	async copyZelfProof(): Promise<void> {
+		if (this.apiResult?.zelfProof) {
+			try {
+				await navigator.clipboard.writeText(this.apiResult.zelfProof);
+			} catch (error) {
+				// Fallback for older browsers
+				const textArea = document.createElement("textarea");
+				textArea.value = this.apiResult.zelfProof;
+				document.body.appendChild(textArea);
+				textArea.select();
+				document.execCommand("copy");
+				document.body.removeChild(textArea);
+			}
+		}
 	}
 }

@@ -115,20 +115,8 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	}
 
 	async ngOnInit(): Promise<void> {
-		console.log("🔍 DEBUG ngOnInit - Component starting initialization");
-
 		// First, get the dataType from the route path
 		const currentPath = this._router.url;
-		console.log("🔍 DEBUG ngOnInit - Current router URL:", currentPath);
-
-		// Also check the route snapshot for additional debugging
-		const routeSnapshot = this._route.snapshot;
-		console.log("🔍 DEBUG ngOnInit - Route snapshot:", {
-			url: routeSnapshot.url,
-			params: routeSnapshot.params,
-			queryParams: routeSnapshot.queryParams,
-			routeConfig: routeSnapshot.routeConfig?.path,
-		});
 
 		if (currentPath.includes("/notes/")) {
 			this.dataType = "notes";
@@ -147,48 +135,36 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 			this.dataTitle = "Bank Account";
 		}
 
-		console.log("🔍 DEBUG ngOnInit - dataType set to:", this.dataType);
-		console.log("🔍 DEBUG ngOnInit - dataTitle set to:", this.dataTitle);
-
 		// Ensure extension is in full screen mode for better security during biometric authentication
 		if (this.chromeService.isExtension) {
-			console.log("🔍 DEBUG ngOnInit - Ensuring full screen for:", `dashboard/${this.dataType}/biometrics`);
 			await this.chromeService.ensureFullScreen(`dashboard/${this.dataType}/biometrics`);
-			console.log("🔍 DEBUG ngOnInit - Full screen ensured");
 		}
 
 		// Get data from service instead of query params
-		console.log("🔍 DEBUG ngOnInit - Getting data from service");
 		this._getDataFromService();
-		console.log("🔍 DEBUG ngOnInit - Data retrieved from service, itemData:", this.itemData);
 
-		console.log("🔍 DEBUG ngOnInit - Initializing ZelfKey session");
+		// Initialize ZelfKey session
 		this.initZelfKeySession();
-		console.log("🔍 DEBUG ngOnInit - Initializing biometrics");
+
+		// Initialize biometric verification
 		this._initializeBiometrics();
-		console.log("🔍 DEBUG ngOnInit - Component initialization complete");
 	}
 
 	/**
 	 * Get data from the data passing service
 	 */
 	private _getDataFromService(): void {
-		console.log("🔍 DEBUG _getDataFromService - Getting data for dataType:", this.dataType);
-
 		// Get data from service based on data type
 		const serviceData = this.dataPassingService.getData(this.dataType);
 
 		if (serviceData) {
 			this.itemData = serviceData;
-			console.log("✅ DEBUG - Successfully retrieved data from service:", this.itemData);
 
 			// Set master password if available
 			if ((this.dataType === "notes" || this.dataType === "passwords") && this.itemData.masterPassword) {
 				this.masterPassword = this.itemData.masterPassword;
-				console.log("🔑 DEBUG - Set master password:", this.masterPassword);
 			}
 		} else {
-			console.log("⚠️ DEBUG - No data found in service for dataType:", this.dataType);
 			this.itemData = {};
 		}
 	}
@@ -614,18 +590,8 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 			// Get the correct data source based on data type
 			const dataSource = this._getDataSource();
 
-			// DEBUG: Log what we're working with
-			console.log("🔍 DEBUG _storeDataByCategory:");
-			console.log("  - dataType:", this.dataType);
-			console.log("  - dataSource:", dataSource);
-			console.log("  - this.itemData:", this.itemData);
-			console.log("  - faceBase64 length:", faceBase64 ? faceBase64.length : "undefined");
-
 			// Safety check: Ensure we have data before proceeding
 			if (!dataSource || Object.keys(dataSource).length === 0) {
-				console.error("❌ ERROR: No data source available for", this.dataType);
-				console.error("  - dataSource:", dataSource);
-				console.error("  - this.itemData:", this.itemData);
 				throw new Error(`No data available for ${this.dataType}. Cannot proceed with storage.`);
 			}
 
@@ -640,8 +606,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						faceBase64: faceBase64,
 						...(this.useMasterPassword && this.masterPassword && { password: this.masterPassword }), // Optional password
 					};
-
-					console.log("📝 DEBUG Notes Payload:", notePayload);
 
 					response = await this._httpWrapperService.sendRequest("post", `${environment.keysApiUrl}/api/zelf-key/store/notes`, notePayload, {
 						headers: {
@@ -661,13 +625,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						faceBase64: faceBase64,
 						...(this.useMasterPassword && this.masterPassword && { masterPassword: this.masterPassword }), // Optional master password
 					};
-
-					console.log("🔐 DEBUG Password Payload:", passwordPayload);
-					console.log("  - dataSource.url:", dataSource.url);
-					console.log("  - dataSource.email:", dataSource.email);
-					console.log("  - dataSource.password:", dataSource.password);
-					console.log("  - dataSource.notes:", dataSource.notes);
-					console.log("  - dataSource.title:", dataSource.title);
 
 					response = await this._httpWrapperService.sendRequest(
 						"post",
@@ -758,8 +715,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 			this.imageCaptured.emit(this.response.base64Image);
 
 			// Store the API result in the service
-			console.log("🔍 DEBUG - Storing API result in service for dataType:", this.dataType);
-			this.dataPassingService.storeResult(this.dataType, response);
+			await this.dataPassingService.storeResult(this.dataType, response);
 
 			// Navigate to result page based on category
 			this._navigateToResult(response);
@@ -890,7 +846,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 		if (!error.mediaStreamError || error.mediaStreamError.name !== "NotAllowedError") return;
 
 		this.camera.hasPermissions = false;
-		console.log("Camera permissions denied");
 	}
 
 	processImage(webcamImage: WebcamImage): void {
@@ -971,10 +926,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	 * Get the correct data source based on data type
 	 */
 	private _getDataSource(): any {
-		console.log("🔍 DEBUG _getDataSource:");
-		console.log("  - dataType:", this.dataType);
-		console.log("  - this.itemData:", this.itemData);
-
 		// All data now comes from itemData (populated from service)
 		return this.itemData;
 	}

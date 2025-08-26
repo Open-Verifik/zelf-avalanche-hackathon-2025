@@ -73,27 +73,18 @@ class PasswordFormComponent {
   ngOnInit() {
     var _this = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      console.log("🔍 DEBUG Password Form ngOnInit:");
-      console.log("  - Component initialized");
       // Ensure extension is in full screen mode for better security when handling passwords
       if (_this.chromeService.isExtension) {
-        console.log("  - Extension detected, ensuring full screen");
         yield _this.chromeService.ensureFullScreen("dashboard/passwords/new");
-        console.log("  - Full screen ensured");
       }
       // Check if this is a new password or editing existing
       const id = _this.route.snapshot.paramMap.get("id");
       _this.isNewPassword = id === "new";
-      console.log("  - Route ID:", id);
-      console.log("  - Is new password:", _this.isNewPassword);
       if (!_this.isNewPassword) {
         // TODO: Load existing password data
         // this.loadPasswordData(id);
-        console.log("  - Would load existing password data for ID:", id);
       }
       _this.checkFormValidity();
-      console.log("  - Form validity checked:", _this.formValid);
-      console.log("  - Initial passwordData:", _this.passwordData);
     })();
   }
   togglePasswordVisibility() {
@@ -108,34 +99,25 @@ class PasswordFormComponent {
     const hasEmail = !!this.passwordData.email;
     const hasPassword = !!this.passwordData.password;
     this.formValid = !!(hasUrl && hasTitle && hasEmail && hasPassword);
-    console.log("🔍 DEBUG checkFormValidity:");
-    console.log("  - URL:", this.passwordData.url, "→", hasUrl);
-    console.log("  - Title:", this.passwordData.title, "→", hasTitle);
-    console.log("  - Email:", this.passwordData.email, "→", hasEmail);
-    console.log("  - Password:", this.passwordData.password, "→", hasPassword);
-    console.log("  - Form valid:", this.formValid);
   }
   onCancel() {
     this.router.navigate(["/dashboard/passwords"]);
   }
   onSave() {
-    if (!this.formValid) {
-      console.log("❌ Form validation failed, cannot save");
-      return;
-    }
-    console.log("🔍 DEBUG Password Form onSave:");
-    console.log("  - Form valid:", this.formValid);
-    console.log("  - passwordData:", this.passwordData);
-    // Store data in service instead of query params
-    const formData = {
-      ...this.passwordData,
-      type: "passwords"
-    };
-    this.dataPassingService.storeData("passwords", formData);
-    console.log("🔍 DEBUG - Data stored in service:", formData);
-    // Navigate to biometrics step
-    console.log("🔍 DEBUG Navigation - Target route: /dashboard/passwords/biometrics");
-    this.router.navigate(["/dashboard/passwords/biometrics"]);
+    var _this2 = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      if (!_this2.formValid) {
+        return;
+      }
+      // Store data in service instead of query params
+      const formData = {
+        ..._this2.passwordData,
+        type: "passwords"
+      };
+      yield _this2.dataPassingService.storeData("passwords", formData);
+      // Navigate to biometrics step
+      _this2.router.navigate(["/dashboard/passwords/biometrics"]);
+    })();
   }
   static ɵfac = function PasswordFormComponent_Factory(__ngFactoryType__) {
     return new (__ngFactoryType__ || PasswordFormComponent)(_angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdirectiveInject"](_angular_router__WEBPACK_IMPORTED_MODULE_4__.Router), _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdirectiveInject"](_angular_router__WEBPACK_IMPORTED_MODULE_4__.ActivatedRoute), _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdirectiveInject"](_chrome_service__WEBPACK_IMPORTED_MODULE_1__.ChromeService), _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdirectiveInject"](_services_data_passing_service__WEBPACK_IMPORTED_MODULE_2__.DataPassingService));
