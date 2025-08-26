@@ -108,7 +108,6 @@ export class PasswordDetailComponent implements OnInit, OnDestroy {
 			};
 
 			const response = await this.walletService.retrievePassword(payload);
-			console.log("Retrieve API response:", response);
 
 			if (response?.data?.metadata) {
 				// The decrypted data is in response.data.metadata

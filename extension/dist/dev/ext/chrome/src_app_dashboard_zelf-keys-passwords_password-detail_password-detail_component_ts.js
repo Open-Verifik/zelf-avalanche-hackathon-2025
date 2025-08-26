@@ -344,7 +344,6 @@ class PasswordDetailComponent {
           password: biometricData.password || undefined // Optional
         };
         const response = yield _this3.walletService.retrievePassword(payload);
-        console.log("Retrieve API response:", response);
         if (response?.data?.metadata) {
           // The decrypted data is in response.data.metadata
           _this3.decryptedData = {
