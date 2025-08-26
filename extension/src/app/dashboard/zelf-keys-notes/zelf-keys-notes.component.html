@@ -1,39 +1,68 @@
 <div class="zelf-keys-notes">
-	<div class="header">
-		<h2>Notes</h2>
-		<p>Keep your important information organized and secure</p>
-	</div>
+	<div class="notes-main-view">
+		<div class="header">
+			<h2>Notes</h2>
+			<p>Manage your secure notes and key-value pairs</p>
+		</div>
 
-	<div class="content">
-		<div class="notes-grid">
-			<div class="note-card">
-				<div class="note-header">
-					<h3>Meeting Notes</h3>
-					<span class="date">Dec 15, 2024</span>
-				</div>
-				<p class="note-content">Discussion about Q1 goals and project timeline...</p>
-				<div class="note-actions">
-					<button class="btn-edit">Edit</button>
-					<button class="btn-delete">Delete</button>
-				</div>
+		<div class="content">
+			<!-- Loading State -->
+			<div *ngIf="loading" class="loading-state">
+				<div class="spinner"></div>
+				<p>Loading your notes...</p>
 			</div>
 
-			<div class="note-card">
-				<div class="note-header">
-					<h3>Ideas</h3>
-					<span class="date">Dec 14, 2024</span>
-				</div>
-				<p class="note-content">New feature ideas for the mobile app...</p>
-				<div class="note-actions">
-					<button class="btn-edit">Edit</button>
-					<button class="btn-delete">Delete</button>
-				</div>
+			<!-- Error State -->
+			<div *ngIf="error && !loading" class="error-state">
+				<div class="icon">⚠️</div>
+				<h3>Error loading notes</h3>
+				<p>{{ error }}</p>
+				<button class="btn-secondary" (click)="onRefresh()">Try Again</button>
 			</div>
 
-			<div class="add-note-card">
-				<div class="add-icon">+</div>
-				<h3>Add New Note</h3>
-				<p>Create a new note to keep track of important information</p>
+			<!-- Empty State -->
+			<div *ngIf="!loading && !error && storedNotes.length === 0" class="empty-state">
+				<div class="empty-illustration">
+					<div class="notepad">
+						<div class="notepad-content">
+							<div class="notepad-line"></div>
+							<div class="notepad-line"></div>
+							<div class="notepad-line"></div>
+						</div>
+					</div>
+					<div class="pencil">
+						<div class="pencil-body"></div>
+						<div class="pencil-tip"></div>
+						<div class="pencil-eraser"></div>
+					</div>
+				</div>
+				<h3>No notes yet</h3>
+				<p>Start adding your notes to keep them secure and easily accessible</p>
+				<button class="btn-primary" (click)="onAddNote()">Add Note</button>
+			</div>
+
+			<!-- Notes Grid -->
+			<div *ngIf="!loading && !error && storedNotes.length > 0" class="notes-grid">
+				<div class="list-header">
+					<h3>{{ storedNotes.length }} stored note{{ storedNotes.length !== 1 ? "s" : "" }}</h3>
+					<button class="btn-secondary" (click)="onRefresh()">Refresh</button>
+				</div>
+
+				<div class="notes-cards">
+					<app-data-card
+						*ngFor="let note of storedNotes; trackBy: trackByNote"
+						[item]="note"
+						category="notes"
+						(cardClick)="onNoteClick($event)"
+						(launchClick)="onNoteClick($event)"
+						(optionsClick)="onNoteClick($event)"
+					>
+					</app-data-card>
+				</div>
+
+				<div class="add-more">
+					<button class="btn-primary" (click)="onAddNote()">Add Another Note</button>
+				</div>
 			</div>
 		</div>
 	</div>

@@ -6,11 +6,12 @@ import { Subject, takeUntil } from "rxjs";
 import { WalletService } from "../../wallet.service";
 import { PasswordDataService } from "../../services/password-data.service";
 import { ChromeService } from "../../chrome.service";
+import { DataCardComponent } from "../shared/data-card.component";
 
 @Component({
 	selector: "app-zelf-keys-passwords",
 	standalone: true,
-	imports: [CommonModule, TranslocoModule, RouterModule],
+	imports: [CommonModule, TranslocoModule, RouterModule, DataCardComponent],
 	templateUrl: "./zelf-keys-passwords.component.html",
 	styleUrls: ["./zelf-keys-passwords.component.scss"],
 })
@@ -49,13 +50,17 @@ export class ZelfKeysPasswordsComponent implements OnInit, OnDestroy {
 		try {
 			const response = await this.walletService.listStoredPasswords();
 
-			for (const password of response.data) {
-				console.log("password", password);
-			}
+			console.log("Full response:", response);
 
-			if (response?.data) {
+			if (response?.data && Array.isArray(response.data)) {
 				this.storedPasswords = response.data;
+				console.log("Stored passwords:", this.storedPasswords);
+			} else if (response?.data && Array.isArray(response.data.data)) {
+				// Handle nested data structure
+				this.storedPasswords = response.data.data;
+				console.log("Stored passwords (nested):", this.storedPasswords);
 			} else {
+				console.log("No valid data structure found in response");
 				this.storedPasswords = [];
 			}
 		} catch (error) {

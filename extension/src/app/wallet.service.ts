@@ -621,6 +621,59 @@ export class WalletService {
 	}
 
 	/**
+	 * List stored notes from IPFS
+	 * @returns Promise with the list of stored notes
+	 */
+	async listStoredNotes(): Promise<any> {
+		const jwt = this.getZelfKeyJWT();
+
+		if (!jwt) {
+			// Try to initialize session if no JWT available
+			await this.initZelfKeySession();
+			const newJwt = this.getZelfKeyJWT();
+			if (!newJwt) {
+				throw new Error("Unable to authenticate with ZelfKey API");
+			}
+		}
+
+		return this._httpWrapper.sendRequest(
+			"get",
+			`${environment.keysApiUrl}/api/zelf-key/list?category=notes`,
+			{},
+			{
+				headers: {
+					Authorization: `Bearer ${this.getZelfKeyJWT()}`,
+				},
+			}
+		);
+	}
+
+	/**
+	 * Store notes using ZelfKey API
+	 * @param payload - The note data to store
+	 * @returns Promise with the storage result
+	 */
+	async storeNotes(payload: any): Promise<any> {
+		const jwt = this.getZelfKeyJWT();
+
+		if (!jwt) {
+			// Try to initialize session if no JWT available
+			await this.initZelfKeySession();
+			const newJwt = this.getZelfKeyJWT();
+			if (!newJwt) {
+				throw new Error("Unable to authenticate with ZelfKey API");
+			}
+		}
+
+		return this._httpWrapper.sendRequest("post", `${environment.keysApiUrl}/api/zelf-key/store/notes`, payload, {
+			headers: {
+				Authorization: `Bearer ${this.getZelfKeyJWT()}`,
+				"Content-Type": "application/json",
+			},
+		});
+	}
+
+	/**
 	 * Retrieve/decrypt a stored password
 	 * @param payload - The decryption payload
 	 * @returns Promise with the decrypted password data

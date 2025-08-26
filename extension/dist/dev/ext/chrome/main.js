@@ -2873,11 +2873,10 @@ class WalletService {
     })();
   }
   /**
-   * Retrieve/decrypt a stored password
-   * @param payload - The decryption payload
-   * @returns Promise with the decrypted password data
+   * List stored notes from IPFS
+   * @returns Promise with the list of stored notes
    */
-  retrievePassword(payload) {
+  listStoredNotes() {
     var _this8 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const jwt = _this8.getZelfKeyJWT();
@@ -2889,61 +2888,110 @@ class WalletService {
           throw new Error("Unable to authenticate with ZelfKey API");
         }
       }
-      return _this8._httpWrapper.sendRequest("post", `${environments_environment__WEBPACK_IMPORTED_MODULE_2__.environment.keysApiUrl}/api/zelf-key/retrieve`, payload, {
+      return _this8._httpWrapper.sendRequest("get", `${environments_environment__WEBPACK_IMPORTED_MODULE_2__.environment.keysApiUrl}/api/zelf-key/list?category=notes`, {}, {
         headers: {
-          Authorization: `Bearer ${_this8.getZelfKeyJWT()}`,
+          Authorization: `Bearer ${_this8.getZelfKeyJWT()}`
+        }
+      });
+    })();
+  }
+  /**
+   * Store notes using ZelfKey API
+   * @param payload - The note data to store
+   * @returns Promise with the storage result
+   */
+  storeNotes(payload) {
+    var _this9 = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const jwt = _this9.getZelfKeyJWT();
+      if (!jwt) {
+        // Try to initialize session if no JWT available
+        yield _this9.initZelfKeySession();
+        const newJwt = _this9.getZelfKeyJWT();
+        if (!newJwt) {
+          throw new Error("Unable to authenticate with ZelfKey API");
+        }
+      }
+      return _this9._httpWrapper.sendRequest("post", `${environments_environment__WEBPACK_IMPORTED_MODULE_2__.environment.keysApiUrl}/api/zelf-key/store/notes`, payload, {
+        headers: {
+          Authorization: `Bearer ${_this9.getZelfKeyJWT()}`,
+          "Content-Type": "application/json"
+        }
+      });
+    })();
+  }
+  /**
+   * Retrieve/decrypt a stored password
+   * @param payload - The decryption payload
+   * @returns Promise with the decrypted password data
+   */
+  retrievePassword(payload) {
+    var _this0 = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const jwt = _this0.getZelfKeyJWT();
+      if (!jwt) {
+        // Try to initialize session if no JWT available
+        yield _this0.initZelfKeySession();
+        const newJwt = _this0.getZelfKeyJWT();
+        if (!newJwt) {
+          throw new Error("Unable to authenticate with ZelfKey API");
+        }
+      }
+      return _this0._httpWrapper.sendRequest("post", `${environments_environment__WEBPACK_IMPORTED_MODULE_2__.environment.keysApiUrl}/api/zelf-key/retrieve`, payload, {
+        headers: {
+          Authorization: `Bearer ${_this0.getZelfKeyJWT()}`,
           "Content-Type": "application/json"
         }
       });
     })();
   }
   getFirstWalletFromStorage() {
-    var _this9 = this;
+    var _this1 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      let wallet = new _wallet__WEBPACK_IMPORTED_MODULE_3__.WalletModel(yield _this9._chromeService.getItem("wallet")) || {};
+      let wallet = new _wallet__WEBPACK_IMPORTED_MODULE_3__.WalletModel(yield _this1._chromeService.getItem("wallet")) || {};
       if (wallet?.ethAddress) wallet = new _wallet__WEBPACK_IMPORTED_MODULE_3__.WalletModel(wallet);else {
-        const wallets = yield _this9.getWalletsFromStorage();
+        const wallets = yield _this1.getWalletsFromStorage();
         if (!wallets.length) return {};
         const shiftedWallet = wallets.shift();
         wallet = new _wallet__WEBPACK_IMPORTED_MODULE_3__.WalletModel(shiftedWallet || {});
-        _this9._chromeService.setItem("wallet", wallet);
-        _this9._chromeService.setItem("wallets", wallets);
+        _this1._chromeService.setItem("wallet", wallet);
+        _this1._chromeService.setItem("wallets", wallets);
       }
       return wallet;
     })();
   }
   updateWallet(walletToUpdate) {
-    var _this0 = this;
+    var _this10 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!walletToUpdate || !walletToUpdate.publicData?.zelfName) return;
       const {
         wallet,
         wallets
-      } = yield _this0.getAllWalletsFromStorage();
+      } = yield _this10.getAllWalletsFromStorage();
       if (wallet && wallet.publicData?.zelfName && wallet.publicData?.zelfName === walletToUpdate.publicData?.zelfName) {
-        yield _this0._chromeService.setItem("wallet", walletToUpdate);
+        yield _this10._chromeService.setItem("wallet", walletToUpdate);
         return;
       }
       const index = wallets.findIndex(_wallet => _wallet.publicData.zelfName === walletToUpdate.publicData?.zelfName);
       if (index === -1) return;
       wallets[index] = walletToUpdate;
-      yield _this0._chromeService.setItem("wallets", wallets);
+      yield _this10._chromeService.setItem("wallets", wallets);
     })();
   }
   updateCurrentWallet(wallet) {
-    var _this1 = this;
+    var _this11 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      yield _this1._chromeService.setItem("wallet", wallet);
+      yield _this11._chromeService.setItem("wallet", wallet);
     })();
   }
   clearPGPKeys() {
-    var _this10 = this;
+    var _this12 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const wallet = yield _this10.getCurrentWallet();
-      const wallets = yield _this10.getWalletsFromStorage();
+      const wallet = yield _this12.getCurrentWallet();
+      const wallets = yield _this12.getWalletsFromStorage();
       if (wallet && wallet.pgp) {
         delete wallet.pgp;
-        _this10._chromeService.setItem("wallet", wallet);
+        _this12._chromeService.setItem("wallet", wallet);
       }
       let hasUpdate = false;
       const newWallets = (wallets || []).map(_wallet => {
@@ -2952,78 +3000,78 @@ class WalletService {
         hasUpdate = true;
         return _wallet;
       });
-      if (hasUpdate) yield _this10._chromeService.setItem("wallets", newWallets);
+      if (hasUpdate) yield _this12._chromeService.setItem("wallets", newWallets);
     })();
   }
   getWalletsFromStorage() {
-    var _this11 = this;
+    var _this13 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      return ((yield _this11._chromeService.getItem("wallets")) || []).map(wallet => new _wallet__WEBPACK_IMPORTED_MODULE_3__.WalletModel(wallet));
+      return ((yield _this13._chromeService.getItem("wallets")) || []).map(wallet => new _wallet__WEBPACK_IMPORTED_MODULE_3__.WalletModel(wallet));
     })();
   }
   switchWallet(selectedWallet) {
-    var _this12 = this;
+    var _this14 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const wallet = (yield _this12._chromeService.getItem("wallet")) || {};
+      const wallet = (yield _this14._chromeService.getItem("wallet")) || {};
       if (selectedWallet.publicData.zelfName === wallet.publicData?.zelfName) return;
-      const wallets = (yield _this12._chromeService.getItem("wallets")) || [];
+      const wallets = (yield _this14._chromeService.getItem("wallets")) || [];
       const newWallets = wallets.filter(_wallet => _wallet.publicData.zelfName !== selectedWallet.publicData.zelfName);
-      yield _this12._chromeService.setItem("wallet", selectedWallet);
-      yield _this12._chromeService.setItem("wallets", [wallet, ...newWallets]);
+      yield _this14._chromeService.setItem("wallet", selectedWallet);
+      yield _this14._chromeService.setItem("wallets", [wallet, ...newWallets]);
     })();
   }
   checkIfLastWallet() {
-    var _this13 = this;
+    var _this15 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const {
         wallet: currentWallet,
         wallets
-      } = yield _this13.getAllWalletsFromStorage();
+      } = yield _this15.getAllWalletsFromStorage();
       return currentWallet?.ethAddress && !wallets.length || !currentWallet?.ethAddress && wallets.length === 1;
     })();
   }
   logoutOfWallet(walletToRemove) {
-    var _this14 = this;
+    var _this16 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const {
         wallet: currentWallet,
         wallets
-      } = yield _this14.getAllWalletsFromStorage();
+      } = yield _this16.getAllWalletsFromStorage();
       if (currentWallet?.publicData?.zelfName === walletToRemove.publicData.zelfName) {
-        yield _this14._chromeService.removeItem("wallet");
+        yield _this16._chromeService.removeItem("wallet");
         const wallet = wallets.shift();
-        _this14._chromeService.setItem("wallet", wallet);
-        _this14._chromeService.setItem("wallets", wallets);
+        _this16._chromeService.setItem("wallet", wallet);
+        _this16._chromeService.setItem("wallets", wallets);
       } else {
         const newWallets = wallets.filter(_wallet => _wallet.publicData.zelfName !== walletToRemove.publicData.zelfName);
-        _this14._chromeService.setItem("wallets", newWallets);
+        _this16._chromeService.setItem("wallets", newWallets);
       }
     })();
   }
   setWalletsToColdStorage() {
-    var _this15 = this;
+    var _this17 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const wallet = yield _this15._chromeService.getItem("wallet");
+      const wallet = yield _this17._chromeService.getItem("wallet");
       if (!wallet?.ethAddress) return;
-      const wallets = yield _this15.getWalletsFromStorage();
+      const wallets = yield _this17.getWalletsFromStorage();
       const walletExistsInWallets = wallets.some(_wallet => {
         wallet.name === _wallet.name;
       });
       if (!walletExistsInWallets) wallets.unshift(wallet);
-      _this15._chromeService.setItem("wallet", {});
-      _this15._chromeService.setItem("wallets", wallets);
+      _this17._chromeService.setItem("wallet", {});
+      _this17._chromeService.setItem("wallets", wallets);
     })();
   }
   removeDuplicateWalletsInStorage() {
-    var _this16 = this;
+    var _this18 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       const {
         wallet,
         wallets
-      } = yield _this16.getAllWalletsFromStorage();
+      } = yield _this18.getAllWalletsFromStorage();
       if (!wallets.length || !wallet) return;
       const filteredWallets = wallets.filter(_wallet => _wallet.publicData.zelfName !== wallet.publicData?.zelfName);
-      yield _this16._chromeService.setItem("wallets", filteredWallets);
+      yield _this18._chromeService.setItem("wallets", filteredWallets);
     })();
   }
   isValidEVMAddress(address) {
@@ -3033,11 +3081,11 @@ class WalletService {
     return this._SUI_REGEX.test(address);
   }
   validateEVMAddressOnChain(address) {
-    var _this17 = this;
+    var _this19 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
-        if (!_this17.isValidEVMAddress(address)) return false;
-        const response = yield _this17._httpWrapper.sendRequest("get", `${_this17.baseUrl}/api/validate-address?address=${address}`);
+        if (!_this19.isValidEVMAddress(address)) return false;
+        const response = yield _this19._httpWrapper.sendRequest("get", `${_this19.baseUrl}/api/validate-address?address=${address}`);
         return response?.isValid || false;
       } catch (error) {
         console.error("Error validating EVM address on chain:", error);
@@ -3046,11 +3094,11 @@ class WalletService {
     })();
   }
   validateSUIAddressOnChain(address) {
-    var _this18 = this;
+    var _this20 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       try {
-        if (!_this18.isValidSuiAddress(address)) return false;
-        const response = yield _this18._httpWrapper.sendRequest("get", `${_this18.baseUrl}/api/validate-sui-address?address=${address}`);
+        if (!_this20.isValidSuiAddress(address)) return false;
+        const response = yield _this20._httpWrapper.sendRequest("get", `${_this20.baseUrl}/api/validate-sui-address?address=${address}`);
         return response?.isValid || false;
       } catch (error) {
         console.error("Error validating SUI address on chain:", error);
@@ -3059,28 +3107,28 @@ class WalletService {
     })();
   }
   getPendingTransaction(transactionHash) {
-    var _this19 = this;
+    var _this21 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!transactionHash) return;
-      const pendingTransactions = yield _this19._chromeService.getItem("pendingTransactions");
+      const pendingTransactions = yield _this21._chromeService.getItem("pendingTransactions");
       if (!pendingTransactions) return null;
       return pendingTransactions[transactionHash] || null;
     })();
   }
   removePendingTransaction(transactionHash) {
-    var _this20 = this;
+    var _this22 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
       if (!transactionHash) return;
-      const pendingTransactions = yield _this20._chromeService.getItem("pendingTransactions");
+      const pendingTransactions = yield _this22._chromeService.getItem("pendingTransactions");
       if (!pendingTransactions) return null;
       delete pendingTransactions[transactionHash];
-      yield _this20._chromeService.setItem("pendingTransactions", pendingTransactions);
+      yield _this22._chromeService.setItem("pendingTransactions", pendingTransactions);
     })();
   }
   addTransactionToPending(transaction) {
-    var _this21 = this;
+    var _this23 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const pendingTransactions = yield _this21._chromeService.getItem("pendingTransactions");
+      const pendingTransactions = yield _this23._chromeService.getItem("pendingTransactions");
       const bigIntKeys = Object.keys(transaction).filter(key => {
         return typeof transaction[key] === "bigint";
       });
@@ -3088,20 +3136,20 @@ class WalletService {
         delete transaction[key];
       }
       if (!pendingTransactions) {
-        yield _this21._chromeService.setItem("pendingTransactions", {
+        yield _this23._chromeService.setItem("pendingTransactions", {
           [transaction.transactionHash]: transaction
         });
       } else {
         if (pendingTransactions[transaction.transactionHash]) return;
         pendingTransactions[transaction.transactionHash] = transaction;
-        yield _this21._chromeService.setItem("pendingTransactions", pendingTransactions);
+        yield _this23._chromeService.setItem("pendingTransactions", pendingTransactions);
       }
     })();
   }
   getWalletAddressByTokenType(tokenType) {
-    var _this22 = this;
+    var _this24 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const wallet = yield _this22.getCurrentWallet();
+      const wallet = yield _this24.getCurrentWallet();
       if (!wallet) return "";
       let address = "";
       if (tokenType === "ETH" || tokenType === "AVAX" || tokenType === "POL" || tokenType === "MATIC" || tokenType === "ERC-20" || tokenType === "BEP-20" || tokenType === "BNB") {
@@ -3117,30 +3165,30 @@ class WalletService {
     })();
   }
   getAvailableWalletNetworks() {
-    var _this23 = this;
+    var _this25 = this;
     return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
-      const wallet = yield _this23.getCurrentWallet();
+      const wallet = yield _this25.getCurrentWallet();
       if (!wallet) return [];
       const networks = [];
       if (wallet?.ethAddress) {
         networks.push({
           address: wallet?.ethAddress,
-          image: _this23.getAssetImage("ETH"),
+          image: _this25.getAssetImage("ETH"),
           name: "Ethereum",
           symbol: "ETH"
         }, {
           address: wallet?.ethAddress,
-          image: _this23.getAssetImage("AVAX"),
+          image: _this25.getAssetImage("AVAX"),
           name: "Avalanche",
           symbol: "AVAX"
         }, {
           address: wallet?.ethAddress,
-          image: _this23.getAssetImage("BNB"),
+          image: _this25.getAssetImage("BNB"),
           name: "Binance",
           symbol: "BNB"
         }, {
           address: wallet?.ethAddress,
-          image: _this23.getAssetImage("MATIC"),
+          image: _this25.getAssetImage("MATIC"),
           name: "Polygon",
           symbol: "MATIC"
         });
@@ -3148,7 +3196,7 @@ class WalletService {
       if (wallet?.btcAddress) {
         networks.push({
           address: wallet?.btcAddress,
-          image: _this23.getAssetImage("BTC"),
+          image: _this25.getAssetImage("BTC"),
           name: "Bitcoin",
           symbol: "BTC"
         });
@@ -3156,7 +3204,7 @@ class WalletService {
       if (wallet?.solanaAddress) {
         networks.push({
           address: wallet?.solanaAddress,
-          image: _this23.getAssetImage("SOL"),
+          image: _this25.getAssetImage("SOL"),
           name: "Solana",
           symbol: "SOL"
         });
@@ -3164,7 +3212,7 @@ class WalletService {
       if (wallet?.suiAddress) {
         networks.push({
           address: wallet?.suiAddress,
-          image: _this23.getAssetImage("SUI"),
+          image: _this25.getAssetImage("SUI"),
           name: "Sui",
           symbol: "SUI"
         });
@@ -3900,24 +3948,55 @@ const routes = [{
     }, {
       path: "start",
       loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_start_start_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/start/start.component */ 511)).then(m => m.StartComponent)
+    },
+    // Redirect singular 'password' to plural 'passwords' to fix routing issues
+    {
+      path: "password",
+      redirectTo: "passwords",
+      pathMatch: "full"
+    }, {
+      path: "note",
+      redirectTo: "notes",
+      pathMatch: "full"
+    }, {
+      path: "address",
+      redirectTo: "addresses",
+      pathMatch: "full"
+    }, {
+      path: "payment-card",
+      redirectTo: "payment-cards",
+      pathMatch: "full"
+    }, {
+      path: "bank-account",
+      redirectTo: "bank-accounts",
+      pathMatch: "full"
     }, {
       path: "passwords",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_zelf-keys-passwords_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/zelf-keys-passwords.component */ 587)).then(m => m.ZelfKeysPasswordsComponent)
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_dashboard_shared_data-card_component_ts"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_zelf-keys-passwords_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/zelf-keys-passwords.component */ 587)).then(m => m.ZelfKeysPasswordsComponent)
     }, {
       path: "passwords/new",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_password-form_password-form_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-form/password-form.component */ 2613)).then(m => m.PasswordFormComponent)
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_password-form_password-form_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-form/password-form.component */ 2613)).then(m => m.PasswordFormComponent)
     }, {
       path: "passwords/biometrics",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_material_fesm2022_button_mjs"), __webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("default-src_app_zelf-loader_zelf-loader_component_ts"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_progress-spinner_mjs"), __webpack_require__.e("default-node_modules_angular_flex-layout_fesm2020_angular-flex-layout_mjs"), __webpack_require__.e("default-src_app_services_media-stream_service_ts-node_modules_angular_material_fesm2022_progr-6a79e9"), __webpack_require__.e("default-src_app_dashboard_zelf-keys-passwords_password-biometrics_password-biometrics_compone-138d75")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-biometrics/password-biometrics.component */ 3409)).then(m => m.PasswordBiometricsComponent)
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_material_fesm2022_button_mjs"), __webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("default-src_app_zelf-loader_zelf-loader_component_ts"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_progress-spinner_mjs"), __webpack_require__.e("default-node_modules_angular_flex-layout_fesm2020_angular-flex-layout_mjs"), __webpack_require__.e("default-src_app_services_media-stream_service_ts-node_modules_angular_material_fesm2022_progr-6a79e9"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_shared_data-biometrics_component_ts-node_modules_rxjs_dist_esm_internal_obs-a5c0cf")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/shared/data-biometrics.component */ 9874)).then(m => m.DataBiometricsComponent)
     }, {
       path: "passwords/result",
-      loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_zelf-keys-passwords_password-result_password-result_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-result/password-result.component */ 4717)).then(m => m.PasswordResultComponent)
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_password-result_password-result_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-result/password-result.component */ 4717)).then(m => m.PasswordResultComponent)
     }, {
       path: "passwords/detail",
-      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_material_fesm2022_button_mjs"), __webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("default-src_app_zelf-loader_zelf-loader_component_ts"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_progress-spinner_mjs"), __webpack_require__.e("default-node_modules_angular_flex-layout_fesm2020_angular-flex-layout_mjs"), __webpack_require__.e("default-src_app_services_media-stream_service_ts-node_modules_angular_material_fesm2022_progr-6a79e9"), __webpack_require__.e("default-src_app_dashboard_zelf-keys-passwords_password-biometrics_password-biometrics_compone-138d75"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_password-detail_password-detail_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-detail/password-detail.component */ 7133)).then(m => m.PasswordDetailComponent)
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_material_fesm2022_button_mjs"), __webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("default-src_app_zelf-loader_zelf-loader_component_ts"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_progress-spinner_mjs"), __webpack_require__.e("default-node_modules_angular_flex-layout_fesm2020_angular-flex-layout_mjs"), __webpack_require__.e("default-src_app_services_media-stream_service_ts-node_modules_angular_material_fesm2022_progr-6a79e9"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-passwords_password-detail_password-detail_component_ts-node_modul-6643f9")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-passwords/password-detail/password-detail.component */ 7133)).then(m => m.PasswordDetailComponent)
     }, {
       path: "notes",
-      loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_zelf-keys-notes_zelf-keys-notes_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-notes/zelf-keys-notes.component */ 8552)).then(m => m.ZelfKeysNotesComponent)
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-src_app_dashboard_shared_data-card_component_ts"), __webpack_require__.e("src_app_dashboard_zelf-keys-notes_zelf-keys-notes_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-notes/zelf-keys-notes.component */ 8552)).then(m => m.ZelfKeysNotesComponent)
+    }, {
+      path: "notes/new",
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-notes_note-form_note-form_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-notes/note-form/note-form.component */ 1086)).then(m => m.NoteFormComponent)
+    }, {
+      path: "notes/biometrics",
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("default-node_modules_angular_material_fesm2022_button_mjs"), __webpack_require__.e("default-node_modules_angular_forms_fesm2022_forms_mjs"), __webpack_require__.e("default-src_app_zelf-loader_zelf-loader_component_ts"), __webpack_require__.e("default-node_modules_angular_material_fesm2022_progress-spinner_mjs"), __webpack_require__.e("default-node_modules_angular_flex-layout_fesm2020_angular-flex-layout_mjs"), __webpack_require__.e("default-src_app_services_media-stream_service_ts-node_modules_angular_material_fesm2022_progr-6a79e9"), __webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_shared_data-biometrics_component_ts-node_modules_rxjs_dist_esm_internal_obs-a5c0cf")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/shared/data-biometrics.component */ 9874)).then(m => m.DataBiometricsComponent)
+    }, {
+      path: "notes/result",
+      loadComponent: () => Promise.all(/*! import() */[__webpack_require__.e("common"), __webpack_require__.e("src_app_dashboard_zelf-keys-notes_note-result_note-result_component_ts")]).then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-notes/note-result/note-result.component */ 9642)).then(m => m.NoteResultComponent)
     }, {
       path: "addresses",
       loadComponent: () => __webpack_require__.e(/*! import() */ "src_app_dashboard_zelf-keys-addresses_zelf-keys-addresses_component_ts").then(__webpack_require__.bind(__webpack_require__, /*! ./dashboard/zelf-keys-addresses/zelf-keys-addresses.component */ 5395)).then(m => m.ZelfKeysAddressesComponent)

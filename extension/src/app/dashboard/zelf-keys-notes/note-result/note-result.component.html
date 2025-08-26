@@ -1,0 +1,81 @@
+<div class="note-result">
+	<div class="result-container">
+		<!-- Success State -->
+		<div *ngIf="getResultStatus() === 'success'" class="success-state">
+			<div class="success-icon">✅</div>
+			<h2>Note Created Successfully!</h2>
+			<p>Your note has been securely stored and encrypted</p>
+
+			<!-- Note Information -->
+			<div class="note-info">
+				<div class="info-item">
+					<label>Title</label>
+					<span>{{ apiResult?.publicData?.title || "Untitled Note" }}</span>
+				</div>
+				<div class="info-item">
+					<label>Type</label>
+					<span>{{ apiResult?.publicData?.type || "notes" }}</span>
+				</div>
+				<div class="info-item">
+					<label>Created</label>
+					<span>{{ apiResult?.publicData?.timestamp | date: "medium" }}</span>
+				</div>
+			</div>
+
+			<!-- ZelfProof Information -->
+			<div class="data-section" *ngIf="apiResult.zelfProof">
+				<h3 class="section-title">🔐 ZelfProof Generated</h3>
+				<div class="zelfproof-info">
+					<div class="data-item">
+						<label>ZelfProof</label>
+						<span class="zelfproof-string">{{ apiResult.zelfProof | slice: 0 : 50 }}...</span>
+					</div>
+					<div class="data-item">
+						<label>QR Code</label>
+						<div class="qr-code">
+							<img [src]="apiResult.zelfQR" alt="ZelfProof QR Code" />
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- API Response Debug (Collapsible) -->
+			<div class="data-section">
+				<h3 class="section-title" (click)="toggleDebugView()" class="debug-toggle">
+					🔍 Debug Information <span class="toggle-icon">{{ showDebug ? "▼" : "▶" }}</span>
+				</h3>
+				<div class="api-response" *ngIf="showDebug">
+					<pre class="json-display">{{ apiResult | json }}</pre>
+				</div>
+			</div>
+
+			<!-- Next Steps -->
+			<div class="data-section">
+				<h3 class="section-title">Next Steps</h3>
+				<div class="next-steps">
+					<p>Your note is now securely stored. You can view it in your notes list or add another note.</p>
+				</div>
+			</div>
+		</div>
+
+		<!-- Error State -->
+		<div *ngIf="getResultStatus() === 'error'" class="error-state">
+			<div class="error-icon">❌</div>
+			<h2>Error Creating Note</h2>
+			<p>{{ error || "An error occurred while creating your note" }}</p>
+		</div>
+
+		<!-- Unknown State -->
+		<div *ngIf="getResultStatus() === 'unknown'" class="unknown-state">
+			<div class="unknown-icon">❓</div>
+			<h2>Unknown Status</h2>
+			<p>The system couldn't determine the status. Please check the result details.</p>
+		</div>
+
+		<!-- Action Buttons -->
+		<div class="result-actions">
+			<button class="btn-secondary" (click)="onBackToNotes()">Back to Notes</button>
+			<button class="btn-primary" (click)="onAddAnotherNote()">Add Another Note</button>
+		</div>
+	</div>
+</div>

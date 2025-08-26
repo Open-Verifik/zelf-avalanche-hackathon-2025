@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common";
 import { TranslocoModule } from "@jsverse/transloco";
 import { RouterModule, Router, ActivatedRoute } from "@angular/router";
 import { ChromeService } from "../../../chrome.service";
+import { DataPassingService, ApiResult } from "../../../services/data-passing.service";
 
 @Component({
 	selector: "app-password-result",
@@ -20,7 +21,8 @@ export class PasswordResultComponent implements OnInit {
 	constructor(
 		private router: Router,
 		private route: ActivatedRoute,
-		private chromeService: ChromeService
+		private chromeService: ChromeService,
+		private dataPassingService: DataPassingService
 	) {}
 
 	async ngOnInit(): Promise<void> {
@@ -29,27 +31,29 @@ export class PasswordResultComponent implements OnInit {
 			await this.chromeService.ensureFullScreen("dashboard/passwords/result");
 		}
 
-		// Get result data from route query params
-		this.route.queryParams.subscribe((params) => {
-			if (params["result"]) {
-				try {
-					this.apiResult = JSON.parse(params["result"]);
-				} catch (e) {
-					console.error("Error parsing API result:", e);
-					this.apiResult = { error: "Failed to parse API response" };
-				}
-			}
+		// Get data from service instead of query params
+		console.log("🔍 DEBUG PasswordResult - Getting data from service");
 
-			if (params["passwordData"]) {
-				try {
-					this.passwordData = JSON.parse(decodeURIComponent(params["passwordData"]));
-				} catch (e) {
-					console.error("Error parsing password data:", e);
-				}
-			}
+		// Get API result from service
+		const apiResult = this.dataPassingService.getResult("passwords");
+		if (apiResult) {
+			this.apiResult = apiResult;
+			console.log("✅ DEBUG - Retrieved API result from service:", this.apiResult);
+		} else {
+			console.log("⚠️ DEBUG - No API result found in service");
+			this.apiResult = { error: "No API result available" };
+		}
 
-			this.loading = false;
-		});
+		// Get password form data from service
+		const passwordData = this.dataPassingService.getData("passwords");
+		if (passwordData) {
+			this.passwordData = passwordData;
+			console.log("✅ DEBUG - Retrieved password data from service:", this.passwordData);
+		} else {
+			console.log("⚠️ DEBUG - No password data found in service");
+		}
+
+		this.loading = false;
 	}
 
 	onBackToPasswords(): void {
@@ -57,6 +61,9 @@ export class PasswordResultComponent implements OnInit {
 	}
 
 	onAddAnotherPassword(): void {
+		// Clear the stored data when starting fresh
+		this.dataPassingService.clearAll("passwords");
+		console.log("🔍 DEBUG - Cleared all password data from service");
 		this.router.navigate(["/dashboard/passwords/new"]);
 	}
 

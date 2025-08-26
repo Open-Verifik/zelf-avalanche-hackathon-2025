@@ -1,0 +1,258 @@
+.note-result {
+	max-width: 800px;
+	margin: 0 auto;
+	padding: 20px;
+	font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+
+	.result-container {
+		background: white;
+		border-radius: 16px;
+		box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+		padding: 32px;
+		border: 1px solid #f0f0f0;
+	}
+
+	.success-state,
+	.error-state,
+	.unknown-state {
+		text-align: center;
+		margin-bottom: 32px;
+
+		.success-icon,
+		.error-icon,
+		.unknown-icon {
+			font-size: 64px;
+			margin-bottom: 24px;
+		}
+
+		h2 {
+			font-size: 28px;
+			font-weight: 700;
+			color: #1a1a1a;
+			margin: 0 0 16px 0;
+		}
+
+		p {
+			font-size: 16px;
+			color: #666;
+			margin: 0;
+			max-width: 500px;
+			margin-left: auto;
+			margin-right: auto;
+		}
+	}
+
+	.note-info {
+		background: #f8f9fa;
+		border-radius: 12px;
+		padding: 24px;
+		margin: 24px 0;
+
+		.info-item {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			padding: 12px 0;
+			border-bottom: 1px solid #e9ecef;
+
+			&:last-child {
+				border-bottom: none;
+			}
+
+			label {
+				font-size: 14px;
+				font-weight: 600;
+				color: #495057;
+				min-width: 120px;
+			}
+
+			span {
+				font-size: 14px;
+				color: #1a1a1a;
+				font-weight: 500;
+			}
+		}
+	}
+
+	.data-section {
+		margin: 24px 0;
+		padding: 24px;
+		background: #f8f9fa;
+		border-radius: 12px;
+
+		.section-title {
+			font-size: 18px;
+			font-weight: 600;
+			color: #1a1a1a;
+			margin: 0 0 16px 0;
+			cursor: pointer;
+			display: flex;
+			align-items: center;
+			justify-content: space-between;
+
+			&.debug-toggle {
+				cursor: pointer;
+				user-select: none;
+
+				&:hover {
+					color: #667eea;
+				}
+			}
+
+			.toggle-icon {
+				font-size: 14px;
+				color: #667eea;
+			}
+		}
+
+		.zelfproof-info {
+			.data-item {
+				margin-bottom: 16px;
+
+				&:last-child {
+					margin-bottom: 0;
+				}
+
+				label {
+					display: block;
+					font-size: 14px;
+					font-weight: 600;
+					color: #495057;
+					margin-bottom: 8px;
+				}
+
+				.zelfproof-string {
+					font-family: monospace;
+					font-size: 12px;
+					color: #666;
+					background: white;
+					padding: 8px 12px;
+					border-radius: 6px;
+					border: 1px solid #e0e0e0;
+					display: block;
+					word-break: break-all;
+				}
+
+				.qr-code {
+					text-align: center;
+					margin-top: 12px;
+
+					img {
+						max-width: 200px;
+						height: auto;
+						border-radius: 8px;
+						box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+					}
+				}
+			}
+		}
+
+		.api-response {
+			margin-top: 16px;
+
+			.json-display {
+				background: white;
+				border: 1px solid #e0e0e0;
+				border-radius: 8px;
+				padding: 16px;
+				font-family: monospace;
+				font-size: 12px;
+				color: #333;
+				overflow-x: auto;
+				max-height: 300px;
+				overflow-y: auto;
+			}
+		}
+
+		.next-steps {
+			p {
+				font-size: 14px;
+				color: #666;
+				margin: 0;
+				line-height: 1.5;
+			}
+		}
+	}
+
+	.result-actions {
+		display: flex;
+		gap: 16px;
+		justify-content: center;
+		margin-top: 32px;
+		padding-top: 24px;
+		border-top: 1px solid #f0f0f0;
+
+		.btn-secondary {
+			background: #f8f9fa;
+			border: 1px solid #e0e0e0;
+			color: #666;
+			padding: 12px 24px;
+			border-radius: 8px;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.2s ease;
+
+			&:hover {
+				background: #e9ecef;
+				border-color: #ced4da;
+			}
+		}
+
+		.btn-primary {
+			background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+			border: none;
+			border-radius: 8px;
+			padding: 12px 24px;
+			color: white;
+			font-size: 14px;
+			font-weight: 600;
+			cursor: pointer;
+			transition: all 0.2s ease;
+			box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+
+			&:hover {
+				transform: translateY(-2px);
+				box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+			}
+		}
+	}
+}
+
+// Responsive design
+@media (max-width: 768px) {
+	.note-result {
+		padding: 16px;
+
+		.result-container {
+			padding: 24px 20px;
+		}
+
+		.note-info {
+			padding: 20px;
+
+			.info-item {
+				flex-direction: column;
+				align-items: flex-start;
+				gap: 8px;
+
+				label {
+					min-width: auto;
+				}
+			}
+		}
+
+		.data-section {
+			padding: 20px;
+		}
+
+		.result-actions {
+			flex-direction: column;
+
+			.btn-secondary,
+			.btn-primary {
+				width: 100%;
+			}
+		}
+	}
+}

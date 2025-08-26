@@ -1,6 +1,110 @@
 "use strict";
 (self["webpackChunkzelf_extension"] = self["webpackChunkzelf_extension"] || []).push([["common"],{
 
+/***/ 9284:
+/*!**************************************************!*\
+  !*** ./src/app/services/data-passing.service.ts ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   DataPassingService: () => (/* binding */ DataPassingService)
+/* harmony export */ });
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! @angular/core */ 37580);
+
+class DataPassingService {
+  dataStore = {};
+  resultStore = {};
+  /**
+   * Store form data for a specific form type
+   */
+  storeData(formType, data) {
+    console.log(`🔍 DEBUG DataPassingService - Storing form data for ${formType}:`, data);
+    this.dataStore[formType] = data;
+  }
+  /**
+   * Retrieve form data for a specific form type
+   */
+  getData(formType) {
+    const data = this.dataStore[formType];
+    console.log(`🔍 DEBUG DataPassingService - Retrieving form data for ${formType}:`, data);
+    return data || null;
+  }
+  /**
+   * Store API result for a specific form type
+   */
+  storeResult(formType, result) {
+    console.log(`🔍 DEBUG DataPassingService - Storing result for ${formType}:`, result);
+    this.resultStore[formType] = result;
+  }
+  /**
+   * Retrieve API result for a specific form type
+   */
+  getResult(formType) {
+    const result = this.resultStore[formType];
+    console.log(`🔍 DEBUG DataPassingService - Retrieving result for ${formType}:`, result);
+    return result || null;
+  }
+  /**
+   * Clear form data for a specific form type
+   */
+  clearData(formType) {
+    console.log(`🔍 DEBUG DataPassingService - Clearing form data for ${formType}`);
+    delete this.dataStore[formType];
+  }
+  /**
+   * Clear result data for a specific form type
+   */
+  clearResult(formType) {
+    console.log(`🔍 DEBUG DataPassingService - Clearing result for ${formType}`);
+    delete this.resultStore[formType];
+  }
+  /**
+   * Clear all data for a specific form type (both form and result)
+   */
+  clearAll(formType) {
+    console.log(`🔍 DEBUG DataPassingService - Clearing all data for ${formType}`);
+    this.clearData(formType);
+    this.clearResult(formType);
+  }
+  /**
+   * Check if form data exists for a specific form type
+   */
+  hasData(formType) {
+    return !!this.dataStore[formType];
+  }
+  /**
+   * Check if result data exists for a specific form type
+   */
+  hasResult(formType) {
+    return !!this.resultStore[formType];
+  }
+  /**
+   * Get all stored data for debugging
+   */
+  getAllData() {
+    return {
+      formData: {
+        ...this.dataStore
+      },
+      resultData: {
+        ...this.resultStore
+      }
+    };
+  }
+  static ɵfac = function DataPassingService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || DataPassingService)();
+  };
+  static ɵprov = /*@__PURE__*/_angular_core__WEBPACK_IMPORTED_MODULE_0__["ɵɵdefineInjectable"]({
+    token: DataPassingService,
+    factory: DataPassingService.ɵfac,
+    providedIn: "root"
+  });
+}
+
+/***/ }),
+
 /***/ 9526:
 /*!***************************************************!*\
   !*** ./src/app/services/password-data.service.ts ***!

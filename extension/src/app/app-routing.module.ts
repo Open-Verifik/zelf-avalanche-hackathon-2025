@@ -41,6 +41,12 @@ const routes: Routes = [
 				children: [
 					{ path: "", redirectTo: "start", pathMatch: "full" },
 					{ path: "start", loadComponent: () => import("./dashboard/start/start.component").then((m) => m.StartComponent) },
+					// Redirect singular 'password' to plural 'passwords' to fix routing issues
+					{ path: "password", redirectTo: "passwords", pathMatch: "full" },
+					{ path: "note", redirectTo: "notes", pathMatch: "full" },
+					{ path: "address", redirectTo: "addresses", pathMatch: "full" },
+					{ path: "payment-card", redirectTo: "payment-cards", pathMatch: "full" },
+					{ path: "bank-account", redirectTo: "bank-accounts", pathMatch: "full" },
 					{
 						path: "passwords",
 						loadComponent: () =>
@@ -53,10 +59,7 @@ const routes: Routes = [
 					},
 					{
 						path: "passwords/biometrics",
-						loadComponent: () =>
-							import("./dashboard/zelf-keys-passwords/password-biometrics/password-biometrics.component").then(
-								(m) => m.PasswordBiometricsComponent
-							),
+						loadComponent: () => import("./dashboard/shared/data-biometrics.component").then((m) => m.DataBiometricsComponent),
 					},
 					{
 						path: "passwords/result",
@@ -75,6 +78,19 @@ const routes: Routes = [
 					{
 						path: "notes",
 						loadComponent: () => import("./dashboard/zelf-keys-notes/zelf-keys-notes.component").then((m) => m.ZelfKeysNotesComponent),
+					},
+					{
+						path: "notes/new",
+						loadComponent: () => import("./dashboard/zelf-keys-notes/note-form/note-form.component").then((m) => m.NoteFormComponent),
+					},
+					{
+						path: "notes/biometrics",
+						loadComponent: () => import("./dashboard/shared/data-biometrics.component").then((m) => m.DataBiometricsComponent),
+					},
+					{
+						path: "notes/result",
+						loadComponent: () =>
+							import("./dashboard/zelf-keys-notes/note-result/note-result.component").then((m) => m.NoteResultComponent),
 					},
 					{
 						path: "addresses",
