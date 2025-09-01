@@ -28,12 +28,12 @@ export interface DataCardItem {
 	template: `
 		<div class="data-card" (click)="onCardClick()">
 			<div class="card-left">
-				<div class="app-logo">
+				<div class="app-header">
 					<span class="logo-icon">{{ getIcon() }}</span>
+					<h4 class="app-name">{{ getTitle() }}</h4>
 				</div>
 				<div class="app-info">
-					<h4 class="app-name">{{ getTitle() }}</h4>
-					<p class="app-email">{{ getSubtitle() }}</p>
+					<p class="app-subtitle">{{ getSubtitle() }}</p>
 				</div>
 				<button class="launch-btn" (click)="onLaunchClick($event)">
 					<span class="btn-text">Launch</span>
@@ -129,7 +129,7 @@ export class DataCardComponent {
 	getSubtitle(): string {
 		// Handle backend response structure
 		if (this.item.publicData?.username) {
-			return this.item.publicData.username;
+			return `Username: ${this.item.publicData.username}`;
 		}
 		if (this.item.publicData?.description) {
 			return this.item.publicData.description;
@@ -138,9 +138,15 @@ export class DataCardComponent {
 			return this.item.subtitle;
 		}
 		if (this.item.publicData?.zelfName) {
-			return this.item.publicData.zelfName;
+			return `Zelf Name: ${this.item.publicData.zelfName}`;
 		}
-		return "No description";
+		if (this.item.publicData?.category) {
+			return `Category: ${this.item.publicData.category}`;
+		}
+		if (this.item.publicData?.type) {
+			return `Type: ${this.item.publicData.type}`;
+		}
+		return "Secure credential";
 	}
 
 	getQRCodeUrl(): string | null {

@@ -21,59 +21,20 @@
 				/>
 			</div>
 
-			<!-- Key-Value Pairs Section -->
+			<!-- Note Content Section -->
 			<div class="form-section">
-				<div class="section-header">
-					<label class="form-label">Key-Value Pairs *</label>
-					<button
-						type="button"
-						class="btn-add-pair"
-						(click)="addKeyValuePair()"
-						[disabled]="noteData.keyValuePairs.length >= maxKeyValuePairs"
-					>
-						<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-							<path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-						</svg>
-						Add Pair
-					</button>
-				</div>
-
-				<div class="key-value-pairs">
-					<div *ngFor="let pair of noteData.keyValuePairs; let i = index" class="key-value-row">
-						<input
-							type="text"
-							[(ngModel)]="pair.key"
-							(ngModelChange)="checkFormValidity()"
-							class="form-input key-input"
-							placeholder="Key"
-							required
-						/>
-						<input
-							type="text"
-							[(ngModel)]="pair.value"
-							(ngModelChange)="checkFormValidity()"
-							class="form-input value-input"
-							placeholder="Value"
-							required
-						/>
-						<button
-							type="button"
-							class="btn-remove-pair"
-							(click)="removeKeyValuePair(i)"
-							[disabled]="noteData.keyValuePairs.length <= 1"
-							title="Remove this key-value pair"
-						>
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none">
-								<path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-							</svg>
-						</button>
-					</div>
-				</div>
-
-				<div class="pairs-info">
-					<span class="pairs-count">{{ noteData.keyValuePairs.length }}/{{ maxKeyValuePairs }} pairs</span>
-					<span class="pairs-hint">Add up to {{ maxKeyValuePairs }} key-value pairs</span>
-				</div>
+				<label for="content" class="form-label">Note Content *</label>
+				<textarea
+					id="content"
+					name="content"
+					[(ngModel)]="noteData.content"
+					(ngModelChange)="checkFormValidity()"
+					class="form-textarea"
+					placeholder="Write your note here... You can include multiple paragraphs, lists, or any other content you need to remember securely."
+					rows="8"
+					required
+				></textarea>
+				<small class="form-hint">Your note content will be encrypted and stored securely. You can write as much as you need.</small>
 			</div>
 
 			<!-- Folder Section -->
@@ -126,16 +87,21 @@
 	</div>
 
 	<!-- Biometrics Modal -->
-	<div *ngIf="showBiometrics" class="biometrics-modal">
-		<div class="modal-content">
+	<div *ngIf="showBiometrics" class="biometrics-modal" (click)="onBiometricsCancel()">
+		<div class="modal-content" (click)="$event.stopPropagation()">
 			<div class="modal-header">
+				<button class="modal-close" (click)="onBiometricsCancel()" type="button">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+						<path d="M18 6L6 18M6 6L18 18" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+					</svg>
+				</button>
 				<h3>Verify Your Identity</h3>
 				<p>Please verify your face to create this note</p>
 			</div>
 			<div class="modal-body">
 				<app-data-biometrics
 					[isDecryptMode]="false"
-					[itemData]="noteData"
+					[itemData]="transformedNoteData"
 					(biometricsSuccess)="onBiometricsSuccess($event)"
 					(biometricsCancel)="onBiometricsCancel()"
 				>

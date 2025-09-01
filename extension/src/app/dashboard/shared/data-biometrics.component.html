@@ -72,72 +72,72 @@
 					<div class="zelfproof-preview" *ngIf="itemData.zelfProof">{{ itemData.zelfProof.substring(0, 50) }}...</div>
 				</div>
 			</div>
+		</div>
 
-			<!-- Liveness Detection Controls -->
-			<div class="liveness-controls" *ngIf="!livenessDetection.isActive">
-				<button class="btn-liveness" (click)="startLivenessDetection()">🔄 Start Active Liveness Detection</button>
-				<small>For enhanced security, move your face to different angles</small>
-			</div>
+		<!-- Liveness Detection Controls - Moved Outside Camera Container -->
+		<div class="liveness-controls" *ngIf="!livenessDetection.isActive">
+			<button class="btn-liveness" (click)="startLivenessDetection()">🔄 Start Active Liveness Detection</button>
+			<small>For enhanced security, move your face to different angles</small>
+		</div>
 
-			<!-- Liveness Detection Progress -->
-			<div class="liveness-progress" *ngIf="livenessDetection.isActive">
-				<h3>Active Liveness Detection</h3>
-				<div class="liveness-steps">
-					<div
-						*ngFor="let step of livenessDetection.steps; let i = index"
-						class="liveness-step"
-						[class.active]="i === livenessDetection.currentStep"
-						[class.completed]="step.completed"
-					>
-						<div class="step-indicator">
-							<span *ngIf="step.completed">✅</span>
-							<span *ngIf="!step.completed && i === livenessDetection.currentStep">🔄</span>
-							<span *ngIf="!step.completed && i !== livenessDetection.currentStep">⏳</span>
-						</div>
-						<div class="step-info">
-							<div class="step-name">{{ step.name }}</div>
-							<div class="step-angle">{{ step.angle }}°</div>
-						</div>
+		<!-- Liveness Detection Progress - Moved Outside Camera Container -->
+		<div class="liveness-progress" *ngIf="livenessDetection.isActive">
+			<h3>Active Liveness Detection</h3>
+			<div class="liveness-steps">
+				<div
+					*ngFor="let step of livenessDetection.steps; let i = index"
+					class="liveness-step"
+					[class.active]="i === livenessDetection.currentStep"
+					[class.completed]="step.completed"
+				>
+					<div class="step-indicator">
+						<span *ngIf="step.completed">✅</span>
+						<span *ngIf="!step.completed && i === livenessDetection.currentStep">🔄</span>
+						<span *ngIf="!step.completed && i !== livenessDetection.currentStep">⏳</span>
 					</div>
-				</div>
-
-				<div class="liveness-instructions" *ngIf="livenessDetection.isActive">
-					<div class="current-step">
-						{{ livenessDetection.steps[livenessDetection.currentStep].name }}: Turn your head
-						{{
-							livenessDetection.steps[livenessDetection.currentStep].angle > 0
-								? "right"
-								: livenessDetection.steps[livenessDetection.currentStep].angle < 0
-									? "left"
-									: "center"
-						}}
-					</div>
-					<div class="hold-instruction" *ngIf="livenessDetection.isHolding">
-						Hold position...
-						{{ Math.ceil((livenessDetection.requiredHoldTime - (Date.now() - livenessDetection.holdStartTime)) / 1000) }}s
+					<div class="step-info">
+						<div class="step-name">{{ step.name }}</div>
+						<div class="step-angle">{{ step.angle }}°</div>
 					</div>
 				</div>
 			</div>
 
-			<!-- Optional Master Password Input -->
-			<div class="password-input-container">
-				<div class="password-toggle">
-					<label class="form-label">Add Master Password (Optional)</label>
-					<div class="toggle-switch" (click)="toggleMasterPassword()">
-						<div class="toggle-slider" [class.active]="useMasterPassword"></div>
-					</div>
+			<div class="liveness-instructions" *ngIf="livenessDetection.isActive">
+				<div class="current-step">
+					{{ livenessDetection.steps[livenessDetection.currentStep].name }}: Turn your head
+					{{
+						livenessDetection.steps[livenessDetection.currentStep].angle > 0
+							? "right"
+							: livenessDetection.steps[livenessDetection.currentStep].angle < 0
+								? "left"
+								: "center"
+					}}
 				</div>
+				<div class="hold-instruction" *ngIf="livenessDetection.isHolding">
+					Hold position...
+					{{ Math.ceil((livenessDetection.requiredHoldTime - (Date.now() - livenessDetection.holdStartTime)) / 1000) }}s
+				</div>
+			</div>
+		</div>
 
-				<div *ngIf="useMasterPassword" class="password-input-field">
-					<input
-						type="password"
-						id="masterPassword"
-						placeholder="Enter your master password (optional)"
-						[(ngModel)]="masterPassword"
-						class="password-input"
-					/>
-					<small>Adding a master password provides additional security layer. Biometric verification is always required.</small>
+		<!-- Optional Master Password Input - Moved Outside Camera Container -->
+		<div class="password-input-container">
+			<div class="password-toggle">
+				<label class="form-label">Add Master Password (Optional)</label>
+				<div class="toggle-switch" (click)="toggleMasterPassword()">
+					<div class="toggle-slider" [class.active]="useMasterPassword"></div>
 				</div>
+			</div>
+
+			<div *ngIf="useMasterPassword" class="password-input-field">
+				<input
+					type="password"
+					id="masterPassword"
+					placeholder="Enter your master password (optional)"
+					[(ngModel)]="masterPassword"
+					class="password-input"
+				/>
+				<small>Adding a master password provides additional security layer. Biometric verification is always required.</small>
 			</div>
 		</div>
 

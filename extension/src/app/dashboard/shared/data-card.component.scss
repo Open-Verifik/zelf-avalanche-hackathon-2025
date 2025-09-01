@@ -23,31 +23,43 @@
 		flex-direction: column;
 		justify-content: space-between;
 
-		.app-logo {
+		.app-header {
+			display: flex;
+			align-items: center;
+			gap: 12px;
 			margin-bottom: 16px;
 
 			.logo-icon {
-				font-size: 32px;
+				font-size: 28px;
 				display: block;
+				flex-shrink: 0;
 			}
-		}
-
-		.app-info {
-			flex: 1;
 
 			.app-name {
 				font-size: 18px;
 				font-weight: 600;
 				color: #1a1a1a;
-				margin: 0 0 8px 0;
+				margin: 0;
 				line-height: 1.2;
+				flex: 1;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
 			}
+		}
 
-			.app-email {
+		.app-info {
+			flex: 1;
+			margin-bottom: 16px;
+
+			.app-subtitle {
 				font-size: 14px;
 				color: #666;
 				margin: 0;
 				line-height: 1.4;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				white-space: nowrap;
 			}
 		}
 

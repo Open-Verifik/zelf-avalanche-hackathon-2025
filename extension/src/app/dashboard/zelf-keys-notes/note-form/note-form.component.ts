@@ -17,13 +17,22 @@ import { DataBiometricsComponent } from "../../shared/data-biometrics.component"
 export class NoteFormComponent implements OnInit {
 	noteData = {
 		title: "Meeting Notes",
-		keyValuePairs: [
-			{ key: "Date", value: new Date().toLocaleDateString() },
-			{ key: "Location", value: "Conference Room A" },
-			{ key: "Attendees", value: "Team Members" },
-			{ key: "Agenda", value: "Q1 Planning" },
-			{ key: "Notes", value: "Discussed project timeline and goals..." },
-		],
+		content: `Date: ${new Date().toLocaleDateString()}
+Location: Conference Room A
+Attendees: Team Members
+
+Agenda: Q1 Planning
+
+Notes:
+- Discussed project timeline and goals
+- Reviewed budget allocation
+- Set quarterly objectives
+- Assigned team responsibilities
+
+Next Steps:
+- Finalize project roadmap
+- Schedule follow-up meeting
+- Prepare detailed budget proposal`,
 		folder: "Work",
 		insideFolder: true,
 		useMasterPassword: false,
@@ -32,8 +41,8 @@ export class NoteFormComponent implements OnInit {
 
 	isNewNote = true;
 	formValid = false;
-	maxKeyValuePairs = 10;
 	showBiometrics = false;
+	transformedNoteData: any = null;
 
 	constructor(
 		private router: Router,
@@ -49,13 +58,9 @@ export class NoteFormComponent implements OnInit {
 		}
 
 		// Check if this is a new note or editing existing
-		const id = this.route.snapshot.paramMap.get("id");
-		this.isNewNote = id === "new";
-
-		if (!this.isNewNote) {
-			// TODO: Load existing note data
-			// this.loadNoteData(id);
-		}
+		// For now, this route is always for creating new notes
+		// TODO: Add edit route like "notes/edit/:id" for editing existing notes
+		this.isNewNote = true;
 
 		this.checkFormValidity();
 	}
@@ -72,33 +77,19 @@ export class NoteFormComponent implements OnInit {
 		this.checkFormValidity();
 	}
 
-	addKeyValuePair(): void {
-		if (this.noteData.keyValuePairs.length < this.maxKeyValuePairs) {
-			this.noteData.keyValuePairs.push({ key: "", value: "" });
-			this.checkFormValidity();
-		}
-	}
-
-	removeKeyValuePair(index: number): void {
-		if (this.noteData.keyValuePairs.length > 1) {
-			this.noteData.keyValuePairs.splice(index, 1);
-			this.checkFormValidity();
-		}
-	}
-
 	checkFormValidity(): void {
 		const hasTitle = !!this.noteData.title.trim();
-		const hasValidPairs = this.noteData.keyValuePairs.every((pair) => pair.key.trim() && pair.value.trim());
+		const hasContent = !!this.noteData.content.trim();
 
 		// Master password is optional - only validate if user chose to use it
 		const hasValidMasterPassword = !this.noteData.useMasterPassword || (this.noteData.useMasterPassword && !!this.noteData.masterPassword.trim());
 
 		// Backend validation requirements:
 		// - title: required, minLength: 1, maxLength: 100
-		// - keyValuePairs: required, minKeys: 1, maxKeys: 10
+		// - content: required, minLength: 1
 		// - masterPassword: optional (only if user enables it)
 
-		this.formValid = hasTitle && hasValidPairs && hasValidMasterPassword;
+		this.formValid = hasTitle && hasContent && hasValidMasterPassword;
 	}
 
 	onCancel(): void {
@@ -119,13 +110,21 @@ export class NoteFormComponent implements OnInit {
 			return;
 		}
 
-		// Store data in service instead of query params
-		const formData = {
-			...this.noteData,
+		// Transform note data to match backend API expectations
+		// Convert content to keyValuePairs format
+		this.transformedNoteData = {
+			title: this.noteData.title,
+			keyValuePairs: {
+				content: this.noteData.content,
+			},
+			folder: this.noteData.folder,
+			insideFolder: this.noteData.insideFolder,
+			useMasterPassword: this.noteData.useMasterPassword,
+			masterPassword: this.noteData.masterPassword,
 			type: "notes",
 		};
 
-		await this.dataPassingService.storeData("notes", formData);
+		await this.dataPassingService.storeData("notes", this.transformedNoteData);
 
 		// Show biometrics modal instead of navigating
 		this.showBiometrics = true;

@@ -37,7 +37,7 @@ const schemas = {
 		title: { required: true, minLength: 1, maxLength: 100 },
 		keyValuePairs: { required: true, minKeys: 1, maxKeys: 10 },
 		faceBase64: { required: true, isBase64Image: true },
-		password: { required: true },
+		password: { required: false },
 	},
 
 	// Credit card schema
