@@ -1,0 +1,49 @@
+<div class="payment-card-result">
+	<div class="result-container">
+		<div *ngIf="isSuccess" class="success-state">
+			<div class="success-icon">✅</div>
+			<h2>Payment Card Created Successfully!</h2>
+			<p>Your payment card has been securely stored and encrypted.</p>
+
+			<div *ngIf="result?.publicData" class="card-preview">
+				<div class="preview-header">
+					<h3>Card Details</h3>
+				</div>
+				<div class="preview-content">
+					<div class="detail-row">
+						<span class="label">Card Name:</span>
+						<span class="value">{{ result.publicData.cardName || "N/A" }}</span>
+					</div>
+					<div class="detail-row">
+						<span class="label">Bank:</span>
+						<span class="value">{{ result.publicData.bankName || "N/A" }}</span>
+					</div>
+					<div class="detail-row">
+						<span class="label">Card Number:</span>
+						<span class="value">{{ result.publicData.cardNumber || "N/A" }}</span>
+					</div>
+					<div class="detail-row">
+						<span class="label">Expires:</span>
+						<span class="value">{{ result.publicData.expiryMonth }}/{{ result.publicData.expiryYear }}</span>
+					</div>
+				</div>
+			</div>
+
+			<div class="actions">
+				<button class="btn-secondary" (click)="onBackToCards()">Back to Payment Cards</button>
+				<button class="btn-primary" (click)="onAddAnother()">Add Another Card</button>
+			</div>
+		</div>
+
+		<div *ngIf="!isSuccess" class="error-state">
+			<div class="error-icon">❌</div>
+			<h2>Error Creating Payment Card</h2>
+			<p>{{ error || "An unexpected error occurred while creating your payment card." }}</p>
+
+			<div class="actions">
+				<button class="btn-secondary" (click)="onBackToCards()">Back to Payment Cards</button>
+				<button class="btn-primary" (click)="onAddAnother()">Try Again</button>
+			</div>
+		</div>
+	</div>
+</div>

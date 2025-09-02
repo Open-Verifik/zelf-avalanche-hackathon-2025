@@ -81,21 +81,6 @@ const storeContact = async (ctx) => {
 };
 
 /**
- * Store bank account details
- * @param {Object} ctx - Koa context
- */
-const storeBankDetails = async (ctx) => {
-	try {
-		const data = await Module.storeBankDetails(ctx.request.body, ctx.state.user);
-		ctx.body = { ...data };
-	} catch (error) {
-		console.error(error);
-		ctx.status = error.status || 500;
-		ctx.body = { error: error.message };
-	}
-};
-
-/**
  * Retrieve stored data (decrypt)
  * @param {Object} ctx - Koa context
  */
@@ -140,4 +125,4 @@ const listData = async (ctx) => {
 	}
 };
 
-export { storeData, storePassword, storeNotes, storeCreditCard, storeContact, storeBankDetails, retrieveData, previewData, listData };
+export { storeData, storePassword, storeNotes, storeCreditCard, storeContact, retrieveData, previewData, listData };

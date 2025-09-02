@@ -1,0 +1,202 @@
+<div class="payment-card-form">
+	<div class="form-header">
+		<h2>Secure Payment Card</h2>
+		<p>Add a new payment card to your secure vault</p>
+	</div>
+
+	<div class="form-content">
+		<form (ngSubmit)="onSave()" #cardForm="ngForm">
+			<!-- Card Preview Section -->
+			<div class="form-section">
+				<label class="form-label">Card Preview</label>
+				<div class="card-preview" [class]="getCardType().toLowerCase()">
+					<div class="card-header">
+						<div class="card-type">{{ getCardType() }}</div>
+					</div>
+					<!-- QR Code replacing NFC chip on the left -->
+					<div class="card-qr-chip">
+						<div class="qr-placeholder">QR</div>
+					</div>
+					<div class="card-number">{{ getMaskedCardNumber() || "•••• •••• •••• ••••" }}</div>
+					<div class="card-details">
+						<div class="card-holder">
+							<span class="label">Card Holder</span>
+							<span class="value">{{ cardData.cardName || "CARD HOLDER" }}</span>
+						</div>
+						<div class="card-expiry">
+							<span class="label">Expires</span>
+							<span class="value">{{ cardData.expiryMonth || "MM" }}/{{ cardData.expiryYear || "YY" }}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<!-- Card Information Section -->
+			<div class="form-section">
+				<label class="form-label">Card Information</label>
+
+				<div class="field-row">
+					<div class="field-group">
+						<input
+							type="text"
+							class="form-input"
+							[(ngModel)]="cardData.cardName"
+							(ngModelChange)="checkFormValidity()"
+							name="cardName"
+							placeholder="Card Holder Name"
+							required
+						/>
+					</div>
+					<div class="field-group">
+						<input
+							type="text"
+							class="form-input"
+							[(ngModel)]="cardData.cardNumber"
+							(ngModelChange)="onCardNumberChange()"
+							name="cardNumber"
+							placeholder="Card Number"
+							maxlength="19"
+							required
+						/>
+					</div>
+				</div>
+
+				<div class="field-row">
+					<div class="field-group">
+						<select
+							class="form-input"
+							[(ngModel)]="cardData.expiryMonth"
+							(ngModelChange)="checkFormValidity()"
+							name="expiryMonth"
+							required
+						>
+							<option value="">Month</option>
+							<option value="01">01 - January</option>
+							<option value="02">02 - February</option>
+							<option value="03">03 - March</option>
+							<option value="04">04 - April</option>
+							<option value="05">05 - May</option>
+							<option value="06">06 - June</option>
+							<option value="07">07 - July</option>
+							<option value="08">08 - August</option>
+							<option value="09">09 - September</option>
+							<option value="10">10 - October</option>
+							<option value="11">11 - November</option>
+							<option value="12">12 - December</option>
+						</select>
+					</div>
+					<div class="field-group">
+						<input
+							type="number"
+							class="form-input"
+							[(ngModel)]="cardData.expiryYear"
+							(ngModelChange)="checkFormValidity()"
+							name="expiryYear"
+							placeholder="Year (YYYY)"
+							min="2024"
+							max="2030"
+							required
+						/>
+					</div>
+					<div class="field-group">
+						<input
+							type="text"
+							class="form-input"
+							[(ngModel)]="cardData.cvv"
+							(ngModelChange)="onCvvChange()"
+							name="cvv"
+							placeholder="CVV"
+							maxlength="4"
+							required
+						/>
+					</div>
+				</div>
+
+				<div class="field-row">
+					<div class="field-group">
+						<input
+							type="text"
+							class="form-input"
+							[(ngModel)]="cardData.bankName"
+							(ngModelChange)="checkFormValidity()"
+							name="bankName"
+							placeholder="Bank Name"
+							required
+						/>
+					</div>
+				</div>
+			</div>
+
+			<!-- Folder Section -->
+			<div class="form-section">
+				<div class="folder-toggle">
+					<label class="form-label">Store in Folder</label>
+					<div class="toggle-switch" (click)="toggleFolder()">
+						<div class="toggle-slider" [class.active]="cardData.insideFolder"></div>
+					</div>
+				</div>
+
+				<div *ngIf="cardData.insideFolder" class="folder-input">
+					<input type="text" class="form-input" [(ngModel)]="cardData.folder" name="folder" placeholder="Folder name" />
+				</div>
+			</div>
+
+			<!-- Master Password Section -->
+			<div class="form-section">
+				<div class="password-toggle">
+					<label class="form-label">Add Master Password (Optional)</label>
+					<div class="toggle-switch" (click)="toggleMasterPassword()">
+						<div class="toggle-slider" [class.active]="cardData.useMasterPassword"></div>
+					</div>
+				</div>
+
+				<div *ngIf="cardData.useMasterPassword" class="password-input-field">
+					<input
+						type="password"
+						id="masterPassword"
+						name="masterPassword"
+						[(ngModel)]="cardData.masterPassword"
+						(ngModelChange)="checkFormValidity()"
+						class="form-input"
+						placeholder="Enter your master password (optional)"
+					/>
+					<small class="form-hint"
+						>Adding a master password provides additional security layer. Biometric verification is always required.</small
+					>
+				</div>
+			</div>
+
+			<!-- Action Buttons -->
+			<div class="form-actions">
+				<button type="button" class="btn-secondary" (click)="onCancel()">Cancel</button>
+				<button type="submit" class="btn-primary" [disabled]="!formValid" [class.btn-disabled]="!formValid">
+					{{ isNewCard ? "Create Card" : "Update Card" }}
+				</button>
+			</div>
+		</form>
+	</div>
+
+	<!-- Biometrics Modal -->
+	<div *ngIf="showBiometrics" class="biometrics-modal" (click)="onBiometricsCancel()">
+		<div class="modal-content" (click)="$event.stopPropagation()">
+			<div class="modal-header">
+				<button class="modal-close" (click)="onBiometricsCancel()" type="button">
+					<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+						<path d="M18 6L6 18M6 6L18 18" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+					</svg>
+				</button>
+				<h3>Verify Your Identity</h3>
+				<p>Please verify your face to create this payment card</p>
+			</div>
+			<div class="modal-body">
+				<app-data-biometrics
+					[isDecryptMode]="false"
+					[itemData]="transformedCardData"
+					(biometricsSuccess)="onBiometricsSuccess($event)"
+					(biometricsCancel)="onBiometricsCancel()"
+				>
+				</app-data-biometrics>
+			</div>
+		</div>
+	</div>
+</div>

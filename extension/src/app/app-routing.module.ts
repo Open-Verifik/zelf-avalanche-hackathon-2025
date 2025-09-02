@@ -87,11 +87,6 @@ const routes: Routes = [
 							import("./dashboard/zelf-keys-notes/note-result/note-result.component").then((m) => m.NoteResultComponent),
 					},
 					{
-						path: "addresses",
-						loadComponent: () =>
-							import("./dashboard/zelf-keys-addresses/zelf-keys-addresses.component").then((m) => m.ZelfKeysAddressesComponent),
-					},
-					{
 						path: "payment-cards",
 						loadComponent: () =>
 							import("./dashboard/zelf-keys-payment-cards/zelf-keys-payment-cards.component").then(
@@ -99,10 +94,17 @@ const routes: Routes = [
 							),
 					},
 					{
-						path: "bank-accounts",
+						path: "payment-cards/new",
 						loadComponent: () =>
-							import("./dashboard/zelf-keys-bank-accounts/zelf-keys-bank-accounts.component").then(
-								(m) => m.ZelfKeysBankAccountsComponent
+							import("./dashboard/zelf-keys-payment-cards/payment-card-form/payment-card-form.component").then(
+								(m) => m.PaymentCardFormComponent
+							),
+					},
+					{
+						path: "payment-cards/result",
+						loadComponent: () =>
+							import("./dashboard/zelf-keys-payment-cards/payment-card-result/payment-card-result.component").then(
+								(m) => m.PaymentCardResultComponent
 							),
 					},
 				],

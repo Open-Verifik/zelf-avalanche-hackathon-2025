@@ -42,17 +42,9 @@
 				<span class="nav-text">Notes</span>
 				<div class="active-indicator" *ngIf="activeTab === 'notes'"></div>
 			</div>
-			<div class="nav-item" [class.active]="activeTab === 'addresses'" (click)="navigateToTab('addresses')">
-				<span class="nav-text">Addresses</span>
-				<div class="active-indicator" *ngIf="activeTab === 'addresses'"></div>
-			</div>
 			<div class="nav-item" [class.active]="activeTab === 'payment-cards'" (click)="navigateToTab('payment-cards')">
 				<span class="nav-text">Payment Cards</span>
 				<div class="active-indicator" *ngIf="activeTab === 'payment-cards'"></div>
-			</div>
-			<div class="nav-item" [class.active]="activeTab === 'bank-accounts'" (click)="navigateToTab('bank-accounts')">
-				<span class="nav-text">Bank Accounts</span>
-				<div class="active-indicator" *ngIf="activeTab === 'bank-accounts'"></div>
 			</div>
 		</nav>
 

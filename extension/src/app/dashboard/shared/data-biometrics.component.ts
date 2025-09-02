@@ -145,15 +145,9 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 		} else if (currentPath.includes("/passwords/")) {
 			this.dataType = "passwords";
 			this.dataTitle = "Password";
-		} else if (currentPath.includes("/addresses/")) {
-			this.dataType = "addresses";
-			this.dataTitle = "Address";
 		} else if (currentPath.includes("/payment-cards/")) {
 			this.dataType = "payment-cards";
 			this.dataTitle = "Payment Card";
-		} else if (currentPath.includes("/bank-accounts/")) {
-			this.dataType = "bank-accounts";
-			this.dataTitle = "Bank Account";
 		}
 
 		// Get data from service instead of query params
@@ -826,68 +820,23 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 					);
 					break;
 
-				case "addresses":
-					// Store address data
-					const addressPayload = {
-						title: dataSource.title,
-						address: dataSource.address,
-						city: dataSource.city,
-						state: dataSource.state,
-						zipCode: dataSource.zipCode,
-						country: dataSource.country,
-						faceBase64: faceBase64,
-					};
-
-					response = await this._httpWrapperService.sendRequest(
-						"post",
-						`${environment.keysApiUrl}/api/zelf-key/store/addresses`,
-						addressPayload,
-						{
-							headers: {
-								Authorization: `Bearer ${this.apiKeysSessionJWT}`,
-							},
-						}
-					);
-					break;
-
 				case "payment-cards":
 					// Store payment card data
 					const cardPayload = {
-						title: dataSource.title,
+						cardName: dataSource.cardName,
 						cardNumber: dataSource.cardNumber,
-						expiryDate: dataSource.expiryDate,
+						expiryMonth: dataSource.expiryMonth,
+						expiryYear: dataSource.expiryYear,
 						cvv: dataSource.cvv,
-						cardholderName: dataSource.cardholderName,
-						faceBase64: faceBase64,
-					};
-
-					response = await this._httpWrapperService.sendRequest(
-						"post",
-						`${environment.keysApiUrl}/api/zelf-key/store/payment-cards`,
-						cardPayload,
-						{
-							headers: {
-								Authorization: `Bearer ${this.apiKeysSessionJWT}`,
-							},
-						}
-					);
-					break;
-
-				case "bank-accounts":
-					// Store bank account data
-					const accountPayload = {
-						title: dataSource.title,
-						accountNumber: dataSource.accountNumber,
-						routingNumber: dataSource.routingNumber,
 						bankName: dataSource.bankName,
-						accountType: dataSource.accountType,
 						faceBase64: faceBase64,
+						...(this.useMasterPassword && this.masterPassword && { masterPassword: this.masterPassword }), // Optional master password
 					};
 
 					response = await this._httpWrapperService.sendRequest(
 						"post",
-						`${environment.keysApiUrl}/api/zelf-key/store/bank-accounts`,
-						accountPayload,
+						`${environment.keysApiUrl}/api/zelf-key/store/credit-card`,
+						cardPayload,
 						{
 							headers: {
 								Authorization: `Bearer ${this.apiKeysSessionJWT}`,
@@ -1025,28 +974,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 				});
 				break;
 
-			case "addresses":
-				this._router.navigate(["/dashboard/addresses/result"], {
-					queryParams: {
-						result: encodeURIComponent(
-							JSON.stringify({
-								success: true,
-								message: isRetrieveMode ? "Address retrieved successfully" : "Address stored successfully",
-								publicData: {
-									title: dataSource.title || apiResponse?.data?.title,
-									type: "address",
-									timestamp: new Date().toISOString(),
-								},
-								zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
-								zelfQR: apiResponse?.data?.zelfQR || "data:image/png;base64,sample_qr_code",
-								// Include retrieved data if in retrieve mode
-								...(isRetrieveMode && { retrievedData: apiResponse?.data }),
-							})
-						),
-					},
-				});
-				break;
-
 			case "payment-cards":
 				this._router.navigate(["/dashboard/payment-cards/result"], {
 					queryParams: {
@@ -1057,28 +984,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 								publicData: {
 									title: dataSource.title || apiResponse?.data?.title,
 									type: "payment-card",
-									timestamp: new Date().toISOString(),
-								},
-								zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
-								zelfQR: apiResponse?.data?.zelfQR || "data:image/png;base64,sample_qr_code",
-								// Include retrieved data if in retrieve mode
-								...(isRetrieveMode && { retrievedData: apiResponse?.data }),
-							})
-						),
-					},
-				});
-				break;
-
-			case "bank-accounts":
-				this._router.navigate(["/dashboard/bank-accounts/result"], {
-					queryParams: {
-						result: encodeURIComponent(
-							JSON.stringify({
-								success: true,
-								message: isRetrieveMode ? "Bank account retrieved successfully" : "Bank account stored successfully",
-								publicData: {
-									title: dataSource.title || apiResponse?.data?.title,
-									type: "bank-account",
 									timestamp: new Date().toISOString(),
 								},
 								zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
@@ -1157,21 +1062,9 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 				});
 				break;
 
-			case "addresses":
-				this._router.navigate(["/dashboard/addresses/new"], {
-					queryParams: { addressData: encodeURIComponent(JSON.stringify(dataSource)) },
-				});
-				break;
-
 			case "payment-cards":
 				this._router.navigate(["/dashboard/payment-cards/new"], {
 					queryParams: { cardData: encodeURIComponent(JSON.stringify(dataSource)) },
-				});
-				break;
-
-			case "bank-accounts":
-				this._router.navigate(["/dashboard/bank-accounts/new"], {
-					queryParams: { accountData: encodeURIComponent(JSON.stringify(dataSource)) },
 				});
 				break;
 
@@ -1197,12 +1090,8 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 				return "🔐";
 			case "notes":
 				return "📝";
-			case "addresses":
-				return "📍";
 			case "payment-cards":
 				return "💳";
-			case "bank-accounts":
-				return "🏦";
 			default:
 				return "📄";
 		}

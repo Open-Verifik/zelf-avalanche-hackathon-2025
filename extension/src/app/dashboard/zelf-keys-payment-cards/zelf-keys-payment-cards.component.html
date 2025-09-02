@@ -1,57 +1,72 @@
 <div class="zelf-keys-payment-cards">
-	<div class="header">
-		<h2>Payment Cards</h2>
-		<p>Securely store your payment card information</p>
-	</div>
+	<div class="notes-main-view">
+		<div class="header">
+			<h2>Payment Cards</h2>
+			<p>Securely store your payment card information</p>
+		</div>
 
-	<div class="content">
-		<div class="cards-grid">
-			<div class="card-item">
-				<div class="card-header">
-					<div class="card-type visa">VISA</div>
-					<div class="card-actions">
-						<button class="btn-edit">Edit</button>
-						<button class="btn-delete">Delete</button>
+		<div class="content">
+			<!-- Loading State -->
+			<div *ngIf="isLoading" class="loading-state">
+				<div class="loading-spinner"></div>
+				<p>Loading payment cards...</p>
+			</div>
+
+			<!-- Error State -->
+			<div *ngIf="error && !isLoading" class="error-state">
+				<div class="error-icon">⚠️</div>
+				<h3>Error Loading Cards</h3>
+				<p>{{ error }}</p>
+				<button class="btn-retry" (click)="onRefresh()">Try Again</button>
+			</div>
+
+			<!-- Cards Grid -->
+			<div *ngIf="!isLoading && !error && paymentCards.length > 0" class="cards-grid">
+				<div class="list-header">
+					<h3>{{ paymentCards.length }} stored card{{ paymentCards.length !== 1 ? "s" : "" }}</h3>
+					<button class="btn-secondary" (click)="onRefresh()">Refresh</button>
+				</div>
+				<!-- Dynamic Payment Cards -->
+				<div *ngFor="let card of paymentCards" class="card-item" [style.background]="getCardGradient(card.zelfProof)">
+					<div class="card-header">
+						<div class="card-type" [class]="getCardType(card.cardNumber).toLowerCase()">
+							{{ getCardType(card.cardNumber) }}
+						</div>
+						<div class="card-actions">
+							<button class="btn-edit" (click)="onEditCard(card)">Edit</button>
+							<button class="btn-delete" (click)="onDeleteCard(card)">Delete</button>
+						</div>
+					</div>
+					<!-- QR Code replacing NFC chip on the left -->
+					<div class="card-qr-chip">
+						<img [src]="getMiniQRCode(card.zelfProof)" alt="QR Code" class="chip-qr-code" />
+					</div>
+					<div class="card-number">{{ getMaskedCardNumber(card.cardNumber) }}</div>
+					<div class="card-details">
+						<div class="card-holder">
+							<span class="label">Card Holder</span>
+							<span class="value">{{ card.cardName }}</span>
+						</div>
+						<div class="card-expiry">
+							<span class="label">Expires</span>
+							<span class="value">{{ card.expiryMonth }}/{{ card.expiryYear.slice(-2) }}</span>
+						</div>
 					</div>
 				</div>
-				<div class="card-number">•••• •••• •••• 1234</div>
-				<div class="card-details">
-					<div class="card-holder">
-						<span class="label">Card Holder</span>
-						<span class="value">John Doe</span>
-					</div>
-					<div class="card-expiry">
-						<span class="label">Expires</span>
-						<span class="value">12/26</span>
-					</div>
+
+				<div class="add-more">
+					<button class="btn-primary" (click)="onAddNewCard()">Add Another Card</button>
 				</div>
 			</div>
 
-			<div class="card-item">
-				<div class="card-header">
-					<div class="card-type mastercard">MASTERCARD</div>
-					<div class="card-actions">
-						<button class="btn-edit">Edit</button>
-						<button class="btn-delete">Delete</button>
-					</div>
+			<!-- Cards Grid for empty state - Show add card tile when no cards exist -->
+			<div *ngIf="!isLoading && !error && paymentCards.length === 0" class="cards-grid">
+				<!-- Add New Card Button -->
+				<div class="add-card" (click)="onAddNewCard()">
+					<div class="add-icon">+</div>
+					<h3>Add New Card</h3>
+					<p>Securely store a new payment card</p>
 				</div>
-				<div class="card-number">•••• •••• •••• 5678</div>
-				<div class="card-details">
-					<div class="card-holder">
-						<span class="label">Card Holder</span>
-						<span class="value">Jane Smith</span>
-					</div>
-					<div class="card-expiry">
-						<span class="label">Expires</span>
-						<span class="value">08/25</span>
-					</div>
-				</div>
-			</div>
-
-			<div class="add-card">
-				<div class="add-icon">+</div>
-				<h3>Add New Card</h3>
-				<p>Securely store a new payment card</p>
 			</div>
 		</div>
 	</div>

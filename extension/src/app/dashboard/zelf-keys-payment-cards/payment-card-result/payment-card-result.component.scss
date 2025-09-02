@@ -1,0 +1,149 @@
+.payment-card-result {
+	padding: 24px;
+	height: 100%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+
+	.result-container {
+		max-width: 500px;
+		width: 100%;
+		text-align: center;
+
+		.success-state,
+		.error-state {
+			.success-icon,
+			.error-icon {
+				font-size: 64px;
+				margin-bottom: 24px;
+			}
+
+			h2 {
+				font-size: 24px;
+				font-weight: 600;
+				color: #1a1a1a;
+				margin: 0 0 12px 0;
+			}
+
+			p {
+				font-size: 16px;
+				color: #666;
+				margin: 0 0 32px 0;
+			}
+		}
+
+		.success-state {
+			.success-icon {
+				color: #10b981;
+			}
+		}
+
+		.error-state {
+			.error-icon {
+				color: #ef4444;
+			}
+		}
+
+		.card-preview {
+			background: #f8f9fa;
+			border: 1px solid #e0e0e0;
+			border-radius: 12px;
+			padding: 24px;
+			margin: 24px 0;
+
+			.preview-header {
+				margin-bottom: 16px;
+
+				h3 {
+					font-size: 18px;
+					font-weight: 600;
+					color: #1a1a1a;
+					margin: 0;
+				}
+			}
+
+			.preview-content {
+				.detail-row {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					padding: 8px 0;
+					border-bottom: 1px solid #e0e0e0;
+
+					&:last-child {
+						border-bottom: none;
+					}
+
+					.label {
+						font-weight: 500;
+						color: #666;
+					}
+
+					.value {
+						font-weight: 600;
+						color: #1a1a1a;
+					}
+				}
+			}
+		}
+
+		.actions {
+			display: flex;
+			gap: 16px;
+			justify-content: center;
+			margin-top: 32px;
+
+			.btn-primary,
+			.btn-secondary {
+				padding: 12px 24px;
+				border-radius: 8px;
+				font-size: 14px;
+				font-weight: 600;
+				cursor: pointer;
+				transition: all 0.2s ease;
+				border: none;
+			}
+
+			.btn-primary {
+				background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+				color: white;
+				box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+
+				&:hover {
+					transform: translateY(-2px);
+					box-shadow: 0 8px 24px rgba(102, 126, 234, 0.4);
+				}
+			}
+
+			.btn-secondary {
+				background: #f8f9fa;
+				border: 1px solid #e0e0e0;
+				color: #666;
+
+				&:hover {
+					background: #e9ecef;
+					border-color: #ced4da;
+				}
+			}
+		}
+	}
+}
+
+// Responsive design
+@media (max-width: 768px) {
+	.payment-card-result {
+		padding: 16px;
+
+		.result-container {
+			.actions {
+				flex-direction: column;
+				gap: 12px;
+
+				.btn-primary,
+				.btn-secondary {
+					width: 100%;
+				}
+			}
+		}
+	}
+}

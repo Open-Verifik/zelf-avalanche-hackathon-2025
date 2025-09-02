@@ -90,12 +90,8 @@ export class DataCardComponent {
 				return "🔐";
 			case "notes":
 				return "📝";
-			case "addresses":
-				return "📍";
 			case "payment-cards":
 				return "💳";
-			case "bank-accounts":
-				return "🏦";
 			case "contacts":
 				return "👤";
 			default:

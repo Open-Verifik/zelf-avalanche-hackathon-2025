@@ -16,8 +16,6 @@ export default (server) => {
 	server.post(`${PATH}/store/password`, Middleware.storePasswordValidation, Controller.storePassword);
 	server.post(`${PATH}/store/notes`, Middleware.storeNotesValidation, Controller.storeNotes);
 	server.post(`${PATH}/store/credit-card`, Middleware.storeCreditCardValidation, Controller.storeCreditCard);
-	server.post(`${PATH}/store/contact`, Middleware.storeContactValidation, Controller.storeContact);
-	server.post(`${PATH}/store/bank-details`, Middleware.storeBankDetailsValidation, Controller.storeBankDetails);
 
 	// Retrieve and preview endpoints
 	server.get(`${PATH}/list`, Middleware.listValidation, Controller.listData);

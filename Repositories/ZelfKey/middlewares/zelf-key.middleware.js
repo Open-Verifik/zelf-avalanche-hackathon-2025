@@ -8,7 +8,7 @@ import { validate } from "../../../Utilities/helper.module.js";
 /**
  * Supported data categories for ZelfKey storage
  */
-const SUPPORTED_CATEGORIES = ["password", "notes", "credit_card", "contact", "bank_details"];
+const SUPPORTED_CATEGORIES = ["password", "notes", "credit_card", "contact"];
 
 /**
  * Validation schemas for different data types
@@ -49,38 +49,14 @@ const schemas = {
 		cvv: { required: true, minLength: 3, maxLength: 4 },
 		bankName: { required: true, minLength: 1 },
 		faceBase64: { required: true, isBase64Image: true },
-		password: { required: true },
+		password: { required: false },
 	},
-
-	// Contact schema
-	contact: {
-		name: { required: true, minLength: 1 },
-		email: { required: false, pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/ },
-		phone: { required: false, minLength: 10 },
-		address: { required: false },
-		company: { required: false },
-		faceBase64: { required: true, isBase64Image: true },
-		password: { required: true },
-	},
-
-	// Bank details schema
-	bankDetails: {
-		bankName: { required: true, minLength: 1 },
-		accountNumber: { required: true, minLength: 8, maxLength: 17 },
-		routingNumber: { required: true, minLength: 9, maxLength: 9 },
-		accountType: { required: true, enum: ["checking", "savings", "business", "investment"] },
-		accountHolder: { required: true, minLength: 1 },
-		faceBase64: { required: true, isBase64Image: true },
-		password: { required: true },
-	},
-
 	// Retrieve data schema
 	retrieve: {
 		zelfProof: { required: true },
 		faceBase64: { required: true, isBase64Image: true },
 		password: { required: false },
 	},
-
 	// Preview data schema
 	preview: {
 		zelfProof: { required: true },
@@ -122,12 +98,7 @@ const storeDataValidation = async (ctx, next) => {
 		case "credit_card":
 			payloadSchema = schemas.creditCard;
 			break;
-		case "contact":
-			payloadSchema = schemas.contact;
-			break;
-		case "bank_details":
-			payloadSchema = schemas.bankDetails;
-			break;
+
 		default:
 			ctx.status = 400;
 			ctx.body = {
@@ -227,32 +198,6 @@ const storeDataValidation = async (ctx, next) => {
 				ctx.body = {
 					error: "Validation error",
 					message: "Credit card has expired",
-				};
-				return;
-			}
-			break;
-
-		case "contact":
-			// Validate contact business logic: at least one contact method required
-			const { email, phone, address } = payload;
-			if (!email && !phone && !address) {
-				ctx.status = 400;
-				ctx.body = {
-					error: "Validation error",
-					message: "At least one contact method (email, phone, or address) is required",
-				};
-				return;
-			}
-			break;
-
-		case "bank_details":
-			// Validate bank details business logic: validate routing number format
-			const { routingNumber } = payload;
-			if (!/^\d{9}$/.test(routingNumber)) {
-				ctx.status = 400;
-				ctx.body = {
-					error: "Validation error",
-					message: "Routing number must be exactly 9 digits",
 				};
 				return;
 			}
@@ -394,64 +339,6 @@ const storeCreditCardValidation = async (ctx, next) => {
 };
 
 /**
- * Store contact validation middleware
- */
-const storeContactValidation = async (ctx, next) => {
-	const valid = validate(schemas.contact, ctx.request.body);
-
-	if (valid.error) {
-		ctx.status = 400;
-		ctx.body = {
-			error: "Validation error",
-			message: valid.error.message,
-		};
-		return;
-	}
-
-	// Additional business logic: at least one contact method required
-	const { email, phone, address } = ctx.request.body;
-	if (!email && !phone && !address) {
-		ctx.status = 400;
-		ctx.body = {
-			error: "Validation error",
-			message: "At least one contact method (email, phone, or address) is required",
-		};
-		return;
-	}
-
-	await next();
-};
-
-/**
- * Store bank details validation middleware
- */
-const storeBankDetailsValidation = async (ctx, next) => {
-	const valid = validate(schemas.bankDetails, ctx.request.body);
-
-	if (valid.error) {
-		ctx.status = 400;
-		ctx.body = {
-			error: "Validation error",
-			message: valid.error.message,
-		};
-		return;
-	}
-
-	// Additional business logic: validate routing number format
-	const { routingNumber } = ctx.request.body;
-	if (!/^\d{9}$/.test(routingNumber)) {
-		ctx.status = 400;
-		ctx.body = {
-			error: "Validation error",
-			message: "Routing number must be exactly 9 digits",
-		};
-		return;
-	}
-
-	await next();
-};
-
-/**
  * Retrieve data validation middleware
  */
 const retrieveValidation = async (ctx, next) => {
@@ -544,8 +431,6 @@ export {
 	storePasswordValidation,
 	storeNotesValidation,
 	storeCreditCardValidation,
-	storeContactValidation,
-	storeBankDetailsValidation,
 	retrieveValidation,
 	previewValidation,
 	listValidation,

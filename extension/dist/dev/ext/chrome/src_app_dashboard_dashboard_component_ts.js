@@ -48,16 +48,6 @@ function DashboardComponent_div_35_Template(rf, ctx) {
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](0, "div", 21);
   }
 }
-function DashboardComponent_div_39_Template(rf, ctx) {
-  if (rf & 1) {
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](0, "div", 21);
-  }
-}
-function DashboardComponent_div_43_Template(rf, ctx) {
-  if (rf & 1) {
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](0, "div", 21);
-  }
-}
 class DashboardComponent {
   walletService;
   router;
@@ -137,8 +127,8 @@ class DashboardComponent {
   static ɵcmp = /*@__PURE__*/_angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵdefineComponent"]({
     type: DashboardComponent,
     selectors: [["app-dashboard"]],
-    decls: 46,
-    vars: 19,
+    decls: 38,
+    vars: 13,
     consts: [[1, "dashboard-container"], [1, "dashboard-card"], [1, "dashboard-header"], [1, "header-left"], [1, "logo"], [1, "logo-icon"], [1, "logo-text"], [1, "header-center"], [1, "user-info"], [1, "username"], [1, "header-right"], ["title", "Go to Wallet", 1, "wallet-button", 3, "click"], [1, "wallet-icon"], ["width", "20", "height", "20", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg"], ["d", "M21 18V19C21 19.55 20.55 20 20 20H4C3.45 20 3 19.55 3 19V5C3 4.45 3.45 4 4 4H20C20.55 4 21 4.45 21 5V6H12C11.45 6 11 6.45 11 7V17C11 17.55 11.45 18 12 18H21ZM12 16H22V8H12V16ZM16 13.5C15.17 13.5 14.5 12.83 14.5 12C14.5 11.17 15.17 10.5 16 10.5C16.83 10.5 17.5 11.17 17.5 12C17.5 12.83 16.83 13.5 16 13.5Z", "fill", "currentColor"], [1, "button-text"], [1, "dashboard-nav"], [1, "nav-item", 3, "click"], [1, "nav-text"], ["class", "active-indicator", 4, "ngIf"], [1, "dashboard-content"], [1, "active-indicator"]],
     template: function DashboardComponent_Template(rf, ctx) {
       if (rf & 1) {
@@ -192,33 +182,15 @@ class DashboardComponent {
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](32, "div", 17);
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵlistener"]("click", function DashboardComponent_Template_div_click_32_listener() {
-          return ctx.navigateToTab("addresses");
-        });
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](33, "span", 18);
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](34, "Addresses");
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](35, DashboardComponent_div_35_Template, 1, 0, "div", 19);
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](36, "div", 17);
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵlistener"]("click", function DashboardComponent_Template_div_click_36_listener() {
           return ctx.navigateToTab("payment-cards");
         });
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](37, "span", 18);
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](38, "Payment Cards");
+        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](33, "span", 18);
+        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](34, "Payment Cards");
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](39, DashboardComponent_div_39_Template, 1, 0, "div", 19);
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](40, "div", 17);
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵlistener"]("click", function DashboardComponent_Template_div_click_40_listener() {
-          return ctx.navigateToTab("bank-accounts");
-        });
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](41, "span", 18);
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](42, "Bank Accounts");
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](43, DashboardComponent_div_43_Template, 1, 0, "div", 19);
+        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](35, DashboardComponent_div_35_Template, 1, 0, "div", 19);
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]()();
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](44, "main", 20);
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](45, "router-outlet");
+        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](36, "main", 20);
+        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](37, "router-outlet");
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]()()();
       }
       if (rf & 2) {
@@ -237,17 +209,9 @@ class DashboardComponent {
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](3);
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵproperty"]("ngIf", ctx.activeTab === "notes");
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵclassProp"]("active", ctx.activeTab === "addresses");
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](3);
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵproperty"]("ngIf", ctx.activeTab === "addresses");
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"]();
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵclassProp"]("active", ctx.activeTab === "payment-cards");
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](3);
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵproperty"]("ngIf", ctx.activeTab === "payment-cards");
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵclassProp"]("active", ctx.activeTab === "bank-accounts");
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](3);
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵproperty"]("ngIf", ctx.activeTab === "bank-accounts");
       }
     },
     dependencies: [_angular_common__WEBPACK_IMPORTED_MODULE_5__.CommonModule, _angular_common__WEBPACK_IMPORTED_MODULE_5__.NgIf, _jsverse_transloco__WEBPACK_IMPORTED_MODULE_6__.TranslocoModule, _angular_router__WEBPACK_IMPORTED_MODULE_7__.RouterModule, _angular_router__WEBPACK_IMPORTED_MODULE_4__.RouterOutlet],

@@ -72,23 +72,7 @@ const createMetadataAndPublicData = async (type, data, authToken) => {
 					category: `${authToken.identifier}_contact`,
 				},
 			};
-		case "bank_details":
-			return {
-				metadata: {
-					accountNumber: `${data.accountNumber}`,
-					routingNumber: `${data.routingNumber}`,
-					accountType: `${data.accountType}`,
-					accountHolder: `${data.accountHolder}`,
-				},
-				publicData: {
-					type: "bank_details",
-					bankName: `${data.bankName}`,
-					accountNumber: `****${data.accountNumber.slice(-4)}`,
-					timestamp: `${new Date().toISOString()}`,
-					zelfName: `${authToken.identifier}`,
-					category: `${authToken.identifier}_bank_details`,
-				},
-			};
+
 		default:
 			throw new Error(`Unsupported data type: ${type}`);
 	}
@@ -397,72 +381,9 @@ const storeContact = async (data, authToken) => {
 };
 
 /**
- * Store bank account details
- * @param {Object} data
- * @param {string} data.bankName - Bank name
- * @param {string} data.accountNumber - Account number
- * @param {string} data.routingNumber - Routing number
- * @param {string} data.accountType - Type of account (checking, savings, etc.)
- * @param {string} data.accountHolder - Account holder name
- * @param {string} data.faceBase64 - User's face for encryption
- * @param {string} data.password - User's master password
- * @returns {Promise<Object>}
- */
-const storeBankDetails = async (data, authToken) => {
-	try {
-		const { bankName, accountNumber, routingNumber, accountType, accountHolder, faceBase64, masterPassword, type } = data;
-
-		// Validate bank details
-		if (!routingNumber || routingNumber.length !== 9) {
-			throw new Error("Routing number must be exactly 9 digits");
-		}
-
-		const validAccountTypes = ["checking", "savings", "money_market", "cd", "ira", "roth_ira"];
-		if (!validAccountTypes.includes(accountType)) {
-			throw new Error("Invalid account type");
-		}
-
-		const identifier = `bank_${bankName}_${Date.now()}`;
-
-		const { metadata, publicData } = await createMetadataAndPublicData("bank_details", data, authToken);
-
-		// Encrypt using ZelfProof module
-		const { zelfQR } = await ZelfProofModule.encryptQRCode({
-			publicData,
-			metadata,
-			faceBase64,
-			password: masterPassword,
-			identifier,
-			requireLiveness: true,
-			tolerance: "REGULAR",
-			os: "DESKTOP",
-		});
-
-		const { zelfProof } = await ZelfProofModule.encrypt({
-			publicData,
-			metadata,
-			faceBase64,
-			password: masterPassword,
-			identifier,
-		});
-
-		return {
-			success: true,
-			zelfProof, // QR code data URL for tests
-			zelfQR, // Encrypted string
-			publicData,
-			message: "Bank details stored successfully",
-		};
-	} catch (error) {
-		console.error("Error storing bank details:", error);
-		throw new Error("Failed to store bank details");
-	}
-};
-
-/**
  * Main function to handle different types of data storage
  * @param {Object} data
- * @param {string} data.type - Type of data to store (password, notes, credit_card, contact, bank_details)
+ * @param {string} data.type - Type of data to store (password, notes, credit_card, contact)
  * @param {Object} data.payload - Data payload specific to the type
  * @param {string} data.faceBase64 - User's face for encryption
  * @param {string} data.password - User's master password
@@ -494,10 +415,6 @@ const storeData = async (data, authToken) => {
 
 			case "contact":
 				result = await storeContact({ ...payload, faceBase64, masterPassword: password }, authToken);
-				break;
-
-			case "bank_details":
-				result = await storeBankDetails({ ...payload, faceBase64, masterPassword: password }, authToken);
 				break;
 
 			default:
@@ -692,7 +609,7 @@ const listData = async (data, authToken) => {
 		const { category } = data;
 
 		// Validate category
-		const validCategories = ["password", "notes", "credit_card", "contact", "bank_details"];
+		const validCategories = ["password", "notes", "credit_card", "contact"];
 		if (!validCategories.includes(category)) {
 			throw new Error(`Invalid category: ${category}`);
 		}
@@ -734,15 +651,4 @@ const listData = async (data, authToken) => {
 	}
 };
 
-export {
-	storeData,
-	storePassword,
-	storeNotes,
-	storeCreditCard,
-	storeContact,
-	storeBankDetails,
-	retrieveData,
-	previewData,
-	createNFTReadyData,
-	listData,
-};
+export { storeData, storePassword, storeNotes, storeCreditCard, storeContact, retrieveData, previewData, createNFTReadyData, listData };
