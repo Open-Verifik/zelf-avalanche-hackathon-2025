@@ -56,22 +56,6 @@ const createMetadataAndPublicData = async (type, data, authToken) => {
 					category: `${authToken.identifier}_credit_card`,
 				},
 			};
-		case "contact":
-			return {
-				metadata: {
-					name: `${data.name}`,
-					email: `${data.email}`,
-					phone: `${data.phone}`,
-					address: `${data.address}`,
-					company: `${data.company}`,
-				},
-				publicData: {
-					type: "contact",
-					name: `${data.name}`,
-					zelfName: `${authToken.identifier}`,
-					category: `${authToken.identifier}_contact`,
-				},
-			};
 
 		default:
 			throw new Error(`Unsupported data type: ${type}`);
@@ -279,7 +263,7 @@ const storeCreditCard = async (data, authToken) => {
 
 		const identifier = `creditcard_${bankName}_${Date.now()}`;
 
-		const { metadata, publicData } = await createMetadataAndPublicData("contact", data, authToken);
+		const { metadata, publicData } = await createMetadataAndPublicData("credit_card", data, authToken);
 
 		// Encrypt using ZelfProof module
 		const { zelfQR } = await ZelfProofModule.encryptQRCode({
@@ -315,75 +299,9 @@ const storeCreditCard = async (data, authToken) => {
 };
 
 /**
- * Store contact information
- * @param {Object} data
- * @param {string} data.name - Contact name
- * @param {string} data.email - Contact email
- * @param {string} data.phone - Contact phone
- * @param {string} data.address - Contact address
- * @param {string} data.company - Company name
- * @param {string} data.faceBase64 - User's face for encryption
- * @param {string} data.password - User's master password
- * @returns {Promise<Object>}
- */
-const storeContact = async (data, authToken) => {
-	try {
-		const { name, email, phone, address, faceBase64, masterPassword, type } = data;
-
-		// Validate contact data
-		if (!email && !phone && !address) {
-			throw new Error("At least one contact method (email, phone, or address) is required");
-		}
-
-		if (email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-			throw new Error("Invalid email format");
-		}
-
-		if (phone && phone.length < 7) {
-			throw new Error("Phone number is too short");
-		}
-
-		const identifier = `contact_${name}_${Date.now()}`;
-
-		const { metadata, publicData } = await createMetadataAndPublicData("contact", data, authToken);
-
-		// Encrypt using ZelfProof module
-		const { zelfQR } = await ZelfProofModule.encryptQRCode({
-			publicData,
-			metadata,
-			faceBase64,
-			password: masterPassword,
-			identifier,
-			requireLiveness: true,
-			tolerance: "REGULAR",
-			os: "DESKTOP",
-		});
-
-		const { zelfProof } = await ZelfProofModule.encrypt({
-			publicData,
-			metadata,
-			faceBase64,
-			password: masterPassword,
-			identifier,
-		});
-
-		return {
-			success: true,
-			zelfProof, // QR code data URL for tests
-			zelfQR, // Encrypted string
-			publicData,
-			message: "Contact stored successfully",
-		};
-	} catch (error) {
-		console.error("Error storing contact:", error);
-		throw new Error("Failed to store contact");
-	}
-};
-
-/**
  * Main function to handle different types of data storage
  * @param {Object} data
- * @param {string} data.type - Type of data to store (password, notes, credit_card, contact)
+ * @param {string} data.type - Type of data to store (password, notes, credit_card)
  * @param {Object} data.payload - Data payload specific to the type
  * @param {string} data.faceBase64 - User's face for encryption
  * @param {string} data.password - User's master password
@@ -411,10 +329,6 @@ const storeData = async (data, authToken) => {
 
 			case "credit_card":
 				result = await storeCreditCard({ ...payload, faceBase64, masterPassword: password }, authToken);
-				break;
-
-			case "contact":
-				result = await storeContact({ ...payload, faceBase64, masterPassword: password }, authToken);
 				break;
 
 			default:
@@ -609,7 +523,7 @@ const listData = async (data, authToken) => {
 		const { category } = data;
 
 		// Validate category
-		const validCategories = ["password", "notes", "credit_card", "contact"];
+		const validCategories = ["password", "notes", "credit_card"];
 		if (!validCategories.includes(category)) {
 			throw new Error(`Invalid category: ${category}`);
 		}
@@ -651,4 +565,4 @@ const listData = async (data, authToken) => {
 	}
 };
 
-export { storeData, storePassword, storeNotes, storeCreditCard, storeContact, retrieveData, previewData, createNFTReadyData, listData };
+export { storeData, storePassword, storeNotes, storeCreditCard, retrieveData, previewData, createNFTReadyData, listData };
