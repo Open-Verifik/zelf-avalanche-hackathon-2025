@@ -239,8 +239,8 @@ const storeNotes = async (data, authToken) => {
 
 		return {
 			success: true,
-			zelfProof: zelfQR, // QR code data URL for tests
-			zelfQR: zelfProof, // Encrypted string
+			zelfProof, // QR code data URL for tests
+			zelfQR, // Encrypted string
 			ipfs: qrCodeIPFS
 				? {
 						hash: qrCodeIPFS.IpfsHash,
@@ -319,8 +319,8 @@ const storeCreditCard = async (data, authToken) => {
 
 		return {
 			success: true,
-			zelfProof: zelfQR, // QR code data URL for tests
-			zelfQR: zelfProof, // Encrypted string
+			zelfProof, // QR code data URL for tests
+			zelfQR, // Encrypted string
 			publicData,
 			message: "Credit card stored successfully",
 		};
@@ -385,8 +385,8 @@ const storeContact = async (data, authToken) => {
 
 		return {
 			success: true,
-			zelfProof: zelfQR, // QR code data URL for tests
-			zelfQR: zelfProof, // Encrypted string
+			zelfProof, // QR code data URL for tests
+			zelfQR, // Encrypted string
 			publicData,
 			message: "Contact stored successfully",
 		};
@@ -448,8 +448,8 @@ const storeBankDetails = async (data, authToken) => {
 
 		return {
 			success: true,
-			zelfProof: zelfQR, // QR code data URL for tests
-			zelfQR: zelfProof, // Encrypted string
+			zelfProof, // QR code data URL for tests
+			zelfQR, // Encrypted string
 			publicData,
 			message: "Bank details stored successfully",
 		};
