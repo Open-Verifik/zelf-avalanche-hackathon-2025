@@ -191,12 +191,18 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	}
 
 	ngOnDestroy(): void {
+		// Clear intervals
 		if (this._intervals.detectFace) {
 			clearInterval(this._intervals.detectFace);
 		}
 		if (this._intervals.checkNgxVideo) {
 			clearInterval(this._intervals.checkNgxVideo);
 		}
+
+		// Stop camera stream
+		this._stopCamera();
+
+		// Complete observables
 		this.unsubscriber$.next();
 		this.unsubscriber$.complete();
 	}
@@ -222,6 +228,8 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	 */
 	onBiometricsSuccess(faceBase64: string, password?: string): void {
 		if (this.isDecryptMode) {
+			// Stop camera before emitting success
+			this._stopCamera();
 			this.biometricsSuccess.emit({
 				faceBase64,
 				password: this.masterPassword || password,
@@ -230,11 +238,38 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	}
 
 	/**
-	 * Handle biometrics cancellation in decrypt mode
+	 * Handle biometrics cancellation in both decrypt and create modes
 	 */
 	onBiometricsCancel(): void {
-		if (this.isDecryptMode) {
-			this.biometricsCancel.emit();
+		// Stop camera before closing
+		this._stopCamera();
+		this.biometricsCancel.emit();
+	}
+
+	/**
+	 * Stop camera stream and cleanup
+	 */
+	private _stopCamera(): void {
+		try {
+			// Stop the webcam component
+			if (this.webcamRef) {
+				// Access the native video element and stop its stream
+				const videoElement = this.webcamRef.nativeVideoElement;
+				if (videoElement && videoElement.srcObject) {
+					const stream = videoElement.srcObject as MediaStream;
+					if (stream) {
+						stream.getTracks().forEach((track) => {
+							track.stop();
+						});
+					}
+					videoElement.srcObject = null;
+				}
+			}
+
+			// Note: MediaStreamService doesn't have stopCamera method
+			// Camera cleanup is handled above through the webcam component
+		} catch (error) {
+			console.warn("Error stopping camera:", error);
 		}
 	}
 
@@ -923,6 +958,9 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	}
 
 	private _navigateToResult(apiResponse?: any): void {
+		// Stop camera before navigating
+		this._stopCamera();
+
 		// Get the correct data source for navigation
 		const dataSource = this._getDataSource();
 
@@ -1096,8 +1134,8 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 			// In decrypt mode, emit cancel event
 			this.onBiometricsCancel();
 		} else {
-			// In create mode, navigate back to form based on category
-			this._navigateBackToForm();
+			// In create mode, emit cancel event to close modal and return to form
+			this.onBiometricsCancel();
 		}
 	}
 

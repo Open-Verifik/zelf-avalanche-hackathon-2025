@@ -31,7 +31,6 @@ const createMetadataAndPublicData = async (type, data, authToken) => {
 				publicData: {
 					type: "notes",
 					title: `${data.title}`,
-					pairCount: Object.keys(data.keyValuePairs || {}).length,
 					timestamp: `${new Date().toISOString()}`,
 					zelfName: `${authToken.identifier}`,
 					category: `${authToken.identifier}_notes`,
