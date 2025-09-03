@@ -29,6 +29,25 @@
 				</div>
 			</div>
 
+			<!-- Security Information -->
+			<div *ngIf="result?.zelfProof || result?.zelfQR" class="security-info">
+				<div class="security-header">
+					<h3>Security Information</h3>
+				</div>
+				<div class="security-content">
+					<div *ngIf="result?.zelfProof" class="detail-row">
+						<span class="label">Zelf Proof:</span>
+						<span class="value proof-value">{{ result.zelfProof.substring(0, 20) }}...</span>
+					</div>
+					<div *ngIf="result?.zelfQR" class="detail-row">
+						<span class="label">QR Code:</span>
+						<div class="qr-display">
+							<img [src]="result.zelfQR" alt="Zelf QR Code" class="qr-image" />
+						</div>
+					</div>
+				</div>
+			</div>
+
 			<div class="actions">
 				<button class="btn-secondary" (click)="onBackToCards()">Back to Payment Cards</button>
 				<button class="btn-primary" (click)="onAddAnother()">Add Another Card</button>

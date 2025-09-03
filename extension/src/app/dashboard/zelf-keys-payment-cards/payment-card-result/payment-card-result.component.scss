@@ -44,14 +44,16 @@
 			}
 		}
 
-		.card-preview {
+		.card-preview,
+		.security-info {
 			background: #f8f9fa;
 			border: 1px solid #e0e0e0;
 			border-radius: 12px;
 			padding: 24px;
 			margin: 24px 0;
 
-			.preview-header {
+			.preview-header,
+			.security-header {
 				margin-bottom: 16px;
 
 				h3 {
@@ -62,7 +64,8 @@
 				}
 			}
 
-			.preview-content {
+			.preview-content,
+			.security-content {
 				.detail-row {
 					display: flex;
 					justify-content: space-between;
@@ -83,7 +86,40 @@
 						font-weight: 600;
 						color: #1a1a1a;
 					}
+
+					.proof-value {
+						font-family: monospace;
+						font-size: 12px;
+						background: #e9ecef;
+						padding: 4px 8px;
+						border-radius: 4px;
+						color: #495057;
+					}
 				}
+
+				.qr-display {
+					display: flex;
+					justify-content: center;
+					align-items: center;
+
+					.qr-image {
+						width: 120px;
+						height: 120px;
+						border: 1px solid #e0e0e0;
+						border-radius: 8px;
+						background: white;
+						padding: 8px;
+					}
+				}
+			}
+		}
+
+		.security-info {
+			background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+			border-color: #ced4da;
+
+			.security-header h3 {
+				color: #495057;
 			}
 		}
 

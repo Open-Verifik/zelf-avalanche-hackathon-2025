@@ -198,18 +198,6 @@ class PaymentCardFormComponent {
     // - bankName: required, minLength: 1
     // - masterPassword: optional (only if user enables it)
     this.formValid = hasCardName && hasCardNumber && hasExpiryMonth && hasExpiryYear && hasCvv && hasBankName && hasValidMasterPassword;
-    // Debug logging
-    console.log("Form validation check:", {
-      hasCardName,
-      hasCardNumber,
-      hasExpiryMonth,
-      hasExpiryYear,
-      hasCvv,
-      hasBankName,
-      hasValidMasterPassword,
-      formValid: this.formValid,
-      cardData: this.cardData
-    });
   }
   onCancel() {
     this.router.navigate(["/dashboard/payment-cards"]);

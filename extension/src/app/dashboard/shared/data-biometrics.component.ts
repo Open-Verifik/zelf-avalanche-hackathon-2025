@@ -843,6 +843,11 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 							},
 						}
 					);
+
+					// Debug logging for payment card response
+					console.log("Payment card API response:", response);
+					console.log("Response data:", response?.data);
+					console.log("Public data:", response?.data?.publicData);
 					break;
 
 				default:
@@ -855,7 +860,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 			await this.dataPassingService.storeResult(this.dataType, response);
 
 			// Navigate to result page based on category
-			this._navigateToResult(response);
+			await this._navigateToResult(response);
 		} catch (error) {
 			console.error(`Error storing ${this.dataType} data:`, error);
 			this.error.emit(error);
@@ -896,7 +901,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 			await this.dataPassingService.storeResult(this.dataType, response);
 
 			// Navigate to result page for retrieved data
-			this._navigateToResult(response);
+			await this._navigateToResult(response);
 
 			return response;
 		} catch (error) {
@@ -906,7 +911,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 		}
 	}
 
-	private _navigateToResult(apiResponse?: any): void {
+	private async _navigateToResult(apiResponse?: any): Promise<void> {
 		// Stop camera before navigating
 		this._stopCamera();
 
@@ -975,25 +980,35 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 				break;
 
 			case "payment-cards":
-				this._router.navigate(["/dashboard/payment-cards/result"], {
-					queryParams: {
-						result: encodeURIComponent(
-							JSON.stringify({
-								success: true,
-								message: isRetrieveMode ? "Payment card retrieved successfully" : "Payment card stored successfully",
-								publicData: {
-									title: dataSource.title || apiResponse?.data?.title,
-									type: "payment-card",
-									timestamp: new Date().toISOString(),
-								},
-								zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
-								zelfQR: apiResponse?.data?.zelfQR || "data:image/png;base64,sample_qr_code",
-								// Include retrieved data if in retrieve mode
-								...(isRetrieveMode && { retrievedData: apiResponse?.data }),
-							})
-						),
+				const resultData = {
+					success: apiResponse?.data?.success || true,
+					message:
+						apiResponse?.data?.message || (isRetrieveMode ? "Payment card retrieved successfully" : "Payment card stored successfully"),
+					publicData: {
+						cardName: apiResponse?.data?.publicData?.cardName || dataSource.cardName,
+						cardNumber: apiResponse?.data?.publicData?.cardNumber || dataSource.cardNumber,
+						expiryMonth: apiResponse?.data?.publicData?.expiryMonth || dataSource.expiryMonth,
+						expiryYear: apiResponse?.data?.publicData?.expiryYear || dataSource.expiryYear,
+						bankName: apiResponse?.data?.publicData?.bankName || dataSource.bankName,
+						type: apiResponse?.data?.publicData?.type || "credit_card",
+						timestamp: apiResponse?.data?.publicData?.timestamp || new Date().toISOString(),
+						zelfName: apiResponse?.data?.publicData?.zelfName,
+						category: apiResponse?.data?.publicData?.category,
 					},
-				});
+					zelfProof: apiResponse?.data?.zelfProof,
+					zelfQR: apiResponse?.data?.zelfQR,
+					// Include retrieved data if in retrieve mode
+					...(isRetrieveMode && { retrievedData: apiResponse?.data }),
+				};
+
+				// Debug logging for navigation data
+				console.log("Navigating to payment card result with data:", resultData);
+				console.log("DataSource:", dataSource);
+				console.log("API Response:", apiResponse);
+
+				// Store result data in the service instead of query params
+				await this.dataPassingService.storeResult("payment-cards", resultData);
+				this._router.navigate(["/dashboard/payment-cards/result"]);
 				break;
 
 			default:

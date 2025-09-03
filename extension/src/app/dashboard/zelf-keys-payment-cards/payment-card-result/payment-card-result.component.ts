@@ -3,6 +3,7 @@ import { CommonModule } from "@angular/common";
 import { TranslocoModule } from "@jsverse/transloco";
 import { RouterModule, Router, ActivatedRoute } from "@angular/router";
 import { ChromeService } from "../../../chrome.service";
+import { DataPassingService } from "../../../services/data-passing.service";
 
 @Component({
 	selector: "app-payment-card-result",
@@ -19,7 +20,8 @@ export class PaymentCardResultComponent implements OnInit {
 	constructor(
 		private router: Router,
 		private route: ActivatedRoute,
-		private chromeService: ChromeService
+		private chromeService: ChromeService,
+		private dataPassingService: DataPassingService
 	) {}
 
 	async ngOnInit(): Promise<void> {
@@ -28,23 +30,22 @@ export class PaymentCardResultComponent implements OnInit {
 			await this.chromeService.ensureFullScreen("dashboard/payment-cards/result");
 		}
 
-		// Get result from query parameters
-		this.route.queryParams.subscribe((params) => {
-			if (params["result"]) {
-				try {
-					this.result = JSON.parse(decodeURIComponent(params["result"]));
-					this.isSuccess = this.result?.success === true;
-					if (!this.isSuccess) {
-						this.error = this.result?.message || "Unknown error occurred";
-					}
-				} catch (error) {
-					console.error("Error parsing result:", error);
-					this.error = "Failed to parse result data";
-				}
-			} else {
-				this.error = "No result data found";
+		// Get result from data passing service
+		this.result = this.dataPassingService.getResult("payment-cards");
+
+		// Debug logging
+		console.log("Payment card result data:", this.result);
+		console.log("ZelfProof:", this.result?.zelfProof);
+		console.log("ZelfQR:", this.result?.zelfQR);
+
+		if (this.result) {
+			this.isSuccess = this.result?.success === true;
+			if (!this.isSuccess) {
+				this.error = this.result?.message || "Unknown error occurred";
 			}
-		});
+		} else {
+			this.error = "No result data found";
+		}
 	}
 
 	onBackToCards(): void {

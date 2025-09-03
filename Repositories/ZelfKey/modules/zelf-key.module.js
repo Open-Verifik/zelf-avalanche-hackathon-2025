@@ -285,13 +285,40 @@ const storeCreditCard = async (data, authToken) => {
 			identifier,
 		});
 
-		return {
+		// store in ipfs
+		let qrCodeIPFS = null;
+
+		if (zelfQR) {
+			try {
+				qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
+					...publicData,
+					zelfProof,
+				});
+			} catch (error) {
+				console.error("Error storing credit card:", error);
+				throw new Error("Failed to store credit card");
+			}
+		}
+
+		const result = {
 			success: true,
 			zelfProof, // QR code data URL for tests
 			zelfQR, // Encrypted string
+			ipfs: qrCodeIPFS
+				? {
+						hash: qrCodeIPFS.IpfsHash,
+						gatewayUrl: qrCodeIPFS.url,
+						pinSize: qrCodeIPFS.PinSize,
+						timestamp: `${new Date().toISOString()}`,
+						name: qrCodeIPFS.name,
+						metadata: qrCodeIPFS.metadata,
+				  }
+				: null,
 			publicData,
 			message: "Credit card stored successfully",
 		};
+
+		return result;
 	} catch (error) {
 		console.error("Error storing credit card:", error);
 		throw new Error("Failed to store credit card");
