@@ -156,9 +156,8 @@
 				}
 
 				.card-qr-chip {
-					position: absolute;
-					top: 24px;
-					left: 24px;
+					position: relative;
+
 					width: 40px;
 					height: 30px;
 					background: rgba(255, 255, 255, 0.15);
@@ -216,5 +215,10 @@
 				}
 			}
 		}
+	}
+
+	.card-qr-chip img {
+		width: 52px;
+		height: 52px;
 	}
 }

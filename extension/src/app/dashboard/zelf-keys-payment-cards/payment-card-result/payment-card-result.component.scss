@@ -86,29 +86,24 @@
 						font-weight: 600;
 						color: #1a1a1a;
 					}
-
-					.proof-value {
-						font-family: monospace;
-						font-size: 12px;
-						background: #e9ecef;
-						padding: 4px 8px;
-						border-radius: 4px;
-						color: #495057;
-					}
 				}
 
 				.qr-display {
-					display: flex;
-					justify-content: center;
-					align-items: center;
+					text-align: center;
+					margin-top: 12px;
+					max-width: 250px;
+					margin: 12px auto 0;
+					padding: 16px;
+					background: white;
+					border-radius: 12px;
+					border: 1px solid #e0e0e0;
+					box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 
 					.qr-image {
-						width: 120px;
-						height: 120px;
-						border: 1px solid #e0e0e0;
+						max-width: 100%;
+						height: auto;
 						border-radius: 8px;
-						background: white;
-						padding: 8px;
+						display: block;
 					}
 				}
 			}
@@ -120,6 +115,49 @@
 
 			.security-header h3 {
 				color: #495057;
+			}
+
+			.proof-section,
+			.qr-section {
+				margin-bottom: 16px;
+
+				&:last-child {
+					margin-bottom: 0;
+				}
+
+				label {
+					display: block;
+					font-size: 14px;
+					font-weight: 600;
+					color: #495057;
+					margin-bottom: 8px;
+				}
+
+				.zelfproof-string {
+					font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+					font-size: 14px;
+					color: #2c3e50;
+					background: white;
+					padding: 16px;
+					border-radius: 8px;
+					border: 1px solid #e0e0e0;
+					display: block;
+					word-break: break-all;
+					line-height: 1.4;
+					max-width: 100%;
+					overflow-wrap: break-word;
+					white-space: pre-wrap;
+					cursor: pointer;
+					user-select: all;
+					width: 100%;
+					box-sizing: border-box;
+					transition: all 0.2s ease;
+
+					&:hover {
+						background: #f8f9fa;
+						border-color: #007bff;
+					}
+				}
 			}
 		}
 

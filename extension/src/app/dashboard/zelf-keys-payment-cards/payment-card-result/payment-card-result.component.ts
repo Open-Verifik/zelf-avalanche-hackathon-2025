@@ -33,10 +33,30 @@ export class PaymentCardResultComponent implements OnInit {
 		// Get result from data passing service
 		this.result = this.dataPassingService.getResult("payment-cards");
 
-		// Debug logging
-		console.log("Payment card result data:", this.result);
-		console.log("ZelfProof:", this.result?.zelfProof);
-		console.log("ZelfQR:", this.result?.zelfQR);
+		// after getting the result we need to format the data from publicData
+		let parsedCardData: any = {};
+		if (this.result?.publicData?.card) {
+			try {
+				parsedCardData = JSON.parse(this.result?.publicData?.card);
+			} catch (error) {
+				console.error("Error parsing card data:", error);
+			}
+		}
+
+		// Extract expiry month and year from the expires field (format: "12/26")
+		let expiryMonth = "";
+		let expiryYear = "";
+		if (parsedCardData.expires) {
+			const [month, year] = parsedCardData.expires.split("/");
+			expiryMonth = month;
+			expiryYear = year ? `20${year}` : ""; // Convert "26" to "2026"
+		}
+
+		this.result.publicData.cardName = parsedCardData.name;
+		this.result.publicData.cardNumber = parsedCardData.number;
+		this.result.publicData.expiryMonth = expiryMonth;
+		this.result.publicData.expiryYear = expiryYear;
+		this.result.publicData.bankName = parsedCardData.bankName;
 
 		if (this.result) {
 			this.isSuccess = this.result?.success === true;
@@ -54,5 +74,21 @@ export class PaymentCardResultComponent implements OnInit {
 
 	onAddAnother(): void {
 		this.router.navigate(["/dashboard/payment-cards/new"]);
+	}
+
+	async copyZelfProof(): Promise<void> {
+		if (this.result?.zelfProof) {
+			try {
+				await navigator.clipboard.writeText(this.result.zelfProof);
+			} catch (error) {
+				// Fallback for older browsers
+				const textArea = document.createElement("textarea");
+				textArea.value = this.result.zelfProof;
+				document.body.appendChild(textArea);
+				textArea.select();
+				document.execCommand("copy");
+				document.body.removeChild(textArea);
+			}
+		}
 	}
 }

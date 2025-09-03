@@ -101,23 +101,48 @@ export class ZelfKeysPaymentCardsComponent implements OnInit, AfterViewInit {
 
 			if (response.success && response.data) {
 				// Transform the API response to match our component structure
-				this.paymentCards = response.data.map((item: any) => ({
-					id: item.id,
-					cardName: item.publicData?.cardName || "Unknown",
-					cardNumber: item.publicData?.cardNumber || "",
-					expiryMonth: item.publicData?.expiryMonth || "",
-					expiryYear: item.publicData?.expiryYear || "",
-					bankName: item.publicData?.bankName || "Unknown Bank",
-					zelfProof: item.publicData?.zelfProof || item.id,
-					createdAt: new Date(item.timestamp),
-					// Store the full item for potential future use
-					rawData: item,
-				}));
+				this.paymentCards = response.data.map((item: any) => {
+					// Parse the card data from the JSON string in publicData.card
+					let parsedCardData: any = {};
+					if (item.publicData?.card) {
+						try {
+							parsedCardData = JSON.parse(item.publicData.card);
+						} catch (error) {
+							console.error("Error parsing card data:", error);
+						}
+					}
+
+					// Extract expiry month and year from the expires field (format: "12/26")
+					let expiryMonth = "";
+					let expiryYear = "";
+					if (parsedCardData.expires) {
+						const [month, year] = parsedCardData.expires.split("/");
+						expiryMonth = month;
+						expiryYear = year ? `20${year}` : ""; // Convert "26" to "2026"
+					}
+
+					const _item = {
+						id: item.id,
+						zelfQR: item.url,
+						cardName: parsedCardData.name || "Unknown",
+						cardNumber: parsedCardData.number || "",
+						expiryMonth: expiryMonth,
+						expiryYear: expiryYear,
+						bankName: parsedCardData.bankName || "Unknown Bank",
+						zelfProof: item.zelfProof || item.id,
+						createdAt: new Date(item.timestamp),
+						// Store the full item for potential future use
+						rawData: item,
+					};
+
+					console.log({ item: _item });
+
+					return _item;
+				});
 			} else {
 				this.paymentCards = [];
 			}
 		} catch (error) {
-			console.error("Error loading payment cards:", error);
 			this.error = "Failed to load payment cards. Please try again.";
 			this.paymentCards = [];
 		} finally {
@@ -194,39 +219,5 @@ export class ZelfKeysPaymentCardsComponent implements OnInit, AfterViewInit {
 		const darkerL = Math.max(25, l - 20);
 
 		return `linear-gradient(135deg, hsl(${h}, ${s}%, ${lighterL}%) 0%, hsl(${complementaryH}, ${s}%, ${darkerL}%) 100%)`;
-	}
-
-	// Generate mini QR code data URL (placeholder for now)
-	getMiniQRCode(zelfProof: string): string {
-		// In a real implementation, this would generate an actual QR code
-		// For now, return a data URL of a QR-like pattern
-		const canvas = document.createElement("canvas");
-		canvas.width = 24;
-		canvas.height = 24;
-		const ctx = canvas.getContext("2d");
-
-		if (ctx) {
-			// Create a QR-like pattern based on zelfProof
-			ctx.fillStyle = "#ffffff";
-			ctx.fillRect(0, 0, 24, 24);
-
-			ctx.fillStyle = "#000000";
-
-			// Create corner squares (like QR code)
-			ctx.fillRect(1, 1, 6, 6);
-			ctx.fillRect(17, 1, 6, 6);
-			ctx.fillRect(1, 17, 6, 6);
-
-			// Create inner pattern based on zelfProof
-			for (let i = 0; i < zelfProof.length && i < 16; i++) {
-				const x = 8 + (i % 4) * 2;
-				const y = 8 + Math.floor(i / 4) * 2;
-				if (zelfProof.charCodeAt(i) % 2 === 0) {
-					ctx.fillRect(x, y, 2, 2);
-				}
-			}
-		}
-
-		return canvas.toDataURL();
 	}
 }

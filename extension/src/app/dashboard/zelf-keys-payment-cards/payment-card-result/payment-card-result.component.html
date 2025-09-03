@@ -32,15 +32,15 @@
 			<!-- Security Information -->
 			<div *ngIf="result?.zelfProof || result?.zelfQR" class="security-info">
 				<div class="security-header">
-					<h3>Security Information</h3>
+					<h3>🔐 Security Information</h3>
 				</div>
 				<div class="security-content">
-					<div *ngIf="result?.zelfProof" class="detail-row">
-						<span class="label">Zelf Proof:</span>
-						<span class="value proof-value">{{ result.zelfProof.substring(0, 20) }}...</span>
+					<div *ngIf="result?.zelfProof" class="proof-section">
+						<label>ZelfProof String</label>
+						<span class="zelfproof-string" (click)="copyZelfProof()" title="Click to copy">{{ result.zelfProof }}</span>
 					</div>
-					<div *ngIf="result?.zelfQR" class="detail-row">
-						<span class="label">QR Code:</span>
+					<div *ngIf="result?.zelfQR" class="qr-section">
+						<label>QR Code</label>
 						<div class="qr-display">
 							<img [src]="result.zelfQR" alt="Zelf QR Code" class="qr-image" />
 						</div>

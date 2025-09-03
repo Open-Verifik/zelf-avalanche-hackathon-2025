@@ -844,10 +844,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						}
 					);
 
-					// Debug logging for payment card response
-					console.log("Payment card API response:", response);
-					console.log("Response data:", response?.data);
-					console.log("Public data:", response?.data?.publicData);
 					break;
 
 				default:
@@ -980,34 +976,28 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 				break;
 
 			case "payment-cards":
-				const resultData = {
-					success: apiResponse?.data?.success || true,
-					message:
-						apiResponse?.data?.message || (isRetrieveMode ? "Payment card retrieved successfully" : "Payment card stored successfully"),
-					publicData: {
-						cardName: apiResponse?.data?.publicData?.cardName || dataSource.cardName,
-						cardNumber: apiResponse?.data?.publicData?.cardNumber || dataSource.cardNumber,
-						expiryMonth: apiResponse?.data?.publicData?.expiryMonth || dataSource.expiryMonth,
-						expiryYear: apiResponse?.data?.publicData?.expiryYear || dataSource.expiryYear,
-						bankName: apiResponse?.data?.publicData?.bankName || dataSource.bankName,
-						type: apiResponse?.data?.publicData?.type || "credit_card",
-						timestamp: apiResponse?.data?.publicData?.timestamp || new Date().toISOString(),
-						zelfName: apiResponse?.data?.publicData?.zelfName,
-						category: apiResponse?.data?.publicData?.category,
-					},
-					zelfProof: apiResponse?.data?.zelfProof,
-					zelfQR: apiResponse?.data?.zelfQR,
-					// Include retrieved data if in retrieve mode
-					...(isRetrieveMode && { retrievedData: apiResponse?.data }),
-				};
+				// Parse the card data from the JSON string in publicData.card
+				let parsedCardData: any = {};
+				if (apiResponse?.data?.publicData?.card) {
+					try {
+						parsedCardData = JSON.parse(apiResponse.data.publicData.card);
+						console.log("Parsed card data:", parsedCardData);
+					} catch (error) {
+						console.error("Error parsing card data:", error);
+					}
+				}
 
-				// Debug logging for navigation data
-				console.log("Navigating to payment card result with data:", resultData);
-				console.log("DataSource:", dataSource);
-				console.log("API Response:", apiResponse);
+				// // Extract expiry month and year from the expires field (format: "12/26")
+				// let expiryMonth = "";
+				// let expiryYear = "";
+				// if (parsedCardData.expires) {
+				// 	const [month, year] = parsedCardData.expires.split("/");
+				// 	expiryMonth = month;
+				// 	expiryYear = year ? `20${year}` : ""; // Convert "26" to "2026"
+				// }
 
-				// Store result data in the service instead of query params
-				await this.dataPassingService.storeResult("payment-cards", resultData);
+				await this.dataPassingService.storeResult("payment-cards", apiResponse);
+
 				this._router.navigate(["/dashboard/payment-cards/result"]);
 				break;
 
