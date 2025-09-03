@@ -46,11 +46,12 @@ const createMetadataAndPublicData = async (type, data, authToken) => {
 				},
 				publicData: {
 					type: "credit_card",
-					cardName: `${data.cardName}`,
-					cardNumber: `****-****-****-${data.cardNumber.slice(-4)}`,
-					expiryMonth: `${data.expiryMonth}`,
-					expiryYear: `${data.expiryYear}`,
-					bankName: `${data.bankName}`,
+					card: JSON.stringify({
+						name: `${data.cardName}`,
+						number: `****-****-****-${data.cardNumber.slice(-4)}`,
+						expires: `${data.expiryMonth}/${data.expiryYear.slice(-2)}`,
+						bankName: `${data.bankName}`,
+					}),
 					timestamp: `${new Date().toISOString()}`,
 					zelfName: `${authToken.identifier}`,
 					category: `${authToken.identifier}_credit_card`,
