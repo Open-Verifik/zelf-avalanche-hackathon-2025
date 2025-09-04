@@ -5,11 +5,12 @@ import { RouterModule, Router, ActivatedRoute } from "@angular/router";
 import { FormsModule } from "@angular/forms";
 import { ChromeService } from "../../../chrome.service";
 import { DataPassingService } from "../../../services/data-passing.service";
+import { DataBiometricsComponent } from "../../shared/data-biometrics.component";
 
 @Component({
 	selector: "app-password-form",
 	standalone: true,
-	imports: [CommonModule, TranslocoModule, RouterModule, FormsModule],
+	imports: [CommonModule, TranslocoModule, RouterModule, FormsModule, DataBiometricsComponent],
 	templateUrl: "./password-form.component.html",
 	styleUrls: ["./password-form.component.scss"],
 })
@@ -27,6 +28,8 @@ export class PasswordFormComponent implements OnInit {
 	isNewPassword = true;
 	showPassword = false;
 	formValid = false;
+	showBiometrics = false;
+	transformedPasswordData: any = null;
 
 	constructor(
 		private router: Router,
@@ -74,17 +77,35 @@ export class PasswordFormComponent implements OnInit {
 		this.router.navigate(["/dashboard/passwords"]);
 	}
 
+	onBiometricsSuccess(biometricData: any): void {
+		// Navigate to result page after successful biometrics
+		this.router.navigate(["/dashboard/passwords/result"]);
+	}
+
+	onBiometricsCancel(): void {
+		this.showBiometrics = false;
+	}
+
 	async onSave(): Promise<void> {
 		if (!this.formValid) {
 			return;
 		}
 
-		// Store data in service instead of query params
-		const formData = {
-			...this.passwordData,
+		// Transform password data to match backend API expectations
+		this.transformedPasswordData = {
+			url: this.passwordData.url,
+			title: this.passwordData.title,
+			email: this.passwordData.email,
+			password: this.passwordData.password,
+			notes: this.passwordData.notes,
+			folder: this.passwordData.folder,
+			insideFolder: this.passwordData.insideFolder,
 			type: "passwords",
 		};
 
-		await this.dataPassingService.storeData("passwords", formData);
+		await this.dataPassingService.storeData("passwords", this.transformedPasswordData);
+
+		// Show biometrics modal instead of navigating
+		this.showBiometrics = true;
 	}
 }
