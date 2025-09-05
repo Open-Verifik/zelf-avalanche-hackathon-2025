@@ -115,22 +115,22 @@ const storePassword = async (data, authToken) => {
 			console.warn("⚠️ Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
 		}
 
-		const NFT = await createNFT(
-			{
-				zelfQR,
-				url: qrCodeIPFS.url,
-				name: identifier,
-				publicData,
-				zelfProof,
-			},
-			authToken
-		);
+		// const NFT = await createNFT(
+		// 	{
+		// 		zelfQR,
+		// 		url: qrCodeIPFS.url,
+		// 		name: identifier,
+		// 		publicData,
+		// 		zelfProof,
+		// 	},
+		// 	authToken
+		// );
 
 		const result = {
 			success: true,
 			zelfProof, // QR code data URL for tests
 			zelfQR, // Encrypted string
-			NFT,
+			NFT: null,
 			ipfs: qrCodeIPFS
 				? {
 						hash: qrCodeIPFS.IpfsHash,
