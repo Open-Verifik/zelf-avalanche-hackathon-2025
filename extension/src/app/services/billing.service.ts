@@ -15,6 +15,7 @@ export interface PricingPlan {
 	buttonClass: string;
 	isPopular?: boolean;
 	isCurrent?: boolean;
+	priceId?: string; // Stripe price ID
 }
 
 export interface ApiPlan {
@@ -24,6 +25,7 @@ export interface ApiPlan {
 	price: number;
 	currency: string;
 	interval: string;
+	priceId?: string; // Stripe price ID
 }
 
 export interface ApiResponse {
@@ -37,9 +39,28 @@ export interface CheckoutResponse {
 	sessionId: string;
 }
 
+export interface SubscriptionData {
+	id: string;
+	url: string;
+	ipfs_pin_hash: string;
+	name: string;
+	type: string;
+	endDate: string;
+	zelfName: string;
+	startDate: string;
+	stripeData: {
+		id: string;
+		latestInvoice: string;
+		customer: string;
+		status: string;
+		plan: string;
+	};
+	paymentMethod: string;
+}
+
 export interface SubscriptionResponse {
 	success: boolean;
-	subscription: any;
+	data: SubscriptionData | null;
 	message: string;
 }
 
@@ -128,6 +149,7 @@ export class BillingService {
 			buttonClass: this.getPlanButtonClass(plan.id),
 			isPopular: plan.id === "pro",
 			isCurrent: false, // Will be updated based on current subscription
+			priceId: plan.priceId, // Pass through Stripe price ID
 		}));
 	}
 

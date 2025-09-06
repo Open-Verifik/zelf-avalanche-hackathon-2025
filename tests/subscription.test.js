@@ -27,7 +27,7 @@ describe("Subscription Endpoints", () => {
 			}
 
 			const correctSessionResponse = await request(app).post("/api/sessions").send({
-				identifier: `user-lcaj5d.zelf`,
+				identifier: `avax5.zelf`,
 				address: "0xB7b30A282eb6c0fEef1Bd8D268E05f4c2a2Ab565",
 			});
 			correctAuthToken = correctSessionResponse.body.data.token;
@@ -42,7 +42,15 @@ describe("Subscription Endpoints", () => {
 
 			expect(response.status).toBe(200);
 			expect(response.body).toHaveProperty("success", true);
-			expect(response.body).toHaveProperty("subscription");
+			expect(response.body).toHaveProperty("data");
+			expect(response.body.data).toHaveProperty("url");
+			expect(response.body.data).toHaveProperty("ipfs_pin_hash");
+			expect(response.body.data).toHaveProperty("name");
+			expect(response.body.data).toHaveProperty("type");
+			expect(response.body.data).toHaveProperty("endDate");
+			expect(response.body.data).toHaveProperty("zelfName");
+			expect(response.body.data).toHaveProperty("startDate");
+			expect(response.body.data).toHaveProperty("paymentMethod");
 		});
 
 		it("should return no active subscription for new user", async () => {
@@ -50,12 +58,16 @@ describe("Subscription Endpoints", () => {
 
 			if (response.status === 200) {
 				expect(response.body).toHaveProperty("success", true);
-				expect(response.body).toHaveProperty("subscription", null);
+				expect(response.body).toHaveProperty("data", null);
 				expect(response.body.message).toContain("No active subscription found");
 			} else {
 				// External API failure is expected in test environment
-				expect([401, 500]).toContain(response.status);
-				expect(response.body).toHaveProperty("error");
+				expect([404, 500]).toContain(response.status);
+
+				expect(response.body).toHaveProperty("success", false);
+				expect(response.body).toHaveProperty("message", "No active subscription found");
+				expect(response.body.data.success).toBe(false);
+				expect(response.body).toHaveProperty("data");
 			}
 		});
 

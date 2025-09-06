@@ -59,14 +59,33 @@ export class ZelfKeysBillingComponent implements OnInit {
 			.then((response) => {
 				console.log("Response:", response);
 
-				if (!response.success) {
+				if (!response.success || !response.data) {
 					this.currentPlan = "free";
 					return;
 				}
 
-				this.currentPlan = response.subscription.planId;
+				// Extract plan from stripeData
+				const stripeData = response.data.stripeData;
+				if (stripeData && stripeData.plan) {
+					// Find the plan that matches the Stripe price ID
+					const currentPlan = this.plans.find((plan) => {
+						// Check if the plan has a priceId that matches the Stripe plan
+						return plan.priceId === stripeData.plan;
+					});
+
+					this.currentPlan = currentPlan?.id || "basic";
+
+					// Update the plans array to mark current plan
+					this.plans = this.plans.map((plan) => ({
+						...plan,
+						isCurrent: plan.id === this.currentPlan,
+					}));
+				} else {
+					this.currentPlan = "free";
+				}
 			})
 			.catch((error) => {
+				console.error("Error loading current plan:", error);
 				this.currentPlan = "free";
 			});
 	}

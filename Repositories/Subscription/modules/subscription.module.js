@@ -13,16 +13,39 @@ const stripe = new Stripe(configuration.stripe.secretKey, {
 });
 
 /**
+ * Convert zelfName to zelfKeys format for IPFS operations
+ * @param {string} zelfName - The original zelfName (e.g., "user.zelf" or "user.zelf.hold")
+ * @returns {string} The converted zelfKeys format (e.g., "user.zelfkeys")
+ */
+const convertToZelfKeysFormat = (zelfName) => {
+	if (!zelfName) return zelfName;
+
+	if (zelfName.endsWith(".zelf.hold")) {
+		return zelfName.replace(".zelf.hold", ".zelfkeys");
+	}
+
+	if (zelfName.endsWith(".zelf")) {
+		return zelfName.replace(".zelf", ".zelfkeys");
+	}
+
+	// If it doesn't end with .zelf or .zelf.hold, return as is
+	return zelfName;
+};
+
+/**
  * Get active subscription for the authenticated user
  * @param {Object} user - User object from JWT
  * @returns {Object} Subscription data
  */
-export const getActiveSubscription = async (user) => {
+const getActiveSubscription = async (user) => {
 	try {
 		const { identifier } = user;
 
-		// Search for subscription in IPFS using the identifier
-		const subscriptionData = await searchSubscriptionInIPFS(identifier);
+		// Convert zelfName to zelfKeys format for IPFS operations
+		const zelfKeysTag = convertToZelfKeysFormat(identifier);
+
+		// Search for subscription in IPFS using the converted identifier
+		const subscriptionData = await searchSubscriptionInIPFS(zelfKeysTag);
 
 		if (!subscriptionData) {
 			return {
@@ -32,31 +55,33 @@ export const getActiveSubscription = async (user) => {
 			};
 		}
 
-		switch (subscriptionData.paymentMethod) {
-			case "stripe":
-				// Verify subscription status with Stripe
-				const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionData.stripeSubscriptionId);
+		return subscriptionData;
 
-				const activeSubscription = {
-					id: subscriptionData.id,
-					zelfName: identifier,
-					plan: subscriptionData.plan,
-					status: stripeSubscription.status,
-					currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
-					currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
-					cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
-					createdAt: new Date(subscriptionData.createdAt),
-					updatedAt: new Date(subscriptionData.updatedAt),
-				};
+		// switch (subscriptionData.paymentMethod) {
+		// 	case "stripe":
+		// 		// Verify subscription status with Stripe
+		// 		const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionData.stripeSubscriptionId);
 
-				return {
-					success: true,
-					subscription: activeSubscription,
-				};
+		// 		const activeSubscription = {
+		// 			id: subscriptionData.id,
+		// 			zelfName: identifier,
+		// 			plan: subscriptionData.plan,
+		// 			status: stripeSubscription.status,
+		// 			currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
+		// 			currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
+		// 			cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
+		// 			createdAt: new Date(subscriptionData.createdAt),
+		// 			updatedAt: new Date(subscriptionData.updatedAt),
+		// 		};
 
-			default:
-				throw new Error("Invalid payment method");
-		}
+		// 		return {
+		// 			success: true,
+		// 			subscription: activeSubscription,
+		// 		};
+
+		// 	default:
+		// 		throw new Error("Invalid payment method");
+		// }
 	} catch (error) {
 		console.error("Error retrieving subscription:", error);
 		throw error;
@@ -67,7 +92,7 @@ export const getActiveSubscription = async (user) => {
  * Get available subscription plans
  * @returns {Object} Available plans
  */
-export const getAvailablePlans = async () => {
+const getAvailablePlans = async () => {
 	try {
 		const plans = Object.entries(configuration.stripe.plans).map(([key, plan]) => ({
 			id: key,
@@ -76,6 +101,7 @@ export const getAvailablePlans = async () => {
 			price: plan.price,
 			currency: plan.currency,
 			interval: plan.interval,
+			priceId: plan.priceId, // Include Stripe price ID
 		}));
 
 		return {
@@ -94,7 +120,7 @@ export const getAvailablePlans = async () => {
  * @param {Object} user - User object from JWT
  * @returns {Object} Checkout session data
  */
-export const createCheckoutSession = async (body, user) => {
+const createCheckoutSession = async (body, user) => {
 	try {
 		const { identifier } = user;
 		const { planId } = body;
@@ -148,12 +174,15 @@ export const createCheckoutSession = async (body, user) => {
  * @param {Object} user - User object from JWT
  * @returns {Object} Cancellation result
  */
-export const cancelSubscription = async (user) => {
+const cancelSubscription = async (user) => {
 	try {
 		const { identifier } = user;
 
+		// Convert zelfName to zelfKeys format for IPFS operations
+		const zelfKeysTag = convertToZelfKeysFormat(identifier);
+
 		// Get subscription from IPFS
-		const subscriptionData = await searchSubscriptionInIPFS(identifier);
+		const subscriptionData = await searchSubscriptionInIPFS(zelfKeysTag);
 
 		if (!subscriptionData) {
 			return {
@@ -168,7 +197,7 @@ export const cancelSubscription = async (user) => {
 		});
 
 		// Update subscription in IPFS
-		await updateSubscriptionInIPFS(identifier, {
+		await updateSubscriptionInIPFS(zelfKeysTag, {
 			...subscriptionData,
 			cancelAtPeriodEnd: true,
 			updatedAt: new Date().toISOString(),
@@ -196,7 +225,7 @@ export const cancelSubscription = async (user) => {
  * @param {Object} headers - Request headers
  * @returns {Object} Webhook response
  */
-export const webhookHandler = async (body, headers) => {
+const webhookHandler = async (body, headers) => {
 	try {
 		const sig = headers["stripe-signature"];
 		const endpointSecret = configuration.stripe.webhookSecret;
@@ -247,41 +276,49 @@ export const webhookHandler = async (body, headers) => {
 // Helper functions
 async function searchSubscriptionInIPFS(zelfKeysTag) {
 	try {
-		console.log("🔍 Searching subscription in IPFS for:", zelfKeysTag);
-
-		// Convert zelfName to the correct format for IPFS query
-		// Replace .zelf with .zelfkeys or .zelf.hold with .zelfkeys
-
-		// Query IPFS by key-value pair
 		const files = await pinata.filter("zelfName", zelfKeysTag);
 
-		if (!files || files.length === 0) return null; // No subscription found
+		let activeSubscription = null;
 
-		// Find subscription files (type: "subscription")
-		const subscriptionFiles = files.filter((file) => file.metadata && file.metadata.type === "subscription" && file.metadata.status === "active");
+		for (let index = 0; index < files.length; index++) {
+			const element = files[index];
 
-		if (subscriptionFiles.length === 0) return null; // No active subscription found
+			const keyValues = element.metadata?.keyvalues;
 
-		return subscriptionFiles[0];
+			// now we need to check if the currentDate moment now() is between the startDate and endDate
+			const currentDate = moment();
+			const startDate = moment(keyValues.startDate);
+			const endDate = moment(keyValues.endDate);
+
+			if (currentDate.isBetween(startDate, endDate)) {
+				activeSubscription = {
+					id: element.id,
+					url: element.url,
+					ipfs_pin_hash: element.ipfs_pin_hash,
+					name: element.metadata.name,
+					...keyValues,
+					stripeData: keyValues.stripeData ? JSON.parse(keyValues.stripeData) : null,
+				};
+				break;
+			}
+		}
+
+		return activeSubscription;
 	} catch (error) {
 		console.error("Error searching subscription in IPFS:", error);
-		return null;
 	}
+
+	return null;
 }
 
 async function updateSubscriptionInIPFS(zelfName, subscriptionData) {
 	try {
 		// Convert zelfName to the correct format for IPFS storage
-		let queryKey = zelfName;
-		if (zelfName.endsWith(".zelf")) {
-			queryKey = zelfName.replace(".zelf", ".zelfkeys");
-		} else if (zelfName.endsWith(".zelf.hold")) {
-			queryKey = zelfName.replace(".zelf.hold", ".zelfkeys");
-		}
+		const zelfKeysTag = convertToZelfKeysFormat(zelfName);
 
 		// Create metadata for IPFS storage
 		const metadata = {
-			zelfName: queryKey,
+			zelfName: zelfKeysTag,
 			type: "subscription",
 			status: subscriptionData.status || "active",
 			plan: subscriptionData.plan,
@@ -291,7 +328,7 @@ async function updateSubscriptionInIPFS(zelfName, subscriptionData) {
 		// Store subscription data in IPFS
 		const ipfsResult = await pinata.pinFile(
 			Buffer.from(JSON.stringify(subscriptionData)).toString("base64"),
-			`${queryKey}.json`,
+			`${zelfKeysTag}.json`,
 			"application/json",
 			metadata
 		);
@@ -384,12 +421,8 @@ async function handleInvoicePaymentSucceeded(invoice) {
 			};
 		}
 
-		let zelfKeysTag = zelfName;
-		if (zelfName.endsWith(".zelf")) {
-			zelfKeysTag = zelfName.replace(".zelf", ".zelfkeys");
-		} else if (zelfName.endsWith(".zelf.hold")) {
-			zelfKeysTag = zelfName.replace(".zelf.hold", ".zelfkeys");
-		}
+		// Convert zelfName to zelfKeys format for IPFS operations
+		const zelfKeysTag = convertToZelfKeysFormat(zelfName);
 
 		// Check if subscription already exists to avoid duplicates
 		const existingSubscription = await searchSubscriptionInIPFS(zelfKeysTag);
@@ -402,18 +435,26 @@ async function handleInvoicePaymentSucceeded(invoice) {
 			};
 		}
 
+		console.log("🔍 Subscription:", subscription);
+
 		const subscriptionData = {
-			id: subscription.id,
+			stripeData: JSON.stringify({
+				id: subscription.id,
+				latestInvoice: subscription.latest_invoice,
+				customer: subscription.customer,
+				status: subscription.status,
+				// metadata: subscription.metadata,
+				plan: subscription.plan.id,
+			}),
 			zelfName: zelfKeysTag,
-			plan: subscription.metadata.plan,
-			stripeSubscriptionId: subscription.id,
-			stripeCustomerId: subscription.customer,
-			status: subscription.status,
 			startDate: moment(new Date(subscription.current_period_start * 1000)).format("YYYY-MM-DD HH:mm:ss"),
 			endDate: moment(new Date(subscription.current_period_end * 1000)).format("YYYY-MM-DD HH:mm:ss"),
+			paymentMethod: "stripe",
+			type: "subscription",
 		};
 
 		const ipfsResult = await storeSubscriptionInIPFS(subscriptionData);
+
 		console.log("📁 IPFS Result:", ipfsResult);
 	} catch (error) {
 		console.error("❌ Error handling invoice payment succeeded:", error);
@@ -435,8 +476,11 @@ async function handleSubscriptionUpdated(subscription) {
 		const zelfName = subscription.metadata.zelfName;
 
 		if (zelfName) {
+			// Convert zelfName to zelfKeys format for IPFS operations
+			const zelfKeysTag = convertToZelfKeysFormat(zelfName);
+
 			// Check if subscription exists first
-			const existingSubscription = await searchSubscriptionInIPFS(zelfName);
+			const existingSubscription = await searchSubscriptionInIPFS(zelfKeysTag);
 
 			const subscriptionData = {
 				id: subscription.id,
@@ -451,7 +495,7 @@ async function handleSubscriptionUpdated(subscription) {
 
 			// If subscription exists, update it; otherwise create it
 			if (existingSubscription) {
-				await updateSubscriptionInIPFS(zelfName, subscriptionData);
+				await updateSubscriptionInIPFS(zelfKeysTag, subscriptionData);
 				console.log("✅ Subscription updated:", subscriptionData);
 			} else {
 				await storeSubscriptionInIPFS(subscriptionData);
@@ -477,10 +521,13 @@ async function handleSubscriptionDeleted(subscription) {
 		const zelfName = subscription.metadata.zelfName;
 
 		if (zelfName) {
+			// Convert zelfName to zelfKeys format for IPFS operations
+			const zelfKeysTag = convertToZelfKeysFormat(zelfName);
+
 			// Mark subscription as canceled in IPFS
 			const subscriptionData = {
 				id: subscription.id,
-				zelfName,
+				zelfName: zelfKeysTag,
 				plan: subscription.metadata.plan,
 				stripeSubscriptionId: subscription.id,
 				stripeCustomerId: subscription.customer,
@@ -489,7 +536,7 @@ async function handleSubscriptionDeleted(subscription) {
 				updatedAt: new Date().toISOString(),
 			};
 
-			await updateSubscriptionInIPFS(zelfName, subscriptionData);
+			await updateSubscriptionInIPFS(zelfKeysTag, subscriptionData);
 			console.log("✅ Subscription canceled and updated:", subscriptionData);
 		} else {
 			console.log("⚠️ No zelfName found in subscription metadata");
@@ -501,24 +548,11 @@ async function handleSubscriptionDeleted(subscription) {
 
 async function storeSubscriptionInIPFS(subscriptionData) {
 	try {
-		// Create metadata for IPFS storage
-		const metadata = {
-			zelfName: subscriptionData.zelfName,
-			type: "subscription",
-			startDate: `${subscriptionData.startDate}`,
-			endDate: `${subscriptionData.endDate}`,
-			status: subscriptionData.status || "active",
-			plan: subscriptionData.plan,
-			timestamp: new Date().toISOString(),
-		};
-
-		// Store subscription data in IPFS
-
 		const ipfsResult = await pinata.pinFile(
 			Buffer.from(JSON.stringify(subscriptionData)).toString("base64"),
-			`subscription_${subscriptionData.id}.json`,
+			`${subscriptionData.zelfName}.json`,
 			"application/json",
-			metadata
+			subscriptionData
 		);
 
 		if (!ipfsResult) throw new Error("Failed to store subscription in IPFS");
@@ -529,3 +563,9 @@ async function storeSubscriptionInIPFS(subscriptionData) {
 		throw error;
 	}
 }
+
+// ========================================
+// EXPORTS - All exported functions listed here
+// ========================================
+
+export { getActiveSubscription, getAvailablePlans, createCheckoutSession, cancelSubscription, webhookHandler };
