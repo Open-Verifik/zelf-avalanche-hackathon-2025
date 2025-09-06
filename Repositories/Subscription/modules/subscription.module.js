@@ -1,6 +1,7 @@
 import Stripe from "stripe";
 import configuration from "../../../Core/config.js";
 import * as pinata from "../../IPFS/modules/pinata.js";
+import moment from "moment";
 
 /**
  * Subscription Module - Business logic for subscription management and Stripe integration
@@ -219,7 +220,7 @@ export const webhookHandler = async (body, headers) => {
 				result.subscriptionCreated = true;
 				break;
 			case "customer.subscription.updated":
-				// await handleSubscriptionUpdated(event.data.object);
+				await handleSubscriptionUpdated(event.data.object);
 				result.subscriptionUpdated = true;
 				break;
 			case "customer.subscription.deleted":
@@ -244,42 +245,23 @@ export const webhookHandler = async (body, headers) => {
 };
 
 // Helper functions
-async function searchSubscriptionInIPFS(zelfName) {
+async function searchSubscriptionInIPFS(zelfKeysTag) {
 	try {
-		console.log("🔍 Searching subscription in IPFS for:", zelfName);
+		console.log("🔍 Searching subscription in IPFS for:", zelfKeysTag);
 
 		// Convert zelfName to the correct format for IPFS query
 		// Replace .zelf with .zelfkeys or .zelf.hold with .zelfkeys
-		let queryKey = zelfName;
-		if (zelfName.endsWith(".zelf")) {
-			queryKey = zelfName.replace(".zelf", ".zelfkeys");
-		} else if (zelfName.endsWith(".zelf.hold")) {
-			queryKey = zelfName.replace(".zelf.hold", ".zelfkeys");
-		}
-
-		console.log("🔍 Querying IPFS with key:", queryKey);
 
 		// Query IPFS by key-value pair
 		const files = await pinata.filter("zelfName", queryKey);
 
-		console.log("🔍 IPFS query result:", files?.length || 0, "files found");
-
-		if (!files || files.length === 0) {
-			console.log("🔍 No files found in IPFS");
-			return null; // No subscription found
-		}
+		if (!files || files.length === 0) return null; // No subscription found
 
 		// Find subscription files (type: "subscription")
 		const subscriptionFiles = files.filter((file) => file.metadata && file.metadata.type === "subscription" && file.metadata.status === "active");
 
-		console.log("🔍 Subscription files found:", subscriptionFiles.length);
+		if (subscriptionFiles.length === 0) return null; // No active subscription found
 
-		if (subscriptionFiles.length === 0) {
-			console.log("🔍 No active subscription files found");
-			return null; // No active subscription found
-		}
-
-		console.log("🔍 Found active subscription:", subscriptionFiles[0].metadata);
 		return subscriptionFiles[0];
 	} catch (error) {
 		console.error("Error searching subscription in IPFS:", error);
@@ -317,12 +299,6 @@ async function updateSubscriptionInIPFS(zelfName, subscriptionData) {
 		if (!ipfsResult) {
 			throw new Error("Failed to store subscription in IPFS");
 		}
-
-		console.log("Subscription updated in IPFS:", {
-			zelfName: queryKey,
-			ipfsHash: ipfsResult.IpfsHash,
-			url: ipfsResult.url,
-		});
 
 		return ipfsResult;
 	} catch (error) {
@@ -376,7 +352,6 @@ async function handleInvoicePaymentSucceeded(invoice) {
 
 		// Only process if this is a subscription invoice
 		if (!invoice.subscription) {
-			console.log("⚠️ Not a subscription invoice, skipping");
 			return { success: false, message: "Not a subscription invoice, skipping" };
 		}
 
@@ -403,7 +378,6 @@ async function handleInvoicePaymentSucceeded(invoice) {
 		}
 
 		if (!zelfName) {
-			console.log("⚠️ No zelfName found in subscription or invoice metadata");
 			return {
 				success: false,
 				message: "No zelfName found in subscription or invoice metadata",
@@ -411,10 +385,17 @@ async function handleInvoicePaymentSucceeded(invoice) {
 			};
 		}
 
+		let zelfKeysTag = zelfName;
+		if (zelfName.endsWith(".zelf")) {
+			zelfKeysTag = zelfName.replace(".zelf", ".zelfkeys");
+		} else if (zelfName.endsWith(".zelf.hold")) {
+			zelfKeysTag = zelfName.replace(".zelf.hold", ".zelfkeys");
+		}
+
 		// Check if subscription already exists to avoid duplicates
-		const existingSubscription = await searchSubscriptionInIPFS(zelfName);
+		const existingSubscription = await searchSubscriptionInIPFS(zelfKeysTag);
+
 		if (existingSubscription) {
-			console.log("⚠️ Subscription already exists, skipping creation:", existingSubscription.metadata);
 			return {
 				success: false,
 				message: "Subscription already exists, skipping creation",
@@ -424,19 +405,16 @@ async function handleInvoicePaymentSucceeded(invoice) {
 
 		const subscriptionData = {
 			id: subscription.id,
-			zelfName,
+			zelfName: zelfKeysTag,
 			plan: subscription.metadata.plan,
 			stripeSubscriptionId: subscription.id,
 			stripeCustomerId: subscription.customer,
 			status: subscription.status,
-			createdAt: new Date().toISOString(),
-			updatedAt: new Date().toISOString(),
+			startDate: moment(new Date(subscription.current_period_start * 1000)).format("YYYY-MM-DD HH:mm:ss"),
+			endDate: moment(new Date(subscription.current_period_end * 1000)).format("YYYY-MM-DD HH:mm:ss"),
 		};
 
-		// Store subscription in IPFS - payment confirmed!
-		console.log("🔄 Storing subscription in IPFS...", subscriptionData);
 		const ipfsResult = await storeSubscriptionInIPFS(subscriptionData);
-		console.log("✅ Subscription created and stored after payment confirmation:", subscriptionData);
 		console.log("📁 IPFS Result:", ipfsResult);
 	} catch (error) {
 		console.error("❌ Error handling invoice payment succeeded:", error);
@@ -445,6 +423,8 @@ async function handleInvoicePaymentSucceeded(invoice) {
 }
 
 async function handleSubscriptionUpdated(subscription) {
+	// TODO: Implement subscription updated
+	return;
 	try {
 		console.log("🔄 Processing subscription updated:", {
 			subscriptionId: subscription.id,
@@ -522,25 +502,19 @@ async function handleSubscriptionDeleted(subscription) {
 
 async function storeSubscriptionInIPFS(subscriptionData) {
 	try {
-		// Convert zelfName to the correct format for IPFS storage
-		let queryKey = subscriptionData.zelfName;
-		if (subscriptionData.zelfName.endsWith(".zelf")) {
-			queryKey = subscriptionData.zelfName.replace(".zelf", ".zelfkeys");
-		} else if (subscriptionData.zelfName.endsWith(".zelf.hold")) {
-			queryKey = subscriptionData.zelfName.replace(".zelf.hold", ".zelfkeys");
-		}
-
 		// Create metadata for IPFS storage
 		const metadata = {
-			zelfName: queryKey,
+			zelfName: subscriptionData.zelfName,
 			type: "subscription",
+			startDate: `${subscriptionData.startDate}`,
+			endDate: `${subscriptionData.endDate}`,
 			status: subscriptionData.status || "active",
 			plan: subscriptionData.plan,
 			timestamp: new Date().toISOString(),
 		};
 
 		// Store subscription data in IPFS
-		console.log("🔄 Attempting to store in IPFS with metadata:", metadata);
+
 		const ipfsResult = await pinata.pinFile(
 			Buffer.from(JSON.stringify(subscriptionData)).toString("base64"),
 			`subscription_${subscriptionData.id}.json`,
@@ -548,17 +522,7 @@ async function storeSubscriptionInIPFS(subscriptionData) {
 			metadata
 		);
 
-		console.log("📁 IPFS storage result:", ipfsResult);
-
-		if (!ipfsResult) {
-			throw new Error("Failed to store subscription in IPFS");
-		}
-
-		console.log("✅ Subscription stored in IPFS:", {
-			zelfName: queryKey,
-			ipfsHash: ipfsResult.IpfsHash,
-			url: ipfsResult.url,
-		});
+		if (!ipfsResult) throw new Error("Failed to store subscription in IPFS");
 
 		return ipfsResult;
 	} catch (error) {
