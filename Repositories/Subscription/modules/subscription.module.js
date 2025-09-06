@@ -291,7 +291,7 @@ async function updateSubscriptionInIPFS(zelfName, subscriptionData) {
 		// Store subscription data in IPFS
 		const ipfsResult = await pinata.pinFile(
 			Buffer.from(JSON.stringify(subscriptionData)).toString("base64"),
-			`subscription_${subscriptionData.id}.json`,
+			`${queryKey}.json`,
 			"application/json",
 			metadata
 		);
