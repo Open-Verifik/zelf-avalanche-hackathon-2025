@@ -89,6 +89,27 @@ const cancelSubscription = async (ctx) => {
 };
 
 /**
+ * Create Stripe customer portal session for subscription management
+ * @param {Object} ctx - Koa context
+ */
+const createCustomerPortalSession = async (ctx) => {
+	try {
+		const data = await Module.createCustomerPortalSession(ctx.state.user);
+
+		ctx.status = 200;
+		ctx.body = {
+			success: true,
+			portalUrl: data.portalUrl,
+			sessionId: data.sessionId,
+		};
+	} catch (error) {
+		console.error(error);
+		ctx.status = error.status || 500;
+		ctx.body = { error: error.message };
+	}
+};
+
+/**
  * Stripe webhook handler
  * @param {Object} ctx - Koa context
  */
@@ -113,4 +134,4 @@ const webhookHandler = async (ctx) => {
 	}
 };
 
-export { getActiveSubscription, getAvailablePlans, createCheckoutSession, cancelSubscription, webhookHandler };
+export { getActiveSubscription, getAvailablePlans, createCheckoutSession, cancelSubscription, createCustomerPortalSession, webhookHandler };

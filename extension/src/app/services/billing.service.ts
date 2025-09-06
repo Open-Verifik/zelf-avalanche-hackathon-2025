@@ -132,6 +132,19 @@ export class BillingService {
 	}
 
 	/**
+	 * Create Stripe customer portal session for subscription management
+	 * @returns Promise with the portal session data
+	 */
+	async createCustomerPortalSession(): Promise<{ success: boolean; portalUrl: string; sessionId: string }> {
+		const apiKeysSessionJWT = this._walletService.getZelfKeyJWT();
+		return this._httpWrapper.sendRequest("post", `${this.baseUrl}/api/subscription/portal`, null, {
+			headers: {
+				Authorization: `Bearer ${apiKeysSessionJWT}`,
+			},
+		});
+	}
+
+	/**
 	 * Transform API plans to pricing plans with additional UI properties
 	 * @param apiPlans - Plans from the API
 	 * @returns Transformed pricing plans
@@ -160,28 +173,9 @@ export class BillingService {
 	 */
 	private getPlanFeatures(planId: string): string[] {
 		const featuresMap: { [key: string]: string[] } = {
-			basic: ["Up to 10 passwords", "Basic encryption", "Single device access", "Community support", "Basic backup"],
-			pro: [
-				"Unlimited passwords",
-				"Advanced encryption",
-				"Multi-device sync",
-				"Priority support",
-				"Cloud backup",
-				"Password sharing",
-				"Advanced security features",
-				"Dark mode themes",
-			],
-			enterprise: [
-				"Everything in Pro",
-				"Team collaboration",
-				"Advanced analytics",
-				"Custom integrations",
-				"White-label options",
-				"API access",
-				"Priority feature requests",
-				"24/7 premium support",
-				"Advanced reporting",
-			],
+			basic: ["Up to 20 new encryptions every month", "Community support"],
+			pro: ["Up to 50 new encryptions every month", "Priority support"],
+			enterprise: ["Up to 100 new encryptions every month", "24/7 premium support"],
 		};
 		return featuresMap[planId] || [];
 	}

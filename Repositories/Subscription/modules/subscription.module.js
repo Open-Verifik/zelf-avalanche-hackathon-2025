@@ -564,8 +564,47 @@ async function storeSubscriptionInIPFS(subscriptionData) {
 	}
 }
 
+/**
+ * Create Stripe customer portal session for subscription management
+ * @param {Object} user - User object from JWT
+ * @returns {Object} Portal session data
+ */
+const createCustomerPortalSession = async (user) => {
+	try {
+		const { identifier } = user;
+
+		// Convert zelfName to zelfKeys format for IPFS operations
+		const zelfKeysTag = convertToZelfKeysFormat(identifier);
+
+		// Search for subscription in IPFS
+		const subscriptionData = await searchSubscriptionInIPFS(zelfKeysTag);
+
+		if (!subscriptionData) throw new Error("No active subscription found");
+
+		// Validate that we have the required customer ID
+		if (!subscriptionData.stripeData?.customer) {
+			throw new Error("Customer ID not found in subscription data");
+		}
+
+		// Create customer portal session
+		const portalSession = await stripe.billingPortal.sessions.create({
+			customer: subscriptionData.stripeData.customer,
+			return_url: `${configuration.stripe.redirectUrl}/dashboard/billing`,
+		});
+
+		return {
+			success: true,
+			portalUrl: portalSession.url,
+			sessionId: portalSession.id,
+		};
+	} catch (error) {
+		console.error("❌ Error creating customer portal session:", error);
+		throw error;
+	}
+};
+
 // ========================================
 // EXPORTS - All exported functions listed here
 // ========================================
 
-export { getActiveSubscription, getAvailablePlans, createCheckoutSession, cancelSubscription, webhookHandler };
+export { getActiveSubscription, getAvailablePlans, createCheckoutSession, cancelSubscription, createCustomerPortalSession, webhookHandler };

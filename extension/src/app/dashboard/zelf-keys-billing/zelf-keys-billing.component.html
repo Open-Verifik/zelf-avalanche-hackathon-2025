@@ -27,8 +27,66 @@
 		</div>
 	</div>
 
+	<!-- Active Subscription Management View -->
+	<div *ngIf="!loading && !error && hasActiveSubscription" class="subscription-management">
+		<div class="subscription-card">
+			<div class="subscription-header">
+				<div class="subscription-status">
+					<svg class="status-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path
+							d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg>
+					<span class="status-text">Active Subscription</span>
+				</div>
+				<div class="subscription-plan">{{ activeSubscription?.name || "Premium Plan" }}</div>
+			</div>
+
+			<div class="subscription-details">
+				<div class="detail-row">
+					<span class="detail-label">Status:</span>
+					<span class="detail-value status-active">{{ activeSubscription?.stripeData?.status || "Active" }}</span>
+				</div>
+				<div class="detail-row">
+					<span class="detail-label">Zelf Name:</span>
+					<span class="detail-value">{{ activeSubscription?.zelfName || "N/A" }}</span>
+				</div>
+				<div class="detail-row">
+					<span class="detail-label">Start Date:</span>
+					<span class="detail-value">{{ activeSubscription?.startDate | date: "medium" }}</span>
+				</div>
+				<div class="detail-row">
+					<span class="detail-label">Next Billing:</span>
+					<span class="detail-value">{{ activeSubscription?.endDate | date: "medium" }}</span>
+				</div>
+			</div>
+
+			<div class="subscription-actions">
+				<button class="manage-button" (click)="openCustomerPortal()">
+					<svg class="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path
+							d="M10.325 4.317C10.751 3.901 11.377 3.901 11.803 4.317L20.69 13.204C21.116 13.63 21.116 14.256 20.69 14.682L11.803 23.569C11.377 23.995 10.751 23.995 10.325 23.569L1.438 14.682C1.012 14.256 1.012 13.63 1.438 13.204L10.325 4.317Z"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg>
+					Manage Subscription
+				</button>
+				<p class="management-note">
+					Manage your subscription, update payment methods, view billing history, and more in the Stripe customer portal.
+				</p>
+			</div>
+		</div>
+	</div>
+
 	<!-- Plans Grid -->
-	<div *ngIf="!loading && !error" class="pricing-grid">
+	<div *ngIf="!loading && !error && !hasActiveSubscription" class="pricing-grid">
 		<div *ngFor="let plan of plans" class="pricing-card" [class.popular]="plan.isPopular" [class.current]="plan.isCurrent">
 			<div class="card-header">
 				<div class="plan-name">{{ plan.name }}</div>

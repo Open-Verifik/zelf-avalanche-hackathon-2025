@@ -16,6 +16,8 @@ export class ZelfKeysBillingComponent implements OnInit {
 	currentPlan: string = "free";
 	loading: boolean = true;
 	error: string | null = null;
+	hasActiveSubscription: boolean = false;
+	activeSubscription: any = null;
 
 	constructor(
 		private billingService: BillingService,
@@ -61,8 +63,14 @@ export class ZelfKeysBillingComponent implements OnInit {
 
 				if (!response.success || !response.data) {
 					this.currentPlan = "free";
+					this.hasActiveSubscription = false;
+					this.activeSubscription = null;
 					return;
 				}
+
+				// Set active subscription data
+				this.hasActiveSubscription = true;
+				this.activeSubscription = response.data;
 
 				// Extract plan from stripeData
 				const stripeData = response.data.stripeData;
@@ -87,6 +95,8 @@ export class ZelfKeysBillingComponent implements OnInit {
 			.catch((error) => {
 				console.error("Error loading current plan:", error);
 				this.currentPlan = "free";
+				this.hasActiveSubscription = false;
+				this.activeSubscription = null;
 			});
 	}
 
@@ -137,5 +147,42 @@ export class ZelfKeysBillingComponent implements OnInit {
 
 	isPlanDisabled(plan: PricingPlan): boolean {
 		return plan.isCurrent || false;
+	}
+
+	/**
+	 * Open Stripe customer portal for subscription management
+	 */
+	openCustomerPortal(): void {
+		console.log("🚀 Opening customer portal with subscription data:", {
+			hasActiveSubscription: this.hasActiveSubscription,
+			activeSubscription: this.activeSubscription,
+			stripeData: this.activeSubscription?.stripeData,
+		});
+
+		this.billingService
+			.createCustomerPortalSession()
+			.then((response) => {
+				console.log("✅ Portal session response:", response);
+
+				if (response.success && response.portalUrl) {
+					// Open the portal in a new tab
+					window.open(response.portalUrl, "_blank");
+				} else {
+					console.error("❌ Portal creation failed:", response);
+					this.error = response.error || "Failed to open subscription management portal";
+				}
+			})
+			.catch((error) => {
+				console.error("❌ Error opening customer portal:", error);
+
+				// Provide more specific error messages
+				if (error.message?.includes("Customer ID not found")) {
+					this.error = "Unable to find customer information. Please contact support.";
+				} else if (error.message?.includes("No active subscription")) {
+					this.error = "No active subscription found. Please refresh the page.";
+				} else {
+					this.error = `Failed to open subscription management: ${error.message || "Unknown error"}`;
+				}
+			});
 	}
 }

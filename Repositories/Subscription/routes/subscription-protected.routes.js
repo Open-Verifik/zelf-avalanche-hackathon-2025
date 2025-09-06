@@ -16,4 +16,7 @@ export default (server) => {
 
 	// Cancel subscription (at period end)
 	server.post(`${PATH}/cancel`, Middleware.validateUserIdentifier, Controller.cancelSubscription);
+
+	// Create Stripe customer portal session for subscription management
+	server.post(`${PATH}/portal`, Middleware.validateUserIdentifier, Controller.createCustomerPortalSession);
 };

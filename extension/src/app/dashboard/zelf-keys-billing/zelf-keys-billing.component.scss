@@ -89,6 +89,147 @@
 		}
 	}
 
+	.subscription-management {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 48px;
+
+		.subscription-card {
+			background: white;
+			border: 2px solid #28a745;
+			border-radius: 20px;
+			padding: 40px;
+			max-width: 600px;
+			width: 100%;
+			box-shadow: 0 8px 32px rgba(40, 167, 69, 0.15);
+			position: relative;
+			overflow: hidden;
+
+			&::before {
+				content: "";
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 4px;
+				background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+			}
+
+			.subscription-header {
+				display: flex;
+				justify-content: space-between;
+				align-items: center;
+				margin-bottom: 32px;
+				padding-bottom: 24px;
+				border-bottom: 1px solid #e9ecef;
+
+				.subscription-status {
+					display: flex;
+					align-items: center;
+					gap: 12px;
+
+					.status-icon {
+						color: #28a745;
+						width: 24px;
+						height: 24px;
+					}
+
+					.status-text {
+						font-size: 18px;
+						font-weight: 600;
+						color: #28a745;
+					}
+				}
+
+				.subscription-plan {
+					font-size: 24px;
+					font-weight: 700;
+					color: #1a1a1a;
+					letter-spacing: -0.5px;
+				}
+			}
+
+			.subscription-details {
+				margin-bottom: 32px;
+
+				.detail-row {
+					display: flex;
+					justify-content: space-between;
+					align-items: center;
+					padding: 12px 0;
+					border-bottom: 1px solid #f8f9fa;
+
+					&:last-child {
+						border-bottom: none;
+					}
+
+					.detail-label {
+						font-size: 14px;
+						font-weight: 600;
+						color: #666;
+						text-transform: uppercase;
+						letter-spacing: 0.5px;
+					}
+
+					.detail-value {
+						font-size: 16px;
+						font-weight: 500;
+						color: #1a1a1a;
+
+						&.status-active {
+							color: #28a745;
+							font-weight: 600;
+						}
+					}
+				}
+			}
+
+			.subscription-actions {
+				text-align: center;
+
+				.manage-button {
+					background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+					color: white;
+					border: none;
+					padding: 16px 32px;
+					border-radius: 12px;
+					font-size: 16px;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.3s ease;
+					display: inline-flex;
+					align-items: center;
+					gap: 12px;
+					box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+					margin-bottom: 16px;
+
+					&:hover {
+						transform: translateY(-2px);
+						box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+					}
+
+					&:active {
+						transform: translateY(0);
+					}
+
+					.button-icon {
+						width: 20px;
+						height: 20px;
+					}
+				}
+
+				.management-note {
+					font-size: 14px;
+					color: #666;
+					line-height: 1.5;
+					margin: 0;
+					max-width: 400px;
+					margin: 0 auto;
+				}
+			}
+		}
+	}
+
 	.pricing-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -316,6 +457,64 @@
 
 			.billing-subtitle {
 				font-size: 16px;
+			}
+		}
+
+		.subscription-management {
+			margin-bottom: 32px;
+
+			.subscription-card {
+				padding: 24px 20px;
+
+				.subscription-header {
+					flex-direction: column;
+					align-items: flex-start;
+					gap: 16px;
+					margin-bottom: 24px;
+					padding-bottom: 16px;
+
+					.subscription-status {
+						.status-text {
+							font-size: 16px;
+						}
+					}
+
+					.subscription-plan {
+						font-size: 20px;
+					}
+				}
+
+				.subscription-details {
+					margin-bottom: 24px;
+
+					.detail-row {
+						flex-direction: column;
+						align-items: flex-start;
+						gap: 4px;
+						padding: 8px 0;
+
+						.detail-label {
+							font-size: 12px;
+						}
+
+						.detail-value {
+							font-size: 14px;
+						}
+					}
+				}
+
+				.subscription-actions {
+					.manage-button {
+						padding: 14px 24px;
+						font-size: 15px;
+						width: 100%;
+						justify-content: center;
+					}
+
+					.management-note {
+						font-size: 13px;
+					}
+				}
 			}
 		}
 
