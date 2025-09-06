@@ -20,6 +20,7 @@ const createMetadataAndPublicData = async (type, data, authToken) => {
 					type: "website_password",
 					website: `${data.website}`,
 					username: data.username ? "***" + data.username.slice(-3) : "***",
+					folder: data.folder && data.insideFolder ? data.folder : undefined,
 					timestamp: `${new Date().toISOString()}`,
 					zelfName: `${authToken.identifier}`,
 					category: `${authToken.identifier}_password`,
@@ -32,6 +33,7 @@ const createMetadataAndPublicData = async (type, data, authToken) => {
 					type: "notes",
 					title: `${data.title}`,
 					timestamp: `${new Date().toISOString()}`,
+					folder: data.folder && data.insideFolder ? data.folder : undefined,
 					zelfName: `${authToken.identifier}`,
 					category: `${authToken.identifier}_notes`,
 				},
@@ -52,6 +54,7 @@ const createMetadataAndPublicData = async (type, data, authToken) => {
 						expires: `${data.expiryMonth}/${data.expiryYear.slice(-2)}`,
 						bankName: `${data.bankName}`,
 					}),
+					folder: data.folder && data.insideFolder ? data.folder : undefined,
 					timestamp: `${new Date().toISOString()}`,
 					zelfName: `${authToken.identifier}`,
 					category: `${authToken.identifier}_credit_card`,
@@ -76,7 +79,7 @@ const createMetadataAndPublicData = async (type, data, authToken) => {
  */
 const storePassword = async (data, authToken) => {
 	try {
-		const { website, faceBase64, masterPassword, name } = data;
+		const { website, faceBase64, masterPassword, name, folder, insideFolder } = data;
 
 		const { metadata, publicData } = await createMetadataAndPublicData("password", data, authToken);
 

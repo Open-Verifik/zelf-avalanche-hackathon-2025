@@ -4,7 +4,7 @@ export const environment = {
 	baseUrl: "/index.html",
 	apiUrl: "https://api.zelf.world",
 	captchaKey: "6LcAhbIqAAAAANEZltlDqWutQ_kcujZ7IUKIQiK1",
-	keysApiUrl: "https://keys-api.zelf.world",
+	keysApiUrl: "http://localhost:3010",
 	// apiUrl: "https://api.zelf.world",
 	// testnetAddress: "tb1phkg7rlfp8d6zkk699rlacnwyuc9g2jh02ehscztncuew4c4y5mkstxw2c9",
 	testnetAddress: "",

@@ -27,6 +27,8 @@ const schemas = {
 		website: { required: true, minLength: 1 },
 		username: { required: true, minLength: 1 },
 		password: { required: true, minLength: 1 },
+		folder: { required: false },
+		insideFolder: { required: false },
 		notes: { required: false },
 		faceBase64: { required: true, isBase64Image: true },
 		password: { required: true },
@@ -37,6 +39,8 @@ const schemas = {
 		title: { required: true, minLength: 1, maxLength: 100 },
 		keyValuePairs: { required: true, minKeys: 1, maxKeys: 10 },
 		faceBase64: { required: true, isBase64Image: true },
+		folder: { required: false },
+		insideFolder: { required: false },
 		password: { required: false },
 	},
 
@@ -49,6 +53,8 @@ const schemas = {
 		cvv: { required: true, minLength: 3, maxLength: 4 },
 		bankName: { required: true, minLength: 1 },
 		faceBase64: { required: true, isBase64Image: true },
+		folder: { required: false },
+		insideFolder: { required: false },
 		password: { required: false },
 	},
 	// Retrieve data schema

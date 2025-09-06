@@ -803,6 +803,8 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						username: dataSource.email,
 						password: dataSource.password,
 						notes: dataSource.notes,
+						folder: dataSource.folder,
+						insideFolder: dataSource.insideFolder,
 						name: dataSource.title,
 						faceBase64: faceBase64,
 						...(this.useMasterPassword && this.masterPassword && { masterPassword: this.masterPassword }), // Optional master password
@@ -827,6 +829,8 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						cardNumber: dataSource.cardNumber,
 						expiryMonth: dataSource.expiryMonth,
 						expiryYear: dataSource.expiryYear,
+						folder: dataSource.folder,
+						insideFolder: dataSource.insideFolder,
 						cvv: dataSource.cvv,
 						bankName: dataSource.bankName,
 						faceBase64: faceBase64,
