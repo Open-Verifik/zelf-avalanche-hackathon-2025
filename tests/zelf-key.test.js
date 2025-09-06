@@ -18,10 +18,12 @@ describe("ZelfKey Endpoints", () => {
 	beforeAll(async () => {
 		// Create a session to get JWT token for ZelfKey endpoints
 		try {
-			const sessionResponse = await request(app).post("/api/sessions").send({
-				identifier: "test-user-123",
-				address: "0xB7b30A282eb6c0fEef1Bd8D268E05f4c2a2Ab565",
-			});
+			const sessionResponse = await request(app)
+				.post("/api/sessions")
+				.send({
+					identifier: `name${Math.random().toString(36).substring(2, 6)}.zelf`,
+					address: "0xB7b30A282eb6c0fEef1Bd8D268E05f4c2a2Ab565",
+				});
 
 			if (sessionResponse.status === 200) {
 				authToken = sessionResponse.body.data.token;

@@ -4,8 +4,9 @@
 
 import authRoute from "../Repositories/ZelfProof/routes/auth.route.js";
 import zelfProofRoute from "../Repositories/ZelfProof/routes/zelf-proof.route.js";
-import zelfKeyRoute from "../Repositories/ZelfKey/routes/zelf-key.route.js";
+
 import sessionRoutes from "../Repositories/Session/routes/session.routes.js";
+import subscriptionRoute from "../Repositories/Subscription/routes/subscription.routes.js";
 
 export default (router) => {
 	// Register authentication routes (unprotected)
@@ -16,4 +17,7 @@ export default (router) => {
 
 	// Register Session routes (unprotected)
 	sessionRoutes(router);
+
+	// Register Subscription routes (unprotected endpoints: plans, webhook)
+	subscriptionRoute(router);
 };

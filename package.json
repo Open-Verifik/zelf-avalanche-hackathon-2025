@@ -59,6 +59,7 @@
 		"qrcode": "^1.5.4",
 		"qrcode-reader": "^1.0.4",
 		"readable-stream": "^4.5.2",
+		"stripe": "^18.5.0",
 		"tiny-secp256k1": "^2.2.3"
 	},
 	"dresolutions": {

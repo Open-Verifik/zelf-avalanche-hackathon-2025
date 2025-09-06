@@ -91,6 +91,42 @@ const configuration = {
 			showImageRendering: process.env.AVALANCHE_SHOW_IMAGE !== "false", // Default: true
 		},
 	},
+	stripe: {
+		redirectUrl: process.env.STRIPE_REDIRECTURL || "https://verifik.app",
+		secretKey: process.env.STRIPE_SECRET_KEY,
+		publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
+		webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
+		taxes: 0.19,
+		successUrl: process.env.STRIPE_SUCCESS_URL || "https://zelf.world/dashboard/billing?success=true",
+		cancelUrl: process.env.STRIPE_CANCEL_URL || "https://zelf.world/dashboard/billing?canceled=true",
+		// Subscription plans
+		plans: {
+			basic: {
+				priceId: process.env.STRIPE_BASIC_PRICE_ID,
+				name: "Basic Plan",
+				description: "Essential features for personal use",
+				price: 9.99,
+				currency: "usd",
+				interval: "month",
+			},
+			pro: {
+				priceId: process.env.STRIPE_PRO_PRICE_ID,
+				name: "Pro Plan",
+				description: "Advanced features for power users",
+				price: 19.99,
+				currency: "usd",
+				interval: "month",
+			},
+			enterprise: {
+				priceId: process.env.STRIPE_ENTERPRISE_PRICE_ID,
+				name: "Enterprise Plan",
+				description: "Full features for teams and businesses",
+				price: 49.99,
+				currency: "usd",
+				interval: "month",
+			},
+		},
+	},
 };
 
 export default configuration;

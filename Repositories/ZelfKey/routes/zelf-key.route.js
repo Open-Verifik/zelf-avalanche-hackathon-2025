@@ -5,7 +5,6 @@ import * as Middleware from "../middlewares/zelf-key.middleware.js";
  * ZelfKey Routes - Password manager API endpoints
  * @author Miguel Trevino <miguel@zelf.world>
  */
-
 const PATH = "/api/zelf-key";
 
 export default (server) => {
