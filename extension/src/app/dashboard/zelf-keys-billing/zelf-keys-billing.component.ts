@@ -1,20 +1,7 @@
 import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TranslocoModule } from "@jsverse/transloco";
-
-interface PricingPlan {
-	id: string;
-	name: string;
-	price: number;
-	currency: string;
-	period: string;
-	tagline: string;
-	features: string[];
-	buttonText: string;
-	buttonClass: string;
-	isPopular?: boolean;
-	isCurrent?: boolean;
-}
+import { BillingService, PricingPlan } from "../../services/billing.service";
 
 @Component({
 	selector: "app-zelf-keys-billing",
@@ -24,73 +11,50 @@ interface PricingPlan {
 	styleUrls: ["./zelf-keys-billing.component.scss"],
 })
 export class ZelfKeysBillingComponent implements OnInit {
-	plans: PricingPlan[] = [
-		{
-			id: "free",
-			name: "Free",
-			price: 0,
-			currency: "USD",
-			period: "month",
-			tagline: "Essential features for getting started",
-			features: ["Up to 10 passwords", "Basic encryption", "Single device access", "Community support", "Basic backup"],
-			buttonText: "Your current plan",
-			buttonClass: "current-plan",
-			isCurrent: true,
-		},
-		{
-			id: "plus",
-			name: "Plus",
-			price: 9.99,
-			currency: "USD",
-			period: "month",
-			tagline: "More features for power users",
-			features: [
-				"Unlimited passwords",
-				"Advanced encryption",
-				"Multi-device sync",
-				"Priority support",
-				"Cloud backup",
-				"Password sharing",
-				"Advanced security features",
-				"Dark mode themes",
-			],
-			buttonText: "Get Plus",
-			buttonClass: "upgrade-button",
-			isPopular: true,
-		},
-		{
-			id: "pro",
-			name: "Pro",
-			price: 19.99,
-			currency: "USD",
-			period: "month",
-			tagline: "Full access to all features",
-			features: [
-				"Everything in Plus",
-				"Team collaboration",
-				"Advanced analytics",
-				"Custom integrations",
-				"White-label options",
-				"API access",
-				"Priority feature requests",
-				"24/7 premium support",
-				"Advanced reporting",
-			],
-			buttonText: "Get Pro",
-			buttonClass: "upgrade-button pro",
-		},
-	];
-
+	plans: PricingPlan[] = [];
 	currentPlan: string = "free";
+	loading: boolean = true;
+	error: string | null = null;
+
+	constructor(private billingService: BillingService) {}
 
 	ngOnInit(): void {
-		// In a real app, this would fetch the user's current subscription status
+		this.loadPlans();
 		this.loadCurrentPlan();
 	}
 
+	private loadPlans(): void {
+		this.loading = true;
+		this.error = null;
+
+		this.billingService
+			.getAvailablePlans()
+			.then((response) => {
+				if (response.success && response.plans) {
+					this.plans = this.billingService.transformApiPlansToPricingPlans(response.plans);
+					this.loading = false;
+					return;
+				}
+
+				this.error = "Failed to load subscription plans";
+				this.loading = false;
+			})
+			.catch((error) => {
+				console.error("Error loading plans:", error);
+				this.error = "Failed to load subscription plans";
+				this.loading = false;
+			});
+	}
+
 	private loadCurrentPlan(): void {
-		// Mock current plan - in real app, fetch from service
+		// TODO: Fetch current subscription from API
+		// For now, default to free
 		this.currentPlan = "free";
+	}
+
+	// Public method for retry button
+	public retryLoadPlans(): void {
+		this.loadPlans();
 	}
 
 	selectPlan(planId: string): void {
@@ -98,9 +62,25 @@ export class ZelfKeysBillingComponent implements OnInit {
 			return; // Don't allow selecting current plan
 		}
 
-		// In a real app, this would handle the subscription upgrade
 		console.log(`Upgrading to ${planId} plan`);
-		// TODO: Implement subscription logic
+		this.createCheckoutSession(planId);
+	}
+
+	private createCheckoutSession(planId: string): void {
+		this.billingService
+			.createCheckoutSession(planId)
+			.then((response) => {
+				if (response.success && response.checkoutUrl) {
+					// Redirect to Stripe checkout
+					window.open(response.checkoutUrl, "_blank");
+				} else {
+					this.error = "Failed to create checkout session";
+				}
+			})
+			.catch((error) => {
+				console.error("Error creating checkout session:", error);
+				this.error = "Failed to create checkout session";
+			});
 	}
 
 	getPlanButtonText(plan: PricingPlan): string {

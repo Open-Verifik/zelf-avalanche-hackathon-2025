@@ -23,6 +23,72 @@
 		}
 	}
 
+	.loading-container {
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		justify-content: center;
+		padding: 60px 20px;
+		text-align: center;
+
+		.loading-spinner {
+			width: 40px;
+			height: 40px;
+			border: 4px solid #f3f3f3;
+			border-top: 4px solid #667eea;
+			border-radius: 50%;
+			animation: spin 1s linear infinite;
+			margin-bottom: 16px;
+		}
+
+		p {
+			font-size: 16px;
+			color: #666;
+			margin: 0;
+		}
+	}
+
+	.error-container {
+		display: flex;
+		justify-content: center;
+		padding: 60px 20px;
+
+		.error-message {
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			text-align: center;
+			max-width: 400px;
+
+			.error-icon {
+				color: #dc3545;
+				margin-bottom: 16px;
+			}
+
+			p {
+				font-size: 16px;
+				color: #dc3545;
+				margin: 0 0 20px 0;
+			}
+
+			.retry-button {
+				background: #667eea;
+				color: white;
+				border: none;
+				padding: 12px 24px;
+				border-radius: 8px;
+				font-size: 14px;
+				font-weight: 600;
+				cursor: pointer;
+				transition: background-color 0.2s ease;
+
+				&:hover {
+					background: #5a67d8;
+				}
+			}
+		}
+	}
+
 	.pricing-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -223,6 +289,16 @@
 				}
 			}
 		}
+	}
+}
+
+// Animations
+@keyframes spin {
+	0% {
+		transform: rotate(0deg);
+	}
+	100% {
+		transform: rotate(360deg);
 	}
 }
 

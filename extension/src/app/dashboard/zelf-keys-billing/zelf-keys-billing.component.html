@@ -4,7 +4,31 @@
 		<p class="billing-subtitle">Select the plan that best fits your needs</p>
 	</div>
 
-	<div class="pricing-grid">
+	<!-- Loading State -->
+	<div *ngIf="loading" class="loading-container">
+		<div class="loading-spinner"></div>
+		<p>Loading subscription plans...</p>
+	</div>
+
+	<!-- Error State -->
+	<div *ngIf="error && !loading" class="error-container">
+		<div class="error-message">
+			<svg class="error-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<path
+					d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+					stroke="currentColor"
+					stroke-width="2"
+					stroke-linecap="round"
+					stroke-linejoin="round"
+				/>
+			</svg>
+			<p>{{ error }}</p>
+			<button class="retry-button" (click)="retryLoadPlans()">Try Again</button>
+		</div>
+	</div>
+
+	<!-- Plans Grid -->
+	<div *ngIf="!loading && !error" class="pricing-grid">
 		<div *ngFor="let plan of plans" class="pricing-card" [class.popular]="plan.isPopular" [class.current]="plan.isCurrent">
 			<div class="card-header">
 				<div class="plan-name">{{ plan.name }}</div>
@@ -15,11 +39,11 @@
 				<div class="price">
 					<span class="currency">$</span>
 					<span class="amount">{{ plan.price }}</span>
-					<span class="period">/{{ plan.period }}</span>
+					<span class="period">/{{ plan.interval }}</span>
 				</div>
 			</div>
 
-			<div class="plan-tagline">{{ plan.tagline }}</div>
+			<div class="plan-tagline">{{ plan.description }}</div>
 
 			<div class="plan-features">
 				<div *ngFor="let feature of plan.features" class="feature-item">
