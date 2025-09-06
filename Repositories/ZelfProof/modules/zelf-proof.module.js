@@ -39,6 +39,8 @@ const encrypt = async (data) => {
 	} catch (exception) {
 		const _error = exception.response?.data;
 
+		console.log({ exception, data: exception.response?.data });
+
 		let error = new Error(_error?.message || "Something went wrong");
 
 		switch (_error?.code || _error?.message) {
@@ -93,7 +95,7 @@ const encryptQRCode = async (data) => {
 
 		return encryptedResponse?.data;
 	} catch (exception) {
-		console.log({ exception });
+		console.log({ exception, data: exception.response?.data });
 
 		const error = _formattingError(exception.response?.data);
 
@@ -132,6 +134,7 @@ const decrypt = async (data) => {
 
 		return encryptedResponse?.data;
 	} catch (exception) {
+		console.error({ exception, data: exception.response?.data });
 		const error = _formattingError(exception.response?.data);
 
 		let _error = new Error(error.message);
@@ -187,6 +190,10 @@ const _formattingError = (error = {}) => {
 
 	if (error?.message) {
 		error.message = error.message.toUpperCase();
+	}
+
+	if (error?.error) {
+		error.message = error.error;
 	}
 
 	return error;

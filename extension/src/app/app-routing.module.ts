@@ -107,6 +107,11 @@ const routes: Routes = [
 								(m) => m.PaymentCardResultComponent
 							),
 					},
+					{
+						path: "billing",
+						loadComponent: () =>
+							import("./dashboard/zelf-keys-billing/zelf-keys-billing.component").then((m) => m.ZelfKeysBillingComponent),
+					},
 				],
 			},
 			{

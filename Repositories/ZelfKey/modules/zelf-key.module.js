@@ -66,6 +66,17 @@ const createMetadataAndPublicData = async (type, data, authToken) => {
 	}
 };
 
+const validateOwnership = async (zelfProof, faceBase64, masterPassword) => {
+	const decryptedResponse = await ZelfProofModule.decrypt({
+		zelfProof,
+		faceBase64,
+		password: masterPassword,
+		os: "DESKTOP",
+	});
+
+	return decryptedResponse.publicData;
+};
+
 /**
  * Store website passwords
  * @param {Object} data
@@ -78,9 +89,11 @@ const createMetadataAndPublicData = async (type, data, authToken) => {
  * @returns {Promise<Object>}
  */
 const storePassword = async (data, authToken) => {
-	try {
-		const { website, faceBase64, masterPassword, name, folder, insideFolder } = data;
+	const { website, faceBase64, masterPassword, name, folder, insideFolder, zelfProof } = data;
 
+	await validateOwnership(zelfProof, faceBase64, masterPassword);
+
+	try {
 		const { metadata, publicData } = await createMetadataAndPublicData("password", data, authToken);
 
 		const identifier = name ? `${authToken.address}_${name}` : `password_${website}_${Date.now()}`;
@@ -96,7 +109,7 @@ const storePassword = async (data, authToken) => {
 			os: "DESKTOP",
 		});
 
-		const { zelfProof } = await ZelfProofModule.encrypt({
+		const zelfKey = await ZelfProofModule.encrypt({
 			publicData,
 			metadata,
 			faceBase64,
@@ -112,7 +125,7 @@ const storePassword = async (data, authToken) => {
 		try {
 			qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
 				...publicData,
-				zelfProof,
+				zelfProof: zelfKey.zelfProof,
 			});
 		} catch (ipfsError) {
 			console.warn("⚠️ Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
@@ -131,7 +144,7 @@ const storePassword = async (data, authToken) => {
 
 		const result = {
 			success: true,
-			zelfProof, // QR code data URL for tests
+			zelfProof: zelfKey.zelfProof,
 			zelfQR, // Encrypted string
 			NFT: null,
 			ipfs: qrCodeIPFS
@@ -165,9 +178,11 @@ const storePassword = async (data, authToken) => {
  * @returns {Promise<Object>}
  */
 const storeNotes = async (data, authToken) => {
-	try {
-		const { title, faceBase64, masterPassword } = data;
+	const { title, faceBase64, masterPassword, zelfProof } = data;
 
+	await validateOwnership(zelfProof, faceBase64, masterPassword);
+
+	try {
 		const identifier = `notes_${title}_${Date.now()}`;
 
 		const { metadata, publicData } = await createMetadataAndPublicData("notes", data, authToken);
@@ -184,7 +199,7 @@ const storeNotes = async (data, authToken) => {
 			os: "DESKTOP",
 		});
 
-		const { zelfProof } = await ZelfProofModule.encrypt({
+		const zelfKey = await ZelfProofModule.encrypt({
 			publicData,
 			metadata,
 			faceBase64,
@@ -202,7 +217,7 @@ const storeNotes = async (data, authToken) => {
 			try {
 				qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
 					...publicData,
-					zelfProof,
+					zelfProof: zelfKey.zelfProof,
 				});
 			} catch (ipfsError) {
 				console.warn("Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
@@ -211,7 +226,7 @@ const storeNotes = async (data, authToken) => {
 
 		return {
 			success: true,
-			zelfProof, // QR code data URL for tests
+			zelfProof: zelfKey.zelfProof,
 			zelfQR, // Encrypted string
 			ipfs: qrCodeIPFS
 				? {
@@ -246,9 +261,11 @@ const storeNotes = async (data, authToken) => {
  * @returns {Promise<Object>}
  */
 const storeCreditCard = async (data, authToken) => {
-	try {
-		const { cardName, cardNumber, expiryMonth, expiryYear, cvv, bankName, faceBase64, masterPassword } = data;
+	const { cardName, cardNumber, expiryMonth, expiryYear, cvv, bankName, faceBase64, masterPassword, zelfProof } = data;
 
+	await validateOwnership(zelfProof, faceBase64, masterPassword);
+
+	try {
 		// Validate credit card data
 		if (!cardNumber || cardNumber.length < 13 || cardNumber.length > 19) {
 			throw new Error("Invalid credit card number");
@@ -281,7 +298,7 @@ const storeCreditCard = async (data, authToken) => {
 			os: "DESKTOP",
 		});
 
-		const { zelfProof } = await ZelfProofModule.encrypt({
+		const zelfKey = await ZelfProofModule.encrypt({
 			publicData,
 			metadata,
 			faceBase64,
@@ -296,7 +313,7 @@ const storeCreditCard = async (data, authToken) => {
 			try {
 				qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
 					...publicData,
-					zelfProof,
+					zelfProof: zelfKey.zelfProof,
 				});
 			} catch (error) {
 				console.error("Error storing credit card:", error);
@@ -306,7 +323,7 @@ const storeCreditCard = async (data, authToken) => {
 
 		const result = {
 			success: true,
-			zelfProof, // QR code data URL for tests
+			zelfProof: zelfKey.zelfProof,
 			zelfQR, // Encrypted string
 			ipfs: qrCodeIPFS
 				? {

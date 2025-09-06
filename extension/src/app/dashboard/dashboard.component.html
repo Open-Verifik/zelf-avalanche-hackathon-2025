@@ -46,6 +46,10 @@
 				<span class="nav-text">Payment Cards</span>
 				<div class="active-indicator" *ngIf="activeTab === 'payment-cards'"></div>
 			</div>
+			<div class="nav-item" [class.active]="activeTab === 'billing'" (click)="navigateToTab('billing')">
+				<span class="nav-text">Billing</span>
+				<div class="active-indicator" *ngIf="activeTab === 'billing'"></div>
+			</div>
 		</nav>
 
 		<main class="dashboard-content">

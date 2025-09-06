@@ -1,8 +1,8 @@
-import { Component, OnInit, OnDestroy, EventEmitter, Output, ViewChild, ElementRef, ChangeDetectorRef, Renderer2, Input } from "@angular/core";
+import { Component, OnInit, OnDestroy, EventEmitter, Output, ViewChild, ElementRef, ChangeDetectorRef, Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { FormsModule } from "@angular/forms";
-import { TranslocoModule, TranslocoService } from "@jsverse/transloco";
-import { RouterModule, Router, ActivatedRoute } from "@angular/router";
+import { TranslocoModule } from "@jsverse/transloco";
+import { RouterModule, Router } from "@angular/router";
 import { WebcamComponent, WebcamImage, WebcamInitError, WebcamModule } from "ngx-webcam";
 import { Subject, takeUntil, Observable } from "rxjs";
 import { FlexLayoutModule } from "@angular/flex-layout";
@@ -11,12 +11,11 @@ import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { ZelfLoaderComponent } from "app/zelf-loader/zelf-loader.component";
 import { HttpWrapperService } from "app/http-wrapper.service";
-import { MediaStreamService } from "app/services/media-stream.service";
 import { WalletService } from "../../wallet.service";
 import { environment } from "environments/environment";
 import * as faceapi from "@vladmandic/face-api";
-import { ChromeService } from "../../chrome.service";
 import { DataPassingService } from "../../services/data-passing.service";
+import { Wallet } from "app/wallet";
 
 export interface BiometricData {
 	faceBase64: string;
@@ -98,6 +97,9 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	// Category-specific properties
 	dataType: string = "";
 	dataTitle: string = "";
+	wallet!: Wallet;
+	hasMasterPassword!: boolean;
+	shareables!: any;
 	useMasterPassword: boolean = false;
 
 	// Make Math and Date available in template
@@ -123,16 +125,15 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	constructor(
 		private _changeDetectorRef: ChangeDetectorRef,
 		private _httpWrapperService: HttpWrapperService,
-		private _mediaStreamService: MediaStreamService,
-		private _renderer: Renderer2,
-		private _translocoService: TranslocoService,
 		private _walletService: WalletService,
 		private _router: Router,
-		private _route: ActivatedRoute,
-		private chromeService: ChromeService,
 		private dataPassingService: DataPassingService
 	) {
 		this.apiKeysSessionJWT = "";
+
+		this.shareables = {
+			wallet: {},
+		};
 	}
 
 	async ngOnInit(): Promise<void> {
@@ -153,11 +154,33 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 		// Get data from service instead of query params
 		this._getDataFromService();
 
+		await this._setWallet();
+
 		// Initialize ZelfKey session
 		this.initZelfKeySession();
 
 		// Initialize biometric verification
 		this._initializeBiometrics();
+	}
+
+	private async _setWallet(): Promise<any> {
+		const wallet = await this._walletService.getFirstWalletFromStorage();
+
+		if (!wallet?.name) {
+			this._router.navigate(["/welcome"]);
+
+			return;
+		}
+
+		this.shareables.wallet = wallet;
+
+		this.wallet = this.shareables.wallet;
+
+		console.log("wallet >>> inside data-biometrics.component.ts", wallet, { itemData: this.itemData });
+
+		this.hasMasterPassword = wallet.hasPassword || false;
+
+		this._changeDetectorRef.detectChanges();
 	}
 
 	/**
@@ -777,6 +800,11 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 				throw new Error(`No data available for ${this.dataType}. Cannot proceed with storage.`);
 			}
 
+			const walletKeys = {
+				zelfProof: this.wallet.zelfProof,
+				masterPassword: this.wallet.hasPassword ? dataSource.masterPassword : undefined,
+			};
+
 			switch (this.dataType) {
 				case "notes":
 					// Store note data
@@ -786,7 +814,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						folder: dataSource.folder,
 						insideFolder: dataSource.insideFolder,
 						faceBase64: faceBase64,
-						...(this.useMasterPassword && this.masterPassword && { password: this.masterPassword }), // Optional password
+						...walletKeys,
 					};
 
 					response = await this._httpWrapperService.sendRequest("post", `${environment.keysApiUrl}/api/zelf-key/store/notes`, notePayload, {
@@ -807,7 +835,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						insideFolder: dataSource.insideFolder,
 						name: dataSource.title,
 						faceBase64: faceBase64,
-						...(this.useMasterPassword && this.masterPassword && { masterPassword: this.masterPassword }), // Optional master password
+						...walletKeys,
 					};
 
 					response = await this._httpWrapperService.sendRequest(
@@ -834,7 +862,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 						cvv: dataSource.cvv,
 						bankName: dataSource.bankName,
 						faceBase64: faceBase64,
-						...(this.useMasterPassword && this.masterPassword && { masterPassword: this.masterPassword }), // Optional master password
+						...walletKeys,
 					};
 
 					response = await this._httpWrapperService.sendRequest(

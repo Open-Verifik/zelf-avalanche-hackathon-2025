@@ -1347,6 +1347,76 @@ class BiometricsGeneralComponent {
 
 /***/ }),
 
+/***/ 54173:
+/*!**************************************************!*\
+  !*** ./src/app/services/media-stream.service.ts ***!
+  \**************************************************/
+/***/ ((__unused_webpack_module, __webpack_exports__, __webpack_require__) => {
+
+__webpack_require__.r(__webpack_exports__);
+/* harmony export */ __webpack_require__.d(__webpack_exports__, {
+/* harmony export */   MediaStreamService: () => (/* binding */ MediaStreamService)
+/* harmony export */ });
+/* harmony import */ var _Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__ = __webpack_require__(/*! ./node_modules/@angular-devkit/build-angular/node_modules/@babel/runtime/helpers/esm/asyncToGenerator.js */ 81890);
+/* harmony import */ var _angular_core__WEBPACK_IMPORTED_MODULE_1__ = __webpack_require__(/*! @angular/core */ 37580);
+
+
+class MediaStreamService {
+  _activeStreams = [];
+  startStream(constraints) {
+    var _this = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      const stream = yield navigator.mediaDevices.getUserMedia(constraints);
+      _this._activeStreams.push(stream);
+      return stream;
+    })();
+  }
+  addStream(stream) {
+    this._activeStreams.push(stream);
+  }
+  stopStream(stream) {
+    stream.getTracks().forEach(track => track.stop());
+    this._activeStreams = this._activeStreams.filter(activeStream => activeStream !== stream);
+  }
+  stopAllStreams() {
+    var _this2 = this;
+    return (0,_Users_miguel_zelf_avalanche_hackathon_2025_extension_node_modules_angular_devkit_build_angular_node_modules_babel_runtime_helpers_esm_asyncToGenerator_js__WEBPACK_IMPORTED_MODULE_0__["default"])(function* () {
+      _this2._activeStreams.forEach(stream => {
+        stream?.getTracks().forEach(track => track.stop());
+      });
+      _this2._activeStreams = [];
+      document.querySelectorAll("video").forEach(video => {
+        if (!(video.srcObject instanceof MediaStream)) return;
+        const stream = video.srcObject;
+        if (!stream) return;
+        stream.getTracks().forEach(track => track.stop());
+        video.srcObject = null;
+      });
+      document.querySelectorAll("canvas").forEach(canvas => {
+        const context = canvas.getContext("2d");
+        if (!context) return;
+        const stream = canvas.captureStream?.();
+        if (!stream) return;
+        stream.getTracks().forEach(track => track.stop());
+      });
+      const stream = yield navigator.mediaDevices.getUserMedia({
+        video: true
+      });
+      stream?.getTracks().forEach(track => track.stop());
+    })();
+  }
+  static ɵfac = function MediaStreamService_Factory(__ngFactoryType__) {
+    return new (__ngFactoryType__ || MediaStreamService)();
+  };
+  static ɵprov = /*@__PURE__*/_angular_core__WEBPACK_IMPORTED_MODULE_1__["ɵɵdefineInjectable"]({
+    token: MediaStreamService,
+    factory: MediaStreamService.ɵfac,
+    providedIn: "root"
+  });
+}
+
+/***/ }),
+
 /***/ 67397:
 /*!**************************************************!*\
   !*** ./src/app/biometrics-general/sdk.models.ts ***!
