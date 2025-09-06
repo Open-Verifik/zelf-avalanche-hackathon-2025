@@ -176,8 +176,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 
 		this.wallet = this.shareables.wallet;
 
-		console.log("wallet >>> inside data-biometrics.component.ts", wallet, { itemData: this.itemData });
-
 		this.hasMasterPassword = wallet.hasPassword || false;
 
 		this._changeDetectorRef.detectChanges();
@@ -221,6 +219,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 
 		// Complete observables
 		this.unsubscriber$.next();
+
 		this.unsubscriber$.complete();
 	}
 
@@ -282,9 +281,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 					videoElement.srcObject = null;
 				}
 			}
-
-			// Note: MediaStreamService doesn't have stopCamera method
-			// Camera cleanup is handled above through the webcam component
 		} catch (error) {
 			console.warn("Error stopping camera:", error);
 		}
@@ -770,16 +766,11 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 		try {
 			const base64Data = this.response.base64Image.split(",")[1];
 
-			console.log("🔍 DEBUG - Biometric capture mode:", this.isDecryptMode ? "DECRYPT" : "STORE");
-			console.log("🔍 DEBUG - Data type:", this.dataType);
-
 			if (this.isDecryptMode) {
 				// In decrypt mode, retrieve the data based on category
-				console.log("🔍 DEBUG - Calling retrieve method");
 				await this._retrieveDataByCategory(base64Data);
 			} else {
 				// In create mode, store the data based on category
-				console.log("🔍 DEBUG - Calling store method");
 				await this._storeDataByCategory(base64Data);
 			}
 		} catch (error) {
@@ -897,15 +888,11 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 
 	private async _retrieveDataByCategory(faceBase64: string): Promise<any> {
 		try {
-			console.log("🔍 DEBUG - Starting retrieve process");
-
 			// Get the correct data source based on data type
 			const dataSource = this._getDataSource();
-			console.log("🔍 DEBUG - Data source for retrieve:", dataSource);
 
 			// For retrieve mode, we need zelfProof and optional password
 			if (!dataSource.publicData.zelfProof) {
-				console.error("❌ DEBUG - No zelfProof found in data source");
 				throw new Error(`No zelfProof available for ${this.dataType}. Cannot proceed with retrieval.`);
 			}
 
@@ -914,9 +901,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 				faceBase64: faceBase64,
 				...(this.useMasterPassword && this.masterPassword && { password: this.masterPassword }), // Optional password
 			};
-
-			console.log("🔍 DEBUG - Retrieve payload:", retrievePayload);
-			console.log("🔍 DEBUG - Calling retrieve endpoint:", `${environment.keysApiUrl}/api/zelf-key/retrieve`);
 
 			// Call the retrieve endpoint
 			const response = await this._httpWrapperService.sendRequest("post", `${environment.keysApiUrl}/api/zelf-key/retrieve`, retrievePayload, {
@@ -948,7 +932,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 
 		// Determine if this is store or retrieve mode
 		const isRetrieveMode = this.isDecryptMode;
-		const modeText = isRetrieveMode ? "retrieved" : "stored";
+
 		const messageText = isRetrieveMode ? "Note retrieved successfully" : "Note stored successfully";
 
 		// For decrypt mode, emit result instead of navigating
@@ -1013,20 +997,10 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 				if (apiResponse?.data?.publicData?.card) {
 					try {
 						parsedCardData = JSON.parse(apiResponse.data.publicData.card);
-						console.log("Parsed card data:", parsedCardData);
 					} catch (error) {
 						console.error("Error parsing card data:", error);
 					}
 				}
-
-				// // Extract expiry month and year from the expires field (format: "12/26")
-				// let expiryMonth = "";
-				// let expiryYear = "";
-				// if (parsedCardData.expires) {
-				// 	const [month, year] = parsedCardData.expires.split("/");
-				// 	expiryMonth = month;
-				// 	expiryYear = year ? `20${year}` : ""; // Convert "26" to "2026"
-				// }
 
 				await this.dataPassingService.storeResult("payment-cards", apiResponse);
 
@@ -1034,7 +1008,6 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 				break;
 
 			default:
-				// Fallback to dashboard
 				this._router.navigate(["/dashboard"]);
 				break;
 		}
