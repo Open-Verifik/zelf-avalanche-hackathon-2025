@@ -253,7 +253,7 @@ async function searchSubscriptionInIPFS(zelfKeysTag) {
 		// Replace .zelf with .zelfkeys or .zelf.hold with .zelfkeys
 
 		// Query IPFS by key-value pair
-		const files = await pinata.filter("zelfName", queryKey);
+		const files = await pinata.filter("zelfName", zelfKeysTag);
 
 		if (!files || files.length === 0) return null; // No subscription found
 
@@ -326,15 +326,14 @@ async function handleCheckoutSessionCompleted(session) {
 
 async function handleSubscriptionCreated(subscription) {
 	try {
-		console.log("🆕 Processing subscription created:", {
-			subscriptionId: subscription.id,
-			status: subscription.status,
-			customerId: subscription.customer,
-			metadata: subscription.metadata,
-		});
-
+		// console.log("🆕 Processing subscription created:", {
+		// 	subscriptionId: subscription.id,
+		// 	status: subscription.status,
+		// 	customerId: subscription.customer,
+		// 	metadata: subscription.metadata,
+		// });
 		// Just log - don't create subscription yet, wait for payment confirmation
-		console.log("⏳ Subscription created, waiting for payment confirmation...");
+		// console.log("⏳ Subscription created, waiting for payment confirmation...");
 	} catch (error) {
 		console.error("❌ Error handling subscription created:", error);
 	}

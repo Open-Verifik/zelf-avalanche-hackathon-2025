@@ -7,6 +7,7 @@ import config from "../Core/config.js";
 
 describe("Subscription Endpoints", () => {
 	let authToken;
+	let correctAuthToken;
 
 	beforeAll(async () => {
 		// Create a session to get JWT token for subscription endpoints
@@ -24,12 +25,26 @@ describe("Subscription Endpoints", () => {
 			} else {
 				console.log("Could not get JWT token, subscription tests will expect 401 errors");
 			}
+
+			const correctSessionResponse = await request(app).post("/api/sessions").send({
+				identifier: `user-lcaj5d.zelf`,
+				address: "0xB7b30A282eb6c0fEef1Bd8D268E05f4c2a2Ab565",
+			});
+			correctAuthToken = correctSessionResponse.body.data.token;
 		} catch (error) {
 			console.log("Could not get JWT token, subscription tests will expect 401 errors");
 		}
 	});
 
 	describe("GET /api/subscription/active", () => {
+		it("should return active subscription for correct user", async () => {
+			const response = await request(app).get("/api/subscription/active").set("Authorization", `Bearer ${correctAuthToken}`);
+
+			expect(response.status).toBe(200);
+			expect(response.body).toHaveProperty("success", true);
+			expect(response.body).toHaveProperty("subscription");
+		});
+
 		it("should return no active subscription for new user", async () => {
 			const response = await request(app).get("/api/subscription/active").set("Authorization", `Bearer ${authToken}`);
 

@@ -199,92 +199,6 @@ describe("ZelfKey Endpoints", () => {
 				}
 			});
 		});
-
-		describe("Store Contact", () => {
-			it("should store contact with all fields successfully", async () => {
-				const payload = {
-					type: "contact",
-					payload: {
-						name: "Jane Smith",
-						email: "jane.smith@company.com",
-						phone: "+1-555-123-4567",
-						address: "123 Business St, City, State 12345",
-						company: "Tech Corp",
-					},
-					faceBase64: selfiesData.manSelfie,
-					password: "master_password_123",
-				};
-
-				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
-
-				if (response.status === 200) {
-					expect(response.body).toHaveProperty("success", true);
-					expect(response.body).toHaveProperty("zelfProof");
-					expect(response.body).toHaveProperty("publicData");
-					expect(response.body.publicData.type).toBe("contact");
-					expect(response.body.publicData.name).toBe("Jane Smith");
-					expect(response.body.publicData.email).toBe("***com");
-					expect(response.body.publicData.phone).toBe("***4567");
-					expect(response.body.publicData).toHaveProperty("timestamp");
-				} else {
-					expect([401, 500]).toContain(response.status);
-				}
-			});
-
-			it("should store contact with minimal required fields", async () => {
-				const payload = {
-					type: "contact",
-					payload: {
-						name: "Minimal Contact",
-						email: "minimal@test.com",
-					},
-					faceBase64: selfiesData.manSelfie,
-					password: "master_password_123",
-				};
-
-				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
-
-				if (response.status === 200) {
-					expect(response.body.publicData.name).toBe("Minimal Contact");
-					expect(response.body.publicData.email).toBe("***com");
-				} else {
-					expect([401, 500]).toContain(response.status);
-				}
-			});
-		});
-
-		describe("Store Bank Details", () => {
-			it("should store bank details successfully", async () => {
-				const payload = {
-					type: "bank_details",
-					payload: {
-						bankName: "Wells Fargo",
-						accountNumber: "1234567890123456",
-						routingNumber: "121000248",
-						accountType: "checking",
-						accountHolder: "John Doe",
-					},
-					faceBase64: selfiesData.manSelfie,
-					password: "master_password_123",
-				};
-
-				const response = await request(app).post("/api/zelf-key/store").set("Authorization", `Bearer ${authToken}`).send(payload);
-
-				if (response.status === 200) {
-					expect(response.body).toHaveProperty("success", true);
-					expect(response.body).toHaveProperty("zelfProof");
-					expect(response.body).toHaveProperty("publicData");
-					expect(response.body.publicData.type).toBe("bank_details");
-					expect(response.body.publicData.bankName).toBe("Wells Fargo");
-					expect(response.body.publicData.accountNumber).toBe("****3456");
-					expect(response.body.publicData.accountType).toBe("checking");
-					expect(response.body.publicData.accountHolder).toBe("John Doe");
-					expect(response.body.publicData).toHaveProperty("timestamp");
-				} else {
-					expect([401, 500]).toContain(response.status);
-				}
-			});
-		});
 	});
 
 	describe("POST /api/zelf-key/store/password", () => {
@@ -369,63 +283,6 @@ describe("ZelfKey Endpoints", () => {
 				expect(response.body.publicData.expiryMonth).toBe("06");
 				expect(response.body.publicData.expiryYear).toBe("2029");
 				expect(response.body.publicData.bankName).toBe("Test Bank");
-				expect(response.body.publicData).toHaveProperty("timestamp");
-			} else {
-				expect([401, 500]).toContain(response.status);
-			}
-		});
-	});
-
-	describe("POST /api/zelf-key/store/contact", () => {
-		it("should store contact using specific endpoint", async () => {
-			const payload = {
-				name: "Specific Contact",
-				email: "specific@test.com",
-				phone: "+1-555-987-6543",
-				faceBase64: selfiesData.manSelfie,
-				password: "master_password_123",
-			};
-
-			const response = await request(app).post("/api/zelf-key/store/contact").set("Authorization", `Bearer ${authToken}`).send(payload);
-
-			if (response.status === 200) {
-				expect(response.body).toHaveProperty("success", true);
-				expect(response.body).toHaveProperty("zelfProof");
-				expect(response.body).toHaveProperty("publicData");
-				expect(response.body.publicData.type).toBe("contact");
-				expect(response.body.publicData.name).toBe("Specific Contact");
-				expect(response.body.publicData.email).toBe("***com");
-				expect(response.body.publicData.phone).toBe("***6543");
-				expect(response.body.publicData).toHaveProperty("timestamp");
-			} else {
-				expect([401, 500]).toContain(response.status);
-			}
-		});
-	});
-
-	describe("POST /api/zelf-key/store/bank-details", () => {
-		it("should store bank details using specific endpoint", async () => {
-			const payload = {
-				bankName: "Specific Bank",
-				accountNumber: "9876543210987654",
-				routingNumber: "987654321",
-				accountType: "savings",
-				accountHolder: "Specific Holder",
-				faceBase64: selfiesData.manSelfie,
-				password: "master_password_123",
-			};
-
-			const response = await request(app).post("/api/zelf-key/store/bank-details").set("Authorization", `Bearer ${authToken}`).send(payload);
-
-			if (response.status === 200) {
-				expect(response.body).toHaveProperty("success", true);
-				expect(response.body).toHaveProperty("zelfProof");
-				expect(response.body).toHaveProperty("publicData");
-				expect(response.body.publicData.type).toBe("bank_details");
-				expect(response.body.publicData.bankName).toBe("Specific Bank");
-				expect(response.body.publicData.accountNumber).toBe("****7654");
-				expect(response.body.publicData.accountType).toBe("savings");
-				expect(response.body.publicData.accountHolder).toBe("Specific Holder");
 				expect(response.body.publicData).toHaveProperty("timestamp");
 			} else {
 				expect([401, 500]).toContain(response.status);
@@ -931,7 +788,7 @@ describe("ZelfKey Endpoints", () => {
 
 	describe("Category Validation", () => {
 		it("should accept valid categories", async () => {
-			const validCategories = ["password", "notes", "credit_card", "contact", "bank_details"];
+			const validCategories = ["password", "notes", "credit_card"];
 
 			for (const category of validCategories) {
 				const response = await request(app).get(`/api/zelf-key/list?category=${category}`).set("Authorization", `Bearer ${authToken}`);

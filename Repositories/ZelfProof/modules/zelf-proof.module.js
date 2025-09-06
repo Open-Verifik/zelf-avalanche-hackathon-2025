@@ -134,7 +134,6 @@ const decrypt = async (data) => {
 
 		return encryptedResponse?.data;
 	} catch (exception) {
-		console.error({ exception, data: exception.response?.data });
 		const error = _formattingError(exception.response?.data);
 
 		let _error = new Error(error.message);
@@ -166,8 +165,6 @@ const preview = async (data) => {
 
 		return encryptedResponse?.data;
 	} catch (exception) {
-		console.error({ exception });
-
 		const error = _formattingError(exception.response?.data);
 
 		let _error = new Error(error.message);
