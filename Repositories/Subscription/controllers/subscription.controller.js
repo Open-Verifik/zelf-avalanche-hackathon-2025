@@ -13,11 +13,12 @@ const getActiveSubscription = async (ctx) => {
 	try {
 		const data = await Module.getActiveSubscription(ctx.state.user);
 
-		ctx.status = 200;
+		ctx.status = data?.subscription ? 200 : 404;
+
 		ctx.body = {
-			success: true,
-			subscription: data.subscription,
-			message: data.subscription ? "Active subscription found" : "No active subscription found",
+			success: Boolean(data?.subscription),
+			subscription: data?.subscription,
+			message: data?.subscription ? "Active subscription found" : "No active subscription found",
 		};
 	} catch (error) {
 		console.error(error);

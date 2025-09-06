@@ -67,7 +67,12 @@ export class BillingService {
 	 * @returns Promise with the active subscription data
 	 */
 	async getActiveSubscription(): Promise<SubscriptionResponse> {
-		return this._httpWrapper.sendRequest("get", `${this.baseUrl}/api/subscription/active`);
+		const apiKeysSessionJWT = this._walletService.getZelfKeyJWT();
+		return this._httpWrapper.sendRequest("get", `${this.baseUrl}/api/subscription/active`, null, {
+			headers: {
+				Authorization: `Bearer ${apiKeysSessionJWT}`,
+			},
+		});
 	}
 
 	/**
@@ -97,7 +102,12 @@ export class BillingService {
 	 * @returns Promise with the cancellation result
 	 */
 	async cancelSubscription(): Promise<{ success: boolean; message: string }> {
-		return this._httpWrapper.sendRequest("post", `${this.baseUrl}/api/subscription/cancel`);
+		const apiKeysSessionJWT = this._walletService.getZelfKeyJWT();
+		return this._httpWrapper.sendRequest("post", `${this.baseUrl}/api/subscription/cancel`, null, {
+			headers: {
+				Authorization: `Bearer ${apiKeysSessionJWT}`,
+			},
+		});
 	}
 
 	/**

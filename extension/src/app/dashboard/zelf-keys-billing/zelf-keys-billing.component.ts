@@ -22,10 +22,12 @@ export class ZelfKeysBillingComponent implements OnInit {
 		private _walletService: WalletService
 	) {}
 
-	ngOnInit(): void {
+	async ngOnInit(): Promise<void> {
+		await this._walletService.initZelfKeySession();
+
 		this.loadPlans();
+
 		this.loadCurrentPlan();
-		this._walletService.initZelfKeySession();
 	}
 
 	private loadPlans(): void {
@@ -52,9 +54,21 @@ export class ZelfKeysBillingComponent implements OnInit {
 	}
 
 	private loadCurrentPlan(): void {
-		// TODO: Fetch current subscription from API
-		// For now, default to free
-		this.currentPlan = "free";
+		this.billingService
+			.getActiveSubscription()
+			.then((response) => {
+				console.log("Response:", response);
+
+				if (!response.success) {
+					this.currentPlan = "free";
+					return;
+				}
+
+				this.currentPlan = response.subscription.planId;
+			})
+			.catch((error) => {
+				this.currentPlan = "free";
+			});
 	}
 
 	// Public method for retry button
