@@ -93,17 +93,22 @@ const cancelSubscription = async (ctx) => {
  */
 const webhookHandler = async (ctx) => {
 	try {
+		console.log("🎯 Webhook received in controller:", ctx.request.body.type);
 		const data = await Module.webhookHandler(ctx.request.body, ctx.headers);
 
 		ctx.status = 200;
 		ctx.body = {
 			success: true,
 			message: "Webhook received",
+			processed: data,
 		};
 	} catch (error) {
-		console.error(error);
+		console.error("❌ Webhook error in controller:", error);
 		ctx.status = error.status || 500;
-		ctx.body = { error: error.message };
+		ctx.body = {
+			error: error.message,
+			details: error.stack,
+		};
 	}
 };
 

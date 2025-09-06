@@ -136,14 +136,46 @@ async function simulatePaymentFlow() {
 
 		console.log(`✅ Subscription webhook processed: ${subscriptionResponse.status}`);
 
-		// Step 5: Check subscription status
+		// Step 5: Simulate invoice.payment_succeeded webhook (this creates the subscription)
+		console.log("\n💰 Simulating invoice.payment_succeeded webhook...");
+
+		const invoiceEventId = `evt_${Math.random().toString(36).substring(2, 15)}`;
+		const invoiceId = `in_${Math.random().toString(36).substring(2, 15)}`;
+
+		const invoiceWebhook = {
+			id: invoiceEventId,
+			object: "event",
+			type: "invoice.payment_succeeded",
+			data: {
+				object: {
+					id: invoiceId,
+					object: "invoice",
+					subscription: subscriptionId,
+					customer: customerId,
+					amount_paid: 999,
+					currency: "usd",
+					status: "paid",
+					created: Math.floor(Date.now() / 1000),
+					metadata: {
+						zelfName: zelfName,
+						plan: "basic",
+					},
+				},
+			},
+		};
+
+		const invoiceResponse = await request(BASE_URL).post("/api/subscription/webhook").send(invoiceWebhook);
+
+		console.log(`✅ Invoice payment webhook processed: ${invoiceResponse.status}`);
+
+		// Step 6: Check subscription status
 		console.log("\n📋 Checking subscription status...");
 		const statusResponse = await request(BASE_URL).get("/api/subscription/active").set("Authorization", `Bearer ${authToken}`);
 
 		console.log(`Status: ${statusResponse.status}`);
 		console.log("Response:", statusResponse.body);
 
-		// Step 6: Test subscription update
+		// Step 7: Test subscription update
 		console.log("\n🔄 Testing subscription update...");
 
 		const updateEventId = `evt_${Math.random().toString(36).substring(2, 15)}`;
@@ -192,7 +224,7 @@ async function simulatePaymentFlow() {
 
 		console.log(`✅ Update webhook processed: ${updateResponse.status}`);
 
-		// Step 7: Test subscription cancellation
+		// Step 8: Test subscription cancellation
 		console.log("\n🗑️ Testing subscription cancellation...");
 
 		const cancelEventId = `evt_${Math.random().toString(36).substring(2, 15)}`;
