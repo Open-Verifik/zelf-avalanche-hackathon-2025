@@ -2,6 +2,7 @@ import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TranslocoModule } from "@jsverse/transloco";
 import { BillingService, PricingPlan } from "../../services/billing.service";
+import { WalletService } from "../../wallet.service";
 
 @Component({
 	selector: "app-zelf-keys-billing",
@@ -16,11 +17,15 @@ export class ZelfKeysBillingComponent implements OnInit {
 	loading: boolean = true;
 	error: string | null = null;
 
-	constructor(private billingService: BillingService) {}
+	constructor(
+		private billingService: BillingService,
+		private _walletService: WalletService
+	) {}
 
 	ngOnInit(): void {
 		this.loadPlans();
 		this.loadCurrentPlan();
+		this._walletService.initZelfKeySession();
 	}
 
 	private loadPlans(): void {

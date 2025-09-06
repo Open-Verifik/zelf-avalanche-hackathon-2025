@@ -1,6 +1,7 @@
 import { Injectable } from "@angular/core";
 import { HttpWrapperService } from "./../http-wrapper.service";
 import { environment } from "../../environments/environment";
+import { WalletService } from "app/wallet.service";
 
 export interface PricingPlan {
 	id: string;
@@ -46,9 +47,12 @@ export interface SubscriptionResponse {
 	providedIn: "root",
 })
 export class BillingService {
-	private baseUrl: string = environment.appUrl;
+	private baseUrl: string = environment.keysApiUrl;
 
-	constructor(private _httpWrapper: HttpWrapperService) {}
+	constructor(
+		private _httpWrapper: HttpWrapperService,
+		private _walletService: WalletService
+	) {}
 
 	/**
 	 * Get available subscription plans
@@ -72,9 +76,20 @@ export class BillingService {
 	 * @returns Promise with the checkout session data
 	 */
 	async createCheckoutSession(planId: string): Promise<CheckoutResponse> {
-		return this._httpWrapper.sendRequest("post", `${this.baseUrl}/api/subscription/checkout`, {
-			planId: planId,
-		});
+		const apiKeysSessionJWT = this._walletService.getZelfKeyJWT();
+
+		return this._httpWrapper.sendRequest(
+			"post",
+			`${this.baseUrl}/api/subscription/checkout`,
+			{
+				planId: planId,
+			},
+			{
+				headers: {
+					Authorization: `Bearer ${apiKeysSessionJWT}`,
+				},
+			}
+		);
 	}
 
 	/**
