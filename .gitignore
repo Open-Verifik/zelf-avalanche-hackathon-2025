@@ -7,7 +7,7 @@
 /.angular/
 .angular/
 /extension/node_modules/
-/extension/dist/dev/
+extension/dist/dev/
 
 # Node modules and dependency files
 /node_modules/
