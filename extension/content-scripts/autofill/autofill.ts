@@ -65,9 +65,6 @@ class AutofillContentScript {
       return;
     }
 
-    // Determine form type
-    const formType = this.autofillEngine.detectFormType(form);
-
     // Show icons for relevant fields
     form.fields.forEach(field => {
       if (this.shouldShowIconForField(field)) {
@@ -155,3 +152,19 @@ setTimeout(() => {
     });
   }
 }, 1000);
+// Test comment
+// Test change Sun Sep  7 12:02:40 MDT 2025
+// Test change Sun Sep  7 12:04:29 MDT 2025
+// Test change Sun Sep  7 12:04:57 MDT 2025
+// Test change Sun Sep  7 12:05:06 MDT 2025
+// Test change Sun Sep  7 12:05:32 MDT 2025
+// Test change Sun Sep  7 12:08:53 MDT 2025
+// Test change Sun Sep  7 12:09:03 MDT 2025
+// Test change Sun Sep  7 12:09:19 MDT 2025
+// Test change Sun Sep  7 12:09:40 MDT 2025
+// Test change Sun Sep  7 12:09:54 MDT 2025
+// Test change Sun Sep  7 12:10:18 MDT 2025
+// Test change Sun Sep  7 12:10:48 MDT 2025
+// Test change Sun Sep  7 12:11:00 MDT 2025
+// Test change Sun Sep  7 12:11:33 MDT 2025
+// Final test change Sun Sep  7 12:11:40 MDT 2025

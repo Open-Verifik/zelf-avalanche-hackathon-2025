@@ -12,7 +12,7 @@ import { ChromeService } from "app/chrome.service";
 import { VaultService } from "app/vault.service";
 import { ZelfFlow, ZelfNameService } from "app/zelf-name-service.service";
 import { WalletModel } from "app/wallet";
-import { PasswordStrengthComponent } from "password-strength/password-strength.component";
+import { PasswordStrengthComponent } from "app/password-strength/password-strength.component";
 
 @Component({
     imports: [CommonModule, ReactiveFormsModule, RouterModule, TranslocoModule, MatButtonModule, PasswordStrengthComponent],

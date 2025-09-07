@@ -90,6 +90,7 @@ export class BrowserApiUtil {
         }
         return null;
     }
+<<<<<<< HEAD
     // Get action API (Chrome) or browserAction (Firefox)
     get action() {
         if (this._isChrome) {
@@ -100,6 +101,8 @@ export class BrowserApiUtil {
         }
         return null;
     }
+=======
+>>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
     // Convenience getters
     get isExtension() {
         return this._isChrome || this._isBrowser;

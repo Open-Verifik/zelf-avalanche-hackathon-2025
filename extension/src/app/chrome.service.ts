@@ -271,18 +271,6 @@ export class ChromeService {
 
 				// Ensure the tab is focused and active
 				await browser.tabs.update(currentTab.id, { active: true });
-
-				// Try to maximize the window if possible
-				if (currentTab.windowId) {
-					try {
-						await browser.windows.update(currentTab.windowId, {
-							state: "maximized",
-						});
-					} catch (error) {
-						// Fallback to normal state if maximized fails
-						console.log("Could not maximize window, using normal state");
-					}
-				}
 			} else {
 				// Not in a tab, open a new full page
 				await this.openFullPage(path);

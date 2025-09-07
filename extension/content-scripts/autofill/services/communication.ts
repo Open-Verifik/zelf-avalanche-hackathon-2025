@@ -1,8 +1,7 @@
-import { AutofillMessage, AutofillResponse, PasswordEntry, DecryptedPasswordData } from '../types/autofill.types';
+import { AutofillMessage, AutofillResponse, PasswordEntry, DecryptedPasswordData } from '@shared/types/autofill.types';
 
-// Browser extension API declarations
+// Chrome extension API declaration
 declare const chrome: any;
-declare const browser: any;
 
 export class CommunicationService {
   private static instance: CommunicationService;
@@ -77,9 +76,9 @@ export class CommunicationService {
     return new Promise((resolve, reject) => {
       console.log('Sending message to background script:', message);
       
-      // Check if we're in a browser extension context
+      // Check if we're in a Chrome extension context
       if (typeof chrome !== 'undefined' && chrome.runtime) {
-        chrome.runtime.sendMessage(message, (response) => {
+        chrome.runtime.sendMessage(message, (response: any) => {
           console.log('Received response from background script:', response);
           if (chrome.runtime.lastError) {
             console.error('Chrome runtime error:', chrome.runtime.lastError);
@@ -88,13 +87,8 @@ export class CommunicationService {
             resolve(response);
           }
         });
-      } else if (typeof browser !== 'undefined' && browser.runtime) {
-        browser.runtime.sendMessage(message).then((response) => {
-          console.log('Received response from background script:', response);
-          resolve(response as AutofillResponse);
-        }).catch(reject);
       } else {
-        reject(new Error('Extension runtime not available'));
+        reject(new Error('Chrome extension runtime not available'));
       }
     });
   }
@@ -102,14 +96,9 @@ export class CommunicationService {
   public setupMessageListener(): void {
     // Listen for messages from the background script
     if (typeof chrome !== 'undefined' && chrome.runtime) {
-      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+      chrome.runtime.onMessage.addListener((message: any, sender: any, sendResponse: any) => {
         this.handleMessage(message, sendResponse);
         return true; // Keep message channel open for async response
-      });
-    } else if (typeof browser !== 'undefined' && browser.runtime) {
-      browser.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        this.handleMessage(message, sendResponse);
-        return true;
       });
     }
   }

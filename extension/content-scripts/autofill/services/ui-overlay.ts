@@ -310,20 +310,24 @@ export class UIOverlay {
     const item = document.createElement('div');
     item.className = 'zelfkey-menu-item';
 
+    // Extract host name from website/domain/url
+    const hostName = this.extractHostName(password);
+    const hostInitial = hostName.charAt(0).toUpperCase();
+
     const icon = document.createElement('div');
     icon.className = 'zelfkey-menu-item-icon';
-    icon.textContent = password.name.charAt(0).toUpperCase();
+    icon.textContent = hostInitial;
 
     const content = document.createElement('div');
     content.className = 'zelfkey-menu-item-content';
 
     const title = document.createElement('div');
     title.className = 'zelfkey-menu-item-title';
-    title.textContent = password.name;
+    title.textContent = hostName;
 
     const subtitle = document.createElement('div');
     subtitle.className = 'zelfkey-menu-item-subtitle';
-    subtitle.textContent = password.username || 'No username';
+    subtitle.textContent = this.extractUsername(password);
 
     content.appendChild(title);
     content.appendChild(subtitle);
@@ -331,6 +335,54 @@ export class UIOverlay {
     item.appendChild(content);
 
     return item;
+  }
+
+  private extractHostName(password: PasswordEntry): string {
+    // Check if this is the new format with publicData
+    if ((password as any).publicData?.website) {
+      try {
+        const url = new URL((password as any).publicData.website);
+        return url.hostname;
+      } catch {
+        return (password as any).publicData.website;
+      }
+    }
+
+    // Fallback to original format
+    const source = password.website || password.domain || password.url || password.name;
+    
+    if (!source) {
+      return 'Unknown';
+    }
+
+    try {
+      // If it's a full URL, extract the hostname
+      if (source.includes('://')) {
+        const url = new URL(source);
+        return url.hostname;
+      }
+      
+      // If it already looks like a hostname (contains dots but no protocol)
+      if (source.includes('.') && !source.includes(' ')) {
+        return source;
+      }
+      
+      // Otherwise, use the source as fallback
+      return source;
+    } catch {
+      // If URL parsing fails, use the source as is
+      return source;
+    }
+  }
+
+  private extractUsername(password: PasswordEntry): string {
+    // Check if this is the new format with publicData
+    if ((password as any).publicData?.username) {
+      return (password as any).publicData.username;
+    }
+
+    // Fallback to original format
+    return password.username || 'No username';
   }
 
   private createLoadingMenuItem(): HTMLElement {
@@ -509,3 +561,4 @@ export class UIOverlay {
     });
   }
 }
+// Another test change Sun Sep  7 12:02:57 MDT 2025

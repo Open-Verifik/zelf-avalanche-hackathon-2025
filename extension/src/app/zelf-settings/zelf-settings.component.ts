@@ -4,10 +4,10 @@ import { MatButtonModule } from "@angular/material/button";
 import { MatDialog, MatDialogRef } from "@angular/material/dialog";
 import { TranslocoModule, TranslocoService } from "@jsverse/transloco";
 import { ActivatedRoute, Router, RouterLink } from "@angular/router";
-import { ChromeService } from "app/chrome.service";
-import { ConfirmationDialogComponent } from "app/confirmation-dialog/confirmation-dialog.component";
 import { Subject, takeUntil } from "rxjs";
 import { ZelfSettingsSecurityComponent } from "./zelf-settings-security/zelf-settings-security.component";
+import { ChromeService } from "../chrome.service";
+import { ConfirmationDialogComponent } from "../confirmation-dialog/confirmation-dialog.component";
 
 @Component({
     imports: [NgFor, NgIf, TranslocoModule, MatButtonModule, RouterLink, NgTemplateOutlet, ZelfSettingsSecurityComponent],

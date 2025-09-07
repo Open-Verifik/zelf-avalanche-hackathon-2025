@@ -7,7 +7,7 @@ import {
   MessageSender,
   PasswordEntry,
   SendResponse,
-} from "../types/autofill.types";
+} from "@shared/types/autofill.types";
 import { WalletService } from "../wallet.service";
 import { PasswordDataService } from "./password-data.service";
 
@@ -34,14 +34,6 @@ export class AutofillIntegrationService {
           this.handleMessage(message, sender, sendResponse);
 
           return true; // Keep message channel open for async response
-        }
-      );
-    } else if (typeof browser !== "undefined" && browser.runtime) {
-      browser.runtime.onMessage.addListener(
-        (message: any, sender: MessageSender, sendResponse: SendResponse) => {
-          this.handleMessage(message, sender, sendResponse);
-
-          return true;
         }
       );
     }
@@ -205,13 +197,8 @@ export class AutofillIntegrationService {
             reject(new Error(chrome.runtime.lastError.message));
           else resolve(response);
         });
-      } else if (typeof browser !== "undefined" && browser.runtime) {
-        browser.runtime
-          .sendMessage(message)
-          .then((response: any) => resolve(response))
-          .catch(reject);
       } else {
-        reject(new Error("Extension runtime not available"));
+        reject(new Error("Chrome extension runtime not available"));
       }
     });
   }

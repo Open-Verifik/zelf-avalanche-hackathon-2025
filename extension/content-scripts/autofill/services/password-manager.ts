@@ -30,7 +30,14 @@ export class PasswordManager {
 
   public async decryptPassword(passwordId: string): Promise<{ username: string; password: string } | null> {
     try {
-      return await this.communicationService.decryptPassword(passwordId);
+      const result = await this.communicationService.decryptPassword(passwordId);
+      if (result && result.metadata) {
+        return {
+          username: result.metadata.username,
+          password: result.metadata.password
+        };
+      }
+      return null;
     } catch (error) {
       console.error('Error decrypting password:', error);
       return null;
