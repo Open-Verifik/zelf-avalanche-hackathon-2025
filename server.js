@@ -59,7 +59,7 @@ app.use(
 		algorithms: ["HS256"],
 		// Skip JWT validation for unprotected routes
 		unless: {
-			path: [/^\/api\/auth\//, /^\/swagger/, /^\/swagger\.json$/],
+			path: [/^\/api\/auth\//, /^\/swagger/, /^\/swagger\.json$/, /^\/api\/stripe\/result/],
 		},
 	})
 );

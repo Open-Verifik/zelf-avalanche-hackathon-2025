@@ -41,8 +41,12 @@ const getActiveSubscription = async (user) => {
 	try {
 		const { identifier } = user;
 
+		console.log("Identifier:::::", identifier);
+
 		// Convert zelfName to zelfKeys format for IPFS operations
 		const zelfKeysTag = convertToZelfKeysFormat(identifier);
+
+		console.log("ZelfKeysTag:::::", zelfKeysTag);
 
 		// Search for subscription in IPFS using the converted identifier
 		const subscriptionData = await searchSubscriptionInIPFS(zelfKeysTag);
@@ -290,7 +294,11 @@ async function searchSubscriptionInIPFS(zelfKeysTag) {
 			const startDate = moment(keyValues.startDate);
 			const endDate = moment(keyValues.endDate);
 
-			if (currentDate.isBetween(startDate, endDate)) {
+			// Check if subscription is active (either active or cancelled but still within period)
+			const isWithinPeriod = currentDate.isBetween(startDate, endDate);
+			const isActiveOrCancelledActive = !keyValues.status || keyValues.status === "active" || keyValues.status === "cancelled_active";
+
+			if (isWithinPeriod && isActiveOrCancelledActive) {
 				activeSubscription = {
 					id: element.id,
 					url: element.url,
@@ -311,31 +319,16 @@ async function searchSubscriptionInIPFS(zelfKeysTag) {
 	return null;
 }
 
-async function updateSubscriptionInIPFS(zelfName, subscriptionData) {
+async function updateSubscriptionInIPFS(zelfKeysTag, subscriptionData) {
 	try {
-		// Convert zelfName to the correct format for IPFS storage
-		const zelfKeysTag = convertToZelfKeysFormat(zelfName);
-
-		// Create metadata for IPFS storage
-		const metadata = {
-			zelfName: zelfKeysTag,
-			type: "subscription",
-			status: subscriptionData.status || "active",
-			plan: subscriptionData.plan,
-			timestamp: new Date().toISOString(),
-		};
-
-		// Store subscription data in IPFS
 		const ipfsResult = await pinata.pinFile(
 			Buffer.from(JSON.stringify(subscriptionData)).toString("base64"),
 			`${zelfKeysTag}.json`,
 			"application/json",
-			metadata
+			subscriptionData
 		);
 
-		if (!ipfsResult) {
-			throw new Error("Failed to store subscription in IPFS");
-		}
+		if (!ipfsResult) throw new Error("Failed to store subscription in IPFS");
 
 		return ipfsResult;
 	} catch (error) {
@@ -463,49 +456,46 @@ async function handleInvoicePaymentSucceeded(invoice) {
 }
 
 async function handleSubscriptionUpdated(subscription) {
-	// TODO: Implement subscription updated
-	return;
 	try {
-		console.log("🔄 Processing subscription updated:", {
-			subscriptionId: subscription.id,
-			status: subscription.status,
-			customerId: subscription.customer,
-			metadata: subscription.metadata,
-		});
+		const zelfName = subscription.metadata?.zelfName;
 
-		const zelfName = subscription.metadata.zelfName;
+		if (!zelfName) return;
 
-		if (zelfName) {
-			// Convert zelfName to zelfKeys format for IPFS operations
-			const zelfKeysTag = convertToZelfKeysFormat(zelfName);
+		// Convert zelfName to zelfKeys format for IPFS operations
+		const zelfKeysTag = convertToZelfKeysFormat(zelfName);
 
-			// Check if subscription exists first
-			const existingSubscription = await searchSubscriptionInIPFS(zelfKeysTag);
+		// Check if subscription exists first
+		const existingSubscription = await searchSubscriptionInIPFS(zelfKeysTag);
 
-			const subscriptionData = {
-				id: subscription.id,
-				zelfName,
-				plan: subscription.metadata.plan,
-				stripeSubscriptionId: subscription.id,
-				stripeCustomerId: subscription.customer,
-				status: subscription.status,
-				cancelAtPeriodEnd: subscription.cancel_at_period_end,
-				updatedAt: new Date().toISOString(),
-			};
-
-			// If subscription exists, update it; otherwise create it
-			if (existingSubscription) {
-				await updateSubscriptionInIPFS(zelfKeysTag, subscriptionData);
-				console.log("✅ Subscription updated:", subscriptionData);
-			} else {
-				await storeSubscriptionInIPFS(subscriptionData);
-				console.log("✅ Subscription created from update:", subscriptionData);
-			}
-		} else {
-			console.log("⚠️ No zelfName found in subscription metadata");
+		if (!existingSubscription) {
+			console.log("⚠️ No existing subscription found to update for:", zelfKeysTag);
+			return;
 		}
+		// unpin the existing subscription
+		await pinata.unPinFiles([existingSubscription.ipfs_pin_hash]);
+
+		const stripeData =
+			typeof existingSubscription.stripeData === "string" ? JSON.parse(existingSubscription.stripeData) : existingSubscription.stripeData;
+
+		stripeData.status = subscription.status;
+		stripeData.cancelledAt = subscription.cancel_at_period_end ? moment().format("YYYY-MM-DD HH:mm:ss") : null;
+		stripeData.cancelAtPeriodEnd = subscription.cancel_at_period_end;
+
+		console.log({ subscription, existingSubscription });
+
+		const subscriptionData = {
+			stripeData: JSON.stringify(stripeData),
+			zelfName: zelfKeysTag,
+			startDate: existingSubscription.startDate,
+			endDate: existingSubscription.endDate,
+			paymentMethod: "stripe",
+			type: "subscription",
+		};
+
+		await updateSubscriptionInIPFS(zelfKeysTag, subscriptionData);
 	} catch (error) {
 		console.error("❌ Error handling subscription updated:", error);
+		throw error;
 	}
 }
 
@@ -518,31 +508,58 @@ async function handleSubscriptionDeleted(subscription) {
 			metadata: subscription.metadata,
 		});
 
-		const zelfName = subscription.metadata.zelfName;
+		const zelfName = subscription.metadata?.zelfName;
 
-		if (zelfName) {
-			// Convert zelfName to zelfKeys format for IPFS operations
-			const zelfKeysTag = convertToZelfKeysFormat(zelfName);
+		if (!zelfName) {
+			console.log("⚠️ No zelfName found in subscription metadata, skipping deletion");
+			return;
+		}
 
-			// Mark subscription as canceled in IPFS
-			const subscriptionData = {
-				id: subscription.id,
+		// Convert zelfName to zelfKeys format for IPFS operations
+		const zelfKeysTag = convertToZelfKeysFormat(zelfName);
+
+		// Find the existing subscription in IPFS to get the pin hash
+		const existingSubscription = await searchSubscriptionInIPFS(zelfKeysTag);
+
+		if (!existingSubscription) {
+			console.log("⚠️ No existing subscription found to delete for:", zelfKeysTag);
+			return;
+		}
+
+		// Delete the subscription from IPFS
+		try {
+			await pinata.unPinFiles([existingSubscription.ipfs_pin_hash]);
+			console.log("✅ Subscription record deleted from IPFS:", {
 				zelfName: zelfKeysTag,
-				plan: subscription.metadata.plan,
-				stripeSubscriptionId: subscription.id,
-				stripeCustomerId: subscription.customer,
-				status: "canceled",
-				canceledAt: new Date().toISOString(),
+				ipfsHash: existingSubscription.ipfs_pin_hash,
+				subscriptionId: subscription.id,
+			});
+		} catch (unpinError) {
+			console.error("❌ Failed to unpin from IPFS, but subscription is deleted in Stripe:", unpinError);
+
+			// Even if unpinning fails, we should mark it as deleted in case the record still exists
+			const deletedSubscriptionData = {
+				stripeData: JSON.stringify({
+					...existingSubscription.stripeData,
+					status: "deleted",
+					deletedAt: new Date().toISOString(),
+				}),
+				zelfName: zelfKeysTag,
+				startDate: existingSubscription.startDate,
+				endDate: existingSubscription.endDate,
+				paymentMethod: "stripe",
+				type: "subscription",
+				status: "deleted",
+				deletedAt: new Date().toISOString(),
 				updatedAt: new Date().toISOString(),
 			};
 
-			await updateSubscriptionInIPFS(zelfKeysTag, subscriptionData);
-			console.log("✅ Subscription canceled and updated:", subscriptionData);
-		} else {
-			console.log("⚠️ No zelfName found in subscription metadata");
+			await updateSubscriptionInIPFS(zelfKeysTag, deletedSubscriptionData);
+			console.log("✅ Subscription marked as deleted in IPFS as fallback");
 		}
 	} catch (error) {
 		console.error("❌ Error handling subscription deleted:", error);
+		throw error;
 	}
 }
 

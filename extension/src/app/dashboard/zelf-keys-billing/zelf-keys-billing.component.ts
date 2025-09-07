@@ -1,8 +1,10 @@
-import { Component, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TranslocoModule } from "@jsverse/transloco";
 import { BillingService, PricingPlan } from "../../services/billing.service";
 import { WalletService } from "../../wallet.service";
+import { Wallet } from "app/wallet";
+import { Router } from "@angular/router";
 
 @Component({
 	selector: "app-zelf-keys-billing",
@@ -18,18 +20,41 @@ export class ZelfKeysBillingComponent implements OnInit {
 	error: string | null = null;
 	hasActiveSubscription: boolean = false;
 	activeSubscription: any = null;
+	shareables: any = null;
 
 	constructor(
 		private billingService: BillingService,
-		private _walletService: WalletService
-	) {}
+		private _walletService: WalletService,
+		private _router: Router,
+		private _changeDetectorRef: ChangeDetectorRef
+	) {
+		this.shareables = {
+			wallet: {},
+		};
+	}
 
 	async ngOnInit(): Promise<void> {
 		await this._walletService.initZelfKeySession();
 
+		await this._setWallet();
+
 		this.loadPlans();
 
 		this.loadCurrentPlan();
+	}
+
+	private async _setWallet(): Promise<any> {
+		const wallet = await this._walletService.getFirstWalletFromStorage();
+
+		if (!wallet?.name) {
+			this._router.navigate(["/welcome"]);
+
+			return;
+		}
+
+		this.shareables.wallet = wallet;
+
+		this._changeDetectorRef.detectChanges();
 	}
 
 	private loadPlans(): void {
@@ -59,8 +84,6 @@ export class ZelfKeysBillingComponent implements OnInit {
 		this.billingService
 			.getActiveSubscription()
 			.then((response) => {
-				console.log("Response:", response);
-
 				if (!response.success || !response.data) {
 					this.currentPlan = "free";
 					this.hasActiveSubscription = false;
@@ -110,7 +133,6 @@ export class ZelfKeysBillingComponent implements OnInit {
 			return; // Don't allow selecting current plan
 		}
 
-		console.log(`Upgrading to ${planId} plan`);
 		this.createCheckoutSession(planId);
 	}
 
@@ -153,23 +175,15 @@ export class ZelfKeysBillingComponent implements OnInit {
 	 * Open Stripe customer portal for subscription management
 	 */
 	openCustomerPortal(): void {
-		console.log("🚀 Opening customer portal with subscription data:", {
-			hasActiveSubscription: this.hasActiveSubscription,
-			activeSubscription: this.activeSubscription,
-			stripeData: this.activeSubscription?.stripeData,
-		});
-
 		this.billingService
 			.createCustomerPortalSession()
 			.then((response) => {
-				console.log("✅ Portal session response:", response);
-
 				if (response.success && response.portalUrl) {
 					// Open the portal in a new tab
 					window.open(response.portalUrl, "_blank");
 				} else {
 					console.error("❌ Portal creation failed:", response);
-					this.error = response.error || "Failed to open subscription management portal";
+					this.error = "Failed to open subscription management portal";
 				}
 			})
 			.catch((error) => {

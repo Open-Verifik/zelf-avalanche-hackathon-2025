@@ -132,12 +132,22 @@
 						color: #28a745;
 						width: 24px;
 						height: 24px;
+
+						&.cancelled {
+							color: #fd7e14;
+						}
 					}
 
 					.status-text {
 						font-size: 18px;
 						font-weight: 600;
 						color: #28a745;
+					}
+
+					&.cancelled {
+						.status-text {
+							color: #fd7e14;
+						}
 					}
 				}
 
@@ -178,6 +188,11 @@
 
 						&.status-active {
 							color: #28a745;
+							font-weight: 600;
+						}
+
+						&.status-cancelled {
+							color: #fd7e14;
 							font-weight: 600;
 						}
 					}

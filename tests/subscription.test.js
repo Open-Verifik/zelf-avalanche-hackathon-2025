@@ -30,6 +30,7 @@ describe("Subscription Endpoints", () => {
 				identifier: `avax5.zelf`,
 				address: "0xB7b30A282eb6c0fEef1Bd8D268E05f4c2a2Ab565",
 			});
+
 			correctAuthToken = correctSessionResponse.body.data.token;
 		} catch (error) {
 			console.log("Could not get JWT token, subscription tests will expect 401 errors");
@@ -39,7 +40,7 @@ describe("Subscription Endpoints", () => {
 	describe("GET /api/subscription/active", () => {
 		it("should return active subscription for correct user", async () => {
 			const response = await request(app).get("/api/subscription/active").set("Authorization", `Bearer ${correctAuthToken}`);
-
+			console.log("Response:::::", response.body);
 			expect(response.status).toBe(200);
 			expect(response.body).toHaveProperty("success", true);
 			expect(response.body).toHaveProperty("data");

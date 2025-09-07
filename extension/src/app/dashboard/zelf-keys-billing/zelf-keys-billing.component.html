@@ -1,5 +1,5 @@
 <div class="billing-container">
-	<div class="billing-header">
+	<div class="billing-header" *ngIf="!loading && !error && !hasActiveSubscription">
 		<h1 class="billing-title">Choose Your Plan</h1>
 		<p class="billing-subtitle">Select the plan that best fits your needs</p>
 	</div>
@@ -31,8 +31,16 @@
 	<div *ngIf="!loading && !error && hasActiveSubscription" class="subscription-management">
 		<div class="subscription-card">
 			<div class="subscription-header">
-				<div class="subscription-status">
-					<svg class="status-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+				<div class="subscription-status" [class.cancelled]="activeSubscription?.status === 'cancelled_active'">
+					<svg
+						*ngIf="activeSubscription?.status !== 'cancelled_active'"
+						class="status-icon"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
 						<path
 							d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
 							stroke="currentColor"
@@ -41,15 +49,44 @@
 							stroke-linejoin="round"
 						/>
 					</svg>
-					<span class="status-text">Active Subscription</span>
+					<svg
+						*ngIf="activeSubscription?.status === 'cancelled_active'"
+						class="status-icon cancelled"
+						width="24"
+						height="24"
+						viewBox="0 0 24 24"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg>
+					<span class="status-text">
+						{{ activeSubscription?.status === "cancelled_active" ? "Cancelled (Active Until Period End)" : "Active Subscription" }}
+					</span>
 				</div>
-				<div class="subscription-plan">{{ activeSubscription?.name || "Premium Plan" }}</div>
+				<div class="subscription-plan" *ngIf="shareables.wallet">{{ shareables.wallet.name || "Premium Plan" }}</div>
 			</div>
 
 			<div class="subscription-details">
 				<div class="detail-row">
 					<span class="detail-label">Status:</span>
-					<span class="detail-value status-active">{{ activeSubscription?.stripeData?.status || "Active" }}</span>
+					<span
+						class="detail-value"
+						[class.status-active]="activeSubscription?.status !== 'cancelled_active'"
+						[class.status-cancelled]="activeSubscription?.status === 'cancelled_active'"
+					>
+						{{
+							activeSubscription?.status === "cancelled_active"
+								? "Cancelled (Active Until Period End)"
+								: activeSubscription?.stripeData?.status || "Active"
+						}}
+					</span>
 				</div>
 				<div class="detail-row">
 					<span class="detail-label">Zelf Name:</span>

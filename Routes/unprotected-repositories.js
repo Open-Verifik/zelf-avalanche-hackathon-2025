@@ -7,6 +7,7 @@ import zelfProofRoute from "../Repositories/ZelfProof/routes/zelf-proof.route.js
 
 import sessionRoutes from "../Repositories/Session/routes/session.routes.js";
 import subscriptionRoute from "../Repositories/Subscription/routes/subscription.routes.js";
+import stripeResultRoute from "./stripe-result.js";
 
 export default (router) => {
 	// Register authentication routes (unprotected)
@@ -20,4 +21,7 @@ export default (router) => {
 
 	// Register Subscription routes (unprotected endpoints: plans, webhook)
 	subscriptionRoute(router);
+
+	// Register Stripe result routes (unprotected checkout success/failure pages)
+	stripeResultRoute(router);
 };

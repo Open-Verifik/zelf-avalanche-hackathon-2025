@@ -97,8 +97,8 @@ const configuration = {
 		publishableKey: process.env.STRIPE_PUBLISHABLE_KEY,
 		webhookSecret: process.env.STRIPE_WEBHOOK_SECRET,
 		taxes: 0.19,
-		successUrl: process.env.STRIPE_SUCCESS_URL || "https://zelf.world/dashboard/billing?success=true",
-		cancelUrl: process.env.STRIPE_CANCEL_URL || "https://zelf.world/dashboard/billing?canceled=true",
+		successUrl: process.env.STRIPE_SUCCESS_URL || "http://localhost:3010/api/stripe/result?success=true",
+		cancelUrl: process.env.STRIPE_CANCEL_URL || "http://localhost:3010/api/stripe/result?canceled=true",
 		// Subscription plans
 		plans: {
 			basic: {
