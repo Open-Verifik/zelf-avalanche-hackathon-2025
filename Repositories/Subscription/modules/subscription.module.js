@@ -75,7 +75,6 @@ const getActiveSubscription = async (user) => {
 		// 			currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
 		// 			cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
 		// 			createdAt: new Date(subscriptionData.createdAt),
-		// 			updatedAt: new Date(subscriptionData.updatedAt),
 		// 		};
 
 		// 		return {
@@ -204,7 +203,6 @@ const cancelSubscription = async (user) => {
 		await updateSubscriptionInIPFS(zelfKeysTag, {
 			...subscriptionData,
 			cancelAtPeriodEnd: true,
-			updatedAt: new Date().toISOString(),
 		});
 
 		return {
@@ -223,6 +221,9 @@ const cancelSubscription = async (user) => {
 	}
 };
 
+// Track processed webhook events to prevent duplicates
+const processedWebhooks = new Map();
+
 /**
  * Handle Stripe webhook events
  * @param {Object} body - Webhook payload
@@ -231,17 +232,37 @@ const cancelSubscription = async (user) => {
  */
 const webhookHandler = async (body, headers) => {
 	try {
-		const sig = headers["stripe-signature"];
-		const endpointSecret = configuration.stripe.webhookSecret;
-
 		let event;
 
 		// Skip signature validation for testing - use body directly as event
 		event = body;
 
+		// Create unique key for deduplication
+		const eventKey = `${event.type}_${event.data?.object?.id}_${event.created}`;
+
+		// Check if we've already processed this exact event
+		if (processedWebhooks.has(eventKey)) {
+			console.log("🔄 Duplicate webhook detected, skipping:", eventKey);
+			return { received: true, duplicate: true };
+		}
+
+		// Mark as processing immediately to prevent race conditions
+		processedWebhooks.set(eventKey, Date.now());
+
+		// Small delay to handle rapid-fire webhooks (let other duplicates arrive first)
+		await new Promise((resolve) => setTimeout(resolve, 100));
+
+		// Clean up old entries (older than 1 hour)
+		const oneHourAgo = Date.now() - 60 * 60 * 1000;
+		for (const [key, timestamp] of processedWebhooks.entries()) {
+			if (timestamp < oneHourAgo) {
+				processedWebhooks.delete(key);
+			}
+		}
+
 		// Handle the event
-		console.log("🎯 Processing webhook event:", event.type);
-		let result = { received: true };
+		console.log("🎯 Processing webhook event:", event.type, "Key:", eventKey);
+		let result = { received: true, eventKey };
 
 		switch (event.type) {
 			case "checkout.session.completed":
@@ -273,6 +294,9 @@ const webhookHandler = async (body, headers) => {
 		return result;
 	} catch (error) {
 		console.error("Webhook error:", error);
+		// Remove from processed map if there was an error
+		const eventKey = `${body.type}_${body.data?.object?.id}_${body.created}`;
+		processedWebhooks.delete(eventKey);
 		throw error;
 	}
 };
@@ -461,6 +485,13 @@ async function handleSubscriptionUpdated(subscription) {
 
 		if (!zelfName) return;
 
+		console.log("🔄 Processing subscription update:", {
+			subscriptionId: subscription.id,
+			status: subscription.status,
+			cancelAtPeriodEnd: subscription.cancel_at_period_end,
+			zelfName,
+		});
+
 		// Convert zelfName to zelfKeys format for IPFS operations
 		const zelfKeysTag = convertToZelfKeysFormat(zelfName);
 
@@ -471,17 +502,21 @@ async function handleSubscriptionUpdated(subscription) {
 			console.log("⚠️ No existing subscription found to update for:", zelfKeysTag);
 			return;
 		}
-		// unpin the existing subscription
-		await pinata.unPinFiles([existingSubscription.ipfs_pin_hash]);
 
+		console.log("📝 Updating existing subscription:", {
+			currentHash: existingSubscription.ipfs_pin_hash,
+			currentStatus: existingSubscription.stripeData?.status,
+			newStatus: subscription.status,
+		});
+
+		// Parse existing stripe data
 		const stripeData =
 			typeof existingSubscription.stripeData === "string" ? JSON.parse(existingSubscription.stripeData) : existingSubscription.stripeData;
 
-		stripeData.status = subscription.status;
+		// Update stripe data with new information
+		stripeData.status = subscription.cancel_at_period_end ? "cancelled_active" : subscription.status;
 		stripeData.cancelledAt = subscription.cancel_at_period_end ? moment().format("YYYY-MM-DD HH:mm:ss") : null;
 		stripeData.cancelAtPeriodEnd = subscription.cancel_at_period_end;
-
-		console.log({ subscription, existingSubscription });
 
 		const subscriptionData = {
 			stripeData: JSON.stringify(stripeData),
@@ -492,7 +527,33 @@ async function handleSubscriptionUpdated(subscription) {
 			type: "subscription",
 		};
 
-		await updateSubscriptionInIPFS(zelfKeysTag, subscriptionData);
+		// Atomically replace the subscription: unpin old, create new
+		try {
+			// First create the new record
+			const newRecord = await pinata.pinFile(
+				Buffer.from(JSON.stringify(subscriptionData)).toString("base64"),
+				`${zelfKeysTag}.json`,
+				"application/json",
+				subscriptionData
+			);
+
+			if (!newRecord) {
+				throw new Error("Failed to create new subscription record");
+			}
+
+			// Then unpin the old record
+			await pinata.unPinFiles([existingSubscription.ipfs_pin_hash]);
+
+			console.log("✅ Subscription updated successfully:", {
+				zelfName: zelfKeysTag,
+				oldHash: existingSubscription.ipfs_pin_hash,
+				newHash: newRecord.IpfsHash,
+				status: subscriptionData.status,
+			});
+		} catch (ipfsError) {
+			console.error("❌ Error updating IPFS record:", ipfsError);
+			throw ipfsError;
+		}
 	} catch (error) {
 		console.error("❌ Error handling subscription updated:", error);
 		throw error;
@@ -542,16 +603,13 @@ async function handleSubscriptionDeleted(subscription) {
 				stripeData: JSON.stringify({
 					...existingSubscription.stripeData,
 					status: "deleted",
-					deletedAt: new Date().toISOString(),
+					deletedAt: moment().format("YYYY-MM-DD HH:mm:ss"),
 				}),
 				zelfName: zelfKeysTag,
 				startDate: existingSubscription.startDate,
 				endDate: existingSubscription.endDate,
 				paymentMethod: "stripe",
 				type: "subscription",
-				status: "deleted",
-				deletedAt: new Date().toISOString(),
-				updatedAt: new Date().toISOString(),
 			};
 
 			await updateSubscriptionInIPFS(zelfKeysTag, deletedSubscriptionData);

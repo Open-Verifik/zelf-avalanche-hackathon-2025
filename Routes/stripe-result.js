@@ -27,7 +27,7 @@ const handleStripeResult = async (ctx) => {
 		if (session_id) {
 			try {
 				sessionData = await stripe.checkout.sessions.retrieve(session_id, {
-					expand: ["subscription", "customer"],
+					expand: ["subscription", "customer", "subscription.latest_invoice"],
 				});
 
 				if (sessionData.subscription) {
@@ -118,6 +118,13 @@ const generateResultHTML = ({ success, canceled, sessionId, sessionData, subscri
 		const customerEmail = customerData?.email || "N/A";
 		const nextBilling = subscriptionData.current_period_end ? new Date(subscriptionData.current_period_end * 1000).toLocaleDateString() : "N/A";
 
+		// Get invoice details
+		const latestInvoice = subscriptionData.latest_invoice;
+		const invoiceNumber = latestInvoice?.number || "N/A";
+		const invoiceDate = latestInvoice?.created ? new Date(latestInvoice.created * 1000).toLocaleDateString() : "N/A";
+		const invoicePdfUrl = latestInvoice?.invoice_pdf;
+		const invoiceAmount = latestInvoice?.amount_paid ? (latestInvoice.amount_paid / 100).toFixed(2) : amount;
+
 		return `
 		<!DOCTYPE html>
 		<html lang="en">
@@ -144,12 +151,24 @@ const generateResultHTML = ({ success, canceled, sessionId, sessionData, subscri
 							<span class="value">${planName} Plan</span>
 						</div>
 						<div class="detail-row">
-							<span class="label">Amount:</span>
+							<span class="label">Amount Paid:</span>
+							<span class="value">$${invoiceAmount} ${currency}</span>
+						</div>
+						<div class="detail-row">
+							<span class="label">Recurring:</span>
 							<span class="value">$${amount} ${currency}/${interval}</span>
 						</div>
 						<div class="detail-row">
 							<span class="label">Email:</span>
 							<span class="value">${customerEmail}</span>
+						</div>
+						<div class="detail-row">
+							<span class="label">Invoice #:</span>
+							<span class="value">${invoiceNumber}</span>
+						</div>
+						<div class="detail-row">
+							<span class="label">Invoice Date:</span>
+							<span class="value">${invoiceDate}</span>
 						</div>
 						<div class="detail-row">
 							<span class="label">Next Billing:</span>
@@ -162,8 +181,20 @@ const generateResultHTML = ({ success, canceled, sessionId, sessionData, subscri
 					</div>
 					
 					<div class="actions">
-						<a href="${baseUrl}/dashboard/billing" class="button primary">Manage Subscription</a>
-						<a href="${baseUrl}/dashboard" class="button secondary">Go to Dashboard</a>
+						${
+							invoicePdfUrl
+								? `<a href="${invoicePdfUrl}" target="_blank" class="button primary invoice-button">
+							<svg class="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								<polyline points="14,2 14,8 20,8" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								<line x1="16" y1="13" x2="8" y2="13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								<line x1="16" y1="17" x2="8" y2="17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+								<polyline points="10,9 9,9 8,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+							</svg>
+							See Invoice PDF
+						</a>`
+								: `<span class="button disabled">Invoice PDF not available</span>`
+						}
 					</div>
 					
 					<div class="footer-note">
@@ -201,7 +232,6 @@ const generateResultHTML = ({ success, canceled, sessionId, sessionData, subscri
 					
 					<div class="actions">
 						<a href="${baseUrl}/dashboard/billing" class="button primary">View Subscription</a>
-						<a href="${baseUrl}/dashboard" class="button secondary">Go to Dashboard</a>
 					</div>
 				</div>
 			</div>
@@ -420,6 +450,29 @@ const getCommonStyles = () => {
 		.button.secondary:hover {
 			background: #e9ecef;
 			color: #495057;
+		}
+
+		.button.invoice-button {
+			display: inline-flex;
+			align-items: center;
+			gap: 8px;
+		}
+
+		.button.invoice-button .button-icon {
+			width: 20px;
+			height: 20px;
+		}
+
+		.button.disabled {
+			background: #e9ecef;
+			color: #6c757d;
+			cursor: not-allowed;
+			opacity: 0.6;
+		}
+
+		.button.disabled:hover {
+			transform: none;
+			box-shadow: none;
 		}
 
 		.footer-note {
