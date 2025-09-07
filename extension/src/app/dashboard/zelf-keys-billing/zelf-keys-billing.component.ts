@@ -95,6 +95,12 @@ export class ZelfKeysBillingComponent implements OnInit {
 				this.hasActiveSubscription = true;
 				this.activeSubscription = response.data;
 
+				console.log("🔍 Active subscription loaded:", {
+					stripeDataStatus: response.data.stripeData?.status,
+					cancelAtPeriodEnd: response.data.stripeData?.cancelAtPeriodEnd,
+					cancelledAt: response.data.stripeData?.cancelledAt,
+				});
+
 				// Extract plan from stripeData
 				const stripeData = response.data.stripeData;
 				if (stripeData && stripeData.plan) {
@@ -169,6 +175,21 @@ export class ZelfKeysBillingComponent implements OnInit {
 
 	isPlanDisabled(plan: PricingPlan): boolean {
 		return plan.isCurrent || false;
+	}
+
+	/**
+	 * Check if the subscription is cancelled but still active
+	 * @returns boolean indicating if subscription is cancelled but active
+	 */
+	isCancelledActive(): boolean {
+		if (!this.activeSubscription) return false;
+
+		// Check both the main status and stripeData for cancelled status
+		const mainStatus = this.activeSubscription.stripeData?.status === "cancelled_active";
+		const stripeStatus = this.activeSubscription.stripeData?.status === "cancelled_active";
+		const cancelAtPeriodEnd = this.activeSubscription.stripeData?.cancelAtPeriodEnd === true;
+
+		return mainStatus || stripeStatus || cancelAtPeriodEnd;
 	}
 
 	/**

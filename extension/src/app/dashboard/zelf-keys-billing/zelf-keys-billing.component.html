@@ -31,9 +31,9 @@
 	<div *ngIf="!loading && !error && hasActiveSubscription" class="subscription-management">
 		<div class="subscription-card">
 			<div class="subscription-header">
-				<div class="subscription-status" [class.cancelled]="activeSubscription?.status === 'cancelled_active'">
+				<div class="subscription-status" [class.cancelled]="isCancelledActive()">
 					<svg
-						*ngIf="activeSubscription?.status !== 'cancelled_active'"
+						*ngIf="!isCancelledActive()"
 						class="status-icon"
 						width="24"
 						height="24"
@@ -50,7 +50,7 @@
 						/>
 					</svg>
 					<svg
-						*ngIf="activeSubscription?.status === 'cancelled_active'"
+						*ngIf="isCancelledActive()"
 						class="status-icon cancelled"
 						width="24"
 						height="24"
@@ -59,7 +59,7 @@
 						xmlns="http://www.w3.org/2000/svg"
 					>
 						<path
-							d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+							d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12 C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
 							stroke="currentColor"
 							stroke-width="2"
 							stroke-linecap="round"
@@ -67,7 +67,7 @@
 						/>
 					</svg>
 					<span class="status-text">
-						{{ activeSubscription?.status === "cancelled_active" ? "Cancelled (Active Until Period End)" : "Active Subscription" }}
+						{{ isCancelledActive() ? "Cancelled (Active Until Period End)" : "Active Subscription" }}
 					</span>
 				</div>
 				<div class="subscription-plan" *ngIf="shareables.wallet">{{ shareables.wallet.name || "Premium Plan" }}</div>
@@ -76,16 +76,8 @@
 			<div class="subscription-details">
 				<div class="detail-row">
 					<span class="detail-label">Status:</span>
-					<span
-						class="detail-value"
-						[class.status-active]="activeSubscription?.status !== 'cancelled_active'"
-						[class.status-cancelled]="activeSubscription?.status === 'cancelled_active'"
-					>
-						{{
-							activeSubscription?.status === "cancelled_active"
-								? "Cancelled (Active Until Period End)"
-								: activeSubscription?.stripeData?.status || "Active"
-						}}
+					<span class="detail-value" [class.status-active]="!isCancelledActive()" [class.status-cancelled]="isCancelledActive()">
+						{{ isCancelledActive() ? "Cancelled (Active Until Period End)" : activeSubscription?.stripeData?.status || "Active" }}
 					</span>
 				</div>
 				<div class="detail-row">
@@ -97,8 +89,14 @@
 					<span class="detail-value">{{ activeSubscription?.startDate | date: "medium" }}</span>
 				</div>
 				<div class="detail-row">
-					<span class="detail-label">Next Billing:</span>
-					<span class="detail-value">{{ activeSubscription?.endDate | date: "medium" }}</span>
+					<span class="detail-label">{{ isCancelledActive() ? "Access Ends:" : "Next Billing:" }}</span>
+					<span class="detail-value" [class.status-cancelled]="isCancelledActive()">
+						{{ activeSubscription?.endDate | date: "medium" }}
+					</span>
+				</div>
+				<div *ngIf="isCancelledActive() && activeSubscription?.stripeData?.cancelledAt" class="detail-row">
+					<span class="detail-label">Cancelled On:</span>
+					<span class="detail-value status-cancelled">{{ activeSubscription.stripeData.cancelledAt | date: "medium" }}</span>
 				</div>
 			</div>
 
@@ -116,7 +114,11 @@
 					Manage Subscription
 				</button>
 				<p class="management-note">
-					Manage your subscription, update payment methods, view billing history, and more in the Stripe customer portal.
+					{{
+						isCancelledActive()
+							? "Your subscription is cancelled but remains active until the end of your billing period. You can reactivate or view billing history in the Stripe customer portal."
+							: "Manage your subscription, update payment methods, view billing history, and more in the Stripe customer portal."
+					}}
 				</p>
 			</div>
 		</div>

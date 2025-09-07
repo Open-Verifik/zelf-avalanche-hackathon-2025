@@ -249,22 +249,22 @@ function ZelfKeysBillingComponent_div_3_Template(rf, ctx) {
 function ZelfKeysBillingComponent_div_4__svg_svg_4_Template(rf, ctx) {
   if (rf & 1) {
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵnamespaceSVG"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "svg", 36);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](1, "path", 37);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "svg", 37);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](1, "path", 38);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
   }
 }
 function ZelfKeysBillingComponent_div_4__svg_svg_5_Template(rf, ctx) {
   if (rf & 1) {
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵnamespaceSVG"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "svg", 38);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](1, "path", 17);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "svg", 39);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](1, "path", 40);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
   }
 }
 function ZelfKeysBillingComponent_div_4_div_8_Template(rf, ctx) {
   if (rf & 1) {
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 39);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 41);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](1);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
   }
@@ -272,6 +272,22 @@ function ZelfKeysBillingComponent_div_4_div_8_Template(rf, ctx) {
     const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵnextContext"](2);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate"](ctx_r1.shareables.wallet.name || "Premium Plan");
+  }
+}
+function ZelfKeysBillingComponent_div_4_div_32_Template(rf, ctx) {
+  if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 28)(1, "span", 29);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](2, "Cancelled On:");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](3, "span", 42);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](4);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵpipe"](5, "date");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]()();
+  }
+  if (rf & 2) {
+    const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵnextContext"](2);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](4);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate"](_angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵpipeBind2"](5, 1, ctx_r1.activeSubscription.stripeData.cancelledAt, "medium"));
   }
 }
 function ZelfKeysBillingComponent_div_4_Template(rf, ctx) {
@@ -304,69 +320,79 @@ function ZelfKeysBillingComponent_div_4_Template(rf, ctx) {
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵpipe"](25, "date");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]()();
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](26, "div", 28)(27, "span", 29);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](28, "Next Billing:");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](28);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](29, "span", 30);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](30);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵpipe"](31, "date");
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]()()();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](32, "div", 31)(33, "button", 32);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵlistener"]("click", function ZelfKeysBillingComponent_div_4_Template_button_click_33_listener() {
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]()();
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](32, ZelfKeysBillingComponent_div_4_div_32_Template, 6, 4, "div", 31);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](33, "div", 32)(34, "button", 33);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵlistener"]("click", function ZelfKeysBillingComponent_div_4_Template_button_click_34_listener() {
       _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵrestoreView"](_r3);
       const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵnextContext"]();
       return _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵresetView"](ctx_r1.openCustomerPortal());
     });
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵnamespaceSVG"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](34, "svg", 33);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](35, "path", 34);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](35, "svg", 34);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](36, "path", 35);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](36, " Manage Subscription ");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](37, " Manage Subscription ");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵnamespaceHTML"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](37, "p", 35);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](38, " Manage your subscription, update payment methods, view billing history, and more in the Stripe customer portal. ");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](38, "p", 36);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](39);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]()()()();
   }
   if (rf & 2) {
     const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵnextContext"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](3);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵclassProp"]("cancelled", (ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.status) === "cancelled_active");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵclassProp"]("cancelled", ctx_r1.isCancelledActive());
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵproperty"]("ngIf", (ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.status) !== "cancelled_active");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵproperty"]("ngIf", !ctx_r1.isCancelledActive());
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵproperty"]("ngIf", (ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.status) === "cancelled_active");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵproperty"]("ngIf", ctx_r1.isCancelledActive());
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](2);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate1"](" ", (ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.status) === "cancelled_active" ? "Cancelled (Active Until Period End)" : "Active Subscription", " ");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate1"](" ", ctx_r1.isCancelledActive() ? "Cancelled (Active Until Period End)" : "Active Subscription", " ");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵproperty"]("ngIf", ctx_r1.shareables.wallet);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](5);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵclassProp"]("status-active", (ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.status) !== "cancelled_active")("status-cancelled", (ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.status) === "cancelled_active");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵclassProp"]("status-active", !ctx_r1.isCancelledActive())("status-cancelled", ctx_r1.isCancelledActive());
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate1"](" ", (ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.status) === "cancelled_active" ? "Cancelled (Active Until Period End)" : (ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.stripeData == null ? null : ctx_r1.activeSubscription.stripeData.status) || "Active", " ");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate1"](" ", ctx_r1.isCancelledActive() ? "Cancelled (Active Until Period End)" : (ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.stripeData == null ? null : ctx_r1.activeSubscription.stripeData.status) || "Active", " ");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](5);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate"]((ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.zelfName) || "N/A");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](5);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate"](_angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵpipeBind2"](25, 14, ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.startDate, "medium"));
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](6);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate"](_angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵpipeBind2"](31, 17, ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.endDate, "medium"));
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate"](_angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵpipeBind2"](25, 19, ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.startDate, "medium"));
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](4);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate"](ctx_r1.isCancelledActive() ? "Access Ends:" : "Next Billing:");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵclassProp"]("status-cancelled", ctx_r1.isCancelledActive());
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate1"](" ", _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵpipeBind2"](31, 22, ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.endDate, "medium"), " ");
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](2);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵproperty"]("ngIf", ctx_r1.isCancelledActive() && (ctx_r1.activeSubscription == null ? null : ctx_r1.activeSubscription.stripeData == null ? null : ctx_r1.activeSubscription.stripeData.cancelledAt));
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵadvance"](7);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtextInterpolate1"](" ", ctx_r1.isCancelledActive() ? "Your subscription is cancelled but remains active until the end of your billing period. You can reactivate or view billing history in the Stripe customer portal." : "Manage your subscription, update payment methods, view billing history, and more in the Stripe customer portal.", " ");
   }
 }
 function ZelfKeysBillingComponent_div_5_div_1_div_4_Template(rf, ctx) {
   if (rf & 1) {
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 55);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 58);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](1, "POPULAR");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
   }
 }
 function ZelfKeysBillingComponent_div_5_div_1_div_16_Template(rf, ctx) {
   if (rf & 1) {
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 56);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 59);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵnamespaceSVG"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](1, "svg", 57);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](2, "path", 37);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](1, "svg", 60);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelement"](2, "path", 38);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵnamespaceHTML"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](3, "span", 58);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](3, "span", 61);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](4);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]()();
   }
@@ -379,27 +405,27 @@ function ZelfKeysBillingComponent_div_5_div_1_div_16_Template(rf, ctx) {
 function ZelfKeysBillingComponent_div_5_div_1_Template(rf, ctx) {
   if (rf & 1) {
     const _r4 = _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵgetCurrentView"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 42)(1, "div", 43)(2, "div", 44);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 45)(1, "div", 46)(2, "div", 47);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](3);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](4, ZelfKeysBillingComponent_div_5_div_1_div_4_Template, 2, 0, "div", 45);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](4, ZelfKeysBillingComponent_div_5_div_1_div_4_Template, 2, 0, "div", 48);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](5, "div", 46)(6, "div", 47)(7, "span", 48);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](5, "div", 49)(6, "div", 50)(7, "span", 51);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](8, "$");
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](9, "span", 49);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](9, "span", 52);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](10);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](11, "span", 50);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](11, "span", 53);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](12);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]()()();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](13, "div", 51);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](13, "div", 54);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](14);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](15, "div", 52);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](16, ZelfKeysBillingComponent_div_5_div_1_div_16_Template, 5, 1, "div", 53);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](15, "div", 55);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](16, ZelfKeysBillingComponent_div_5_div_1_div_16_Template, 5, 1, "div", 56);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](17, "button", 54);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](17, "button", 57);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵlistener"]("click", function ZelfKeysBillingComponent_div_5_div_1_Template_button_click_17_listener() {
       const plan_r6 = _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵrestoreView"](_r4).$implicit;
       const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵnextContext"](2);
@@ -433,8 +459,8 @@ function ZelfKeysBillingComponent_div_5_div_1_Template(rf, ctx) {
 }
 function ZelfKeysBillingComponent_div_5_Template(rf, ctx) {
   if (rf & 1) {
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 40);
-    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](1, ZelfKeysBillingComponent_div_5_div_1_Template, 19, 14, "div", 41);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 43);
+    _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](1, ZelfKeysBillingComponent_div_5_div_1_Template, 19, 14, "div", 44);
     _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]();
   }
   if (rf & 2) {
@@ -513,6 +539,11 @@ class ZelfKeysBillingComponent {
       // Set active subscription data
       this.hasActiveSubscription = true;
       this.activeSubscription = response.data;
+      console.log("🔍 Active subscription loaded:", {
+        stripeDataStatus: response.data.stripeData?.status,
+        cancelAtPeriodEnd: response.data.stripeData?.cancelAtPeriodEnd,
+        cancelledAt: response.data.stripeData?.cancelledAt
+      });
       // Extract plan from stripeData
       const stripeData = response.data.stripeData;
       if (stripeData && stripeData.plan) {
@@ -576,6 +607,18 @@ class ZelfKeysBillingComponent {
     return plan.isCurrent || false;
   }
   /**
+   * Check if the subscription is cancelled but still active
+   * @returns boolean indicating if subscription is cancelled but active
+   */
+  isCancelledActive() {
+    if (!this.activeSubscription) return false;
+    // Check both the main status and stripeData for cancelled status
+    const mainStatus = this.activeSubscription.stripeData?.status === "cancelled_active";
+    const stripeStatus = this.activeSubscription.stripeData?.status === "cancelled_active";
+    const cancelAtPeriodEnd = this.activeSubscription.stripeData?.cancelAtPeriodEnd === true;
+    return mainStatus || stripeStatus || cancelAtPeriodEnd;
+  }
+  /**
    * Open Stripe customer portal for subscription management
    */
   openCustomerPortal() {
@@ -607,11 +650,11 @@ class ZelfKeysBillingComponent {
     selectors: [["app-zelf-keys-billing"]],
     decls: 16,
     vars: 5,
-    consts: [[1, "billing-container"], ["class", "billing-header", 4, "ngIf"], ["class", "loading-container", 4, "ngIf"], ["class", "error-container", 4, "ngIf"], ["class", "subscription-management", 4, "ngIf"], ["class", "pricing-grid", 4, "ngIf"], [1, "billing-footer"], [1, "footer-links"], ["href", "#", 1, "footer-link"], [1, "billing-header"], [1, "billing-title"], [1, "billing-subtitle"], [1, "loading-container"], [1, "loading-spinner"], [1, "error-container"], [1, "error-message"], ["width", "24", "height", "24", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 1, "error-icon"], ["d", "M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z", "stroke", "currentColor", "stroke-width", "2", "stroke-linecap", "round", "stroke-linejoin", "round"], [1, "retry-button", 3, "click"], [1, "subscription-management"], [1, "subscription-card"], [1, "subscription-header"], [1, "subscription-status"], ["class", "status-icon", "width", "24", "height", "24", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 4, "ngIf"], ["class", "status-icon cancelled", "width", "24", "height", "24", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 4, "ngIf"], [1, "status-text"], ["class", "subscription-plan", 4, "ngIf"], [1, "subscription-details"], [1, "detail-row"], [1, "detail-label"], [1, "detail-value"], [1, "subscription-actions"], [1, "manage-button", 3, "click"], ["width", "20", "height", "20", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 1, "button-icon"], ["d", "M10.325 4.317C10.751 3.901 11.377 3.901 11.803 4.317L20.69 13.204C21.116 13.63 21.116 14.256 20.69 14.682L11.803 23.569C11.377 23.995 10.751 23.995 10.325 23.569L1.438 14.682C1.012 14.256 1.012 13.63 1.438 13.204L10.325 4.317Z", "stroke", "currentColor", "stroke-width", "2", "stroke-linecap", "round", "stroke-linejoin", "round"], [1, "management-note"], ["width", "24", "height", "24", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 1, "status-icon"], ["d", "M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z", "stroke", "currentColor", "stroke-width", "2", "stroke-linecap", "round", "stroke-linejoin", "round"], ["width", "24", "height", "24", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 1, "status-icon", "cancelled"], [1, "subscription-plan"], [1, "pricing-grid"], ["class", "pricing-card", 3, "popular", "current", 4, "ngFor", "ngForOf"], [1, "pricing-card"], [1, "card-header"], [1, "plan-name"], ["class", "popular-badge", 4, "ngIf"], [1, "plan-pricing"], [1, "price"], [1, "currency"], [1, "amount"], [1, "period"], [1, "plan-tagline"], [1, "plan-features"], ["class", "feature-item", 4, "ngFor", "ngForOf"], [1, "plan-button", 3, "click", "disabled"], [1, "popular-badge"], [1, "feature-item"], ["width", "16", "height", "16", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 1, "feature-icon"], [1, "feature-text"]],
+    consts: [[1, "billing-container"], ["class", "billing-header", 4, "ngIf"], ["class", "loading-container", 4, "ngIf"], ["class", "error-container", 4, "ngIf"], ["class", "subscription-management", 4, "ngIf"], ["class", "pricing-grid", 4, "ngIf"], [1, "billing-footer"], [1, "footer-links"], ["href", "#", 1, "footer-link"], [1, "billing-header"], [1, "billing-title"], [1, "billing-subtitle"], [1, "loading-container"], [1, "loading-spinner"], [1, "error-container"], [1, "error-message"], ["width", "24", "height", "24", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 1, "error-icon"], ["d", "M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z", "stroke", "currentColor", "stroke-width", "2", "stroke-linecap", "round", "stroke-linejoin", "round"], [1, "retry-button", 3, "click"], [1, "subscription-management"], [1, "subscription-card"], [1, "subscription-header"], [1, "subscription-status"], ["class", "status-icon", "width", "24", "height", "24", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 4, "ngIf"], ["class", "status-icon cancelled", "width", "24", "height", "24", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 4, "ngIf"], [1, "status-text"], ["class", "subscription-plan", 4, "ngIf"], [1, "subscription-details"], [1, "detail-row"], [1, "detail-label"], [1, "detail-value"], ["class", "detail-row", 4, "ngIf"], [1, "subscription-actions"], [1, "manage-button", 3, "click"], ["width", "20", "height", "20", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 1, "button-icon"], ["d", "M10.325 4.317C10.751 3.901 11.377 3.901 11.803 4.317L20.69 13.204C21.116 13.63 21.116 14.256 20.69 14.682L11.803 23.569C11.377 23.995 10.751 23.995 10.325 23.569L1.438 14.682C1.012 14.256 1.012 13.63 1.438 13.204L10.325 4.317Z", "stroke", "currentColor", "stroke-width", "2", "stroke-linecap", "round", "stroke-linejoin", "round"], [1, "management-note"], ["width", "24", "height", "24", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 1, "status-icon"], ["d", "M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z", "stroke", "currentColor", "stroke-width", "2", "stroke-linecap", "round", "stroke-linejoin", "round"], ["width", "24", "height", "24", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 1, "status-icon", "cancelled"], ["d", "M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12 C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z", "stroke", "currentColor", "stroke-width", "2", "stroke-linecap", "round", "stroke-linejoin", "round"], [1, "subscription-plan"], [1, "detail-value", "status-cancelled"], [1, "pricing-grid"], ["class", "pricing-card", 3, "popular", "current", 4, "ngFor", "ngForOf"], [1, "pricing-card"], [1, "card-header"], [1, "plan-name"], ["class", "popular-badge", 4, "ngIf"], [1, "plan-pricing"], [1, "price"], [1, "currency"], [1, "amount"], [1, "period"], [1, "plan-tagline"], [1, "plan-features"], ["class", "feature-item", 4, "ngFor", "ngForOf"], [1, "plan-button", 3, "click", "disabled"], [1, "popular-badge"], [1, "feature-item"], ["width", "16", "height", "16", "viewBox", "0 0 24 24", "fill", "none", "xmlns", "http://www.w3.org/2000/svg", 1, "feature-icon"], [1, "feature-text"]],
     template: function ZelfKeysBillingComponent_Template(rf, ctx) {
       if (rf & 1) {
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](0, "div", 0);
-        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](1, ZelfKeysBillingComponent_div_1_Template, 5, 0, "div", 1)(2, ZelfKeysBillingComponent_div_2_Template, 4, 0, "div", 2)(3, ZelfKeysBillingComponent_div_3_Template, 8, 1, "div", 3)(4, ZelfKeysBillingComponent_div_4_Template, 39, 20, "div", 4)(5, ZelfKeysBillingComponent_div_5_Template, 2, 1, "div", 5);
+        _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtemplate"](1, ZelfKeysBillingComponent_div_1_Template, 5, 0, "div", 1)(2, ZelfKeysBillingComponent_div_2_Template, 4, 0, "div", 2)(3, ZelfKeysBillingComponent_div_3_Template, 8, 1, "div", 3)(4, ZelfKeysBillingComponent_div_4_Template, 40, 25, "div", 4)(5, ZelfKeysBillingComponent_div_5_Template, 2, 1, "div", 5);
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementStart"](6, "div", 6)(7, "div", 7)(8, "a", 8);
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵtext"](9, "Have an existing plan? See billing help");
         _angular_core__WEBPACK_IMPORTED_MODULE_3__["ɵɵelementEnd"]()();

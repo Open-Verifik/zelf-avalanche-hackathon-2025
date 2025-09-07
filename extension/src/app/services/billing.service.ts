@@ -54,6 +54,8 @@ export interface SubscriptionData {
 		customer: string;
 		status: string;
 		plan: string;
+		cancelledAt: string;
+		cancelAtPeriodEnd: boolean;
 	};
 	paymentMethod: string;
 }
