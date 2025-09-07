@@ -6,6 +6,7 @@ import { environment } from "environments/environment";
 import { ChromeService } from "./chrome.service";
 import { HttpWrapperService } from "./http-wrapper.service";
 import { WalletService } from "./wallet.service";
+import { AutofillIntegrationService } from "./services/autofill-integration.service";
 
 @Component({
     encapsulation: ViewEncapsulation.None,
@@ -28,7 +29,8 @@ export class AppComponent implements OnInit, OnDestroy {
     constructor(
         private _httpWrapperService: HttpWrapperService,
         private _walletService: WalletService,
-        private _chromeService: ChromeService
+        private _chromeService: ChromeService,
+        private _autofillIntegrationService: AutofillIntegrationService
     ) {
         this.isPopout = this._chromeService.isPopout;
 

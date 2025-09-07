@@ -3,6 +3,7 @@ export const environment = {
 	appUrl: "https://keys.zelf.world",
 	baseUrl: "/",
 	captchaKey: "",
+	keysApiUrl: "https://keys-api.zelf.world",
 	production: true,
 	testnetAddress: "",
 	networks: {

@@ -4,7 +4,7 @@
 	"manifest_version": 3,
 	"name": "Zelf Keys",
 	"orientation": "portrait",
-	"permissions": ["activeTab", "clipboardWrite", "clipboardRead", "storage", "sidePanel"],
+	"permissions": ["activeTab", "clipboardWrite", "clipboardRead", "storage", "sidePanel", "scripting"],
 	"version": "1.0.0",
 	"action": {
 		"default_popup": "index.html",
@@ -16,7 +16,8 @@
 	"content_scripts": [
 		{
 			"matches": ["<all_urls>"],
-			"js": ["browser-polyfill.min.js", "main.js"]
+			"js": ["browser-polyfill.min.js", "main.js", "autofill.js"],
+			"run_at": "document_end"
 		}
 	],
 	"content_security_policy": {
@@ -33,7 +34,7 @@
 	},
 	"web_accessible_resources": [
 		{
-			"resources": ["index.html", "styles.css", "main.js", "runtime.js", "polyfills.js", "background.js"],
+			"resources": ["index.html", "styles.css", "main.js", "runtime.js", "polyfills.js", "autofill.js"],
 			"matches": ["<all_urls>"]
 		}
 	]
