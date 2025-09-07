@@ -19,7 +19,7 @@ const createMetadataAndPublicData = async (type, data, authToken) => {
 				publicData: {
 					type: "website_password",
 					website: `${data.website}`,
-					username: data.username ? "***" + data.username.slice(-3) : "***",
+					username: data.username,
 					folder: data.folder && data.insideFolder ? data.folder : undefined,
 					timestamp: `${new Date().toISOString()}`,
 					zelfName: `${authToken.identifier}`,
