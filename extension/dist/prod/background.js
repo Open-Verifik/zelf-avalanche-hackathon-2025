@@ -18,4 +18,5 @@ if (browserApi.has("runtime")) {
         return true; // Keep message channel open for async response
     });
 }
+// Test comment
 //# sourceMappingURL=background.js.map

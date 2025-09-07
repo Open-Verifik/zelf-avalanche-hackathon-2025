@@ -8,8 +8,9 @@ function watchUnifiedBuild() {
     'background-scripts',
     'content-scripts',
     'shared',
-    'configurations',
-    'src' // Angular source files
+    'configurations'
+    // Note: Angular src directory is not watched to prevent build loops
+    // Angular files are handled by the build process itself
   ];
   
   // Directories to exclude from watching
@@ -96,7 +97,8 @@ function watchUnifiedBuild() {
       // Skip files that are being written by the build process
       if (filePath.includes('extension-scripts') || 
           filePath.includes('out-tsc') ||
-          filePath.includes('background-scripts') && filePath.includes('dist/')) {
+          filePath.includes('background-scripts') && filePath.includes('dist/') ||
+          filePath.includes('src/') && (filePath.includes('.angular/') || filePath.includes('dist/') || filePath.includes('node_modules/'))) {
         return;
       }
       
@@ -120,7 +122,6 @@ function watchUnifiedBuild() {
           filePath.includes('/background-scripts/') && filename.endsWith('.ts') ||
           filePath.includes('/content-scripts/') && filename.endsWith('.ts') ||
           filePath.includes('/shared/') && filename.endsWith('.ts') ||
-          filePath.includes('/src/') && (filename.endsWith('.ts') || filename.endsWith('.html') || filename.endsWith('.scss')) ||
           filePath.includes('/configurations/') && filename.endsWith('.json')
         );
         
@@ -137,8 +138,8 @@ function watchUnifiedBuild() {
   // Watch for changes in build configuration files
   const configFiles = [
     'tsconfig.extension.json',
-    'angular.json',
-    'package.json'
+    'angular.json'
+    // package.json removed to prevent build loops
   ];
   
   configFiles.forEach(configFile => {

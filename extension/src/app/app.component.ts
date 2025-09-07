@@ -32,6 +32,7 @@ export class AppComponent implements OnInit, OnDestroy {
         private _chromeService: ChromeService,
         private _autofillIntegrationService: AutofillIntegrationService
     ) {
+        console.log('AppComponent: Constructor called - Angular app is loading');
         this.isPopout = this._chromeService.isPopout;
 
         this._chromeService.isPopout$.pipe(takeUntil(this.unsubscriber$)).subscribe((isPopout) => {
@@ -41,6 +42,14 @@ export class AppComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this._getPublicKey();
+        // Ensure AutofillIntegrationService is instantiated
+        console.log('AppComponent: AutofillIntegrationService injected:', !!this._autofillIntegrationService);
+        
+        // Force the service to be used to ensure it's instantiated
+        if (this._autofillIntegrationService) {
+            console.log('AppComponent: AutofillIntegrationService is ready');
+            this._autofillIntegrationService.testService();
+        }
     }
 
     ngOnDestroy(): void {

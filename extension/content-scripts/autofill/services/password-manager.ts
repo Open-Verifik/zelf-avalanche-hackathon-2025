@@ -44,9 +44,9 @@ export class PasswordManager {
     }
   }
 
-  public async createNewPassword(): Promise<void> {
+  public async createNewPassword(urlInfo?: any): Promise<void> {
     try {
-      await this.communicationService.createPassword();
+      await this.communicationService.createPassword(urlInfo);
     } catch (error) {
       console.error('Error creating new password:', error);
     }

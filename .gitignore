@@ -8,6 +8,7 @@
 .angular/
 /extension/node_modules/
 /extension/dist/dev/
+/extension/dist/out-tsc/
 
 # Node modules and dependency files
 /node_modules/

@@ -18,28 +18,28 @@ import { DataPassingService } from "../../services/data-passing.service";
 import { Wallet } from "app/wallet";
 
 export interface BiometricData {
-	faceBase64: string;
-	password?: string;
-	retrievedData?: any;
+    faceBase64: string;
+    password?: string;
+    retrievedData?: any;
 }
 
 @Component({
-	selector: "app-data-biometrics",
-	standalone: true,
-	imports: [
-		CommonModule,
-		FormsModule,
-		FlexLayoutModule,
-		MatButtonModule,
-		MatProgressBarModule,
-		MatProgressSpinnerModule,
-		TranslocoModule,
-		WebcamModule,
-		ZelfLoaderComponent,
-		RouterModule,
-	],
-	templateUrl: "./data-biometrics.component.html",
-	styleUrls: ["./data-biometrics.component.scss"],
+    selector: "app-data-biometrics",
+    standalone: true,
+    imports: [
+        CommonModule,
+        FormsModule,
+        FlexLayoutModule,
+        MatButtonModule,
+        MatProgressBarModule,
+        MatProgressSpinnerModule,
+        TranslocoModule,
+        WebcamModule,
+        ZelfLoaderComponent,
+        RouterModule,
+    ],
+    templateUrl: "./data-biometrics.component.html",
+    styleUrls: ["./data-biometrics.component.scss"],
 })
 export class DataBiometricsComponent implements OnInit, OnDestroy {
 	@ViewChild("maskResult", { static: false }) public maskResultCanvasRef: ElementRef | undefined;
@@ -538,48 +538,48 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 			y: height / 2,
 		};
 
-		const margin = {
-			y: height * 0.05,
-			x: 0,
-		};
+        const margin = {
+            y: height * 0.05,
+            x: 0,
+        };
 
-		margin.x = margin.y * 0.8;
+        margin.x = margin.y * 0.8;
 
-		const radius = {
-			y: height * 0.42,
-			x: 0,
-		};
+        const radius = {
+            y: height * 0.42,
+            x: 0,
+        };
 
-		radius.x = radius.y * this.aspectRatio;
+        radius.x = radius.y * this.aspectRatio;
 
-		if (radius.x * 2 >= width) {
-			radius.x = width * 0.48;
-			radius.y = radius.x / this.aspectRatio;
-		}
+        if (radius.x * 2 >= width) {
+            radius.x = width * 0.48;
+            radius.y = radius.x / this.aspectRatio;
+        }
 
-		return { center, radius, margin };
-	}
+        return { center, radius, margin };
+    }
 
-	private _setResultDimensions(type: string, height: number, width: number): void {
-		const dimensions = this.camera.dimensions[type as keyof typeof this.camera.dimensions] as any;
-		if (!dimensions) return;
+    private _setResultDimensions(type: string, height: number, width: number): void {
+        const dimensions = this.camera.dimensions[type as keyof typeof this.camera.dimensions] as any;
+        if (!dimensions) return;
 
-		dimensions.height = height;
-		dimensions.offsetY = 0;
-		dimensions.width = Math.min(2.8 * (this.face.real?.radius?.x || 0), width);
-		dimensions.offsetX = (this.face.real?.center?.x || 0) - dimensions.width / 2;
-	}
+        dimensions.height = height;
+        dimensions.offsetY = 0;
+        dimensions.width = Math.min(2.8 * (this.face.real?.radius?.x || 0), width);
+        dimensions.offsetX = (this.face.real?.center?.x || 0) - dimensions.width / 2;
+    }
 
-	private _drawOvalCenterAndMask(): void {
-		const maskResultCanvas = this.maskResultCanvasRef?.nativeElement;
-		if (!maskResultCanvas) {
-			return;
-		}
+    private _drawOvalCenterAndMask(): void {
+        const maskResultCanvas = this.maskResultCanvasRef?.nativeElement;
+        if (!maskResultCanvas) {
+            return;
+        }
 
-		const ctx = maskResultCanvas.getContext("2d");
-		if (!ctx) {
-			return;
-		}
+        const ctx = maskResultCanvas.getContext("2d");
+        if (!ctx) {
+            return;
+        }
 
 		const videoDim = this.camera.dimensions.video;
 		if (!videoDim.width || !videoDim.height) {

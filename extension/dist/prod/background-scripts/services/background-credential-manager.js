@@ -1,7 +1,7 @@
 export class BackgroundCredentialManager {
-    static getInstance() {
+    static getInstance(browserApi) {
         if (!BackgroundCredentialManager.instance) {
-            BackgroundCredentialManager.instance = new BackgroundCredentialManager();
+            BackgroundCredentialManager.instance = new BackgroundCredentialManager(browserApi);
         }
         return BackgroundCredentialManager.instance;
     }
@@ -9,8 +9,11 @@ export class BackgroundCredentialManager {
         this.browserApi = browserApi;
         this.zelfKeyJWT = null;
         this.zelfKeyJWTExpiry = null;
-        this.API_BASE_URL = 'https://keys-api.zelf.world'; // ZelfKey API URL
-        this.loadJWTFromStorage();
+        this.API_BASE_URL = "https://keys-api.zelf.world"; // ZelfKey API URL
+        // Load JWT from storage asynchronously
+        this.loadJWTFromStorage().catch((error) => {
+            console.error("Error loading JWT from storage in constructor:", error);
+        });
     }
     /**
      * Load JWT from storage (replicating Angular service behavior)
@@ -18,13 +21,23 @@ export class BackgroundCredentialManager {
     async loadJWTFromStorage() {
         try {
             if (this.browserApi?.has("storage")) {
-                const result = await this.browserApi.storage.local.get(['zelfKeyJWT', 'zelfKeyJWTExpiry']);
+                const result = await this.browserApi.storage.local.get(["zelfKeyJWT", "zelfKeyJWTExpiry"]);
                 this.zelfKeyJWT = result.zelfKeyJWT || null;
                 this.zelfKeyJWTExpiry = result.zelfKeyJWTExpiry || null;
+                // Check if token is expired
+                if (this.zelfKeyJWT && this.zelfKeyJWTExpiry && Date.now() >= this.zelfKeyJWTExpiry) {
+                    console.log("JWT token expired, clearing from storage");
+                    this.zelfKeyJWT = null;
+                    this.zelfKeyJWTExpiry = null;
+                    await this.saveJWTToStorage();
+                }
+            }
+            else {
+                console.error("Storage API not available through BrowserApiUtil");
             }
         }
         catch (error) {
-            console.error('Error loading JWT from storage:', error);
+            console.error("Error loading JWT from storage:", error);
         }
     }
     /**
@@ -35,25 +48,50 @@ export class BackgroundCredentialManager {
             if (this.browserApi?.has("storage")) {
                 await this.browserApi.storage.local.set({
                     zelfKeyJWT: this.zelfKeyJWT,
-                    zelfKeyJWTExpiry: this.zelfKeyJWTExpiry
+                    zelfKeyJWTExpiry: this.zelfKeyJWTExpiry,
                 });
+            }
+            else {
+                console.error("Storage API not available through BrowserApiUtil");
             }
         }
         catch (error) {
-            console.error('Error saving JWT to storage:', error);
+            console.error("Error saving JWT to storage:", error);
         }
     }
     /**
-     * Get the current JWT token if valid (replicating getZelfKeyJWT from Angular service)
+     * Get wallet data from storage
      */
-    getZelfKeyJWT() {
+    async getWalletData() {
+        try {
+            if (this.browserApi?.has("storage")) {
+                const result = await this.browserApi.storage.local.get(["wallet"]);
+                return result.wallet || null;
+            }
+            return null;
+        }
+        catch (error) {
+            console.error("Error getting wallet data:", error);
+            return null;
+        }
+    }
+    /**
+     * Get the current JWT token if valid, or initialize session if needed
+     */
+    async getZelfKeyJWT() {
+        // Check if we have a valid cached token
         if (this.zelfKeyJWT && this.zelfKeyJWTExpiry && Date.now() < this.zelfKeyJWTExpiry) {
             return this.zelfKeyJWT;
         }
-        // Clear expired token
-        this.zelfKeyJWT = null;
-        this.zelfKeyJWTExpiry = null;
-        return null;
+        // Try to reload from storage first
+        await this.loadJWTFromStorage();
+        // Check again after loading from storage
+        if (this.zelfKeyJWT && this.zelfKeyJWTExpiry && Date.now() < this.zelfKeyJWTExpiry) {
+            return this.zelfKeyJWT;
+        }
+        // If still no valid token, try to initialize a new session
+        const sessionResult = await this.initZelfKeySession();
+        return sessionResult?.data?.token || null;
     }
     /**
      * Clear the JWT token (replicating clearZelfKeyJWT from Angular service)
@@ -66,8 +104,9 @@ export class BackgroundCredentialManager {
     /**
      * Check if user is authenticated
      */
-    isAuthenticated() {
-        return !!this.getZelfKeyJWT();
+    async isAuthenticated() {
+        const jwt = await this.getZelfKeyJWT();
+        return !!jwt;
     }
     /**
      * Initialize ZelfKey session (replicating initZelfKeySession from Angular service)
@@ -79,10 +118,9 @@ export class BackgroundCredentialManager {
         }
         const { wallet } = await this.getAllWalletsFromStorage();
         if (!wallet?.ethAddress) {
-            console.error('No wallet found in storage');
-            return null;
+            throw new Error("No wallet found in storage - user needs to authenticate first");
         }
-        const response = await this.makeApiCall('POST', '/api/sessions', {
+        const response = await this.makeApiCall("POST", "/api/sessions", {
             address: wallet.ethAddress,
             identifier: wallet.name,
         });
@@ -100,14 +138,16 @@ export class BackgroundCredentialManager {
     async getAllWalletsFromStorage() {
         try {
             if (!this.browserApi?.has("storage")) {
+                console.error("Storage API not available through BrowserApiUtil");
                 return { wallet: null, wallets: [] };
             }
-            const result = await this.browserApi.storage.local.get(['wallet', 'wallets']);
+            const result = await this.browserApi.storage.local.get(["wallet", "wallets"]);
             const wallet = result.wallet || {};
             const wallets = result.wallets || [];
             if (!wallet?.ethAddress) {
-                if (!wallets.length)
+                if (!wallets.length) {
                     return { wallet, wallets: [] };
+                }
                 // Set first wallet as current if no current wallet
                 const firstWallet = wallets[0];
                 await this.browserApi.storage.local.set({ wallet: firstWallet });
@@ -116,7 +156,7 @@ export class BackgroundCredentialManager {
             return { wallet, wallets };
         }
         catch (error) {
-            console.error('Error getting wallets from storage:', error);
+            console.error("Error getting wallets from storage:", error);
             return { wallet: null, wallets: [] };
         }
     }
@@ -124,101 +164,59 @@ export class BackgroundCredentialManager {
      * List stored passwords from IPFS (replicating listStoredPasswords from Angular service)
      */
     async listStoredPasswords() {
-        const jwt = this.getZelfKeyJWT();
+        const jwt = await this.getZelfKeyJWT();
         if (!jwt) {
-            // Try to initialize session if no JWT available
-            await this.initZelfKeySession();
-            const newJwt = this.getZelfKeyJWT();
-            if (!newJwt) {
-                throw new Error("Unable to authenticate with ZelfKey API");
-            }
+            throw new Error("Unable to authenticate with ZelfKey API");
         }
-        return this.makeApiCall('GET', '/api/zelf-key/list?category=password');
+        return this.makeApiCall("GET", "/api/zelf-key/list?category=password");
     }
     /**
      * Get passwords for a specific website (wrapper for listStoredPasswords with filtering)
      */
     async getPasswords(website) {
         try {
-            console.log('Getting passwords for website:', website);
             const rawResponse = await this.listStoredPasswords();
-            console.log('Raw response from listStoredPasswords:', rawResponse);
             // Handle different response formats
             const data = rawResponse.data || rawResponse || [];
-            console.log('Extracted data:', data);
             // Transform the raw password data to match PasswordEntry interface
             const passwords = data
                 .filter((password) => {
-                console.log('Checking password:', password.name, 'type:', password.publicData?.type);
-                return password.publicData?.type === 'website_password';
+                return password.publicData?.type === "website_password";
             })
                 .filter((password) => {
                 // Filter by website if provided
                 if (!website)
                     return true;
-                const targetDomain = website.replace(/^https?:\/\//, '').replace(/^www\./, '');
+                const targetDomain = website.replace(/^https?:\/\//, "").replace(/^www\./, "");
                 const passwordDomain = password.publicData?.website ? new URL(password.publicData.website).hostname : undefined;
-                console.log('Comparing domains - target:', targetDomain, 'password:', passwordDomain);
-                return passwordDomain === targetDomain ||
+                return (passwordDomain === targetDomain ||
                     password.publicData?.website?.includes(targetDomain) ||
-                    password.publicData?.website === targetDomain;
+                    password.publicData?.website === targetDomain);
             });
-            console.log('Filtered passwords for website:', website, passwords);
             return passwords;
         }
         catch (error) {
-            console.error('Error getting passwords:', error);
+            console.error("Error getting passwords:", error);
             return [];
-        }
-    }
-    /**
-     * Retrieve/decrypt a stored password (replicating retrievePassword from Angular service)
-     */
-    async retrievePassword(payload) {
-        const jwt = this.getZelfKeyJWT();
-        if (!jwt) {
-            // Try to initialize session if no JWT available
-            await this.initZelfKeySession();
-            const newJwt = this.getZelfKeyJWT();
-            if (!newJwt) {
-                throw new Error("Unable to authenticate with ZelfKey API");
-            }
-        }
-        return this.makeApiCall('POST', '/api/zelf-key/retrieve', payload);
-    }
-    /**
-     * Decrypt a password (wrapper for retrievePassword)
-     */
-    async decryptPassword(passwordId) {
-        try {
-            const response = await this.retrievePassword({ id: passwordId });
-            if (response?.data) {
-                return response.data;
-            }
-            return null;
-        }
-        catch (error) {
-            console.error('Error decrypting password:', error);
-            return null;
         }
     }
     /**
      * Make API call with authentication (replicating HttpWrapperService behavior)
      */
     async makeApiCall(method, endpoint, data) {
-        const jwt = this.getZelfKeyJWT();
+        const jwt = await this.getZelfKeyJWT();
         if (!jwt) {
-            throw new Error('No valid JWT token available');
+            throw new Error("No valid JWT token available");
         }
         const url = `${this.API_BASE_URL}${endpoint}`;
         const options = {
             method,
             headers: {
-                'Authorization': `Bearer ${jwt}`,
-                'Content-Type': 'application/json',
+                Authorization: `Bearer ${jwt}`,
+                "Content-Type": "application/json",
             },
         };
-        if (data && (method === 'POST' || method === 'PUT')) {
+        if (data && (method === "POST" || method === "PUT")) {
             options.body = JSON.stringify(data);
         }
         const response = await fetch(url, options);
@@ -236,14 +234,14 @@ export class BackgroundCredentialManager {
             await this.initZelfKeySession();
             const jwt = this.getZelfKeyJWT();
             if (!jwt) {
-                console.error('Failed to initialize session');
+                console.error("Failed to initialize session");
                 return false;
             }
-            const response = await this.makeApiCall('POST', '/api/zelf-key/store/password', passwordData);
+            const response = await this.makeApiCall("POST", "/api/zelf-key/store/password", passwordData);
             return !!response?.data;
         }
         catch (error) {
-            console.error('Error storing password:', error);
+            console.error("Error storing password:", error);
             return false;
         }
     }

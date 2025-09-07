@@ -9,7 +9,7 @@
 		"build": "npm run build:prod",
 		"build:prod": "node scripts/build-unified.js --prod",
 		"build:dev": "node scripts/build-unified.js",
-		"watch": "concurrently \"ng build --configuration 'ext_dev_chrome' --watch\" \"npm run watch:unified\"",
+		"watch": "npm run watch:unified",
 		"watch:unified": "node scripts/watch-unified.js",
 		"bump:major": "npm version major --no-git-tag-version && node scripts/sync-versions.js",
 		"bump:minor": "npm version minor --no-git-tag-version && node scripts/sync-versions.js",

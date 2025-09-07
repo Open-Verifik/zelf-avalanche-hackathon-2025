@@ -47,11 +47,11 @@ export class CommunicationService {
     }
   }
 
-  public async createPassword(): Promise<void> {
+  public async createPassword(urlInfo?: any): Promise<void> {
     try {
       await this.sendMessage({
         type: 'CREATE_PASSWORD',
-        payload: {}
+        payload: { urlInfo }
       });
     } catch (error) {
       console.error('Error opening create password:', error);

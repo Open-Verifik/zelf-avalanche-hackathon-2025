@@ -148,16 +148,19 @@ class BackgroundCredentialManager {
     static instance;
     zelfKeyJWT = null;
     zelfKeyJWTExpiry = null;
-    API_BASE_URL = 'https://keys-api.zelf.world'; // ZelfKey API URL
-    static getInstance() {
+    API_BASE_URL = "https://keys-api.zelf.world"; // ZelfKey API URL
+    static getInstance(browserApi) {
         if (!BackgroundCredentialManager.instance) {
-            BackgroundCredentialManager.instance = new BackgroundCredentialManager();
+            BackgroundCredentialManager.instance = new BackgroundCredentialManager(browserApi);
         }
         return BackgroundCredentialManager.instance;
     }
     constructor(browserApi) {
         this.browserApi = browserApi;
-        this.loadJWTFromStorage();
+        // Load JWT from storage asynchronously
+        this.loadJWTFromStorage().catch((error) => {
+            console.error("Error loading JWT from storage in constructor:", error);
+        });
     }
     /**
      * Load JWT from storage (replicating Angular service behavior)
@@ -165,13 +168,23 @@ class BackgroundCredentialManager {
     async loadJWTFromStorage() {
         try {
             if (this.browserApi?.has("storage")) {
-                const result = await this.browserApi.storage.local.get(['zelfKeyJWT', 'zelfKeyJWTExpiry']);
+                const result = await this.browserApi.storage.local.get(["zelfKeyJWT", "zelfKeyJWTExpiry"]);
                 this.zelfKeyJWT = result.zelfKeyJWT || null;
                 this.zelfKeyJWTExpiry = result.zelfKeyJWTExpiry || null;
+                // Check if token is expired
+                if (this.zelfKeyJWT && this.zelfKeyJWTExpiry && Date.now() >= this.zelfKeyJWTExpiry) {
+                    console.log("JWT token expired, clearing from storage");
+                    this.zelfKeyJWT = null;
+                    this.zelfKeyJWTExpiry = null;
+                    await this.saveJWTToStorage();
+                }
+            }
+            else {
+                console.error("Storage API not available through BrowserApiUtil");
             }
         }
         catch (error) {
-            console.error('Error loading JWT from storage:', error);
+            console.error("Error loading JWT from storage:", error);
         }
     }
     /**
@@ -182,25 +195,50 @@ class BackgroundCredentialManager {
             if (this.browserApi?.has("storage")) {
                 await this.browserApi.storage.local.set({
                     zelfKeyJWT: this.zelfKeyJWT,
-                    zelfKeyJWTExpiry: this.zelfKeyJWTExpiry
+                    zelfKeyJWTExpiry: this.zelfKeyJWTExpiry,
                 });
+            }
+            else {
+                console.error("Storage API not available through BrowserApiUtil");
             }
         }
         catch (error) {
-            console.error('Error saving JWT to storage:', error);
+            console.error("Error saving JWT to storage:", error);
         }
     }
     /**
-     * Get the current JWT token if valid (replicating getZelfKeyJWT from Angular service)
+     * Get wallet data from storage
      */
-    getZelfKeyJWT() {
+    async getWalletData() {
+        try {
+            if (this.browserApi?.has("storage")) {
+                const result = await this.browserApi.storage.local.get(["wallet"]);
+                return result.wallet || null;
+            }
+            return null;
+        }
+        catch (error) {
+            console.error("Error getting wallet data:", error);
+            return null;
+        }
+    }
+    /**
+     * Get the current JWT token if valid, or initialize session if needed
+     */
+    async getZelfKeyJWT() {
+        // Check if we have a valid cached token
         if (this.zelfKeyJWT && this.zelfKeyJWTExpiry && Date.now() < this.zelfKeyJWTExpiry) {
             return this.zelfKeyJWT;
         }
-        // Clear expired token
-        this.zelfKeyJWT = null;
-        this.zelfKeyJWTExpiry = null;
-        return null;
+        // Try to reload from storage first
+        await this.loadJWTFromStorage();
+        // Check again after loading from storage
+        if (this.zelfKeyJWT && this.zelfKeyJWTExpiry && Date.now() < this.zelfKeyJWTExpiry) {
+            return this.zelfKeyJWT;
+        }
+        // If still no valid token, try to initialize a new session
+        const sessionResult = await this.initZelfKeySession();
+        return sessionResult?.data?.token || null;
     }
     /**
      * Clear the JWT token (replicating clearZelfKeyJWT from Angular service)
@@ -213,8 +251,9 @@ class BackgroundCredentialManager {
     /**
      * Check if user is authenticated
      */
-    isAuthenticated() {
-        return !!this.getZelfKeyJWT();
+    async isAuthenticated() {
+        const jwt = await this.getZelfKeyJWT();
+        return !!jwt;
     }
     /**
      * Initialize ZelfKey session (replicating initZelfKeySession from Angular service)
@@ -226,10 +265,9 @@ class BackgroundCredentialManager {
         }
         const { wallet } = await this.getAllWalletsFromStorage();
         if (!wallet?.ethAddress) {
-            console.error('No wallet found in storage');
-            return null;
+            throw new Error("No wallet found in storage - user needs to authenticate first");
         }
-        const response = await this.makeApiCall('POST', '/api/sessions', {
+        const response = await this.makeApiCall("POST", "/api/sessions", {
             address: wallet.ethAddress,
             identifier: wallet.name,
         });
@@ -247,14 +285,16 @@ class BackgroundCredentialManager {
     async getAllWalletsFromStorage() {
         try {
             if (!this.browserApi?.has("storage")) {
+                console.error("Storage API not available through BrowserApiUtil");
                 return { wallet: null, wallets: [] };
             }
-            const result = await this.browserApi.storage.local.get(['wallet', 'wallets']);
+            const result = await this.browserApi.storage.local.get(["wallet", "wallets"]);
             const wallet = result.wallet || {};
             const wallets = result.wallets || [];
             if (!wallet?.ethAddress) {
-                if (!wallets.length)
+                if (!wallets.length) {
                     return { wallet, wallets: [] };
+                }
                 // Set first wallet as current if no current wallet
                 const firstWallet = wallets[0];
                 await this.browserApi.storage.local.set({ wallet: firstWallet });
@@ -263,7 +303,7 @@ class BackgroundCredentialManager {
             return { wallet, wallets };
         }
         catch (error) {
-            console.error('Error getting wallets from storage:', error);
+            console.error("Error getting wallets from storage:", error);
             return { wallet: null, wallets: [] };
         }
     }
@@ -271,101 +311,59 @@ class BackgroundCredentialManager {
      * List stored passwords from IPFS (replicating listStoredPasswords from Angular service)
      */
     async listStoredPasswords() {
-        const jwt = this.getZelfKeyJWT();
+        const jwt = await this.getZelfKeyJWT();
         if (!jwt) {
-            // Try to initialize session if no JWT available
-            await this.initZelfKeySession();
-            const newJwt = this.getZelfKeyJWT();
-            if (!newJwt) {
-                throw new Error("Unable to authenticate with ZelfKey API");
-            }
+            throw new Error("Unable to authenticate with ZelfKey API");
         }
-        return this.makeApiCall('GET', '/api/zelf-key/list?category=password');
+        return this.makeApiCall("GET", "/api/zelf-key/list?category=password");
     }
     /**
      * Get passwords for a specific website (wrapper for listStoredPasswords with filtering)
      */
     async getPasswords(website) {
         try {
-            console.log('Getting passwords for website:', website);
             const rawResponse = await this.listStoredPasswords();
-            console.log('Raw response from listStoredPasswords:', rawResponse);
             // Handle different response formats
             const data = rawResponse.data || rawResponse || [];
-            console.log('Extracted data:', data);
             // Transform the raw password data to match PasswordEntry interface
             const passwords = data
                 .filter((password) => {
-                console.log('Checking password:', password.name, 'type:', password.publicData?.type);
-                return password.publicData?.type === 'website_password';
+                return password.publicData?.type === "website_password";
             })
                 .filter((password) => {
                 // Filter by website if provided
                 if (!website)
                     return true;
-                const targetDomain = website.replace(/^https?:\/\//, '').replace(/^www\./, '');
+                const targetDomain = website.replace(/^https?:\/\//, "").replace(/^www\./, "");
                 const passwordDomain = password.publicData?.website ? new URL(password.publicData.website).hostname : undefined;
-                console.log('Comparing domains - target:', targetDomain, 'password:', passwordDomain);
-                return passwordDomain === targetDomain ||
+                return (passwordDomain === targetDomain ||
                     password.publicData?.website?.includes(targetDomain) ||
-                    password.publicData?.website === targetDomain;
+                    password.publicData?.website === targetDomain);
             });
-            console.log('Filtered passwords for website:', website, passwords);
             return passwords;
         }
         catch (error) {
-            console.error('Error getting passwords:', error);
+            console.error("Error getting passwords:", error);
             return [];
-        }
-    }
-    /**
-     * Retrieve/decrypt a stored password (replicating retrievePassword from Angular service)
-     */
-    async retrievePassword(payload) {
-        const jwt = this.getZelfKeyJWT();
-        if (!jwt) {
-            // Try to initialize session if no JWT available
-            await this.initZelfKeySession();
-            const newJwt = this.getZelfKeyJWT();
-            if (!newJwt) {
-                throw new Error("Unable to authenticate with ZelfKey API");
-            }
-        }
-        return this.makeApiCall('POST', '/api/zelf-key/retrieve', payload);
-    }
-    /**
-     * Decrypt a password (wrapper for retrievePassword)
-     */
-    async decryptPassword(passwordId) {
-        try {
-            const response = await this.retrievePassword({ id: passwordId });
-            if (response?.data) {
-                return response.data;
-            }
-            return null;
-        }
-        catch (error) {
-            console.error('Error decrypting password:', error);
-            return null;
         }
     }
     /**
      * Make API call with authentication (replicating HttpWrapperService behavior)
      */
     async makeApiCall(method, endpoint, data) {
-        const jwt = this.getZelfKeyJWT();
+        const jwt = await this.getZelfKeyJWT();
         if (!jwt) {
-            throw new Error('No valid JWT token available');
+            throw new Error("No valid JWT token available");
         }
         const url = `${this.API_BASE_URL}${endpoint}`;
         const options = {
             method,
             headers: {
-                'Authorization': `Bearer ${jwt}`,
-                'Content-Type': 'application/json',
+                Authorization: `Bearer ${jwt}`,
+                "Content-Type": "application/json",
             },
         };
-        if (data && (method === 'POST' || method === 'PUT')) {
+        if (data && (method === "POST" || method === "PUT")) {
             options.body = JSON.stringify(data);
         }
         const response = await fetch(url, options);
@@ -383,14 +381,14 @@ class BackgroundCredentialManager {
             await this.initZelfKeySession();
             const jwt = this.getZelfKeyJWT();
             if (!jwt) {
-                console.error('Failed to initialize session');
+                console.error("Failed to initialize session");
                 return false;
             }
-            const response = await this.makeApiCall('POST', '/api/zelf-key/store/password', passwordData);
+            const response = await this.makeApiCall("POST", "/api/zelf-key/store/password", passwordData);
             return !!response?.data;
         }
         catch (error) {
-            console.error('Error storing password:', error);
+            console.error("Error storing password:", error);
             return false;
         }
     }
@@ -403,23 +401,16 @@ class MessageHandler {
     credentialManager;
     constructor(browserApi) {
         this.browserApi = browserApi;
-        this.credentialManager = BackgroundCredentialManager.getInstance();
+        this.credentialManager = BackgroundCredentialManager.getInstance(this.browserApi);
     }
     async handleAutofillMessage(message, sender, sendResponse) {
         try {
             switch (message.type) {
-                case "TEST_MESSAGE":
-                    console.log("Background: Test message received");
-                    sendResponse({ success: true, message: "Service worker is active!" });
-                    break;
                 case "GET_PASSWORDS":
                     await this.handleGetPasswords(message.payload, sendResponse);
                     break;
-                case "DECRYPT_PASSWORD":
-                    await this.handleDecryptPassword(message.payload, sendResponse);
-                    break;
                 case "CREATE_PASSWORD":
-                    await this.handleCreatePassword(sender, sendResponse);
+                    await this.handleCreatePassword(message.payload, sendResponse);
                     break;
                 case "AUTHENTICATE":
                     await this.handleAuthenticate(sendResponse);
@@ -439,11 +430,7 @@ class MessageHandler {
     }
     async handleGetPasswords(payload, sendResponse) {
         try {
-            console.log("Background: Getting passwords for website:", payload.website);
-            // Use credential manager directly (no fallback needed)
-            console.log("Background: Using credential manager for password retrieval");
             const passwords = await this.credentialManager.getPasswords(payload.website);
-            console.log("Background: Retrieved passwords from credential manager:", passwords);
             sendResponse({ success: true, data: passwords });
         }
         catch (error) {
@@ -451,23 +438,19 @@ class MessageHandler {
             sendResponse({ success: false, error: error.message });
         }
     }
-    async handleDecryptPassword(payload, sendResponse) {
+    async handleCreatePassword(payload, sendResponse) {
         try {
-            // Use credential manager directly (no fallback needed)
-            console.log("Background: Using credential manager for password decryption");
-            const decryptedData = await this.credentialManager.decryptPassword(payload.passwordId);
-            console.log("Background: Decrypted password from credential manager:", decryptedData);
-            sendResponse({ success: true, data: decryptedData });
-        }
-        catch (error) {
-            console.error("Error decrypting password:", error);
-            sendResponse({ success: false, error: error.message });
-        }
-    }
-    async handleCreatePassword(sender, sendResponse) {
-        try {
-            // Open the extension popup/sidebar to the create password page
-            await this.openExtensionUI("create-password");
+            // Get the URL info from the message payload
+            const urlInfo = payload?.urlInfo || null;
+            // Open the extension tab first
+            const tabId = await this.openExtensionUI("dashboard/passwords/new");
+            if (tabId) {
+                // Wait for tab to be ready, then send message to Angular app
+                await this.waitForTabAndSendMessage(tabId, {
+                    type: "AUTOFILL_CREATE_PASSWORD_DATA",
+                    payload: { urlInfo },
+                });
+            }
             sendResponse({ success: true });
         }
         catch (error) {
@@ -476,10 +459,7 @@ class MessageHandler {
     }
     async handleAuthenticate(sendResponse) {
         try {
-            // Use credential manager directly (no fallback needed)
-            console.log("Background: Using credential manager for authentication check");
             const isAuthenticated = this.credentialManager.isAuthenticated();
-            console.log("Background: Authentication status from credential manager:", isAuthenticated);
             sendResponse({ success: isAuthenticated });
         }
         catch (error) {
@@ -489,54 +469,83 @@ class MessageHandler {
     async handleOpenBiometricsModal(payload, sender) {
         try {
             // Open the extension popup/sidebar to the biometrics modal
-            await this.openExtensionUI("biometrics", payload);
+            await this.openExtensionUI("biometrics");
         }
         catch (error) {
             console.error("Error opening biometrics modal:", error);
         }
     }
-    async openExtensionUI(page, data = null) {
+    async openExtensionUI(page) {
         try {
-            // Store any data needed for the UI
-            if (data && this.browserApi.has("storage")) {
-                await this.browserApi.storage.local.set({
-                    autofillData: data,
-                    autofillTimestamp: Date.now(),
+            // Get the extension URL
+            const runtime = this.browserApi.runtime;
+            if (!runtime) {
+                console.error("Runtime API not available");
+                return null;
+            }
+            const extensionUrl = runtime.getURL(`index.html#/${page}`);
+            // Always open a new tab for create password to ensure clean state
+            const tabs = this.browserApi.tabs;
+            if (tabs) {
+                const newTab = await tabs.create({
+                    url: extensionUrl,
+                    active: true,
                 });
-            }
-            // Open the extension popup/sidebar - only use if/elseif for fundamentally different APIs
-            if (this.browserApi.sidebarAction) {
-                // Firefox
-                this.browserApi.sidebarAction.open();
-            }
-            else if (this.browserApi.sidePanel) {
-                // Chrome
-                const currentWindow = await this.browserApi.windows.getCurrent();
-                this.browserApi.sidePanel.open({ windowId: currentWindow.id });
+                return newTab.id;
             }
             else {
-                // Fallback to opening in new tab
-                const runtime = this.browserApi.runtime;
-                if (runtime) {
-                    const url = runtime.getURL(`index.html#/${page}`);
-                    const tabs = this.browserApi.tabs;
-                    if (tabs) {
-                        tabs.create({ url });
-                    }
-                }
+                console.error("Tabs API not available");
+                return null;
             }
         }
         catch (error) {
             console.error("Error opening extension UI:", error);
-            // Fallback to opening in new tab
-            const runtime = this.browserApi.runtime;
-            if (!runtime)
+            return null;
+        }
+    }
+    async waitForTabAndSendMessage(tabId, message, maxRetries = 10, retryDelay = 500) {
+        const tabs = this.browserApi.tabs;
+        if (!tabs) {
+            console.error("Tabs API not available");
+            return;
+        }
+        for (let attempt = 1; attempt <= maxRetries; attempt++) {
+            try {
+                // Try to send a ping message first to check if the tab is ready
+                await tabs.sendMessage(tabId, { type: "PING" });
+                // If ping succeeds, send the actual message
+                await tabs.sendMessage(tabId, message);
                 return;
-            const url = runtime.getURL(`index.html#/${page}`);
+            }
+            catch (error) {
+                if (attempt === maxRetries) {
+                    console.error("Max retries reached, failed to send message to tab", tabId);
+                    return;
+                }
+                // Wait before retrying
+                await new Promise((resolve) => setTimeout(resolve, retryDelay));
+            }
+        }
+    }
+    async sendMessageToAngularApp(message) {
+        try {
             const tabs = this.browserApi.tabs;
-            if (!tabs)
+            if (!tabs) {
+                console.error("Tabs API not available");
                 return;
-            tabs.create({ url });
+            }
+            // Find the extension tab
+            const allTabs = await tabs.query({});
+            const extensionTab = allTabs.find((tab) => tab.url && tab.url.includes("index.html") && (tab.url.includes("chrome-extension://") || tab.url.includes("moz-extension://")));
+            if (extensionTab) {
+                await tabs.sendMessage(extensionTab.id, message);
+            }
+            else {
+                console.error("No extension tab found to send message to");
+            }
+        }
+        catch (error) {
+            console.error("Error sending message to Angular app:", error);
         }
     }
 }
@@ -670,6 +679,7 @@ if (browserApi.has("runtime")) {
         return true; // Keep message channel open for async response
     });
 }
+// Test comment
 
 /******/ })()
 ;

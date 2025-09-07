@@ -196,11 +196,11 @@ class CommunicationService {
             return null;
         }
     }
-    async createPassword() {
+    async createPassword(urlInfo) {
         try {
             await this.sendMessage({
                 type: 'CREATE_PASSWORD',
-                payload: {}
+                payload: { urlInfo }
             });
         }
         catch (error) {
@@ -297,9 +297,9 @@ class PasswordManager {
             return null;
         }
     }
-    async createNewPassword() {
+    async createNewPassword(urlInfo) {
         try {
-            await this.communicationService.createPassword();
+            await this.communicationService.createPassword(urlInfo);
         }
         catch (error) {
             console.error('Error creating new password:', error);
@@ -337,7 +337,7 @@ class UIOverlay {
         this.setupStyles();
     }
     setupStyles() {
-        const style = document.createElement('style');
+        const style = document.createElement("style");
         style.textContent = `
       .zelfkey-icon {
         position: absolute;
@@ -475,12 +475,12 @@ class UIOverlay {
         }
     }
     hideAllIcons() {
-        this.icons.forEach(icon => icon.element.remove());
+        this.icons.forEach((icon) => icon.element.remove());
         this.icons.clear();
     }
     createZelfKeyIcon(field) {
-        const iconElement = document.createElement('div');
-        iconElement.className = 'zelfkey-icon';
+        const iconElement = document.createElement("div");
+        iconElement.className = "zelfkey-icon";
         iconElement.innerHTML = this.getZelfKeySVG();
         // Position the icon
         const rect = field.element.getBoundingClientRect();
@@ -488,12 +488,12 @@ class UIOverlay {
         const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
         const position = {
             top: rect.top + scrollTop + (rect.height - 39) / 2,
-            left: rect.right + scrollLeft - 60
+            left: rect.right + scrollLeft - 60,
         };
         iconElement.style.top = `${position.top}px`;
         iconElement.style.left = `${position.left}px`;
         // Add click handler
-        iconElement.addEventListener('click', (e) => {
+        iconElement.addEventListener("click", (e) => {
             e.stopPropagation();
             this.handleIconClick(field);
         });
@@ -501,7 +501,7 @@ class UIOverlay {
         return {
             element: iconElement,
             field,
-            position
+            position,
         };
     }
     getZelfKeySVG() {
@@ -521,7 +521,7 @@ class UIOverlay {
         const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
         const position = {
             top: rect.top + scrollTop + (rect.height - 28) / 2,
-            left: rect.right + scrollLeft - 32
+            left: rect.right + scrollLeft - 32,
         };
         icon.element.style.top = `${position.top}px`;
         icon.element.style.left = `${position.left}px`;
@@ -530,8 +530,8 @@ class UIOverlay {
     async handleIconClick(field) {
         this.currentField = field;
         this.hideMenu();
-        // Hardcode for testing with file:// URLs
-        const website = 'google.com';
+        // Extract hostname from current URL
+        const website = this.extractHostname(window.location.href);
         // Show menu immediately with loading state
         this.showMenuWithLoading(field, website);
         try {
@@ -542,25 +542,25 @@ class UIOverlay {
                     setTimeout(() => {
                         resolve([]);
                     }, 2000);
-                })
+                }),
             ]);
             this.updateMenuWithPasswords(passwords);
         }
         catch (error) {
-            console.error('Error fetching passwords:', error);
+            console.error("Error fetching passwords:", error);
             this.updateMenuWithPasswords([]);
         }
     }
     showMenuWithLoading(field, website) {
         this.hideMenu();
-        const menu = document.createElement('div');
-        menu.className = 'zelfkey-menu';
+        const menu = document.createElement("div");
+        menu.className = "zelfkey-menu";
         // Add loading indicator
         const loadingItem = this.createLoadingMenuItem();
         menu.appendChild(loadingItem);
         // Add create new password option (always available)
         const createItem = this.createCreateMenuItem();
-        createItem.addEventListener('click', () => this.handleCreatePassword());
+        createItem.addEventListener("click", () => this.handleCreatePassword());
         menu.appendChild(createItem);
         // Position the menu
         const rect = field.element.getBoundingClientRect();
@@ -568,24 +568,24 @@ class UIOverlay {
         const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
         menu.style.top = `${rect.bottom + scrollTop + 5}px`;
         menu.style.left = `${rect.left + scrollLeft}px`;
-        menu.style.zIndex = '10001';
+        menu.style.zIndex = "10001";
         document.body.appendChild(menu);
         this.currentMenu = menu;
         // Add click outside handler
         setTimeout(() => {
-            document.addEventListener('click', this.handleClickOutside.bind(this));
+            document.addEventListener("click", this.handleClickOutside.bind(this));
         }, 0);
     }
     updateMenuWithPasswords(passwords) {
         if (!this.currentMenu)
             return;
         // Clear existing content
-        this.currentMenu.innerHTML = '';
+        this.currentMenu.innerHTML = "";
         // Add existing passwords or "no credentials" message
         if (passwords.length > 0) {
-            passwords.forEach(password => {
+            passwords.forEach((password) => {
                 const item = this.createMenuItem(password);
-                item.addEventListener('click', () => this.handlePasswordSelect(password));
+                item.addEventListener("click", () => this.handlePasswordSelect(password));
                 this.currentMenu.appendChild(item);
             });
         }
@@ -596,25 +596,25 @@ class UIOverlay {
         }
         // Add create new password option
         const createItem = this.createCreateMenuItem();
-        createItem.addEventListener('click', () => this.handleCreatePassword());
+        createItem.addEventListener("click", () => this.handleCreatePassword());
         this.currentMenu.appendChild(createItem);
     }
     createMenuItem(password) {
-        const item = document.createElement('div');
-        item.className = 'zelfkey-menu-item';
+        const item = document.createElement("div");
+        item.className = "zelfkey-menu-item";
         // Extract host name from website/domain/url
         const hostName = this.extractHostName(password);
         const hostInitial = hostName.charAt(0).toUpperCase();
-        const icon = document.createElement('div');
-        icon.className = 'zelfkey-menu-item-icon';
+        const icon = document.createElement("div");
+        icon.className = "zelfkey-menu-item-icon";
         icon.textContent = hostInitial;
-        const content = document.createElement('div');
-        content.className = 'zelfkey-menu-item-content';
-        const title = document.createElement('div');
-        title.className = 'zelfkey-menu-item-title';
+        const content = document.createElement("div");
+        content.className = "zelfkey-menu-item-content";
+        const title = document.createElement("div");
+        title.className = "zelfkey-menu-item-title";
         title.textContent = hostName;
-        const subtitle = document.createElement('div');
-        subtitle.className = 'zelfkey-menu-item-subtitle';
+        const subtitle = document.createElement("div");
+        subtitle.className = "zelfkey-menu-item-subtitle";
         subtitle.textContent = this.extractUsername(password);
         content.appendChild(title);
         content.appendChild(subtitle);
@@ -636,16 +636,16 @@ class UIOverlay {
         // Fallback to original format
         const source = password.website || password.domain || password.url || password.name;
         if (!source) {
-            return 'Unknown';
+            return "Unknown";
         }
         try {
             // If it's a full URL, extract the hostname
-            if (source.includes('://')) {
+            if (source.includes("://")) {
                 const url = new URL(source);
                 return url.hostname;
             }
             // If it already looks like a hostname (contains dots but no protocol)
-            if (source.includes('.') && !source.includes(' ')) {
+            if (source.includes(".") && !source.includes(" ")) {
                 return source;
             }
             // Otherwise, use the source as fallback
@@ -662,46 +662,46 @@ class UIOverlay {
             return password.publicData.username;
         }
         // Fallback to original format
-        return password.username || 'No username';
+        return password.username || "No username";
     }
     createLoadingMenuItem() {
-        const item = document.createElement('div');
-        item.className = 'zelfkey-menu-item loading';
-        const spinner = document.createElement('div');
-        spinner.className = 'loading-spinner';
-        const content = document.createElement('div');
-        content.className = 'zelfkey-menu-item-content';
-        const title = document.createElement('div');
-        title.className = 'zelfkey-menu-item-title';
-        title.textContent = 'Loading passwords...';
+        const item = document.createElement("div");
+        item.className = "zelfkey-menu-item loading";
+        const spinner = document.createElement("div");
+        spinner.className = "loading-spinner";
+        const content = document.createElement("div");
+        content.className = "zelfkey-menu-item-content";
+        const title = document.createElement("div");
+        title.className = "zelfkey-menu-item-title";
+        title.textContent = "Loading passwords...";
         content.appendChild(title);
         item.appendChild(spinner);
         item.appendChild(content);
         return item;
     }
     createNoCredentialsMenuItem() {
-        const item = document.createElement('div');
-        item.className = 'zelfkey-menu-item no-credentials';
-        const content = document.createElement('div');
-        content.className = 'zelfkey-menu-item-content';
-        const title = document.createElement('div');
-        title.className = 'zelfkey-menu-item-title';
-        title.textContent = 'No credentials found';
+        const item = document.createElement("div");
+        item.className = "zelfkey-menu-item no-credentials";
+        const content = document.createElement("div");
+        content.className = "zelfkey-menu-item-content";
+        const title = document.createElement("div");
+        title.className = "zelfkey-menu-item-title";
+        title.textContent = "No credentials found";
         content.appendChild(title);
         item.appendChild(content);
         return item;
     }
     createCreateMenuItem() {
-        const item = document.createElement('div');
-        item.className = 'zelfkey-menu-item create';
-        const icon = document.createElement('div');
-        icon.className = 'zelfkey-menu-item-icon';
-        icon.textContent = '+';
-        const content = document.createElement('div');
-        content.className = 'zelfkey-menu-item-content';
-        const title = document.createElement('div');
-        title.className = 'zelfkey-menu-item-title';
-        title.textContent = 'Create new password';
+        const item = document.createElement("div");
+        item.className = "zelfkey-menu-item create";
+        const icon = document.createElement("div");
+        icon.className = "zelfkey-menu-item-icon";
+        icon.textContent = "+";
+        const content = document.createElement("div");
+        content.className = "zelfkey-menu-item-content";
+        const title = document.createElement("div");
+        title.className = "zelfkey-menu-item-title";
+        title.textContent = "Create new password";
         content.appendChild(title);
         item.appendChild(icon);
         item.appendChild(content);
@@ -726,23 +726,35 @@ class UIOverlay {
     }
     async handleCreatePassword() {
         this.hideMenu();
-        await this.passwordManager.createNewPassword();
+        // Get complete URL information
+        const urlInfo = {
+            hash: window.location.hash,
+            hostname: window.location.hostname,
+            href: window.location.href,
+            origin: window.location.origin,
+            pathname: window.location.pathname,
+            port: window.location.port,
+            protocol: window.location.protocol,
+            search: window.location.search,
+            title: document.title,
+        };
+        await this.passwordManager.createNewPassword(urlInfo);
     }
     openBiometricsModal(password) {
         // This would open the biometrics modal in the extension popup
         // For now, we'll just log it
-        console.log('Opening biometrics modal for password:', password.id);
+        console.log("Opening biometrics modal for password:", password.id);
         // Send message to background script to open popup with biometrics modal
-        if (typeof chrome !== 'undefined' && chrome.runtime) {
+        if (typeof chrome !== "undefined" && chrome.runtime) {
             chrome.runtime.sendMessage({
-                type: 'OPEN_BIOMETRICS_MODAL',
-                payload: { passwordId: password.id, fieldId: this.currentField?.element.id }
+                type: "OPEN_BIOMETRICS_MODAL",
+                payload: { passwordId: password.id, fieldId: this.currentField?.element.id },
             });
         }
     }
     fillField(field, data) {
         // Find the form this field belongs to
-        const form = field.element.closest('form');
+        const form = field.element.closest("form");
         if (!form)
             return;
         // Find username field
@@ -751,7 +763,7 @@ class UIOverlay {
             this.setFieldValue(usernameField, data.username);
         }
         // Fill password field
-        if (field.type === 'password' && data.password) {
+        if (field.type === "password" && data.password) {
             this.setFieldValue(field.element, data.password);
         }
     }
@@ -762,11 +774,11 @@ class UIOverlay {
             'input[name*="username" i]',
             'input[name*="email" i]',
             'input[id*="username" i]',
-            'input[id*="email" i]'
+            'input[id*="email" i]',
         ];
         for (const selector of selectors) {
             const field = form.querySelector(selector);
-            if (field && field.type !== 'password') {
+            if (field && field.type !== "password") {
                 return field;
             }
         }
@@ -777,9 +789,9 @@ class UIOverlay {
         field.focus();
         field.value = value;
         // Dispatch events
-        field.dispatchEvent(new Event('input', { bubbles: true }));
-        field.dispatchEvent(new Event('change', { bubbles: true }));
-        field.dispatchEvent(new Event('blur', { bubbles: true }));
+        field.dispatchEvent(new Event("input", { bubbles: true }));
+        field.dispatchEvent(new Event("change", { bubbles: true }));
+        field.dispatchEvent(new Event("blur", { bubbles: true }));
     }
     handleClickOutside(event) {
         if (this.currentMenu && !this.currentMenu.contains(event.target)) {
@@ -791,24 +803,30 @@ class UIOverlay {
             this.currentMenu.remove();
             this.currentMenu = null;
         }
-        document.removeEventListener('click', this.handleClickOutside.bind(this));
-    }
-    getWebsiteFromUrl(url) {
-        try {
-            const urlObj = new URL(url);
-            return urlObj.hostname;
-        }
-        catch {
-            return window.location.hostname;
-        }
+        document.removeEventListener("click", this.handleClickOutside.bind(this));
     }
     updateIconPositions() {
-        this.icons.forEach(icon => {
+        this.icons.forEach((icon) => {
             this.positionIcon(icon);
         });
     }
+    extractHostname(url) {
+        try {
+            const urlObj = new URL(url);
+            let hostname = urlObj.hostname;
+            // Remove 'www.' prefix if present
+            if (hostname.startsWith("www.")) {
+                hostname = hostname.substring(4);
+            }
+            return hostname;
+        }
+        catch (error) {
+            // Fallback for invalid URLs (like file:// URLs)
+            console.warn("Could not parse URL:", url, error);
+            return "localhost";
+        }
+    }
 }
-// Another test change Sun Sep  7 12:02:57 MDT 2025
 
 ;// ./content-scripts/autofill/services/autofill-engine.ts
 class AutofillEngine {
@@ -977,24 +995,24 @@ class AutofillContentScript {
             // Set up communication
             this.communicationService.setupMessageListener();
             // Listen for detected forms FIRST
-            window.addEventListener('zelfkey:formsDetected', this.handleFormsDetected.bind(this));
+            window.addEventListener("zelfkey:formsDetected", this.handleFormsDetected.bind(this));
             // Start form detection AFTER listener is set up
             this.formDetector.startDetection();
             // Handle window resize and scroll events to reposition icons
-            window.addEventListener('resize', this.handleWindowResize.bind(this));
-            window.addEventListener('scroll', this.handleWindowScroll.bind(this));
+            window.addEventListener("resize", this.handleWindowResize.bind(this));
+            window.addEventListener("scroll", this.handleWindowScroll.bind(this));
             // Handle page visibility changes
-            document.addEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+            document.addEventListener("visibilitychange", this.handleVisibilityChange.bind(this));
             this.isInitialized = true;
-            console.log('ZelfKey Autofill initialized');
+            console.log("ZelfKey Autofill initialized");
         }
         catch (error) {
-            console.error('Error initializing ZelfKey Autofill:', error);
+            console.error("Error initializing ZelfKey Autofill:", error);
         }
     }
     handleFormsDetected(event) {
         const forms = event.detail.forms;
-        forms.forEach(form => {
+        forms.forEach((form) => {
             this.processForm(form);
         });
     }
@@ -1002,11 +1020,11 @@ class AutofillContentScript {
         // Validate the form
         const validation = this.autofillEngine.validateForm(form);
         if (!validation.isValid) {
-            console.log('Invalid form detected:', validation.errors);
+            console.log("Invalid form detected:", validation.errors);
             return;
         }
         // Show icons for relevant fields
-        form.fields.forEach(field => {
+        form.fields.forEach((field) => {
             if (this.shouldShowIconForField(field)) {
                 this.uiOverlay.showIconForField(field);
             }
@@ -1014,7 +1032,7 @@ class AutofillContentScript {
     }
     shouldShowIconForField(field) {
         // Show icon for password, username, and email fields
-        return ['password', 'username', 'email'].includes(field.type);
+        return ["password", "username", "email"].includes(field.type);
     }
     handleWindowResize() {
         // Debounce the resize handler
@@ -1041,7 +1059,7 @@ class AutofillContentScript {
             // Page is visible, rescan for forms
             setTimeout(() => {
                 const forms = this.formDetector.getCurrentForms();
-                forms.forEach(form => this.processForm(form));
+                forms.forEach((form) => this.processForm(form));
             }, 100);
         }
     }
@@ -1051,18 +1069,18 @@ class AutofillContentScript {
         this.formDetector.stopDetection();
         this.uiOverlay.hideAllIcons();
         this.passwordManager.clearCache();
-        window.removeEventListener('zelfkey:formsDetected', this.handleFormsDetected.bind(this));
-        window.removeEventListener('resize', this.handleWindowResize.bind(this));
-        window.removeEventListener('scroll', this.handleWindowScroll.bind(this));
-        document.removeEventListener('visibilitychange', this.handleVisibilityChange.bind(this));
+        window.removeEventListener("zelfkey:formsDetected", this.handleFormsDetected.bind(this));
+        window.removeEventListener("resize", this.handleWindowResize.bind(this));
+        window.removeEventListener("scroll", this.handleWindowScroll.bind(this));
+        document.removeEventListener("visibilitychange", this.handleVisibilityChange.bind(this));
         this.isInitialized = false;
     }
 }
 // Initialize the autofill when the script loads
 const autofill = new AutofillContentScript();
 // Wait for DOM to be ready
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', () => {
+if (document.readyState === "loading") {
+    document.addEventListener("DOMContentLoaded", () => {
         autofill.initialize();
     });
 }
@@ -1070,35 +1088,11 @@ else {
     autofill.initialize();
 }
 // Handle page unload
-window.addEventListener('beforeunload', () => {
+window.addEventListener("beforeunload", () => {
     autofill.destroy();
 });
 // Export for potential external use
 window.ZelfKeyAutofill = autofill;
-// Send a test message to activate the service worker
-setTimeout(() => {
-    if (typeof chrome !== 'undefined' && chrome.runtime) {
-        chrome.runtime.sendMessage({ type: 'TEST_MESSAGE' }, (response) => {
-            console.log('Test message response:', response);
-        });
-    }
-}, 1000);
-// Test comment
-// Test change Sun Sep  7 12:02:40 MDT 2025
-// Test change Sun Sep  7 12:04:29 MDT 2025
-// Test change Sun Sep  7 12:04:57 MDT 2025
-// Test change Sun Sep  7 12:05:06 MDT 2025
-// Test change Sun Sep  7 12:05:32 MDT 2025
-// Test change Sun Sep  7 12:08:53 MDT 2025
-// Test change Sun Sep  7 12:09:03 MDT 2025
-// Test change Sun Sep  7 12:09:19 MDT 2025
-// Test change Sun Sep  7 12:09:40 MDT 2025
-// Test change Sun Sep  7 12:09:54 MDT 2025
-// Test change Sun Sep  7 12:10:18 MDT 2025
-// Test change Sun Sep  7 12:10:48 MDT 2025
-// Test change Sun Sep  7 12:11:00 MDT 2025
-// Test change Sun Sep  7 12:11:33 MDT 2025
-// Final test change Sun Sep  7 12:11:40 MDT 2025
 
 /******/ })()
 ;
