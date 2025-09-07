@@ -70,10 +70,18 @@
 						{{ isCancelledActive() ? "Cancelled (Active Until Period End)" : "Active Subscription" }}
 					</span>
 				</div>
-				<div class="subscription-plan" *ngIf="shareables.wallet">{{ shareables.wallet.name || "Premium Plan" }}</div>
+				<div class="subscription-plan">{{ getCurrentPlanName() }}</div>
 			</div>
 
 			<div class="subscription-details">
+				<div class="detail-row">
+					<span class="detail-label">Plan:</span>
+					<span class="detail-value">{{ getCurrentPlanName() }}</span>
+				</div>
+				<div class="detail-row">
+					<span class="detail-label">Price:</span>
+					<span class="detail-value">{{ getCurrentPlanPrice() }}</span>
+				</div>
 				<div class="detail-row">
 					<span class="detail-label">Status:</span>
 					<span class="detail-value" [class.status-active]="!isCancelledActive()" [class.status-cancelled]="isCancelledActive()">

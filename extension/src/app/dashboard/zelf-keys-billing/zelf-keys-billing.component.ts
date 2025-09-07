@@ -193,6 +193,64 @@ export class ZelfKeysBillingComponent implements OnInit {
 	}
 
 	/**
+	 * Get the current plan details by matching with available plans
+	 * @returns PricingPlan object with name, price, etc.
+	 */
+	getCurrentPlanDetails(): PricingPlan | null {
+		if (!this.activeSubscription || !this.plans.length) return null;
+
+		// Try to match by price ID first (most reliable)
+		const priceId = this.activeSubscription.stripeData?.plan;
+		if (priceId) {
+			const matchedPlan = this.plans.find((plan) => plan.priceId === priceId);
+			if (matchedPlan) return matchedPlan;
+		}
+
+		// Fallback: try to match by plan name from metadata
+		const planName = this.activeSubscription.stripeData?.metadata?.plan;
+		if (planName) {
+			const matchedPlan = this.plans.find((plan) => plan.id === planName);
+			if (matchedPlan) return matchedPlan;
+		}
+
+		// Last fallback: return the current plan if marked as current
+		const currentPlan = this.plans.find((plan) => plan.isCurrent);
+		return currentPlan || null;
+	}
+
+	/**
+	 * Get the display name for the current subscription plan
+	 * @returns string plan name
+	 */
+	getCurrentPlanName(): string {
+		const planDetails = this.getCurrentPlanDetails();
+		if (planDetails) return planDetails.name;
+
+		// Fallback to backend data
+		return this.activeSubscription?.stripeData?.planName || this.activeSubscription?.name || "Premium Plan";
+	}
+
+	/**
+	 * Get the price for the current subscription plan
+	 * @returns string formatted price
+	 */
+	getCurrentPlanPrice(): string {
+		const planDetails = this.getCurrentPlanDetails();
+		if (planDetails) {
+			return `$${planDetails.price}/${planDetails.interval}`;
+		}
+
+		// Fallback to backend data (convert from cents if needed)
+		const backendPrice = this.activeSubscription?.stripeData?.planPrice || this.activeSubscription?.stripeData?.amount;
+		if (backendPrice) {
+			const priceInDollars = backendPrice > 100 ? backendPrice / 100 : backendPrice;
+			return `$${priceInDollars.toFixed(2)}/month`;
+		}
+
+		return "N/A";
+	}
+
+	/**
 	 * Open Stripe customer portal for subscription management
 	 */
 	openCustomerPortal(): void {

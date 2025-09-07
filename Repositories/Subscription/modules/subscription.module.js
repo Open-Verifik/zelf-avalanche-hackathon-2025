@@ -460,8 +460,9 @@ async function handleInvoicePaymentSucceeded(invoice) {
 				latestInvoice: subscription.latest_invoice,
 				customer: subscription.customer,
 				status: subscription.status,
-				// metadata: subscription.metadata,
 				plan: subscription.plan.id,
+				planName: subscription.plan.name,
+				price: subscription.plan.amount / 100,
 			}),
 			zelfName: zelfKeysTag,
 			startDate: moment(new Date(subscription.current_period_start * 1000)).format("YYYY-MM-DD HH:mm:ss"),
@@ -517,12 +518,15 @@ async function handleSubscriptionUpdated(subscription) {
 		stripeData.status = subscription.cancel_at_period_end ? "cancelled_active" : subscription.status;
 		stripeData.cancelledAt = subscription.cancel_at_period_end ? moment().format("YYYY-MM-DD HH:mm:ss") : null;
 		stripeData.cancelAtPeriodEnd = subscription.cancel_at_period_end;
+		stripeData.plan = subscription.plan.id;
+		stripeData.planName = subscription.plan.name;
+		stripeData.price = subscription.plan.amount / 100;
 
 		const subscriptionData = {
 			stripeData: JSON.stringify(stripeData),
 			zelfName: zelfKeysTag,
-			startDate: existingSubscription.startDate,
-			endDate: existingSubscription.endDate,
+			startDate: moment(new Date(subscription.current_period_start * 1000)).format("YYYY-MM-DD HH:mm:ss"),
+			endDate: moment(new Date(subscription.current_period_end * 1000)).format("YYYY-MM-DD HH:mm:ss"),
 			paymentMethod: "stripe",
 			type: "subscription",
 		};
@@ -537,9 +541,7 @@ async function handleSubscriptionUpdated(subscription) {
 				subscriptionData
 			);
 
-			if (!newRecord) {
-				throw new Error("Failed to create new subscription record");
-			}
+			if (!newRecord) throw new Error("Failed to create new subscription record");
 
 			// Then unpin the old record
 			await pinata.unPinFiles([existingSubscription.ipfs_pin_hash]);
@@ -547,8 +549,8 @@ async function handleSubscriptionUpdated(subscription) {
 			console.log("✅ Subscription updated successfully:", {
 				zelfName: zelfKeysTag,
 				oldHash: existingSubscription.ipfs_pin_hash,
-				newHash: newRecord.IpfsHash,
-				status: subscriptionData.status,
+				newHash: newRecord.ipfs_pin_hash || newRecord.IpfsHash,
+				status: subscriptionData.stripeData.status,
 			});
 		} catch (ipfsError) {
 			console.error("❌ Error updating IPFS record:", ipfsError);
