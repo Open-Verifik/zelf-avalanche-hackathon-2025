@@ -11,35 +11,35 @@ export class BrowserApiUtil {
         this.initializeApis();
     }
 
-  initializeApis() {
-    // Check for Chrome API
-    if (typeof chrome !== "undefined") {
-      this._chrome = chrome;
-      this._isChrome = true;
+    initializeApis() {
+        // Check for Chrome API
+        if (typeof chrome !== "undefined") {
+            this._chrome = chrome;
+            this._isChrome = true;
+        }
+
+        // Check for Browser API (Firefox)
+        if (typeof browser !== "undefined") {
+            this._browser = browser;
+            this._isBrowser = true;
+        }
     }
 
-    // Check for Browser API (Firefox)
-    if (typeof browser !== "undefined") {
-      this._browser = browser;
-      this._isBrowser = true;
+    // Smart method that returns the appropriate API or null
+    get(moduleName: string) {
+        if (this._isChrome && this._chrome?.[moduleName as keyof typeof chrome]) {
+            return this._chrome[moduleName as keyof typeof chrome];
+        }
+        if (this._isBrowser && this._browser?.[moduleName as keyof typeof browser]) {
+            return this._browser[moduleName as keyof typeof browser];
+        }
+        return null;
     }
-  }
 
-  // Smart method that returns the appropriate API or null
-  get(moduleName: string) {
-    if (this._isChrome && this._chrome?.[moduleName as keyof typeof chrome]) {
-      return this._chrome[moduleName as keyof typeof chrome];
+    // Check if a module exists
+    has(moduleName: string) {
+        return this.get(moduleName) !== null;
     }
-    if (this._isBrowser && this._browser?.[moduleName as keyof typeof browser]) {
-      return this._browser[moduleName as keyof typeof browser];
-    }
-    return null;
-  }
-
-  // Check if a module exists
-  has(moduleName: string) {
-    return this.get(moduleName) !== null;
-  }
 
     // Get the runtime API with smart sendMessage handling
     get runtime() {
@@ -100,6 +100,17 @@ export class BrowserApiUtil {
     get extension() {
         if (this._isBrowser) {
             return this._browser?.extension;
+        }
+        return null;
+    }
+
+    // Get action API (Chrome) or browserAction (Firefox)
+    get action() {
+        if (this._isChrome) {
+            return this._chrome?.action;
+        }
+        if (this._isBrowser) {
+            return this._browser?.browserAction;
         }
         return null;
     }

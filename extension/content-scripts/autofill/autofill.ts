@@ -12,6 +12,7 @@ class AutofillContentScript {
     private autofillEngine: AutofillEngine;
     private communicationService: CommunicationService;
     private isInitialized: boolean = false;
+    private serviceWorkerReady: boolean = false;
 
     constructor() {
         this.formDetector = new FormDetector();
@@ -28,11 +29,14 @@ class AutofillContentScript {
             // Set up communication
             this.communicationService.setupMessageListener();
 
+            // Listen for service worker ready message
+            this.communicationService.onServiceWorkerReady(() => {
+                this.serviceWorkerReady = true;
+                this.startFormDetection();
+            });
+
             // Listen for detected forms FIRST
             window.addEventListener("zelfkey:formsDetected", this.handleFormsDetected.bind(this) as EventListener);
-
-            // Start form detection AFTER listener is set up
-            this.formDetector.startDetection();
 
             // Handle window resize and scroll events to reposition icons
             window.addEventListener("resize", this.handleWindowResize.bind(this));
@@ -42,9 +46,23 @@ class AutofillContentScript {
             document.addEventListener("visibilitychange", this.handleVisibilityChange.bind(this));
 
             this.isInitialized = true;
-            console.log("ZelfKey Autofill initialized");
+
+            // Fallback: If service worker doesn't respond within 3 seconds, start form detection anyway
+            setTimeout(() => {
+                if (!this.serviceWorkerReady) {
+                    this.serviceWorkerReady = true;
+                    this.startFormDetection();
+                }
+            }, 3000);
         } catch (error) {
             console.error("Error initializing ZelfKey Autofill:", error);
+        }
+    }
+
+    private startFormDetection(): void {
+        if (this.serviceWorkerReady) {
+            // Start form detection when service worker is ready
+            this.formDetector.startDetection();
         }
     }
 

@@ -11,6 +11,9 @@ export class UIOverlay {
     constructor() {
         this.passwordManager = new PasswordManager();
         this.setupStyles();
+
+        // Listen for decryption results from popout
+        this.setupDecryptionResultListener();
     }
 
     private setupStyles(): void {
@@ -349,7 +352,7 @@ export class UIOverlay {
         }
 
         // Fallback to original format
-        const source = password.website || password.domain || password.url || password.name;
+        const source = password.publicData.website || password.url || password.name;
 
         if (!source) {
             return "Unknown";
@@ -382,7 +385,7 @@ export class UIOverlay {
         }
 
         // Fallback to original format
-        return password.username || "No username";
+        return password.publicData.username || "No username";
     }
 
     private createLoadingMenuItem(): HTMLElement {
@@ -450,19 +453,9 @@ export class UIOverlay {
 
         if (!this.currentField) return;
 
-        // Check if authentication is needed
-        const isAuthenticated = await this.passwordManager.authenticate();
-        if (!isAuthenticated) {
-            // Open biometrics modal - this would need to be implemented
-            this.openBiometricsModal(password);
-            return;
-        }
-
-        // Decrypt and fill password
-        const decryptedData: DecryptedPasswordData | null = await this.passwordManager.decryptPassword(password.id);
-        if (decryptedData) {
-            this.fillField(this.currentField, decryptedData);
-        }
+        // Always open biometrics popout for password decryption
+        // The JWT session is just for the API, but we still need biometric verification
+        await this.openBiometricsPopout(password);
     }
 
     private async handleCreatePassword(): Promise<void> {
@@ -484,17 +477,102 @@ export class UIOverlay {
         await this.passwordManager.createNewPassword(urlInfo);
     }
 
-    private openBiometricsModal(password: PasswordEntry): void {
-        // This would open the biometrics modal in the extension popup
-        // For now, we'll just log it
-        console.log("Opening biometrics modal for password:", password.id);
+    private async openBiometricsPopout(password: PasswordEntry): Promise<void> {
+        try {
+            console.log("Storing password decryption data for popup:", password.id);
 
-        // Send message to background script to open popup with biometrics modal
+            // Send message to background script to store decryption data
+            if (typeof chrome !== "undefined" && chrome.runtime) {
+                const response = await chrome.runtime.sendMessage({
+                    type: "OPEN_PASSWORD_DECRYPTOR",
+                    payload: {
+                        passwordId: password.id,
+                        publicData: {
+                            zelfProof: password.publicData.zelfProof,
+                            title: password.name || password.publicData.website,
+                            website: password.publicData.website,
+                        },
+                        fieldId: this.currentField?.element.id,
+                    },
+                });
+
+                console.log("Response from background script:", response);
+
+                if (response?.success) {
+                    // Popup should open automatically, wait for it to be ready and send data
+                    await this.waitForPopoutAndSendData(password);
+                } else {
+                    console.error("Failed to open popup:", response);
+                }
+            } else {
+                console.error("Chrome runtime not available");
+            }
+        } catch (error) {
+            console.error("Error storing password decryption data:", error);
+        }
+    }
+
+    private async waitForPopoutAndSendData(password: PasswordEntry): Promise<void> {
+        try {
+            // Wait for popout to be ready (with timeout)
+            const maxRetries = 20; // 10 seconds total
+            let retries = 0;
+
+            while (retries < maxRetries) {
+                try {
+                    // Try to send data to the popout
+                    const response = await chrome.runtime.sendMessage({
+                        type: "SEND_DECRYPTION_DATA_TO_POPOUT",
+                        payload: {
+                            passwordId: password.id,
+                            publicData: {
+                                zelfProof: password.publicData.zelfProof,
+                                title: password.name || password.publicData.website,
+                                website: password.publicData.website,
+                            },
+                            fieldId: this.currentField?.element.id,
+                        },
+                    });
+
+                    if (response?.success) {
+                        console.log("Decryption data sent to popout successfully");
+                        return;
+                    }
+                } catch (error) {
+                    // Popout not ready yet, continue waiting
+                }
+
+                // Wait 500ms before retrying
+                await new Promise((resolve) => setTimeout(resolve, 500));
+                retries++;
+            }
+
+            console.error("Timeout waiting for popout to be ready");
+        } catch (error) {
+            console.error("Error waiting for popout and sending data:", error);
+        }
+    }
+
+    private setupDecryptionResultListener(): void {
+        // Listen for messages from background script about decryption results
         if (typeof chrome !== "undefined" && chrome.runtime) {
-            chrome.runtime.sendMessage({
-                type: "OPEN_BIOMETRICS_MODAL",
-                payload: { passwordId: password.id, fieldId: this.currentField?.element.id },
+            chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+                if (message.type === "DECRYPTION_RESULT") {
+                    this.handleDecryptionResult(message.payload);
+                    sendResponse({ success: true });
+                }
+                return true; // Keep message channel open
             });
+        }
+    }
+
+    private handleDecryptionResult(result: any): void {
+        if (result.success && result.data && this.currentField) {
+            // Fill the field with the decrypted data
+            this.fillField(this.currentField, result.data);
+        } else if (!result.success) {
+            console.error("Decryption failed:", result.error);
+            // Could show an error message to the user
         }
     }
 
