@@ -11,12 +11,12 @@
 		"default_icon": "assets/icons/icon256.png"
 	},
 	"background": {
-		"service_worker": "background.js"
+		"service_worker": "background-scripts/background.js"
 	},
 	"content_scripts": [
 		{
 			"matches": ["<all_urls>"],
-			"js": ["browser-polyfill.min.js", "main.js", "autofill.js"],
+			"js": ["browser-polyfill.min.js", "main.js", "background-scripts/autofill.js"],
 			"run_at": "document_end"
 		}
 	],
@@ -34,7 +34,7 @@
 	},
 	"web_accessible_resources": [
 		{
-			"resources": ["index.html", "styles.css", "main.js", "runtime.js", "polyfills.js", "autofill.js"],
+			"resources": ["index.html", "styles.css", "main.js", "runtime.js", "polyfills.js", "background-scripts/autofill.js"],
 			"matches": ["<all_urls>"]
 		}
 	]
