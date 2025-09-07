@@ -31,6 +31,6 @@ module.exports = {
   optimization: {
     minimize: false // Keep readable for debugging
   },
-  target: 'web',
+  target: 'webworker',
   devtool: 'source-map'
 };

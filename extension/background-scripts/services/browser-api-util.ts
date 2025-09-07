@@ -143,17 +143,17 @@ export class BrowserApiUtil {
 
   // Smart storage operations
   async getStorageItem(key: string) {
-    const storage = this.storage;
+    const storage = this.storage as any;
     if (!storage?.local) return null;
 
-    const result = await (storage as any).local.get(key);
+    const result = await storage.local.get(key);
     return result[key];
   }
 
   async setStorageItem(key: string, value: any) {
-    const storage = this.storage;
+    const storage = this.storage as any;
     if (!storage?.local) return;
 
-    await (storage as any).local.set({ [key]: value });
+    await storage.local.set({ [key]: value });
   }
 }

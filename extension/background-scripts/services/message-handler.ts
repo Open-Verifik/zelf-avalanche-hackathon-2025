@@ -1,7 +1,12 @@
 import { BrowserApiUtil } from './browser-api-util';
+import { BackgroundCredentialManager } from './background-credential-manager';
 
 export class MessageHandler {
-  constructor(private browserApi: BrowserApiUtil) {}
+  private credentialManager: BackgroundCredentialManager;
+
+  constructor(private browserApi: BrowserApiUtil) {
+    this.credentialManager = BackgroundCredentialManager.getInstance();
+  }
 
   async handleAutofillMessage(message: any, sender: any, sendResponse: (response: any) => void) {
     try {
@@ -39,24 +44,11 @@ export class MessageHandler {
     try {
       console.log("Background: Getting passwords for website:", payload.website);
 
-      // Get stored passwords from the Angular app
-      const response = await this.forwardToAngularApp({
-        type: "GET_PASSWORDS",
-        payload: payload,
-      });
-
-      console.log("Background: Received response from Angular app:", response);
-
-      // Filter passwords for the specific website
-      const websitePasswords = response.filter(
-        (password: any) =>
-          password.website === payload.website ||
-          password.url === payload.website ||
-          password.domain === payload.website
-      );
-
-      console.log("Background: Filtered passwords:", websitePasswords);
-      sendResponse({ success: true, data: websitePasswords });
+      // Use credential manager directly (no fallback needed)
+      console.log("Background: Using credential manager for password retrieval");
+      const passwords = await this.credentialManager.getPasswords(payload.website);
+      console.log("Background: Retrieved passwords from credential manager:", passwords);
+      sendResponse({ success: true, data: passwords });
     } catch (error) {
       console.error("Error getting passwords:", error);
       sendResponse({ success: false, error: (error as Error).message });
@@ -65,13 +57,11 @@ export class MessageHandler {
 
   private async handleDecryptPassword(payload: any, sendResponse: (response: any) => void) {
     try {
-      // Decrypt password using the Angular app
-      const response = await this.forwardToAngularApp({
-        type: "DECRYPT_PASSWORD",
-        payload: payload,
-      });
-
-      sendResponse({ success: true, data: response });
+      // Use credential manager directly (no fallback needed)
+      console.log("Background: Using credential manager for password decryption");
+      const decryptedData = await this.credentialManager.decryptPassword(payload.passwordId);
+      console.log("Background: Decrypted password from credential manager:", decryptedData);
+      sendResponse({ success: true, data: decryptedData });
     } catch (error) {
       console.error("Error decrypting password:", error);
       sendResponse({ success: false, error: (error as Error).message });
@@ -90,17 +80,11 @@ export class MessageHandler {
 
   private async handleAuthenticate(sendResponse: (response: any) => void) {
     try {
-      // Check if user is authenticated in the extension
-      if (this.browserApi.has("storage")) {
-        const authData = await (this.browserApi.storage as any).local.get([
-          "zelfKeyJWT",
-          "isAuthenticated",
-        ]);
-        const isAuthenticated = authData.isAuthenticated && authData.zelfKeyJWT;
-        sendResponse({ success: isAuthenticated });
-      } else {
-        sendResponse({ success: false, error: "No storage API available" });
-      }
+      // Use credential manager directly (no fallback needed)
+      console.log("Background: Using credential manager for authentication check");
+      const isAuthenticated = this.credentialManager.isAuthenticated();
+      console.log("Background: Authentication status from credential manager:", isAuthenticated);
+      sendResponse({ success: isAuthenticated });
     } catch (error) {
       sendResponse({ success: false, error: (error as Error).message });
     }
@@ -115,66 +99,6 @@ export class MessageHandler {
     }
   }
 
-  private async forwardToAngularApp(message: any) {
-    try {
-      console.log("Background: Forwarding message to Angular app:", message);
-
-      // Method 1: Try direct runtime messaging (works without tabs)
-      try {
-        const response = await new Promise((resolve, reject) => {
-          // Much simpler - browserApi handles the Chrome/Firefox difference automatically
-          this.browserApi.sendMessage(message, (response: any) => {
-            if ((this.browserApi.runtime as any)?.lastError) {
-              reject(new Error((this.browserApi.runtime as any).lastError.message));
-            } else {
-              resolve(response);
-            }
-          });
-        });
-
-        console.log(
-          "Background: Received response from Angular app via runtime:",
-          response
-        );
-        return (response as any)?.data || [];
-      } catch (runtimeError) {
-        console.log(
-          "Runtime messaging failed, trying tab messaging:",
-          (runtimeError as Error).message
-        );
-
-        // Method 2: Fallback to tab messaging if runtime fails
-        if (this.browserApi.has("tabs")) {
-          const tabs = await (this.browserApi.tabs as any).query({
-            url: (this.browserApi.runtime as any).getURL("index.html"),
-          });
-
-          console.log("Background: Found extension tabs:", tabs.length);
-
-          if (tabs.length === 0) {
-            console.log(
-              "Background: No extension tabs found, returning empty array"
-            );
-            return [];
-          }
-
-          const response = await (this.browserApi.tabs as any).sendMessage(tabs[0].id, message);
-          console.log(
-            "Background: Received response from Angular app via tab:",
-            response
-          );
-
-          return response?.data || [];
-        } else {
-          console.log("Background: No tab API available");
-          return [];
-        }
-      }
-    } catch (error) {
-      console.error("Error communicating with Angular app:", error);
-      return [];
-    }
-  }
 
   private async openExtensionUI(page: string, data: any = null) {
     try {

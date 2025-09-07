@@ -1,4 +1,5 @@
 <<<<<<< HEAD
+<<<<<<< HEAD
 import { BackgroundCredentialManager } from "./background-credential-manager";
 export class MessageHandler {
     constructor(browserApi) {
@@ -98,6 +99,13 @@ export class MessageHandler {
     constructor(browserApi) {
         this.browserApi = browserApi;
 >>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
+=======
+import { BackgroundCredentialManager } from './background-credential-manager';
+export class MessageHandler {
+    constructor(browserApi) {
+        this.browserApi = browserApi;
+        this.credentialManager = BackgroundCredentialManager.getInstance();
+>>>>>>> 0cea6d0 (Fix watch/build scripts)
     }
     async handleAutofillMessage(message, sender, sendResponse) {
         try {
@@ -162,6 +170,7 @@ export class MessageHandler {
             sendResponse({ success: true, data: passwords });
 =======
             console.log("Background: Getting passwords for website:", payload.website);
+<<<<<<< HEAD
             // Get stored passwords from the Angular app
             const response = await this.forwardToAngularApp({
                 type: "GET_PASSWORDS",
@@ -175,6 +184,13 @@ export class MessageHandler {
             console.log("Background: Filtered passwords:", websitePasswords);
             sendResponse({ success: true, data: websitePasswords });
 >>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
+=======
+            // Use credential manager directly (no fallback needed)
+            console.log("Background: Using credential manager for password retrieval");
+            const passwords = await this.credentialManager.getPasswords(payload.website);
+            console.log("Background: Retrieved passwords from credential manager:", passwords);
+            sendResponse({ success: true, data: passwords });
+>>>>>>> 0cea6d0 (Fix watch/build scripts)
         }
         catch (error) {
             console.error("Error getting passwords:", error);
@@ -200,12 +216,11 @@ export class MessageHandler {
 =======
     async handleDecryptPassword(payload, sendResponse) {
         try {
-            // Decrypt password using the Angular app
-            const response = await this.forwardToAngularApp({
-                type: "DECRYPT_PASSWORD",
-                payload: payload,
-            });
-            sendResponse({ success: true, data: response });
+            // Use credential manager directly (no fallback needed)
+            console.log("Background: Using credential manager for password decryption");
+            const decryptedData = await this.credentialManager.decryptPassword(payload.passwordId);
+            console.log("Background: Decrypted password from credential manager:", decryptedData);
+            sendResponse({ success: true, data: decryptedData });
         }
         catch (error) {
             console.error("Error decrypting password:", error);
@@ -226,6 +241,7 @@ export class MessageHandler {
     async handleAuthenticate(sendResponse) {
         try {
 <<<<<<< HEAD
+<<<<<<< HEAD
             const isAuthenticated = this.credentialManager.isAuthenticated();
             sendResponse({ success: isAuthenticated });
 =======
@@ -242,6 +258,13 @@ export class MessageHandler {
                 sendResponse({ success: false, error: "No storage API available" });
             }
 >>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
+=======
+            // Use credential manager directly (no fallback needed)
+            console.log("Background: Using credential manager for authentication check");
+            const isAuthenticated = this.credentialManager.isAuthenticated();
+            console.log("Background: Authentication status from credential manager:", isAuthenticated);
+            sendResponse({ success: isAuthenticated });
+>>>>>>> 0cea6d0 (Fix watch/build scripts)
         }
         catch (error) {
             sendResponse({ success: false, error: error.message });
@@ -262,6 +285,7 @@ export class MessageHandler {
             console.error("Error opening biometrics modal:", error);
         }
     }
+<<<<<<< HEAD
 <<<<<<< HEAD
     async handleOpenPasswordDecryptor(payload, sender) {
         try {
@@ -423,6 +447,8 @@ export class MessageHandler {
             return [];
         }
     }
+=======
+>>>>>>> 0cea6d0 (Fix watch/build scripts)
     async openExtensionUI(page, data = null) {
         try {
             // Store any data needed for the UI
