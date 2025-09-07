@@ -6,6 +6,24 @@ import { WalletService } from "../../wallet.service";
 import { Wallet } from "app/wallet";
 import { Router } from "@angular/router";
 
+interface CryptoPaymentDisplayData {
+	planId: string;
+	paymentAddress: string;
+	amount: number;
+	currency: string;
+	usdAmount: number;
+	avaxPrice?: number;
+	lockedPriceToken?: string;
+	expiresAt: string;
+	zkPay?: any;
+	selectedPlan?: PricingPlan;
+	isDemoMode?: boolean;
+	originalAmount?: {
+		usd: number;
+		avax: number;
+	};
+}
+
 @Component({
 	selector: "app-zelf-keys-billing",
 	standalone: true,
@@ -22,7 +40,7 @@ export class ZelfKeysBillingComponent implements OnInit {
 	activeSubscription: any = null;
 	shareables: any = null;
 	showCryptoPayment: boolean = false;
-	cryptoPaymentData: any = null;
+	cryptoPaymentData: CryptoPaymentDisplayData | null = null;
 	paymentPollingInterval: any = null;
 
 	constructor(
@@ -161,15 +179,23 @@ export class ZelfKeysBillingComponent implements OnInit {
 		this.billingService
 			.createCryptoPayment(planId)
 			.then((response) => {
-				if (response.success && response.paymentAddress) {
+				if (response.data && response.data.success && response.data.paymentAddress) {
 					console.log("✅ Crypto payment created:", response);
 
 					// Store payment data and show crypto payment interface
 					this.cryptoPaymentData = {
 						planId,
-						paymentAddress: response.paymentAddress,
-						zkPay: response.zkPay,
+						paymentAddress: response.data.paymentAddress,
+						amount: response.data.amount,
+						currency: response.data.currency,
+						usdAmount: response.data.usdAmount,
+						avaxPrice: response.data.avaxPrice,
+						lockedPriceToken: response.data.lockedPriceToken,
+						expiresAt: response.data.expiresAt,
+						zkPay: response.data.zkPay,
 						selectedPlan: this.plans.find((plan) => plan.id === planId),
+						isDemoMode: response.data.isDemoMode,
+						originalAmount: response.data.originalAmount,
 					};
 
 					this.showCryptoPayment = true;
@@ -264,6 +290,22 @@ export class ZelfKeysBillingComponent implements OnInit {
 			// You could show a toast notification here
 			console.log("Payment address copied to clipboard");
 		}
+	}
+
+	/**
+	 * Calculate the demo discount percentage
+	 * @returns Discount percentage as a string
+	 */
+	getDemoDiscount(): string {
+		if (!this.cryptoPaymentData?.isDemoMode || !this.cryptoPaymentData?.originalAmount) {
+			return "0";
+		}
+
+		const originalPrice = this.cryptoPaymentData.originalAmount.usd;
+		const demoPrice = this.cryptoPaymentData.usdAmount;
+		const discountPercentage = ((originalPrice - demoPrice) / originalPrice) * 100;
+
+		return discountPercentage.toFixed(1);
 	}
 
 	private createCheckoutSession(planId: string): void {

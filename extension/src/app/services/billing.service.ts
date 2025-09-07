@@ -39,19 +39,30 @@ export interface CheckoutResponse {
 	sessionId: string;
 }
 
-export interface CryptoPaymentResponse {
+export interface CryptoPaymentData {
 	success: boolean;
 	paymentAddress: string;
 	amount: number;
 	currency: string;
-	zelfProofId: string;
+	usdAmount: number;
+	avaxPrice?: number;
+	lockedPriceToken?: string;
 	expiresAt: string;
-	zkPay: {
+	isDemoMode?: boolean;
+	originalAmount?: {
+		usd: number;
+		avax: number;
+	};
+	zkPay?: {
 		url: string;
 		ipfs_pin_hash: string;
 		name: string;
-		publicData: any;
+		publicData?: any;
 	};
+}
+
+export interface CryptoPaymentResponse {
+	data: CryptoPaymentData;
 }
 
 export interface SubscriptionData {

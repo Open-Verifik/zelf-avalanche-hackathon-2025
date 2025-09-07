@@ -91,6 +91,10 @@ const configuration = {
 			showImageRendering: process.env.AVALANCHE_SHOW_IMAGE !== "false", // Default: true
 		},
 	},
+	cryptoPayments: {
+		demoMode: process.env.CRYPTO_PAYMENTS_DEMO_MODE === "true" || false,
+		demoMultiplier: 0.005, // 0.5% of original price for demo mode (max $0.049 for $9.99)
+	},
 	stripe: {
 		redirectUrl: process.env.STRIPE_REDIRECTURL || "https://verifik.app",
 		secretKey: process.env.STRIPE_SECRET_KEY,

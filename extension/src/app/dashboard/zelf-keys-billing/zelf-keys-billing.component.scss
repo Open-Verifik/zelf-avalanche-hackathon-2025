@@ -282,10 +282,66 @@
 					margin-bottom: 8px;
 				}
 
+				.demo-mode-banner {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					gap: 8px;
+					background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+					color: white;
+					padding: 12px 20px;
+					border-radius: 12px;
+					margin: 16px 0;
+					font-weight: 600;
+					font-size: 14px;
+					text-transform: uppercase;
+					letter-spacing: 0.5px;
+					box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+
+					.demo-icon {
+						animation: pulse 2s infinite;
+					}
+
+					@keyframes pulse {
+						0%,
+						100% {
+							opacity: 1;
+						}
+						50% {
+							opacity: 0.7;
+						}
+					}
+				}
+
 				.payment-subtitle {
 					font-size: 16px;
 					color: #666;
-					margin: 0;
+					margin: 0 0 16px 0;
+				}
+
+				.price-lock-info {
+					display: flex;
+					justify-content: center;
+					gap: 16px;
+					font-size: 14px;
+
+					.lock-text {
+						color: #f7931e;
+						font-weight: 600;
+						padding: 4px 12px;
+						background: #fff5e6;
+						border-radius: 20px;
+						border: 1px solid #f7931e;
+					}
+
+					.rate-text {
+						color: #666;
+						font-weight: 500;
+						padding: 4px 12px;
+						background: #f8f9fa;
+						border-radius: 20px;
+						border: 1px solid #e9ecef;
+					}
 				}
 			}
 
@@ -410,7 +466,54 @@
 						font-size: 32px;
 						font-weight: 700;
 						color: #f7931e;
+						margin: 0 0 8px 0;
+					}
+
+					.usd-equivalent {
+						font-size: 16px;
+						color: #666;
+						font-weight: 500;
 						margin: 0;
+					}
+
+					.original-amount-info {
+						margin-top: 16px;
+						padding-top: 16px;
+						border-top: 1px solid #f7931e;
+
+						.original-label {
+							font-size: 12px;
+							font-weight: 600;
+							color: #666;
+							text-transform: uppercase;
+							letter-spacing: 0.5px;
+							margin-bottom: 8px;
+						}
+
+						.original-values {
+							display: flex;
+							justify-content: center;
+							gap: 16px;
+							margin-bottom: 8px;
+
+							.original-avax,
+							.original-usd {
+								font-size: 14px;
+								color: #999;
+								text-decoration: line-through;
+							}
+						}
+
+						.demo-savings {
+							font-size: 14px;
+							color: #667eea;
+							font-weight: 600;
+							background: #f0f2ff;
+							padding: 4px 12px;
+							border-radius: 20px;
+							display: inline-block;
+							margin-top: 4px;
+						}
 					}
 				}
 			}

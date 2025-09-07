@@ -118,14 +118,8 @@ const createCryptoPayment = async (ctx) => {
 		const data = await Module.createCryptoPayment(ctx.request.body, ctx.state.user);
 
 		ctx.status = 200;
-		ctx.body = {
-			success: true,
-			paymentAddress: data.paymentAddress,
-			amount: data.amount,
-			currency: data.currency,
-			zelfProofId: data.zelfProofId,
-			expiresAt: data.expiresAt,
-		};
+
+		ctx.body = { data };
 	} catch (error) {
 		console.error(error);
 		ctx.status = error.status || 500;

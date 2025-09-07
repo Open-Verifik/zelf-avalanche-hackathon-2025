@@ -6,6 +6,8 @@ import { generateMnemonic } from "../../../Utilities/mnemonic.module.js";
 import { createEthWallet } from "../../../Utilities/eth-wallet.module.js";
 import * as zelfProofModule from "../../ZelfProof/modules/zelf-proof.module.js";
 import avaxSignerModule from "../../../core-wallet-signer.json" with { type: "json" };
+import { calculateCryptoAmount } from "../../../Utilities/crypto-price.module.js";
+import { lockPriceData } from "../../../Utilities/price-lock.module.js";
 
 /**
  * Subscription Module - Business logic for subscription management and Stripe integration
@@ -244,16 +246,67 @@ const createCryptoPayment = async (body, user) => {
 
 		const zkPayTag = convertToZelfKeysFormat(identifier, ".zkpay");
 
-		// retrieve existing zkPay from IPFS by filtering by zkPay key value
+		// Check for existing zkPay record first
 		const recordsFound = await pinata.filter("zkPay", zkPayTag);
+		const existingZkPay = recordsFound && Array.isArray(recordsFound) && recordsFound.length ? recordsFound[0] : null;
 
-		const existingZkPay = recordsFound && Array.isArray(recordsFound) && recordsFound.length? recordsFound[0] : recordsFound || null;
+		// Get real-time AVAX price and calculate amount
+		console.log("💰 Fetching real-time AVAX price...");
+		const priceCalculation = await calculateCryptoAmount(selectedPlan.price, "AVAX");
+		
+		// Check if demo mode is enabled
+		const isDemoMode = configuration.cryptoPayments.demoMode;
+		const demoMultiplier = configuration.cryptoPayments.demoMultiplier;
+		
+		// Calculate demo amounts if in demo mode
+		const demoUsdAmount = isDemoMode ? selectedPlan.price * demoMultiplier : selectedPlan.price;
+		const demoPriceCalculation = isDemoMode ? await calculateCryptoAmount(demoUsdAmount, "AVAX") : priceCalculation;
+		
+		console.log("📊 Price calculation:", {
+			isDemoMode,
+			originalUsdAmount: selectedPlan.price,
+			originalAvaxAmount: priceCalculation.cryptoAmount,
+			demoUsdAmount: isDemoMode ? demoUsdAmount : "N/A",
+			demoAvaxAmount: isDemoMode ? demoPriceCalculation.cryptoAmount : "N/A",
+			avaxPrice: priceCalculation.cryptoPrice,
+		});
+
+		// Create price lock data (use demo amounts if in demo mode)
+		const priceLockData = {
+			planId,
+			planName: selectedPlan.name,
+			usdAmount: isDemoMode ? demoUsdAmount : selectedPlan.price,
+			avaxAmount: isDemoMode ? demoPriceCalculation.cryptoAmount : priceCalculation.cryptoAmount,
+			avaxPrice: priceCalculation.cryptoPrice,
+			zelfName: identifier,
+			zkPayTag,
+			isDemoMode,
+			originalUsdAmount: selectedPlan.price,
+			originalAvaxAmount: priceCalculation.cryptoAmount,
+		};
+
+		// Lock the price for 30 minutes
+		const lockedPriceToken = lockPriceData(priceLockData, 30);
+
+		const returnData = {
+			success: true, 
+			paymentAddress: existingZkPay.metadata.keyvalues.avalancheAddress,
+			amount: isDemoMode ? demoPriceCalculation.cryptoAmount : priceCalculation.cryptoAmount,
+			currency: "AVAX",
+			usdAmount: isDemoMode ? demoUsdAmount : selectedPlan.price,
+			avaxPrice: priceCalculation.cryptoPrice,
+			lockedPriceToken,
+			expiresAt: moment().add(30, "minutes").format("YYYY-MM-DD HH:mm:ss"),
+			isDemoMode,
+			originalAmount: {
+				usd: selectedPlan.price,
+				avax: priceCalculation.cryptoAmount,
+			},
+		};
 
 		if (existingZkPay) {
-	
 			return {
-				success: true,
-				paymentAddress: existingZkPay.metadata.keyvalues.avalancheAddress,
+				...returnData,
 				zkPay: {
 					url: existingZkPay.url,
 					ipfs_pin_hash: existingZkPay.ipfs_pin_hash,
@@ -263,12 +316,11 @@ const createCryptoPayment = async (body, user) => {
 			};
 		}
 
-		// Store the payment zelfProof
-		const zkPay = await _storePaymentAddress(identifier, zkPayTag);
-	
+		// Create new zkPay record with locked pricing
+		const zkPay = await _storePaymentAddress(identifier, zkPayTag, priceLockData);
+
 		return {
-			success: true,
-			paymentAddress: zkPay.publicData.avalancheAddress,
+			...returnData,
 			zkPay,
 		};
 	} catch (error) {
@@ -277,18 +329,29 @@ const createCryptoPayment = async (body, user) => {
 	}
 };
 
-const _storePaymentAddress = async (zelfName, zkPay) => {
+const _storePaymentAddress = async (zelfName, zkPay, priceLockData) => {
 	// first we need to encrypt and encryptQRCode the zelfProofData
 	const mnemonic = generateMnemonic(12);
 
 	const wallet = createEthWallet(mnemonic);
 
-	const zkPayData = {
-		publicData: {
-			avalancheAddress: wallet.address,
-			customerTag: zelfName,
-			zkPay,
-		},
+		const zkPayData = {
+			publicData: {
+				avalancheAddress: wallet.address,
+				customerTag: zelfName,
+				zkPay,
+				planId: priceLockData.planId,
+				planName: priceLockData.planName,
+				usdAmount: priceLockData.usdAmount,
+				avaxAmount: priceLockData.avaxAmount,
+				avaxPrice: priceLockData.avaxPrice,
+				paymentMethod: "crypto",
+				status: "pending",
+				createdAt: moment().format("YYYY-MM-DD HH:mm:ss"),
+				isDemoMode: priceLockData.isDemoMode || false,
+				originalUsdAmount: priceLockData.originalUsdAmount || priceLockData.usdAmount,
+				originalAvaxAmount: priceLockData.originalAvaxAmount || priceLockData.avaxAmount,
+			},
 		identifier: zkPay,
 		faceBase64: avaxSignerModule.faceBase64,
 		password: avaxSignerModule.password,

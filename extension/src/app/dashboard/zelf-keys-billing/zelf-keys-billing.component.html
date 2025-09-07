@@ -137,7 +137,23 @@
 		<div class="crypto-payment-card">
 			<div class="payment-header">
 				<h2 class="payment-title">Complete Your Payment</h2>
-				<p class="payment-subtitle">Send {{ cryptoPaymentData?.selectedPlan?.price }} AVAX to the address below</p>
+				<div *ngIf="cryptoPaymentData?.isDemoMode" class="demo-mode-banner">
+					<svg class="demo-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<path
+							d="M13 2L3 14H12L11 22L21 10H12L13 2Z"
+							stroke="currentColor"
+							stroke-width="2"
+							stroke-linecap="round"
+							stroke-linejoin="round"
+						/>
+					</svg>
+					<span class="demo-text">DEMO MODE - Testing with reduced amounts</span>
+				</div>
+				<p class="payment-subtitle">Send {{ cryptoPaymentData?.amount }} AVAX to the address below</p>
+				<div class="price-lock-info">
+					<span class="lock-text">Price locked for 30 minutes</span>
+					<span class="rate-text">1 AVAX = ${{ cryptoPaymentData?.avaxPrice | number: "1.2-2" }}</span>
+				</div>
 			</div>
 
 			<div class="payment-details">
@@ -171,7 +187,16 @@
 
 				<div class="payment-amount">
 					<div class="amount-label">Amount to Send</div>
-					<div class="amount-value">{{ cryptoPaymentData?.selectedPlan?.price }} AVAX</div>
+					<div class="amount-value">{{ cryptoPaymentData?.amount }} AVAX</div>
+					<div class="usd-equivalent">≈ ${{ cryptoPaymentData?.usdAmount | number: "1.2-4" }}</div>
+					<div *ngIf="cryptoPaymentData?.isDemoMode && cryptoPaymentData?.originalAmount" class="original-amount-info">
+						<div class="original-label">Original Plan Price:</div>
+						<div class="original-values">
+							<span class="original-avax">{{ cryptoPaymentData.originalAmount.avax }} AVAX</span>
+							<span class="original-usd">≈ ${{ cryptoPaymentData.originalAmount.usd }}</span>
+						</div>
+						<div class="demo-savings">Demo Discount: {{ getDemoDiscount() }}%</div>
+					</div>
 				</div>
 			</div>
 
