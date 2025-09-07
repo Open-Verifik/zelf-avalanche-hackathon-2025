@@ -39,6 +39,21 @@ export interface CheckoutResponse {
 	sessionId: string;
 }
 
+export interface CryptoPaymentResponse {
+	success: boolean;
+	paymentAddress: string;
+	amount: number;
+	currency: string;
+	zelfProofId: string;
+	expiresAt: string;
+	zkPay: {
+		url: string;
+		ipfs_pin_hash: string;
+		name: string;
+		publicData: any;
+	};
+}
+
 export interface SubscriptionData {
 	id: string;
 	url: string;
@@ -140,6 +155,41 @@ export class BillingService {
 	async createCustomerPortalSession(): Promise<{ success: boolean; portalUrl: string; sessionId: string }> {
 		const apiKeysSessionJWT = this._walletService.getZelfKeyJWT();
 		return this._httpWrapper.sendRequest("post", `${this.baseUrl}/api/subscription/portal`, null, {
+			headers: {
+				Authorization: `Bearer ${apiKeysSessionJWT}`,
+			},
+		});
+	}
+
+	/**
+	 * Create crypto payment for subscription
+	 * @param planId - The ID of the plan to subscribe to
+	 * @returns Promise with the crypto payment data
+	 */
+	async createCryptoPayment(planId: string): Promise<CryptoPaymentResponse> {
+		const apiKeysSessionJWT = this._walletService.getZelfKeyJWT();
+		return this._httpWrapper.sendRequest(
+			"post",
+			`${this.baseUrl}/api/subscription/crypto-payment`,
+			{
+				planId: planId,
+			},
+			{
+				headers: {
+					Authorization: `Bearer ${apiKeysSessionJWT}`,
+				},
+			}
+		);
+	}
+
+	/**
+	 * Check crypto payment status
+	 * @param paymentId - The payment ID (IPFS hash)
+	 * @returns Promise with payment status
+	 */
+	async checkCryptoPaymentStatus(paymentId: string): Promise<{ success: boolean; paymentConfirmed: boolean; transactionHash?: string }> {
+		const apiKeysSessionJWT = this._walletService.getZelfKeyJWT();
+		return this._httpWrapper.sendRequest("get", `${this.baseUrl}/api/subscription/crypto-payment-status/${paymentId}`, null, {
 			headers: {
 				Authorization: `Bearer ${apiKeysSessionJWT}`,
 			},

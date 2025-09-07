@@ -245,6 +245,235 @@
 		}
 	}
 
+	.crypto-payment-container {
+		display: flex;
+		justify-content: center;
+		margin-bottom: 48px;
+
+		.crypto-payment-card {
+			background: white;
+			border: 2px solid #f7931e;
+			border-radius: 20px;
+			padding: 40px;
+			max-width: 600px;
+			width: 100%;
+			box-shadow: 0 8px 32px rgba(247, 147, 30, 0.15);
+			position: relative;
+			overflow: hidden;
+
+			&::before {
+				content: "";
+				position: absolute;
+				top: 0;
+				left: 0;
+				right: 0;
+				height: 4px;
+				background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+			}
+
+			.payment-header {
+				text-align: center;
+				margin-bottom: 32px;
+
+				.payment-title {
+					font-size: 28px;
+					font-weight: 700;
+					color: #1a1a1a;
+					margin-bottom: 8px;
+				}
+
+				.payment-subtitle {
+					font-size: 16px;
+					color: #666;
+					margin: 0;
+				}
+			}
+
+			.payment-details {
+				.plan-info {
+					text-align: center;
+					margin-bottom: 32px;
+					padding: 20px;
+					background: #fff5e6;
+					border-radius: 12px;
+
+					h3 {
+						font-size: 20px;
+						font-weight: 600;
+						color: #1a1a1a;
+						margin-bottom: 8px;
+					}
+
+					.plan-price {
+						font-size: 24px;
+						font-weight: 700;
+						color: #f7931e;
+						margin: 0;
+					}
+				}
+
+				.payment-address-section {
+					margin-bottom: 32px;
+
+					.address-label {
+						font-size: 14px;
+						font-weight: 600;
+						color: #666;
+						margin-bottom: 8px;
+						text-transform: uppercase;
+						letter-spacing: 0.5px;
+					}
+
+					.address-container {
+						display: flex;
+						gap: 12px;
+						align-items: center;
+						background: #f8f9fa;
+						padding: 16px;
+						border-radius: 12px;
+						border: 1px solid #e9ecef;
+
+						.address-text {
+							flex: 1;
+							font-family: "Courier New", monospace;
+							font-size: 14px;
+							color: #1a1a1a;
+							word-break: break-all;
+						}
+
+						.copy-button {
+							background: #f7931e;
+							color: white;
+							border: none;
+							padding: 8px 12px;
+							border-radius: 8px;
+							font-size: 12px;
+							font-weight: 600;
+							cursor: pointer;
+							display: flex;
+							align-items: center;
+							gap: 4px;
+							transition: background-color 0.2s ease;
+
+							&:hover {
+								background: #e8851c;
+							}
+						}
+					}
+				}
+
+				.qr-code-section {
+					text-align: center;
+					margin-bottom: 32px;
+
+					.qr-label {
+						font-size: 14px;
+						font-weight: 600;
+						color: #666;
+						margin-bottom: 16px;
+						text-transform: uppercase;
+						letter-spacing: 0.5px;
+					}
+
+					.qr-container {
+						display: inline-block;
+						padding: 16px;
+						background: white;
+						border: 2px solid #e9ecef;
+						border-radius: 12px;
+
+						.qr-code {
+							width: 200px;
+							height: 200px;
+							display: block;
+						}
+					}
+				}
+
+				.payment-amount {
+					text-align: center;
+					background: #fff5e6;
+					padding: 20px;
+					border-radius: 12px;
+					border: 2px solid #f7931e;
+
+					.amount-label {
+						font-size: 14px;
+						font-weight: 600;
+						color: #666;
+						margin-bottom: 8px;
+						text-transform: uppercase;
+						letter-spacing: 0.5px;
+					}
+
+					.amount-value {
+						font-size: 32px;
+						font-weight: 700;
+						color: #f7931e;
+						margin: 0;
+					}
+				}
+			}
+
+			.payment-status {
+				text-align: center;
+				margin: 32px 0;
+				padding: 24px;
+				background: #f8f9fa;
+				border-radius: 12px;
+
+				.status-indicator {
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					gap: 12px;
+					margin-bottom: 12px;
+
+					.loading-spinner {
+						width: 20px;
+						height: 20px;
+						border: 2px solid #f3f3f3;
+						border-top: 2px solid #f7931e;
+						border-radius: 50%;
+						animation: spin 1s linear infinite;
+					}
+
+					span {
+						font-size: 16px;
+						font-weight: 600;
+						color: #f7931e;
+					}
+				}
+
+				.status-note {
+					font-size: 14px;
+					color: #666;
+					margin: 0;
+				}
+			}
+
+			.payment-actions {
+				text-align: center;
+
+				.cancel-button {
+					background: #6c757d;
+					color: white;
+					border: none;
+					padding: 12px 24px;
+					border-radius: 8px;
+					font-size: 14px;
+					font-weight: 600;
+					cursor: pointer;
+					transition: background-color 0.2s ease;
+
+					&:hover {
+						background: #5a6268;
+					}
+				}
+			}
+		}
+	}
+
 	.pricing-grid {
 		display: grid;
 		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -365,6 +594,59 @@
 						font-size: 14px;
 						color: #333;
 						line-height: 1.4;
+					}
+				}
+			}
+
+			.payment-options {
+				display: flex;
+				flex-direction: column;
+				gap: 12px;
+				margin-top: auto;
+
+				.payment-button {
+					width: 100%;
+					padding: 14px 24px;
+					border: none;
+					border-radius: 12px;
+					font-size: 16px;
+					font-weight: 600;
+					cursor: pointer;
+					transition: all 0.2s ease;
+					display: flex;
+					align-items: center;
+					justify-content: center;
+					gap: 8px;
+
+					.payment-icon {
+						width: 20px;
+						height: 20px;
+					}
+
+					&.stripe-button {
+						background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+						color: white;
+						box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+
+						&:hover {
+							transform: translateY(-2px);
+							box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+						}
+					}
+
+					&.crypto-button {
+						background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+						color: white;
+						box-shadow: 0 4px 16px rgba(247, 147, 30, 0.3);
+
+						&:hover {
+							transform: translateY(-2px);
+							box-shadow: 0 6px 20px rgba(247, 147, 30, 0.4);
+						}
+					}
+
+					&:active {
+						transform: translateY(0);
 					}
 				}
 			}

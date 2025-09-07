@@ -19,4 +19,7 @@ export default (server) => {
 
 	// Create Stripe customer portal session for subscription management
 	server.post(`${PATH}/portal`, Middleware.validateUserIdentifier, Controller.createCustomerPortalSession);
+
+	// Create crypto payment for subscription
+	server.post(`${PATH}/crypto-payment`, Middleware.validateUserIdentifier, Controller.createCryptoPayment);
 };

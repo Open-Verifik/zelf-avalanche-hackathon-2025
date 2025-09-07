@@ -132,8 +132,65 @@
 		</div>
 	</div>
 
+	<!-- Crypto Payment Interface -->
+	<div *ngIf="!loading && !error && showCryptoPayment" class="crypto-payment-container">
+		<div class="crypto-payment-card">
+			<div class="payment-header">
+				<h2 class="payment-title">Complete Your Payment</h2>
+				<p class="payment-subtitle">Send {{ cryptoPaymentData?.selectedPlan?.price }} AVAX to the address below</p>
+			</div>
+
+			<div class="payment-details">
+				<div class="plan-info">
+					<h3>{{ cryptoPaymentData?.selectedPlan?.name }}</h3>
+					<p class="plan-price">${{ cryptoPaymentData?.selectedPlan?.price }}/{{ cryptoPaymentData?.selectedPlan?.interval }}</p>
+				</div>
+
+				<div class="payment-address-section">
+					<div class="address-label">Payment Address (Avalanche C-Chain)</div>
+					<div class="address-container">
+						<div class="address-text">{{ cryptoPaymentData?.paymentAddress }}</div>
+						<button class="copy-button" (click)="copyPaymentAddress()">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<path
+									d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"
+									fill="currentColor"
+								/>
+							</svg>
+							Copy
+						</button>
+					</div>
+				</div>
+
+				<div class="qr-code-section">
+					<div class="qr-label">Scan with your wallet</div>
+					<div class="qr-container">
+						<img [src]="generatePaymentQR()" alt="Payment QR Code" class="qr-code" />
+					</div>
+				</div>
+
+				<div class="payment-amount">
+					<div class="amount-label">Amount to Send</div>
+					<div class="amount-value">{{ cryptoPaymentData?.selectedPlan?.price }} AVAX</div>
+				</div>
+			</div>
+
+			<div class="payment-status">
+				<div class="status-indicator">
+					<div class="loading-spinner"></div>
+					<span>Waiting for payment confirmation...</span>
+				</div>
+				<p class="status-note">This page will automatically update when payment is received</p>
+			</div>
+
+			<div class="payment-actions">
+				<button class="cancel-button" (click)="cancelCryptoPayment()">Cancel Payment</button>
+			</div>
+		</div>
+	</div>
+
 	<!-- Plans Grid -->
-	<div *ngIf="!loading && !error && !hasActiveSubscription" class="pricing-grid">
+	<div *ngIf="!loading && !error && !hasActiveSubscription && !showCryptoPayment" class="pricing-grid">
 		<div *ngFor="let plan of plans" class="pricing-card" [class.popular]="plan.isPopular" [class.current]="plan.isCurrent">
 			<div class="card-header">
 				<div class="plan-name">{{ plan.name }}</div>
@@ -165,21 +222,25 @@
 				</div>
 			</div>
 
-			<button class="plan-button" [class]="getPlanButtonClass(plan)" [disabled]="isPlanDisabled(plan)" (click)="selectPlan(plan.id)">
+			<div class="payment-options" *ngIf="!plan.isCurrent">
+				<button class="payment-button stripe-button" (click)="selectPlan(plan.id, 'stripe')">
+					<svg class="payment-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" stroke-width="2" />
+						<line x1="1" y1="10" x2="23" y2="10" stroke="currentColor" stroke-width="2" />
+					</svg>
+					Pay with Stripe
+				</button>
+				<button class="payment-button crypto-button" (click)="selectPlan(plan.id, 'crypto')">
+					<svg class="payment-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+						<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+						<path d="M8 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+					</svg>
+					Pay with Crypto
+				</button>
+			</div>
+			<button *ngIf="plan.isCurrent" class="plan-button current-plan" disabled>
 				{{ getPlanButtonText(plan) }}
 			</button>
-		</div>
-	</div>
-
-	<div class="billing-footer">
-		<div class="footer-links">
-			<a href="#" class="footer-link">Have an existing plan? See billing help</a>
-		</div>
-		<div class="footer-links">
-			<a href="#" class="footer-link">I need help with a billing issue</a>
-		</div>
-		<div class="footer-links">
-			<a href="#" class="footer-link">Unlimited subject to fair use policy. Learn more</a>
 		</div>
 	</div>
 </div>

@@ -21,6 +21,9 @@ export class ZelfKeysBillingComponent implements OnInit {
 	hasActiveSubscription: boolean = false;
 	activeSubscription: any = null;
 	shareables: any = null;
+	showCryptoPayment: boolean = false;
+	cryptoPaymentData: any = null;
+	paymentPollingInterval: any = null;
 
 	constructor(
 		private billingService: BillingService,
@@ -134,12 +137,133 @@ export class ZelfKeysBillingComponent implements OnInit {
 		this.loadPlans();
 	}
 
-	selectPlan(planId: string): void {
+	selectPlan(planId: string, paymentMethod: "stripe" | "crypto"): void {
 		if (planId === this.currentPlan) {
 			return; // Don't allow selecting current plan
 		}
 
-		this.createCheckoutSession(planId);
+		console.log(`Selected ${planId} plan with ${paymentMethod} payment`);
+
+		if (paymentMethod === "stripe") {
+			this.createCheckoutSession(planId);
+		} else if (paymentMethod === "crypto") {
+			this.createCryptoPayment(planId);
+		}
+	}
+
+	/**
+	 * Create crypto payment for the selected plan
+	 * @param planId - The ID of the plan to subscribe to
+	 */
+	private createCryptoPayment(planId: string): void {
+		console.log(`Creating crypto payment for ${planId} plan`);
+
+		this.billingService
+			.createCryptoPayment(planId)
+			.then((response) => {
+				if (response.success && response.paymentAddress) {
+					console.log("✅ Crypto payment created:", response);
+
+					// Store payment data and show crypto payment interface
+					this.cryptoPaymentData = {
+						planId,
+						paymentAddress: response.paymentAddress,
+						zkPay: response.zkPay,
+						selectedPlan: this.plans.find((plan) => plan.id === planId),
+					};
+
+					this.showCryptoPayment = true;
+					this.startPaymentMonitoring();
+				} else {
+					this.error = "Failed to create crypto payment";
+				}
+			})
+			.catch((error) => {
+				console.error("Error creating crypto payment:", error);
+				this.error = "Failed to create crypto payment";
+			});
+	}
+
+	/**
+	 * Start monitoring for crypto payment confirmation
+	 */
+	private startPaymentMonitoring(): void {
+		if (this.paymentPollingInterval) {
+			clearInterval(this.paymentPollingInterval);
+		}
+
+		// Check payment status every 30 seconds
+		this.paymentPollingInterval = setInterval(() => {
+			this.checkPaymentStatus();
+		}, 30000);
+
+		// Also check immediately
+		this.checkPaymentStatus();
+	}
+
+	/**
+	 * Check if crypto payment has been confirmed
+	 */
+	private checkPaymentStatus(): void {
+		if (!this.cryptoPaymentData?.zkPay) return;
+
+		this.billingService
+			.checkCryptoPaymentStatus(this.cryptoPaymentData.zkPay.ipfs_pin_hash)
+			.then((response) => {
+				if (response.success && response.paymentConfirmed) {
+					console.log("✅ Payment confirmed!");
+					this.stopPaymentMonitoring();
+					this.showCryptoPayment = false;
+					this.cryptoPaymentData = null;
+
+					// Refresh subscription data
+					this.loadCurrentPlan();
+				}
+			})
+			.catch((error) => {
+				console.error("Error checking payment status:", error);
+			});
+	}
+
+	/**
+	 * Stop payment monitoring
+	 */
+	private stopPaymentMonitoring(): void {
+		if (this.paymentPollingInterval) {
+			clearInterval(this.paymentPollingInterval);
+			this.paymentPollingInterval = null;
+		}
+	}
+
+	/**
+	 * Cancel crypto payment and return to plan selection
+	 */
+	cancelCryptoPayment(): void {
+		this.stopPaymentMonitoring();
+		this.showCryptoPayment = false;
+		this.cryptoPaymentData = null;
+	}
+
+	/**
+	 * Generate QR code data URL for the payment address
+	 * @returns string data URL for QR code
+	 */
+	generatePaymentQR(): string {
+		if (!this.cryptoPaymentData?.paymentAddress) return "";
+
+		// For now, return a simple QR code URL (you can use a QR library later)
+		return `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${this.cryptoPaymentData.paymentAddress}`;
+	}
+
+	/**
+	 * Copy payment address to clipboard
+	 */
+	copyPaymentAddress(): void {
+		if (this.cryptoPaymentData?.paymentAddress) {
+			navigator.clipboard.writeText(this.cryptoPaymentData.paymentAddress);
+			// You could show a toast notification here
+			console.log("Payment address copied to clipboard");
+		}
 	}
 
 	private createCheckoutSession(planId: string): void {
@@ -201,15 +325,19 @@ export class ZelfKeysBillingComponent implements OnInit {
 
 		// Try to match by price ID first (most reliable)
 		const priceId = this.activeSubscription.stripeData?.plan;
+
 		if (priceId) {
 			const matchedPlan = this.plans.find((plan) => plan.priceId === priceId);
+
 			if (matchedPlan) return matchedPlan;
 		}
 
 		// Fallback: try to match by plan name from metadata
 		const planName = this.activeSubscription.stripeData?.metadata?.plan;
+
 		if (planName) {
 			const matchedPlan = this.plans.find((plan) => plan.id === planName);
+
 			if (matchedPlan) return matchedPlan;
 		}
 

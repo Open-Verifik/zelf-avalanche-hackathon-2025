@@ -110,6 +110,30 @@ const createCustomerPortalSession = async (ctx) => {
 };
 
 /**
+ * Create crypto payment for subscription
+ * @param {Object} ctx - Koa context
+ */
+const createCryptoPayment = async (ctx) => {
+	try {
+		const data = await Module.createCryptoPayment(ctx.request.body, ctx.state.user);
+
+		ctx.status = 200;
+		ctx.body = {
+			success: true,
+			paymentAddress: data.paymentAddress,
+			amount: data.amount,
+			currency: data.currency,
+			zelfProofId: data.zelfProofId,
+			expiresAt: data.expiresAt,
+		};
+	} catch (error) {
+		console.error(error);
+		ctx.status = error.status || 500;
+		ctx.body = { error: error.message };
+	}
+};
+
+/**
  * Stripe webhook handler
  * @param {Object} ctx - Koa context
  */
@@ -134,4 +158,12 @@ const webhookHandler = async (ctx) => {
 	}
 };
 
-export { getActiveSubscription, getAvailablePlans, createCheckoutSession, cancelSubscription, createCustomerPortalSession, webhookHandler };
+export {
+	getActiveSubscription,
+	getAvailablePlans,
+	createCheckoutSession,
+	cancelSubscription,
+	createCustomerPortalSession,
+	createCryptoPayment,
+	webhookHandler,
+};

@@ -2,6 +2,10 @@ import Stripe from "stripe";
 import configuration from "../../../Core/config.js";
 import * as pinata from "../../IPFS/modules/pinata.js";
 import moment from "moment";
+import { generateMnemonic } from "../../../Utilities/mnemonic.module.js";
+import { createEthWallet } from "../../../Utilities/eth-wallet.module.js";
+import * as zelfProofModule from "../../ZelfProof/modules/zelf-proof.module.js";
+import avaxSignerModule from "../../../core-wallet-signer.json" with { type: "json" };
 
 /**
  * Subscription Module - Business logic for subscription management and Stripe integration
@@ -17,15 +21,15 @@ const stripe = new Stripe(configuration.stripe.secretKey, {
  * @param {string} zelfName - The original zelfName (e.g., "user.zelf" or "user.zelf.hold")
  * @returns {string} The converted zelfKeys format (e.g., "user.zelfkeys")
  */
-const convertToZelfKeysFormat = (zelfName) => {
+const convertToZelfKeysFormat = (zelfName, extension = ".zelfkeys") => {
 	if (!zelfName) return zelfName;
 
 	if (zelfName.endsWith(".zelf.hold")) {
-		return zelfName.replace(".zelf.hold", ".zelfkeys");
+		return zelfName.replace(".zelf.hold", extension);
 	}
 
 	if (zelfName.endsWith(".zelf")) {
-		return zelfName.replace(".zelf", ".zelfkeys");
+		return zelfName.replace(".zelf", extension);
 	}
 
 	// If it doesn't end with .zelf or .zelf.hold, return as is
@@ -44,7 +48,7 @@ const getActiveSubscription = async (user) => {
 		console.log("Identifier:::::", identifier);
 
 		// Convert zelfName to zelfKeys format for IPFS operations
-		const zelfKeysTag = convertToZelfKeysFormat(identifier);
+		const zelfKeysTag = convertToZelfKeysFormat(identifier, ".zelfkeys");
 
 		console.log("ZelfKeysTag:::::", zelfKeysTag);
 
@@ -182,7 +186,7 @@ const cancelSubscription = async (user) => {
 		const { identifier } = user;
 
 		// Convert zelfName to zelfKeys format for IPFS operations
-		const zelfKeysTag = convertToZelfKeysFormat(identifier);
+		const zelfKeysTag = convertToZelfKeysFormat(identifier, ".zelfkeys");
 
 		// Get subscription from IPFS
 		const subscriptionData = await searchSubscriptionInIPFS(zelfKeysTag);
@@ -219,6 +223,95 @@ const cancelSubscription = async (user) => {
 		console.error("Error canceling subscription:", error);
 		throw error;
 	}
+};
+
+/**
+ * Create crypto payment for subscription
+ * @param {Object} body - Request body with planId
+ * @param {Object} user - User object from JWT
+ * @returns {Object} Crypto payment data
+ */
+const createCryptoPayment = async (body, user) => {
+	try {
+		const { planId } = body;
+		const { identifier } = user;
+
+		// Get plan details
+		const plans = configuration.stripe.plans;
+		const selectedPlan = plans[planId];
+
+		if (!selectedPlan) throw new Error("Invalid plan selected");
+
+		const zkPayTag = convertToZelfKeysFormat(identifier, ".zkpay");
+
+		// retrieve existing zkPay from IPFS by filtering by zkPay key value
+		const recordsFound = await pinata.filter("zkPay", zkPayTag);
+
+		const existingZkPay = recordsFound && Array.isArray(recordsFound) && recordsFound.length? recordsFound[0] : recordsFound || null;
+
+		if (existingZkPay) {
+	
+			return {
+				success: true,
+				paymentAddress: existingZkPay.metadata.keyvalues.avalancheAddress,
+				zkPay: {
+					url: existingZkPay.url,
+					ipfs_pin_hash: existingZkPay.ipfs_pin_hash,
+					name: existingZkPay.metadata.name,
+					publicData: existingZkPay.metadata.keyvalues,
+				},
+			};
+		}
+
+		// Store the payment zelfProof
+		const zkPay = await _storePaymentAddress(identifier, zkPayTag);
+	
+		return {
+			success: true,
+			paymentAddress: zkPay.publicData.avalancheAddress,
+			zkPay,
+		};
+	} catch (error) {
+		console.error("Error creating crypto payment:", error);
+		throw error;
+	}
+};
+
+const _storePaymentAddress = async (zelfName, zkPay) => {
+	// first we need to encrypt and encryptQRCode the zelfProofData
+	const mnemonic = generateMnemonic(12);
+
+	const wallet = createEthWallet(mnemonic);
+
+	const zkPayData = {
+		publicData: {
+			avalancheAddress: wallet.address,
+			customerTag: zelfName,
+			zkPay,
+		},
+		identifier: zkPay,
+		faceBase64: avaxSignerModule.faceBase64,
+		password: avaxSignerModule.password,
+		metadata: {
+			mnemonic: mnemonic,
+		},
+		os: "DESKTOP",
+		requireLiveness: true,
+		livenessLevel: "REGULAR",
+	};
+
+	const { zelfProof } = await zelfProofModule.encrypt(zkPayData);
+
+	const { zelfQR } = await zelfProofModule.encryptQRCode(zkPayData);
+
+	const ipfsResult = await pinata.pinFile(zelfQR, `${zkPay}`, "application/json", { ...zkPayData.publicData, zelfProof });
+	
+	return {
+		url: ipfsResult.url,
+		ipfs_pin_hash: ipfsResult.IpfsHash,
+		name: ipfsResult.Name,
+		publicData: ipfsResult.metadata,
+	};
 };
 
 // Track processed webhook events to prevent duplicates
@@ -684,4 +777,12 @@ const createCustomerPortalSession = async (user) => {
 // EXPORTS - All exported functions listed here
 // ========================================
 
-export { getActiveSubscription, getAvailablePlans, createCheckoutSession, cancelSubscription, createCustomerPortalSession, webhookHandler };
+export {
+	getActiveSubscription,
+	getAvailablePlans,
+	createCheckoutSession,
+	cancelSubscription,
+	createCustomerPortalSession,
+	createCryptoPayment,
+	webhookHandler,
+};
