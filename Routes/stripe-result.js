@@ -99,10 +99,7 @@ const generateResultHTML = ({ success, canceled, sessionId, sessionData, subscri
 					<h1>Subscription Canceled</h1>
 					<p class="subtitle">Your subscription setup was canceled. No charges have been made.</p>
 					
-					<div class="actions">
-						<a href="${baseUrl}/dashboard/billing" class="button primary">Try Again</a>
-						<a href="${baseUrl}/dashboard" class="button secondary">Go to Dashboard</a>
-					</div>
+					
 				</div>
 			</div>
 		</body>
@@ -271,11 +268,6 @@ const generateErrorHTML = (message) => {
 				</div>
 				<h1>Something went wrong</h1>
 				<p class="subtitle">${message}</p>
-				
-				<div class="actions">
-					<a href="${baseUrl}/dashboard/billing" class="button primary">Try Again</a>
-					<a href="${baseUrl}/dashboard" class="button secondary">Go to Dashboard</a>
-				</div>
 			</div>
 		</div>
 	</body>
