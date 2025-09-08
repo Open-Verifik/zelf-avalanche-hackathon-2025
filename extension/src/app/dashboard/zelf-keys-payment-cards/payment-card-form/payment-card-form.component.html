@@ -8,7 +8,6 @@
 		<form (ngSubmit)="onSave()" #cardForm="ngForm">
 			<!-- Card Preview Section -->
 			<div class="form-section">
-				<label class="form-label">Card Preview</label>
 				<div class="card-preview" [class]="getCardType().toLowerCase()">
 					<div class="card-header">
 						<div class="card-type">{{ getCardType() }}</div>
@@ -142,15 +141,8 @@
 			</div>
 
 			<!-- Master Password Section -->
-			<div class="form-section">
-				<div class="password-toggle">
-					<label class="form-label">Add Master Password (Optional)</label>
-					<div class="toggle-switch" (click)="toggleMasterPassword()">
-						<div class="toggle-slider" [class.active]="cardData.useMasterPassword"></div>
-					</div>
-				</div>
-
-				<div *ngIf="cardData.useMasterPassword" class="password-input-field">
+			<div class="form-section" *ngIf="hasMasterPassword">
+				<div class="password-input-field">
 					<input
 						type="password"
 						id="masterPassword"
@@ -158,10 +150,11 @@
 						[(ngModel)]="cardData.masterPassword"
 						(ngModelChange)="checkFormValidity()"
 						class="form-input"
-						placeholder="Enter your master password (optional)"
+						placeholder="Enter your master password"
 					/>
 					<small class="form-hint"
-						>Adding a master password provides additional security layer. Biometric verification is always required.</small
+						>We require the {{ wallet.name }} password to encrypt and store your card details. Biometric verification is always
+						required.</small
 					>
 				</div>
 			</div>

@@ -388,15 +388,15 @@ const storeData = async (data, authToken) => {
 		let result;
 		switch (type) {
 			case "password":
-				result = await storePassword({ ...payload, faceBase64, masterPassword: password }, authToken);
+				result = await storePassword(data, authToken);
 				break;
 
 			case "notes":
-				result = await storeNotes({ ...payload, faceBase64, masterPassword: password }, authToken);
+				result = await storeNotes(data, authToken);
 				break;
 
 			case "credit_card":
-				result = await storeCreditCard({ ...payload, faceBase64, masterPassword: password }, authToken);
+				result = await storeCreditCard(data, authToken);
 				break;
 
 			default:

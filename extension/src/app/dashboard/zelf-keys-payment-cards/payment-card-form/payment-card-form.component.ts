@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TranslocoModule } from "@jsverse/transloco";
 import { RouterModule, Router, ActivatedRoute } from "@angular/router";
@@ -6,7 +6,8 @@ import { FormsModule } from "@angular/forms";
 import { ChromeService } from "../../../chrome.service";
 import { DataPassingService } from "../../../services/data-passing.service";
 import { DataBiometricsComponent } from "../../shared/data-biometrics.component";
-
+import { WalletService } from "app/wallet.service";
+import { Wallet } from "app/wallet";
 @Component({
 	selector: "app-payment-card-form",
 	standalone: true,
@@ -33,11 +34,17 @@ export class PaymentCardFormComponent implements OnInit {
 	showBiometrics = false;
 	transformedCardData: any = null;
 
+	wallet!: Wallet;
+	hasMasterPassword = false;
+	shareables: any = {};
+
 	constructor(
 		private router: Router,
 		private route: ActivatedRoute,
 		private chromeService: ChromeService,
-		private dataPassingService: DataPassingService
+		private dataPassingService: DataPassingService,
+		private _walletService: WalletService,
+		private _changeDetectorRef: ChangeDetectorRef
 	) {}
 
 	async ngOnInit(): Promise<void> {
@@ -51,10 +58,32 @@ export class PaymentCardFormComponent implements OnInit {
 		// TODO: Add edit route like "payment-cards/edit/:id" for editing existing cards
 		this.isNewCard = true;
 
+		await this._setWallet();
 		// Initialize form validation after a short delay to ensure all data is loaded
 		setTimeout(() => {
 			this.checkFormValidity();
 		}, 100);
+	}
+
+	private async _setWallet(): Promise<any> {
+		const wallet = await this._walletService.getFirstWalletFromStorage();
+
+		if (!wallet?.name) {
+			this.router.navigate(["/welcome"]);
+
+			return;
+		}
+
+		this.shareables.wallet = wallet;
+
+		this.wallet = this.shareables.wallet;
+
+		console.log("wallet", wallet);
+
+		this.hasMasterPassword = wallet.hasPassword || false;
+
+		this._changeDetectorRef.detectChanges();
+		this.checkFormValidity();
 	}
 
 	toggleFolder(): void {
@@ -78,8 +107,9 @@ export class PaymentCardFormComponent implements OnInit {
 		const hasBankName = !!this.cardData.bankName?.trim();
 
 		// Master password is optional - only validate if user chose to use it
-		const hasValidMasterPassword =
-			!this.cardData.useMasterPassword || (this.cardData.useMasterPassword && !!this.cardData.masterPassword?.trim());
+		const hasMasterPassword = !!this.cardData.masterPassword;
+
+		const masterPasswordValid = this.hasMasterPassword ? hasMasterPassword : true;
 
 		// Backend validation requirements:
 		// - cardName: required, minLength: 1
@@ -90,7 +120,7 @@ export class PaymentCardFormComponent implements OnInit {
 		// - bankName: required, minLength: 1
 		// - masterPassword: optional (only if user enables it)
 
-		this.formValid = hasCardName && hasCardNumber && hasExpiryMonth && hasExpiryYear && hasCvv && hasBankName && hasValidMasterPassword;
+		this.formValid = hasCardName && hasCardNumber && hasExpiryMonth && hasExpiryYear && hasCvv && hasBankName && masterPasswordValid;
 	}
 
 	onCancel(): void {
