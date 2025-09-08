@@ -65,6 +65,45 @@ export class MessageHandler {
         }
     }
 
+    /**
+     * Notify all content scripts that the service worker is ready
+     * This is called when the extension UI is opened to ensure content scripts
+     * know the service worker is available even if it didn't go through activation
+     */
+    private async notifyContentScriptsServiceWorkerReady(): Promise<void> {
+        try {
+            console.log("MessageHandler: Notifying content scripts that service worker is ready...");
+
+            if (this.browserApi.has("tabs")) {
+                const tabsApi = this.browserApi.tabs as any;
+                if (tabsApi?.query) {
+                    const tabs = await tabsApi.query({});
+                    let successCount = 0;
+
+                    for (const tab of tabs) {
+                        if (tab.id && tab.url && !tab.url.startsWith("chrome-extension://")) {
+                            try {
+                                if (tabsApi?.sendMessage) {
+                                    await tabsApi.sendMessage(tab.id, {
+                                        type: "SERVICE_WORKER_READY",
+                                    });
+                                    successCount++;
+                                }
+                            } catch (error) {
+                                // Tab might not have content script loaded yet, ignore
+                                console.log(`Could not notify tab ${tab.id}:`, error);
+                            }
+                        }
+                    }
+
+                    console.log(`MessageHandler: Notified ${successCount} content scripts that service worker is ready`);
+                }
+            }
+        } catch (error) {
+            console.error("MessageHandler: Error notifying content scripts:", error);
+        }
+    }
+
     async handleAutofillMessage(message: any, sender: any, sendResponse: (response: any) => void) {
         try {
             switch (message.type) {
@@ -127,6 +166,9 @@ export class MessageHandler {
                     type: "AUTOFILL_CREATE_PASSWORD_DATA",
                     payload: { urlInfo },
                 });
+
+                // Notify content scripts that service worker is ready after opening extension UI
+                this.notifyContentScriptsServiceWorkerReady();
             }
 
             sendResponse({ success: true });
@@ -148,6 +190,9 @@ export class MessageHandler {
         try {
             // Open the extension popup/sidebar to the biometrics modal
             await this.openExtensionUI("biometrics");
+
+            // Notify content scripts that service worker is ready after opening extension UI
+            this.notifyContentScriptsServiceWorkerReady();
         } catch (error) {
             console.error("Error opening biometrics modal:", error);
         }
@@ -168,6 +213,9 @@ export class MessageHandler {
                 // Store the sender tab ID for later communication
                 this.pendingDecryptionRequests = this.pendingDecryptionRequests || new Map();
                 this.pendingDecryptionRequests.set(payload.passwordId, sender.tab?.id);
+
+                // Notify content scripts that service worker is ready after opening extension UI
+                this.notifyContentScriptsServiceWorkerReady();
             } else {
                 console.error("MessageHandler: Failed to open password decryptor popout");
             }
