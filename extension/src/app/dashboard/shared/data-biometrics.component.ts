@@ -236,7 +236,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 		await this._walletService.initZelfKeySession();
 
 		// Get the cached token
-		const jwt = this._walletService.getZelfKeyJWT();
+		const jwt = await this._walletService.getZelfKeyJWT();
 
 		if (jwt) {
 			this.apiKeysSessionJWT = jwt;

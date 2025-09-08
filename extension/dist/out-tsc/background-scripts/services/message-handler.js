@@ -1,5 +1,3 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 import { BackgroundCredentialManager } from "./background-credential-manager";
 export class MessageHandler {
     constructor(browserApi) {
@@ -94,42 +92,15 @@ export class MessageHandler {
         catch (error) {
             console.error("MessageHandler: Error notifying content scripts:", error);
         }
-=======
-export class MessageHandler {
-    constructor(browserApi) {
-        this.browserApi = browserApi;
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
-=======
-import { BackgroundCredentialManager } from './background-credential-manager';
-export class MessageHandler {
-    constructor(browserApi) {
-        this.browserApi = browserApi;
-        this.credentialManager = BackgroundCredentialManager.getInstance();
->>>>>>> 0cea6d0 (Fix watch/build scripts)
     }
     async handleAutofillMessage(message, sender, sendResponse) {
         try {
             switch (message.type) {
-<<<<<<< HEAD
                 case "GET_PASSWORDS":
                     await this.handleGetPasswords(message.payload, sendResponse);
                     break;
                 case "CREATE_PASSWORD":
                     await this.handleCreatePassword(message.payload, sendResponse);
-=======
-                case "TEST_MESSAGE":
-                    console.log("Background: Test message received");
-                    sendResponse({ success: true, message: "Service worker is active!" });
-                    break;
-                case "GET_PASSWORDS":
-                    await this.handleGetPasswords(message.payload, sendResponse);
-                    break;
-                case "DECRYPT_PASSWORD":
-                    await this.handleDecryptPassword(message.payload, sendResponse);
-                    break;
-                case "CREATE_PASSWORD":
-                    await this.handleCreatePassword(sender, sendResponse);
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
                     break;
                 case "AUTHENTICATE":
                     await this.handleAuthenticate(sendResponse);
@@ -138,7 +109,6 @@ export class MessageHandler {
                     await this.handleOpenBiometricsModal(message.payload, sender);
                     sendResponse({ success: true });
                     break;
-<<<<<<< HEAD
                 case "OPEN_PASSWORD_DECRYPTOR":
                     console.log("MessageHandler: Handling OPEN_PASSWORD_DECRYPTOR");
                     await this.handleOpenPasswordDecryptor(message.payload, sender);
@@ -152,8 +122,6 @@ export class MessageHandler {
                     await this.handleDecryptionResultFromPopout(message.payload, sender);
                     sendResponse({ success: true });
                     break;
-=======
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
                 default:
                     sendResponse({ success: false, error: "Unknown message type" });
             }
@@ -165,39 +133,14 @@ export class MessageHandler {
     }
     async handleGetPasswords(payload, sendResponse) {
         try {
-<<<<<<< HEAD
             const passwords = await this.credentialManager.getPasswords(payload.website);
             sendResponse({ success: true, data: passwords });
-=======
-            console.log("Background: Getting passwords for website:", payload.website);
-<<<<<<< HEAD
-            // Get stored passwords from the Angular app
-            const response = await this.forwardToAngularApp({
-                type: "GET_PASSWORDS",
-                payload: payload,
-            });
-            console.log("Background: Received response from Angular app:", response);
-            // Filter passwords for the specific website
-            const websitePasswords = response.filter((password) => password.website === payload.website ||
-                password.url === payload.website ||
-                password.domain === payload.website);
-            console.log("Background: Filtered passwords:", websitePasswords);
-            sendResponse({ success: true, data: websitePasswords });
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
-=======
-            // Use credential manager directly (no fallback needed)
-            console.log("Background: Using credential manager for password retrieval");
-            const passwords = await this.credentialManager.getPasswords(payload.website);
-            console.log("Background: Retrieved passwords from credential manager:", passwords);
-            sendResponse({ success: true, data: passwords });
->>>>>>> 0cea6d0 (Fix watch/build scripts)
         }
         catch (error) {
             console.error("Error getting passwords:", error);
             sendResponse({ success: false, error: error.message });
         }
     }
-<<<<<<< HEAD
     async handleCreatePassword(payload, sendResponse) {
         try {
             // Get the URL info from the message payload
@@ -213,25 +156,6 @@ export class MessageHandler {
                 // Notify content scripts that service worker is ready after opening extension UI
                 this.notifyContentScriptsServiceWorkerReady();
             }
-=======
-    async handleDecryptPassword(payload, sendResponse) {
-        try {
-            // Use credential manager directly (no fallback needed)
-            console.log("Background: Using credential manager for password decryption");
-            const decryptedData = await this.credentialManager.decryptPassword(payload.passwordId);
-            console.log("Background: Decrypted password from credential manager:", decryptedData);
-            sendResponse({ success: true, data: decryptedData });
-        }
-        catch (error) {
-            console.error("Error decrypting password:", error);
-            sendResponse({ success: false, error: error.message });
-        }
-    }
-    async handleCreatePassword(sender, sendResponse) {
-        try {
-            // Open the extension popup/sidebar to the create password page
-            await this.openExtensionUI("create-password");
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
             sendResponse({ success: true });
         }
         catch (error) {
@@ -240,31 +164,8 @@ export class MessageHandler {
     }
     async handleAuthenticate(sendResponse) {
         try {
-<<<<<<< HEAD
-<<<<<<< HEAD
             const isAuthenticated = this.credentialManager.isAuthenticated();
             sendResponse({ success: isAuthenticated });
-=======
-            // Check if user is authenticated in the extension
-            if (this.browserApi.has("storage")) {
-                const authData = await this.browserApi.storage.local.get([
-                    "zelfKeyJWT",
-                    "isAuthenticated",
-                ]);
-                const isAuthenticated = authData.isAuthenticated && authData.zelfKeyJWT;
-                sendResponse({ success: isAuthenticated });
-            }
-            else {
-                sendResponse({ success: false, error: "No storage API available" });
-            }
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
-=======
-            // Use credential manager directly (no fallback needed)
-            console.log("Background: Using credential manager for authentication check");
-            const isAuthenticated = this.credentialManager.isAuthenticated();
-            console.log("Background: Authentication status from credential manager:", isAuthenticated);
-            sendResponse({ success: isAuthenticated });
->>>>>>> 0cea6d0 (Fix watch/build scripts)
         }
         catch (error) {
             sendResponse({ success: false, error: error.message });
@@ -273,20 +174,14 @@ export class MessageHandler {
     async handleOpenBiometricsModal(payload, sender) {
         try {
             // Open the extension popup/sidebar to the biometrics modal
-<<<<<<< HEAD
             await this.openExtensionUI("biometrics");
             // Notify content scripts that service worker is ready after opening extension UI
             this.notifyContentScriptsServiceWorkerReady();
-=======
-            await this.openExtensionUI("biometrics", payload);
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         }
         catch (error) {
             console.error("Error opening biometrics modal:", error);
         }
     }
-<<<<<<< HEAD
-<<<<<<< HEAD
     async handleOpenPasswordDecryptor(payload, sender) {
         try {
             console.log("MessageHandler: Opening password decryptor popout...");
@@ -400,90 +295,10 @@ export class MessageHandler {
             else {
                 console.error("Tabs API not available");
                 return null;
-=======
-    async forwardToAngularApp(message) {
-        try {
-            console.log("Background: Forwarding message to Angular app:", message);
-            // Method 1: Try direct runtime messaging (works without tabs)
-            try {
-                const response = await new Promise((resolve, reject) => {
-                    // Much simpler - browserApi handles the Chrome/Firefox difference automatically
-                    this.browserApi.sendMessage(message, (response) => {
-                        if (this.browserApi.runtime?.lastError) {
-                            reject(new Error(this.browserApi.runtime.lastError.message));
-                        }
-                        else {
-                            resolve(response);
-                        }
-                    });
-                });
-                console.log("Background: Received response from Angular app via runtime:", response);
-                return response?.data || [];
-            }
-            catch (runtimeError) {
-                console.log("Runtime messaging failed, trying tab messaging:", runtimeError.message);
-                // Method 2: Fallback to tab messaging if runtime fails
-                if (this.browserApi.has("tabs")) {
-                    const tabs = await this.browserApi.tabs.query({
-                        url: this.browserApi.runtime.getURL("index.html"),
-                    });
-                    console.log("Background: Found extension tabs:", tabs.length);
-                    if (tabs.length === 0) {
-                        console.log("Background: No extension tabs found, returning empty array");
-                        return [];
-                    }
-                    const response = await this.browserApi.tabs.sendMessage(tabs[0].id, message);
-                    console.log("Background: Received response from Angular app via tab:", response);
-                    return response?.data || [];
-                }
-                else {
-                    console.log("Background: No tab API available");
-                    return [];
-                }
-            }
-        }
-        catch (error) {
-            console.error("Error communicating with Angular app:", error);
-            return [];
-        }
-    }
-=======
->>>>>>> 0cea6d0 (Fix watch/build scripts)
-    async openExtensionUI(page, data = null) {
-        try {
-            // Store any data needed for the UI
-            if (data && this.browserApi.has("storage")) {
-                await this.browserApi.storage.local.set({
-                    autofillData: data,
-                    autofillTimestamp: Date.now(),
-                });
-            }
-            // Open the extension popup/sidebar - only use if/elseif for fundamentally different APIs
-            if (this.browserApi.sidebarAction) {
-                // Firefox
-                this.browserApi.sidebarAction.open();
-            }
-            else if (this.browserApi.sidePanel) {
-                // Chrome
-                const currentWindow = await this.browserApi.windows.getCurrent();
-                this.browserApi.sidePanel.open({ windowId: currentWindow.id });
-            }
-            else {
-                // Fallback to opening in new tab
-                const runtime = this.browserApi.runtime;
-                if (runtime) {
-                    const url = runtime.getURL(`index.html#/${page}`);
-                    const tabs = this.browserApi.tabs;
-                    if (tabs) {
-                        tabs.create({ url });
-                    }
-                }
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
             }
         }
         catch (error) {
             console.error("Error opening extension UI:", error);
-<<<<<<< HEAD
             return null;
         }
     }
@@ -530,17 +345,6 @@ export class MessageHandler {
         }
         catch (error) {
             console.error("Error sending message to Angular app:", error);
-=======
-            // Fallback to opening in new tab
-            const runtime = this.browserApi.runtime;
-            if (!runtime)
-                return;
-            const url = runtime.getURL(`index.html#/${page}`);
-            const tabs = this.browserApi.tabs;
-            if (!tabs)
-                return;
-            tabs.create({ url });
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         }
     }
 }

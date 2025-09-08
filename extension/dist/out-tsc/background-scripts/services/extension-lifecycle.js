@@ -25,7 +25,6 @@ export class ExtensionLifecycle {
             });
             self.addEventListener("activate", (event) => {
                 console.log("Service worker activating...");
-<<<<<<< HEAD
                 event.waitUntil(self.clients
                     .claim()
                     .then(() => {
@@ -48,17 +47,6 @@ export class ExtensionLifecycle {
         setTimeout(() => {
             this.notifyServiceWorkerReady();
         }, 100);
-=======
-                event.waitUntil(self.clients.claim());
-            });
-        }
-        // Test service worker immediately
-        setTimeout(() => {
-            console.log("Service worker test - 5 seconds after startup");
-        }, 5000);
-        this.setupSidePanel();
-        this.setupEventListeners();
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
     }
     setupSidePanel() {
         // Chrome API setup (primary)
@@ -127,7 +115,6 @@ export class ExtensionLifecycle {
             });
         });
     }
-<<<<<<< HEAD
     async notifyServiceWorkerReady() {
         try {
             // Get all tabs and notify them that service worker is ready
@@ -164,7 +151,5 @@ export class ExtensionLifecycle {
             console.error("Error notifying content scripts:", error);
         }
     }
-=======
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
 }
 //# sourceMappingURL=extension-lifecycle.js.map

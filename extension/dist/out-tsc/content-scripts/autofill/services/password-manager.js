@@ -36,15 +36,9 @@ export class PasswordManager {
             return null;
         }
     }
-<<<<<<< HEAD
     async createNewPassword(urlInfo) {
         try {
             await this.communicationService.createPassword(urlInfo);
-=======
-    async createNewPassword() {
-        try {
-            await this.communicationService.createPassword();
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         }
         catch (error) {
             console.error('Error creating new password:', error);

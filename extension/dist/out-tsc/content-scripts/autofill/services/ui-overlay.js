@@ -1,8 +1,4 @@
-<<<<<<< HEAD
 import { PasswordManager } from "./password-manager";
-=======
-import { PasswordManager } from './password-manager';
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
 export class UIOverlay {
     constructor() {
         this.icons = new Map();
@@ -10,17 +6,11 @@ export class UIOverlay {
         this.currentField = null;
         this.passwordManager = new PasswordManager();
         this.setupStyles();
-<<<<<<< HEAD
         // Listen for decryption results from popout
         this.setupDecryptionResultListener();
     }
     setupStyles() {
         const style = document.createElement("style");
-=======
-    }
-    setupStyles() {
-        const style = document.createElement('style');
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         style.textContent = `
       .zelfkey-icon {
         position: absolute;
@@ -158,21 +148,12 @@ export class UIOverlay {
         }
     }
     hideAllIcons() {
-<<<<<<< HEAD
         this.icons.forEach((icon) => icon.element.remove());
         this.icons.clear();
     }
     createZelfKeyIcon(field) {
         const iconElement = document.createElement("div");
         iconElement.className = "zelfkey-icon";
-=======
-        this.icons.forEach(icon => icon.element.remove());
-        this.icons.clear();
-    }
-    createZelfKeyIcon(field) {
-        const iconElement = document.createElement('div');
-        iconElement.className = 'zelfkey-icon';
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         iconElement.innerHTML = this.getZelfKeySVG();
         // Position the icon
         const rect = field.element.getBoundingClientRect();
@@ -180,20 +161,12 @@ export class UIOverlay {
         const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
         const position = {
             top: rect.top + scrollTop + (rect.height - 39) / 2,
-<<<<<<< HEAD
             left: rect.right + scrollLeft - 60,
-=======
-            left: rect.right + scrollLeft - 60
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         };
         iconElement.style.top = `${position.top}px`;
         iconElement.style.left = `${position.left}px`;
         // Add click handler
-<<<<<<< HEAD
         iconElement.addEventListener("click", (e) => {
-=======
-        iconElement.addEventListener('click', (e) => {
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
             e.stopPropagation();
             this.handleIconClick(field);
         });
@@ -201,11 +174,7 @@ export class UIOverlay {
         return {
             element: iconElement,
             field,
-<<<<<<< HEAD
             position,
-=======
-            position
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         };
     }
     getZelfKeySVG() {
@@ -225,11 +194,7 @@ export class UIOverlay {
         const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
         const position = {
             top: rect.top + scrollTop + (rect.height - 28) / 2,
-<<<<<<< HEAD
             left: rect.right + scrollLeft - 32,
-=======
-            left: rect.right + scrollLeft - 32
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         };
         icon.element.style.top = `${position.top}px`;
         icon.element.style.left = `${position.left}px`;
@@ -238,13 +203,8 @@ export class UIOverlay {
     async handleIconClick(field) {
         this.currentField = field;
         this.hideMenu();
-<<<<<<< HEAD
         // Extract hostname from current URL
         const website = this.extractHostname(window.location.href);
-=======
-        // Hardcode for testing with file:// URLs
-        const website = 'google.com';
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         // Show menu immediately with loading state
         this.showMenuWithLoading(field, website);
         try {
@@ -255,42 +215,25 @@ export class UIOverlay {
                     setTimeout(() => {
                         resolve([]);
                     }, 2000);
-<<<<<<< HEAD
                 }),
-=======
-                })
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
             ]);
             this.updateMenuWithPasswords(passwords);
         }
         catch (error) {
-<<<<<<< HEAD
             console.error("Error fetching passwords:", error);
-=======
-            console.error('Error fetching passwords:', error);
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
             this.updateMenuWithPasswords([]);
         }
     }
     showMenuWithLoading(field, website) {
         this.hideMenu();
-<<<<<<< HEAD
         const menu = document.createElement("div");
         menu.className = "zelfkey-menu";
-=======
-        const menu = document.createElement('div');
-        menu.className = 'zelfkey-menu';
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         // Add loading indicator
         const loadingItem = this.createLoadingMenuItem();
         menu.appendChild(loadingItem);
         // Add create new password option (always available)
         const createItem = this.createCreateMenuItem();
-<<<<<<< HEAD
         createItem.addEventListener("click", () => this.handleCreatePassword());
-=======
-        createItem.addEventListener('click', () => this.handleCreatePassword());
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         menu.appendChild(createItem);
         // Position the menu
         const rect = field.element.getBoundingClientRect();
@@ -298,41 +241,24 @@ export class UIOverlay {
         const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
         menu.style.top = `${rect.bottom + scrollTop + 5}px`;
         menu.style.left = `${rect.left + scrollLeft}px`;
-<<<<<<< HEAD
         menu.style.zIndex = "10001";
-=======
-        menu.style.zIndex = '10001';
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         document.body.appendChild(menu);
         this.currentMenu = menu;
         // Add click outside handler
         setTimeout(() => {
-<<<<<<< HEAD
             document.addEventListener("click", this.handleClickOutside.bind(this));
-=======
-            document.addEventListener('click', this.handleClickOutside.bind(this));
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         }, 0);
     }
     updateMenuWithPasswords(passwords) {
         if (!this.currentMenu)
             return;
         // Clear existing content
-<<<<<<< HEAD
         this.currentMenu.innerHTML = "";
         // Add existing passwords or "no credentials" message
         if (passwords.length > 0) {
             passwords.forEach((password) => {
                 const item = this.createMenuItem(password);
                 item.addEventListener("click", () => this.handlePasswordSelect(password));
-=======
-        this.currentMenu.innerHTML = '';
-        // Add existing passwords or "no credentials" message
-        if (passwords.length > 0) {
-            passwords.forEach(password => {
-                const item = this.createMenuItem(password);
-                item.addEventListener('click', () => this.handlePasswordSelect(password));
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
                 this.currentMenu.appendChild(item);
             });
         }
@@ -343,7 +269,6 @@ export class UIOverlay {
         }
         // Add create new password option
         const createItem = this.createCreateMenuItem();
-<<<<<<< HEAD
         createItem.addEventListener("click", () => this.handleCreatePassword());
         this.currentMenu.appendChild(createItem);
     }
@@ -363,27 +288,6 @@ export class UIOverlay {
         title.textContent = hostName;
         const subtitle = document.createElement("div");
         subtitle.className = "zelfkey-menu-item-subtitle";
-=======
-        createItem.addEventListener('click', () => this.handleCreatePassword());
-        this.currentMenu.appendChild(createItem);
-    }
-    createMenuItem(password) {
-        const item = document.createElement('div');
-        item.className = 'zelfkey-menu-item';
-        // Extract host name from website/domain/url
-        const hostName = this.extractHostName(password);
-        const hostInitial = hostName.charAt(0).toUpperCase();
-        const icon = document.createElement('div');
-        icon.className = 'zelfkey-menu-item-icon';
-        icon.textContent = hostInitial;
-        const content = document.createElement('div');
-        content.className = 'zelfkey-menu-item-content';
-        const title = document.createElement('div');
-        title.className = 'zelfkey-menu-item-title';
-        title.textContent = hostName;
-        const subtitle = document.createElement('div');
-        subtitle.className = 'zelfkey-menu-item-subtitle';
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         subtitle.textContent = this.extractUsername(password);
         content.appendChild(title);
         content.appendChild(subtitle);
@@ -403,7 +307,6 @@ export class UIOverlay {
             }
         }
         // Fallback to original format
-<<<<<<< HEAD
         const source = password.publicData.website || password.url || password.name;
         if (!source) {
             return "Unknown";
@@ -411,24 +314,11 @@ export class UIOverlay {
         try {
             // If it's a full URL, extract the hostname
             if (source.includes("://")) {
-=======
-        const source = password.website || password.domain || password.url || password.name;
-        if (!source) {
-            return 'Unknown';
-        }
-        try {
-            // If it's a full URL, extract the hostname
-            if (source.includes('://')) {
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
                 const url = new URL(source);
                 return url.hostname;
             }
             // If it already looks like a hostname (contains dots but no protocol)
-<<<<<<< HEAD
             if (source.includes(".") && !source.includes(" ")) {
-=======
-            if (source.includes('.') && !source.includes(' ')) {
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
                 return source;
             }
             // Otherwise, use the source as fallback
@@ -445,7 +335,6 @@ export class UIOverlay {
             return password.publicData.username;
         }
         // Fallback to original format
-<<<<<<< HEAD
         return password.publicData.username || "No username";
     }
     createLoadingMenuItem() {
@@ -458,27 +347,12 @@ export class UIOverlay {
         const title = document.createElement("div");
         title.className = "zelfkey-menu-item-title";
         title.textContent = "Loading passwords...";
-=======
-        return password.username || 'No username';
-    }
-    createLoadingMenuItem() {
-        const item = document.createElement('div');
-        item.className = 'zelfkey-menu-item loading';
-        const spinner = document.createElement('div');
-        spinner.className = 'loading-spinner';
-        const content = document.createElement('div');
-        content.className = 'zelfkey-menu-item-content';
-        const title = document.createElement('div');
-        title.className = 'zelfkey-menu-item-title';
-        title.textContent = 'Loading passwords...';
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         content.appendChild(title);
         item.appendChild(spinner);
         item.appendChild(content);
         return item;
     }
     createNoCredentialsMenuItem() {
-<<<<<<< HEAD
         const item = document.createElement("div");
         item.className = "zelfkey-menu-item no-credentials";
         const content = document.createElement("div");
@@ -486,21 +360,11 @@ export class UIOverlay {
         const title = document.createElement("div");
         title.className = "zelfkey-menu-item-title";
         title.textContent = "No credentials found";
-=======
-        const item = document.createElement('div');
-        item.className = 'zelfkey-menu-item no-credentials';
-        const content = document.createElement('div');
-        content.className = 'zelfkey-menu-item-content';
-        const title = document.createElement('div');
-        title.className = 'zelfkey-menu-item-title';
-        title.textContent = 'No credentials found';
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         content.appendChild(title);
         item.appendChild(content);
         return item;
     }
     createCreateMenuItem() {
-<<<<<<< HEAD
         const item = document.createElement("div");
         item.className = "zelfkey-menu-item create";
         const icon = document.createElement("div");
@@ -511,18 +375,6 @@ export class UIOverlay {
         const title = document.createElement("div");
         title.className = "zelfkey-menu-item-title";
         title.textContent = "Create new password";
-=======
-        const item = document.createElement('div');
-        item.className = 'zelfkey-menu-item create';
-        const icon = document.createElement('div');
-        icon.className = 'zelfkey-menu-item-icon';
-        icon.textContent = '+';
-        const content = document.createElement('div');
-        content.className = 'zelfkey-menu-item-content';
-        const title = document.createElement('div');
-        title.className = 'zelfkey-menu-item-title';
-        title.textContent = 'Create new password';
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         content.appendChild(title);
         item.appendChild(icon);
         item.appendChild(content);
@@ -532,7 +384,6 @@ export class UIOverlay {
         this.hideMenu();
         if (!this.currentField)
             return;
-<<<<<<< HEAD
         // Always open biometrics popout for password decryption
         // The JWT session is just for the API, but we still need biometric verification
         await this.openBiometricsPopout(password);
@@ -650,40 +501,6 @@ export class UIOverlay {
     fillField(field, data) {
         // Find the form this field belongs to
         const form = field.element.closest("form");
-=======
-        // Check if authentication is needed
-        const isAuthenticated = await this.passwordManager.authenticate();
-        if (!isAuthenticated) {
-            // Open biometrics modal - this would need to be implemented
-            this.openBiometricsModal(password);
-            return;
-        }
-        // Decrypt and fill password
-        const decryptedData = await this.passwordManager.decryptPassword(password.id);
-        if (decryptedData) {
-            this.fillField(this.currentField, decryptedData);
-        }
-    }
-    async handleCreatePassword() {
-        this.hideMenu();
-        await this.passwordManager.createNewPassword();
-    }
-    openBiometricsModal(password) {
-        // This would open the biometrics modal in the extension popup
-        // For now, we'll just log it
-        console.log('Opening biometrics modal for password:', password.id);
-        // Send message to background script to open popup with biometrics modal
-        if (typeof chrome !== 'undefined' && chrome.runtime) {
-            chrome.runtime.sendMessage({
-                type: 'OPEN_BIOMETRICS_MODAL',
-                payload: { passwordId: password.id, fieldId: this.currentField?.element.id }
-            });
-        }
-    }
-    fillField(field, data) {
-        // Find the form this field belongs to
-        const form = field.element.closest('form');
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
         if (!form)
             return;
         // Find username field
@@ -692,11 +509,7 @@ export class UIOverlay {
             this.setFieldValue(usernameField, data.username);
         }
         // Fill password field
-<<<<<<< HEAD
         if (field.type === "password" && data.password) {
-=======
-        if (field.type === 'password' && data.password) {
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
             this.setFieldValue(field.element, data.password);
         }
     }
@@ -707,19 +520,11 @@ export class UIOverlay {
             'input[name*="username" i]',
             'input[name*="email" i]',
             'input[id*="username" i]',
-<<<<<<< HEAD
             'input[id*="email" i]',
         ];
         for (const selector of selectors) {
             const field = form.querySelector(selector);
             if (field && field.type !== "password") {
-=======
-            'input[id*="email" i]'
-        ];
-        for (const selector of selectors) {
-            const field = form.querySelector(selector);
-            if (field && field.type !== 'password') {
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
                 return field;
             }
         }
@@ -730,15 +535,9 @@ export class UIOverlay {
         field.focus();
         field.value = value;
         // Dispatch events
-<<<<<<< HEAD
         field.dispatchEvent(new Event("input", { bubbles: true }));
         field.dispatchEvent(new Event("change", { bubbles: true }));
         field.dispatchEvent(new Event("blur", { bubbles: true }));
-=======
-        field.dispatchEvent(new Event('input', { bubbles: true }));
-        field.dispatchEvent(new Event('change', { bubbles: true }));
-        field.dispatchEvent(new Event('blur', { bubbles: true }));
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
     }
     handleClickOutside(event) {
         if (this.currentMenu && !this.currentMenu.contains(event.target)) {
@@ -750,7 +549,6 @@ export class UIOverlay {
             this.currentMenu.remove();
             this.currentMenu = null;
         }
-<<<<<<< HEAD
         document.removeEventListener("click", this.handleClickOutside.bind(this));
     }
     updateIconPositions() {
@@ -775,24 +573,4 @@ export class UIOverlay {
         }
     }
 }
-=======
-        document.removeEventListener('click', this.handleClickOutside.bind(this));
-    }
-    getWebsiteFromUrl(url) {
-        try {
-            const urlObj = new URL(url);
-            return urlObj.hostname;
-        }
-        catch {
-            return window.location.hostname;
-        }
-    }
-    updateIconPositions() {
-        this.icons.forEach(icon => {
-            this.positionIcon(icon);
-        });
-    }
-}
-// Another test change Sun Sep  7 12:02:57 MDT 2025
->>>>>>> cdc582f (Verify the messages can be received from the content scripts to the extension and vice versa)
 //# sourceMappingURL=ui-overlay.js.map
