@@ -5,6 +5,7 @@ export class MessageHandler {
     private credentialManager: BackgroundCredentialManager;
     private pendingDecryptionRequests?: Map<string, number>;
     private pendingPopupRoute?: string;
+    private pendingDecryptionData?: any;
 
     constructor(private browserApi: BrowserApiUtil) {
         this.credentialManager = BackgroundCredentialManager.getInstance(this.browserApi);
@@ -19,36 +20,48 @@ export class MessageHandler {
                     this.navigatePopupToRoute(this.pendingPopupRoute);
                     this.pendingPopupRoute = undefined;
                 }
+                if (message.type === "POPUP_READY" && this.pendingDecryptionData) {
+                    this.sendDecryptionDataToPopup();
+                }
             });
         }
     }
 
     private async navigatePopupToRoute(route: string) {
         try {
-            // Send a message to the popup to navigate to the route
-            const runtime = this.browserApi.runtime;
-            if (runtime) {
-                console.log("Navigating popup to route:", route);
+            console.log("Navigating popup to route:", route);
 
-                // Send message to the popup to navigate
-                const tabs = this.browserApi.tabs;
-                if (tabs) {
-                    // Find the popup tab and send navigation message
-                    const allTabs = await (tabs as any).query({});
-                    const popupTab = allTabs.find(
-                        (tab: any) => tab.url && tab.url.includes("chrome-extension://") && tab.url.includes("index.html") && tab.type === "popup"
-                    );
+            // For popup mode, we don't need to find a tab - the popup will handle navigation
+            // The popup will check for pending decryption data and navigate accordingly
+            console.log("Popup navigation handled by popup itself");
+        } catch (error) {
+            console.error("Error navigating popup to route:", error);
+        }
+    }
 
-                    if (popupTab) {
-                        await (tabs as any).sendMessage(popupTab.id, {
-                            type: "NAVIGATE_TO_ROUTE",
-                            payload: { route: route },
+    private async sendDecryptionDataToPopup() {
+        try {
+            console.log("MessageHandler: Sending decryption data to popup...");
+            console.log("MessageHandler: Pending decryption data:", this.pendingDecryptionData);
+
+            if (this.pendingDecryptionData) {
+                // Send message to all popup views
+                const runtime = this.browserApi.runtime;
+                if (runtime) {
+                    try {
+                        await (runtime as any).sendMessage({
+                            type: "PASSWORD_DECRYPTOR_DATA",
+                            payload: this.pendingDecryptionData,
                         });
+                        console.log("MessageHandler: Decryption data sent to popup");
+                        this.pendingDecryptionData = undefined;
+                    } catch (error) {
+                        console.error("MessageHandler: Error sending decryption data to popup:", error);
                     }
                 }
             }
         } catch (error) {
-            console.error("Error navigating popup to route:", error);
+            console.error("MessageHandler: Error in sendDecryptionDataToPopup:", error);
         }
     }
 
@@ -69,6 +82,7 @@ export class MessageHandler {
                     sendResponse({ success: true });
                     break;
                 case "OPEN_PASSWORD_DECRYPTOR":
+                    console.log("MessageHandler: Handling OPEN_PASSWORD_DECRYPTOR");
                     await this.handleOpenPasswordDecryptor(message.payload, sender);
                     sendResponse({ success: true });
                     break;
@@ -141,47 +155,42 @@ export class MessageHandler {
 
     private async handleOpenPasswordDecryptor(payload: any, sender: any) {
         try {
-            console.log("Opening password decryptor popout...");
+            console.log("MessageHandler: Opening password decryptor popout...");
+            console.log("MessageHandler: Payload:", payload);
+            console.log("MessageHandler: Sender:", sender);
 
             // Open the extension popup for password decryption
             const tabId = await this.openExtensionUI("dashboard/passwords/decrypt");
+            console.log("MessageHandler: openExtensionUI returned tab ID:", tabId);
 
             if (tabId) {
-                console.log("Password decryptor popout opened with tab ID:", tabId);
+                console.log("MessageHandler: Password decryptor popout opened with tab ID:", tabId);
                 // Store the sender tab ID for later communication
                 this.pendingDecryptionRequests = this.pendingDecryptionRequests || new Map();
                 this.pendingDecryptionRequests.set(payload.passwordId, sender.tab?.id);
             } else {
-                console.error("Failed to open password decryptor popout");
+                console.error("MessageHandler: Failed to open password decryptor popout");
             }
         } catch (error) {
-            console.error("Error opening password decryptor:", error);
+            console.error("MessageHandler: Error opening password decryptor:", error);
         }
     }
 
     private async handleSendDecryptionDataToPopout(payload: any, sender: any) {
         try {
-            // Find the popout tab and send the decryption data
-            const tabs = this.browserApi.tabs;
-            if (tabs) {
-                const allTabs = await (tabs as any).query({});
-                const popoutTab = allTabs.find((tab: any) => tab.url && tab.url.includes("#/dashboard/passwords/decrypt"));
+            console.log("MessageHandler: Sending decryption data to popout...");
+            console.log("MessageHandler: Payload:", payload);
 
-                if (popoutTab) {
-                    await this.waitForTabAndSendMessage(popoutTab.id, {
-                        type: "PASSWORD_DECRYPTOR_DATA",
-                        payload: {
-                            passwordId: payload.passwordId,
-                            publicData: payload.publicData,
-                            fieldId: payload.fieldId,
-                        },
-                    });
-                } else {
-                    console.error("Popout tab not found");
-                }
-            }
+            // Store the decryption data for the popup to pick up
+            this.pendingDecryptionData = {
+                passwordId: payload.passwordId,
+                publicData: payload.publicData,
+                fieldId: payload.fieldId,
+            };
+
+            console.log("MessageHandler: Stored decryption data for popup");
         } catch (error) {
-            console.error("Error sending decryption data to popout:", error);
+            console.error("MessageHandler: Error sending decryption data to popout:", error);
         }
     }
 
@@ -218,28 +227,32 @@ export class MessageHandler {
             }
 
             // For password decryptor, open the extension popup programmatically
-            if (page === "dashboard/passwords/decrypt") {
+            if (page === "dashboard/passwords/decrypt" || page === "passwords/decrypt") {
                 console.log("Opening extension popup for password decryption...");
 
                 // Store the route to navigate to when popup opens
                 this.pendingPopupRoute = page;
 
-                // Open the extension popup programmatically
+                // Try to open the extension popup programmatically
                 const action = this.browserApi.action;
                 if (action) {
                     try {
+                        console.log("Attempting to open popup...");
                         // Open the popup programmatically
                         await (action as any).openPopup();
-                        console.log("Extension popup opened");
+                        console.log("Extension popup opened successfully");
 
                         // Return a special ID to indicate popup mode
                         return -1; // Special ID for popup mode
-                    } catch (popupError) {
-                        console.warn("Failed to open popup, falling back to tab:", popupError);
-                        // Fall through to tab creation
+                    } catch (popupError: any) {
+                        console.error("Failed to open popup:", popupError);
+                        console.error("Popup error details:", popupError.message);
+                        // Don't fall back to tab creation - this should be a popup
+                        return null;
                     }
                 } else {
-                    console.warn("Action API not available, falling back to tab");
+                    console.error("Action API not available");
+                    return null;
                 }
             }
 

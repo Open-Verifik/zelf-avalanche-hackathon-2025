@@ -74,14 +74,6 @@ const routes: Routes = [
                             ),
                     },
                     {
-                        path: "passwords/decrypt",
-                        loadComponent: () =>
-                            import("./dashboard/zelf-keys-passwords/password-decryptor/password-decryptor.component").then(
-                                (m) => m.PasswordDecryptorComponent
-                            ),
-                        canActivate: [PopoutOnlyGuard],
-                    },
-                    {
                         path: "notes",
                         loadComponent: () => import("./dashboard/zelf-keys-notes/zelf-keys-notes.component").then((m) => m.ZelfKeysNotesComponent),
                     },
@@ -326,16 +318,16 @@ const routes: Routes = [
         ],
     },
     {
+        path: "passwords/decrypt",
+        loadComponent: () =>
+            import("./dashboard/zelf-keys-passwords/password-decryptor/password-decryptor.component").then((m) => m.PasswordDecryptorComponent),
+        canActivate: [PopoutOnlyGuard],
+    },
+    {
         path: "external-link",
         data: { externalUrl: "https://payment.zelf.world/purchase" },
         canActivate: [ExternalRedirectGuard],
     },
-    // DEPRECATED ROUTES: Ensure all translations are also removed before deleting these components!
-    // {
-    //     path: "extension-instructions",
-    //     loadComponent: () => import("./extension-instructions/extension-instructions.component").then((m) => m.ExtensionInstructionsComponent),
-    //     canActivate: [ExtensionGuard],
-    // },
 ];
 
 if (environment.production) {

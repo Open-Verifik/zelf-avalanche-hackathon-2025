@@ -69,18 +69,18 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
         } as { [key: string]: { width: number; height: number; offsetX?: number; offsetY?: number; max?: { width: number; height: number } } },
         configuration: {
             facingMode: "user",
-            width: { ideal: 400 },
-            height: { ideal: 300 },
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
         },
     };
 
     face = {
         video: { center: { x: 0, y: 0 }, radius: { x: 0, y: 0 }, margin: { x: 0, y: 0 } },
         real: { center: { x: 0, y: 0 }, radius: { x: 0, y: 0 }, margin: { x: 0, y: 0 } },
-        minHeight: 150,
-        minPixels: 150,
+        minHeight: 80, // Further reduced from 100
+        minPixels: 80, // Further reduced from 100
         successPosition: 0,
-        threshold: 0.25,
+        threshold: 0.1, // Further reduced from 0.15 (even more forgiving)
     };
 
     response = {
@@ -97,9 +97,7 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
     dataType: string = "passwords";
     dataTitle: string = "Password";
     wallet!: Wallet;
-    hasMasterPassword!: boolean;
     shareables!: any;
-    useMasterPassword: boolean = false;
     passwordId: string = "";
 
     // Make Math and Date available in template
@@ -131,8 +129,8 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
         // Initialize ZelfKey session
         this.initZelfKeySession();
 
-        // Initialize biometric verification
-        this._initializeBiometrics();
+        // Wait for decryption data from background script before starting camera
+        this._waitForDecryptionData();
     }
 
     private async _setWallet(): Promise<any> {
@@ -145,7 +143,6 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
 
         this.shareables.wallet = wallet;
         this.wallet = this.shareables.wallet;
-        this.hasMasterPassword = wallet.hasPassword || false;
 
         this._changeDetectorRef.detectChanges();
     }
@@ -172,6 +169,38 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
         }
     }
 
+    /**
+     * Wait for decryption data from background script before starting camera
+     */
+    private _waitForDecryptionData(): void {
+        // Check if we already have data
+        if (this.passwordId && this.passwordData.publicData?.zelfProof) {
+            console.log("PasswordDecryptor: Decryption data already available, starting camera");
+            this._initializeBiometrics();
+            return;
+        }
+
+        // Subscribe to decryption data changes
+        this.popoutCommunicationService.decryptionData$.pipe(takeUntil(this.unsubscriber$)).subscribe((data) => {
+            if (data) {
+                console.log("PasswordDecryptor: Received decryption data from background script:", data);
+                this.passwordId = data.passwordId;
+                this.passwordData = {
+                    publicData: data.publicData,
+                    masterPassword: data.masterPassword,
+                };
+
+                // Set master password if available
+                if (this.passwordData.masterPassword) {
+                    this.masterPassword = this.passwordData.masterPassword;
+                }
+
+                // Now start the camera
+                this._initializeBiometrics();
+            }
+        });
+    }
+
     ngOnDestroy(): void {
         // Clear intervals
         if (this._intervals.detectFace) {
@@ -194,14 +223,20 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
     }
 
     async initZelfKeySession(): Promise<void> {
+        console.log("PasswordDecryptor: Initializing ZelfKey session...");
+
         // The wallet service now caches the JWT token
         await this._walletService.initZelfKeySession();
 
         // Get the cached token
         const jwt = await this._walletService.getZelfKeyJWT();
+        console.log("PasswordDecryptor: JWT token from wallet service:", jwt ? "Present" : "Missing");
 
         if (jwt) {
             this.apiKeysSessionJWT = jwt;
+            console.log("PasswordDecryptor: JWT token set successfully");
+        } else {
+            console.error("PasswordDecryptor: No JWT token available!");
         }
     }
 
@@ -238,6 +273,11 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
         // Send result back to background script
         this.sendDecryptionResultToBackground(result);
 
+        // Close the popup after a short delay to ensure message is sent
+        setTimeout(() => {
+            this.closePopup();
+        }, 100);
+
         this.biometricsCancel.emit();
     }
 
@@ -265,16 +305,6 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
         }
     }
 
-    /**
-     * Toggle master password input visibility
-     */
-    toggleMasterPassword(): void {
-        this.useMasterPassword = !this.useMasterPassword;
-        if (!this.useMasterPassword) {
-            this.masterPassword = ""; // Clear password when toggling off
-        }
-    }
-
     private async _initializeBiometrics(): Promise<void> {
         try {
             // Always wait for the wallet service to load the models
@@ -292,19 +322,24 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
     }
 
     private async _setMaxVideoDimensions(): Promise<void> {
-        const maxWidth = 400;
-        const maxHeight = 300;
+        // For popup mode, use the exact popup dimensions (375x600)
+        const popupWidth = 375;
+        const popupHeight = 600;
 
-        // Set initial video dimensions
-        this.camera.dimensions.video.width = maxWidth;
-        this.camera.dimensions.video.height = maxHeight;
+        // Use full popup dimensions since camera container fills entire height
+        const viewportWidth = popupWidth; // Full width
+        const viewportHeight = popupHeight; // Full height
 
-        // Set result dimensions
-        this.camera.dimensions.result.width = maxWidth;
-        this.camera.dimensions.result.height = maxHeight;
+        // Set viewport dimensions (what we display)
+        this.camera.dimensions.video.width = viewportWidth;
+        this.camera.dimensions.video.height = viewportHeight;
 
-        // Initialize face dimensions
-        this.face.video = this._getCenterAndRadius(maxHeight, maxWidth);
+        // Set result dimensions (for processing)
+        this.camera.dimensions.result.width = viewportWidth;
+        this.camera.dimensions.result.height = viewportHeight;
+
+        // Initialize face dimensions based on viewport
+        this.face.video = this._getCenterAndRadius(viewportHeight, viewportWidth);
 
         this._changeDetectorRef.markForCheck();
     }
@@ -343,16 +378,23 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
     };
 
     private _setVideoDimensions(videoElement: HTMLVideoElement) {
-        const actualWidth = videoElement.clientWidth;
-        const actualHeight = videoElement.clientHeight;
+        // Force the video to fill the entire container
+        const containerWidth = 375; // Popup width
+        const containerHeight = 600; // Full popup height
 
-        this.camera.dimensions.video.height = actualHeight;
-        this.camera.dimensions.video.width = actualWidth;
+        // Set the video element dimensions directly
+        videoElement.style.width = `${containerWidth}px`;
+        videoElement.style.height = `${containerHeight}px`;
+        videoElement.style.objectFit = "cover";
+        videoElement.style.objectPosition = "center";
+
+        this.camera.dimensions.video.height = containerHeight;
+        this.camera.dimensions.video.width = containerWidth;
         this.camera.dimensions.result = { height: 0, width: 0, offsetX: 0, offsetY: 0 };
 
-        this._setResultDimensions("result", actualHeight, actualWidth);
+        this._setResultDimensions("result", containerHeight, containerWidth);
 
-        this.face.video = this._getCenterAndRadius(actualHeight, actualWidth);
+        this.face.video = this._getCenterAndRadius(containerHeight, containerWidth);
 
         const maskResultCanvas = this.maskResultCanvasRef?.nativeElement;
 
@@ -381,7 +423,7 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
         margin.x = margin.y * 0.8;
 
         const radius = {
-            y: height * 0.42,
+            y: height * 0.35, // Reduced from 0.42 (smaller oval)
             x: 0,
         };
 
@@ -547,8 +589,8 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
                     this.face.successPosition = 0;
                 }
 
-                if (this.face.successPosition > 2) {
-                    // Capture after 3 successful frames
+                if (this.face.successPosition > 0) {
+                    // Capture after 1 successful frame (very responsive)
                     this.face.successPosition = 0;
                     this._takePicture.next(); // Trigger image capture
                     clearInterval(this._intervals.detectFace); // Stop detection after capture
@@ -626,16 +668,25 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
 
     private async _retrievePasswordData(faceBase64: string): Promise<any> {
         try {
+            console.log("PasswordDecryptor: Starting password retrieval...");
+            console.log("PasswordDecryptor: Password data:", this.passwordData);
+            console.log("PasswordDecryptor: JWT token:", this.apiKeysSessionJWT ? "Present" : "Missing");
+
             // For retrieve mode, we need zelfProof and optional password
             if (!this.passwordData.publicData?.zelfProof) {
                 throw new Error(`No zelfProof available for password decryption.`);
             }
 
+            // Extract base64 data without the data URL prefix (like data-biometrics does)
+            const base64Data = faceBase64.includes(",") ? faceBase64.split(",")[1] : faceBase64;
+
             const retrievePayload = {
                 zelfProof: this.passwordData.publicData.zelfProof,
-                faceBase64: faceBase64,
-                ...(this.useMasterPassword && this.masterPassword && { password: this.masterPassword }),
+                faceBase64: base64Data,
+                ...(this.masterPassword && { password: this.masterPassword }), // Optional password
             };
+
+            console.log("PasswordDecryptor: Retrieve payload:", retrievePayload);
 
             // Call the retrieve endpoint
             const response = await this._httpWrapperService.sendRequest("post", `${environment.keysApiUrl}/api/zelf-key/retrieve`, retrievePayload, {
@@ -663,6 +714,11 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
 
                 // Send result back to background script
                 this.sendDecryptionResultToBackground(result);
+
+                // Close the popup after a short delay to ensure message is sent
+                setTimeout(() => {
+                    this.closePopup();
+                }, 100);
 
                 // Emit success with retrieved data
                 this.biometricsSuccess.emit({
@@ -715,6 +771,31 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
 
     onBack(): void {
         this.onBiometricsCancel();
+    }
+
+    /**
+     * Close the popup window
+     */
+    private closePopup(): void {
+        try {
+            if (typeof chrome !== "undefined" && chrome.windows) {
+                // Get the current window and close it
+                chrome.windows.getCurrent((window) => {
+                    if (window && window.id) {
+                        chrome.windows.remove(window.id);
+                    }
+                });
+            } else if (typeof window !== "undefined") {
+                // Fallback: close the current window
+                window.close();
+            }
+        } catch (error) {
+            console.warn("Error closing popup:", error);
+            // Fallback: try to close the window
+            if (typeof window !== "undefined") {
+                window.close();
+            }
+        }
     }
 
     /**

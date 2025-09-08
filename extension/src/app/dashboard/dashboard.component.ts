@@ -50,9 +50,15 @@ export class DashboardComponent implements OnInit {
     async navigateToTab(tab: string): Promise<void> {
         this.activeTab = tab;
 
+        console.log("DashboardComponent: Navigating to tab:", tab);
+        console.log("DashboardComponent: Is extension:", this.chromeService.isExtension);
+        console.log("DashboardComponent: Is popout:", this.chromeService.isPopout);
+        console.log("DashboardComponent: Is side panel:", this.chromeService.isSidePanel);
+
         // Check if we're navigating to the password-decryptor route
         // If so, don't open fullscreen - stay in popup mode
         if (tab === "passwords/decrypt") {
+            console.log("DashboardComponent: Decrypt route detected - staying in popup mode");
             // Navigate normally without opening fullscreen
             this.router.navigate(["/dashboard", tab]);
             return;
@@ -63,10 +69,12 @@ export class DashboardComponent implements OnInit {
         if (this.chromeService.isExtension) {
             // Check if we're currently in a popup or side panel
             if (this.chromeService.isPopout || this.chromeService.isSidePanel) {
+                console.log("DashboardComponent: Opening full page for popup/sidepanel");
                 // Open the specific tab in full page mode
                 await this.chromeService.openFullPage(`dashboard/${tab}`);
                 return;
             } else {
+                console.log("DashboardComponent: Ensuring full screen for tab");
                 // Ensure we're in full screen mode for the current tab
                 await this.chromeService.ensureFullScreen(`dashboard/${tab}`);
                 return;

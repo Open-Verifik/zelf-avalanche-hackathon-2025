@@ -55,6 +55,9 @@ export class AppComponent implements OnInit, OnDestroy {
             this._autofillIntegrationService.testService();
         }
 
+        console.log("AppComponent: Is popout:", this.isPopout);
+        console.log("AppComponent: Current URL:", this._router.url);
+
         // Check if we're in a popup and have pending decryption data
         this.checkForPendingDecryption();
 
@@ -66,12 +69,23 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     private checkForPendingDecryption(): void {
+        console.log("AppComponent: checkForPendingDecryption called");
+        console.log("AppComponent: isPopout:", this.isPopout);
+
         if (this.isPopout) {
             const decryptionData = this._popoutCommunicationService.getDecryptionData();
+            console.log("AppComponent: decryptionData:", decryptionData);
+
             if (decryptionData) {
                 console.log("AppComponent: Found pending decryption data, navigating to decrypt route");
-                this._router.navigate(["/dashboard/passwords/decrypt"]);
+                console.log("AppComponent: Current URL before navigation:", this._router.url);
+                // Use replace instead of navigate to avoid going through the normal route flow
+                this._router.navigateByUrl("/passwords/decrypt", { replaceUrl: true });
+            } else {
+                console.log("AppComponent: No pending decryption data found");
             }
+        } else {
+            console.log("AppComponent: Not in popout mode, skipping decryption check");
         }
     }
 
@@ -90,8 +104,15 @@ export class AppComponent implements OnInit, OnDestroy {
                     const route = message.payload?.route;
                     if (route) {
                         console.log("AppComponent: Received navigation request to:", route);
-                        this._router.navigate([`/dashboard/${route}`]);
+                        this._router.navigate([`/${route}`]);
                     }
+                    sendResponse({ success: true });
+                } else if (message.type === "PASSWORD_DECRYPTOR_DATA") {
+                    console.log("AppComponent: Received decryption data from background script:", message.payload);
+                    // Set the decryption data in the service
+                    this._popoutCommunicationService.setDecryptionData(message.payload);
+                    // Navigate to the decrypt route
+                    this._router.navigateByUrl("/passwords/decrypt", { replaceUrl: true });
                     sendResponse({ success: true });
                 }
                 return true;
