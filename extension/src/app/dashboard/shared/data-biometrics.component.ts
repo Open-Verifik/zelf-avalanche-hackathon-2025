@@ -94,6 +94,10 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 	aspectRatio = 0.75;
 	masterPassword: string = "";
 
+	// Error handling
+	apiError: string = "";
+	hasApiError: boolean = false;
+
 	// Category-specific properties
 	dataType: string = "";
 	dataTitle: string = "";
@@ -294,6 +298,20 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 		if (!this.useMasterPassword) {
 			this.masterPassword = ""; // Clear password when toggling off
 		}
+	}
+
+	/**
+	 * Clear API error and retry
+	 */
+	clearApiError(): void {
+		this.apiError = "";
+		this.hasApiError = false;
+		this.response.isLoading = false;
+		this.response.base64Image = "";
+		this._changeDetectorRef.markForCheck();
+
+		// Restart face detection
+		this._startFaceDetectionInterval();
 	}
 
 	/**
@@ -775,6 +793,10 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 			}
 		} catch (error) {
 			console.error("Error in biometric capture:", error);
+			// Reset loading state
+			this.response.isLoading = false;
+			this.response.base64Image = "";
+			this._changeDetectorRef.markForCheck();
 			this.error.emit(error);
 		}
 	}
@@ -880,9 +902,36 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 
 			// Navigate to result page based on category
 			await this._navigateToResult(response);
-		} catch (error) {
+		} catch (error: any) {
 			console.error(`Error storing ${this.dataType} data:`, error);
-			this.error.emit(error);
+
+			// Reset loading state
+			this.response.isLoading = false;
+			this._changeDetectorRef.markForCheck();
+
+			// Extract user-friendly error message
+			let errorMessage = `Error storing ${this.dataType}`;
+
+			if (error?.error?.error) {
+				errorMessage = error.error.error;
+			} else if (error?.error?.message) {
+				errorMessage = error.error.message;
+			} else if (error?.message) {
+				errorMessage = error.message;
+			}
+
+			// Set error state for display
+			this.apiError = errorMessage;
+			this.hasApiError = true;
+
+			// Create user-friendly error object
+			const userError = {
+				message: errorMessage,
+				type: "storage_error",
+				originalError: error,
+			};
+
+			this.error.emit(userError);
 		}
 	}
 
@@ -916,10 +965,37 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 			await this._navigateToResult(response);
 
 			return response;
-		} catch (error) {
+		} catch (error: any) {
 			console.error(`Error retrieving ${this.dataType} data:`, error);
-			this.error.emit(error);
-			throw error;
+
+			// Reset loading state
+			this.response.isLoading = false;
+			this._changeDetectorRef.markForCheck();
+
+			// Extract user-friendly error message
+			let errorMessage = `Error retrieving ${this.dataType}`;
+
+			if (error?.error?.error) {
+				errorMessage = error.error.error;
+			} else if (error?.error?.message) {
+				errorMessage = error.error.message;
+			} else if (error?.message) {
+				errorMessage = error.message;
+			}
+
+			// Set error state for display
+			this.apiError = errorMessage;
+			this.hasApiError = true;
+
+			// Create user-friendly error object
+			const userError = {
+				message: errorMessage,
+				type: "retrieval_error",
+				originalError: error,
+			};
+
+			this.error.emit(userError);
+			throw userError;
 		}
 	}
 

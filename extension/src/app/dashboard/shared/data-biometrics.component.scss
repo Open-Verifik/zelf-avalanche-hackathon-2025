@@ -163,6 +163,75 @@
 			}
 		}
 
+		.api-error-container {
+			text-align: center;
+			padding: 40px 20px;
+
+			.api-error-card {
+				background: #fff5f5;
+				border: 2px solid #fed7d7;
+				border-radius: 16px;
+				padding: 32px;
+				max-width: 400px;
+				margin: 0 auto;
+
+				.error-icon {
+					font-size: 48px;
+					margin-bottom: 16px;
+				}
+
+				.error-title {
+					font-size: 20px;
+					font-weight: 600;
+					color: #c53030;
+					margin: 0 0 12px 0;
+				}
+
+				.error-message {
+					font-size: 16px;
+					color: #744210;
+					margin: 0 0 24px 0;
+					line-height: 1.5;
+				}
+
+				.error-actions {
+					display: flex;
+					gap: 12px;
+					justify-content: center;
+
+					.btn-retry,
+					.btn-back-error {
+						padding: 12px 24px;
+						border: none;
+						border-radius: 8px;
+						font-size: 14px;
+						font-weight: 500;
+						cursor: pointer;
+						transition: all 0.2s ease;
+					}
+
+					.btn-retry {
+						background: #667eea;
+						color: white;
+
+						&:hover {
+							background: #5a67d8;
+						}
+					}
+
+					.btn-back-error {
+						background: #f7fafc;
+						color: #4a5568;
+						border: 1px solid #e2e8f0;
+
+						&:hover {
+							background: #edf2f7;
+						}
+					}
+				}
+			}
+		}
+
 		.loading-container {
 			text-align: center;
 			padding: 60px 20px;

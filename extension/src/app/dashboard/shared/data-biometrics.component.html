@@ -1,5 +1,5 @@
 <div class="data-biometrics-container">
-	<div class="biometrics-header">
+	<!-- <div class="biometrics-header">
 		<button class="btn-back" (click)="onBack()">
 			<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
 				<path d="M15 10H5M5 10L10 15M5 10L10 5" stroke="#171717" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
@@ -8,11 +8,11 @@
 		</button>
 
 		<h1 class="biometrics-title">{{ isDecryptMode ? "Verify Identity to Decrypt" : "Biometric Verification" }}</h1>
-	</div>
+	</div> -->
 
 	<div class="biometrics-content" fxLayout="column" fxLayoutAlign="center center">
 		<div
-			*ngIf="!camera.isLoading && camera.hasPermissions && !camera.isLowQuality"
+			*ngIf="!camera.isLoading && camera.hasPermissions && !camera.isLowQuality && !hasApiError && !response.isLoading"
 			class="camera-container"
 			fxLayout="column"
 			fxLayoutAlign="center center"
@@ -74,14 +74,14 @@
 			</div>
 		</div>
 
-		<!-- Liveness Detection Controls - Moved Outside Camera Container -->
-		<div class="liveness-controls" *ngIf="!livenessDetection.isActive">
+		<!-- Liveness Detection Controls - Only show when camera is active and no errors -->
+		<div class="liveness-controls" *ngIf="!livenessDetection.isActive && !hasApiError && !response.isLoading">
 			<button class="btn-liveness" (click)="startLivenessDetection()">🔄 Start Active Liveness Detection</button>
 			<small>For enhanced security, move your face to different angles</small>
 		</div>
 
-		<!-- Liveness Detection Progress - Moved Outside Camera Container -->
-		<div class="liveness-progress" *ngIf="livenessDetection.isActive">
+		<!-- Liveness Detection Progress - Only show when active and no errors -->
+		<div class="liveness-progress" *ngIf="livenessDetection.isActive && !hasApiError && !response.isLoading">
 			<h3>Active Liveness Detection</h3>
 			<div class="liveness-steps">
 				<div
@@ -120,8 +120,8 @@
 			</div>
 		</div>
 
-		<!-- Optional Master Password Input - Moved Outside Camera Container -->
-		<div class="password-input-container">
+		<!-- Optional Master Password Input - Only show when camera is active and no errors -->
+		<div class="password-input-container" *ngIf="!hasApiError && !response.isLoading">
 			<div class="password-toggle">
 				<label class="form-label">Add Master Password (Optional)</label>
 				<div class="toggle-switch" (click)="toggleMasterPassword()">
@@ -141,18 +141,41 @@
 			</div>
 		</div>
 
-		<div class="loading-container" fxLayout="column" fxLayoutAlign="center center" *ngIf="response.base64Image || camera.isLoading">
+		<!-- API Error Display -->
+		<div class="api-error-container" fxLayout="column" fxLayoutAlign="center center" *ngIf="hasApiError && !response.isLoading">
+			<div class="api-error-card">
+				<div class="error-icon">⚠️</div>
+				<h3 class="error-title">Authentication Failed</h3>
+				<p class="error-message">{{ apiError }}</p>
+				<div class="error-actions">
+					<button class="btn-retry" (click)="clearApiError()">Try Again</button>
+					<button class="btn-back-error" (click)="onBack()">Go Back</button>
+				</div>
+			</div>
+		</div>
+
+		<div
+			class="loading-container"
+			fxLayout="column"
+			fxLayoutAlign="center center"
+			*ngIf="(response.base64Image || camera.isLoading) && !hasApiError"
+		>
 			<zelf-loader [diameter]="120"></zelf-loader>
 			<div *ngIf="response.isLoading" class="processing-message">Processing your biometric data...</div>
 		</div>
 
-		<div class="error-container" fxLayout="column" fxLayoutAlign="center center" *ngIf="!camera.isLoading && camera.isLowQuality">
+		<div class="error-container" fxLayout="column" fxLayoutAlign="center center" *ngIf="!camera.isLoading && camera.isLowQuality && !hasApiError">
 			<img src="https://cdn.verifik.co/demo/nocameraenabled.svg" alt="Camera Error" class="camera-error-image" />
 			<h2 class="error-title">Camera not available</h2>
 			<p class="error-description">Please ensure your camera is enabled and accessible for biometric verification</p>
 		</div>
 
-		<div class="permission-container" fxLayout="column" fxLayoutAlign="center center" *ngIf="!camera.isLoading && !camera.hasPermissions">
+		<div
+			class="permission-container"
+			fxLayout="column"
+			fxLayoutAlign="center center"
+			*ngIf="!camera.isLoading && !camera.hasPermissions && !hasApiError"
+		>
 			<div class="permission-icon">📷</div>
 			<h2 class="permission-title">Camera Permission Required</h2>
 			<p class="permission-description">Please allow camera access to continue with biometric verification</p>
