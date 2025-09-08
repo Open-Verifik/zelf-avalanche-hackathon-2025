@@ -96,6 +96,7 @@ const configuration = {
 		demoMultiplier: 0.005, // 0.5% of original price for demo mode (max $0.049 for $9.99)
 	},
 	avalanche: {
+		createNFT: process.env.AVALANCHE_CREATE_NFT === "true",
 		rpcUrl:
 			process.env.AVALANCHE_RPC_URL ||
 			"https://wild-bitter-meadow.avalanche-mainnet.quiknode.pro/e2565749ca44c2873fe2a0a747f5ac68ae7eb14f/ext/bc/C/rpc/",

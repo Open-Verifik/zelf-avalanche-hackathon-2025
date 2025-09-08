@@ -1,6 +1,7 @@
 import * as ZelfProofModule from "../../ZelfProof/modules/zelf-proof.module.js";
 import * as pinata from "../../IPFS/modules/pinata.js";
 import { createNFT } from "../../../Avalanche/modules/avax-nft.module.js";
+import config from "../../../Core/config.js";
 
 /**
  * ZelfKey Module - Password Manager functionality similar to LastPass
@@ -129,16 +130,18 @@ const storePassword = async (data, authToken) => {
 			console.warn("⚠️ Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
 		}
 
-		const NFT = await createNFT(
-			{
-				zelfQR,
-				url: qrCodeIPFS.url,
-				name: identifier,
-				publicData,
-				zelfProof,
-			},
-			authToken
-		);
+		const NFT = config.avalanche.createNFT
+			? await createNFT(
+					{
+						zelfQR,
+						url: qrCodeIPFS.url,
+						name: identifier,
+						publicData,
+						zelfProof,
+					},
+					authToken
+			  )
+			: null;
 
 		const result = {
 			success: true,
@@ -220,16 +223,18 @@ const storeNotes = async (data, authToken) => {
 			}
 		}
 
-		const NFT = await createNFT(
-			{
-				zelfQR,
-				url: qrCodeIPFS.url,
-				name: identifier,
-				publicData,
-				zelfProof,
-			},
-			authToken
-		);
+		const NFT = config.avalanche.createNFT
+			? await createNFT(
+					{
+						zelfQR,
+						url: qrCodeIPFS.url,
+						name: identifier,
+						publicData,
+						zelfProof,
+					},
+					authToken
+			  )
+			: null;
 
 		return {
 			success: true,
@@ -327,16 +332,18 @@ const storeCreditCard = async (data, authToken) => {
 			}
 		}
 
-		const NFT = await createNFT(
-			{
-				zelfQR,
-				url: qrCodeIPFS.url,
-				name: identifier,
-				publicData,
-				zelfProof,
-			},
-			authToken
-		);
+		const NFT = config.avalanche.createNFT
+			? await createNFT(
+					{
+						zelfQR,
+						url: qrCodeIPFS.url,
+						name: identifier,
+						publicData,
+						zelfProof,
+					},
+					authToken
+			  )
+			: null;
 
 		const result = {
 			success: true,
