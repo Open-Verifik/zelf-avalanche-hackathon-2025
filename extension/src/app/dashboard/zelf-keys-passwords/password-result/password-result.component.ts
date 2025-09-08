@@ -82,10 +82,10 @@ export class PasswordResultComponent implements OnInit {
 	}
 
 	getResultStatus(): "success" | "error" | "unknown" {
-		if (this.apiResult.error || this.apiResult.status === "error") {
+		if (this.apiResult.error) {
 			return "error";
 		}
-		if (this.apiResult.status === "success" || this.apiResult.data) {
+		if (this.apiResult.success === true) {
 			return "success";
 		}
 		return "unknown";

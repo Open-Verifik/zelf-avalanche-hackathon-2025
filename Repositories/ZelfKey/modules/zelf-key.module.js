@@ -375,10 +375,10 @@ const storeCreditCard = async (data, authToken) => {
  */
 const storeData = async (data, authToken) => {
 	try {
-		const { type, payload, faceBase64, password, zelfProof, masterPassword } = data;
+		const { type, faceBase64, zelfProof, masterPassword } = data;
 
 		// Validate required fields
-		if (!type || !faceBase64 || !password) {
+		if (!type || !faceBase64) {
 			throw new Error("Missing required fields: type, payload, faceBase64, password");
 		}
 
@@ -388,6 +388,9 @@ const storeData = async (data, authToken) => {
 		let result;
 		switch (type) {
 			case "password":
+				// validate if includes password
+				if (!data.password) throw new Error("Missing required fields: password");
+
 				result = await storePassword(data, authToken);
 				break;
 

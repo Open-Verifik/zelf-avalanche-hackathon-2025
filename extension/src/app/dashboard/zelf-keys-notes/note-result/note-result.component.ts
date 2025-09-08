@@ -14,6 +14,7 @@ import { DataPassingService, ApiResult } from "../../../services/data-passing.se
 })
 export class NoteResultComponent implements OnInit {
 	apiResult: any = null;
+	noteData: any = null;
 	loading = false;
 	error: string | null = null;
 	showDebug = false;
@@ -43,9 +44,46 @@ export class NoteResultComponent implements OnInit {
 	}
 
 	getResultStatus(): "success" | "error" | "unknown" {
-		if (this.error) return "error";
-		if (this.apiResult?.success) return "success";
+		if (this.error || this.apiResult?.error) {
+			return "error";
+		}
+		if (this.apiResult?.success === true) {
+			return "success";
+		}
 		return "unknown";
+	}
+
+	getStatusIcon(): string {
+		switch (this.getResultStatus()) {
+			case "success":
+				return "✅";
+			case "error":
+				return "❌";
+			default:
+				return "❓";
+		}
+	}
+
+	getStatusTitle(): string {
+		switch (this.getResultStatus()) {
+			case "success":
+				return "Note Stored Successfully!";
+			case "error":
+				return "Error Storing Note";
+			default:
+				return "Unknown Status";
+		}
+	}
+
+	getStatusMessage(): string {
+		switch (this.getResultStatus()) {
+			case "success":
+				return "Your note has been securely stored and encrypted with blockchain verification.";
+			case "error":
+				return this.error || "An error occurred while storing your note.";
+			default:
+				return "The system couldn't determine the storage status.";
+		}
 	}
 
 	toggleDebugView(): void {
