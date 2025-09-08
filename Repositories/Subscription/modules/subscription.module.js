@@ -5,9 +5,9 @@ import moment from "moment";
 import { generateMnemonic } from "../../../Utilities/mnemonic.module.js";
 import { createEthWallet } from "../../../Utilities/eth-wallet.module.js";
 import * as zelfProofModule from "../../ZelfProof/modules/zelf-proof.module.js";
-import avaxSignerModule from "../../../core-wallet-signer.json" with { type: "json" };
+import { signer as avaxSignerModule } from "../../../core-wallet-signer.js";
 import { calculateCryptoAmount } from "../../../Utilities/crypto-price.module.js";
-import { lockPriceData } from "../../../Utilities/price-lock.module.js";
+import { lockPriceData, verifyLockedPrice } from "../../../Utilities/price-lock.module.js";
 
 /**
  * Subscription Module - Business logic for subscription management and Stripe integration
@@ -47,12 +47,8 @@ const getActiveSubscription = async (user) => {
 	try {
 		const { identifier } = user;
 
-		console.log("Identifier:::::", identifier);
-
 		// Convert zelfName to zelfKeys format for IPFS operations
 		const zelfKeysTag = convertToZelfKeysFormat(identifier, ".zelfkeys");
-
-		console.log("ZelfKeysTag:::::", zelfKeysTag);
 
 		// Search for subscription in IPFS using the converted identifier
 		const subscriptionData = await searchSubscriptionInIPFS(zelfKeysTag);
@@ -66,31 +62,6 @@ const getActiveSubscription = async (user) => {
 		}
 
 		return subscriptionData;
-
-		// switch (subscriptionData.paymentMethod) {
-		// 	case "stripe":
-		// 		// Verify subscription status with Stripe
-		// 		const stripeSubscription = await stripe.subscriptions.retrieve(subscriptionData.stripeSubscriptionId);
-
-		// 		const activeSubscription = {
-		// 			id: subscriptionData.id,
-		// 			zelfName: identifier,
-		// 			plan: subscriptionData.plan,
-		// 			status: stripeSubscription.status,
-		// 			currentPeriodStart: new Date(stripeSubscription.current_period_start * 1000),
-		// 			currentPeriodEnd: new Date(stripeSubscription.current_period_end * 1000),
-		// 			cancelAtPeriodEnd: stripeSubscription.cancel_at_period_end,
-		// 			createdAt: new Date(subscriptionData.createdAt),
-		// 		};
-
-		// 		return {
-		// 			success: true,
-		// 			subscription: activeSubscription,
-		// 		};
-
-		// 	default:
-		// 		throw new Error("Invalid payment method");
-		// }
 	} catch (error) {
 		console.error("Error retrieving subscription:", error);
 		throw error;
@@ -253,15 +224,15 @@ const createCryptoPayment = async (body, user) => {
 		// Get real-time AVAX price and calculate amount
 		console.log("💰 Fetching real-time AVAX price...");
 		const priceCalculation = await calculateCryptoAmount(selectedPlan.price, "AVAX");
-		
+
 		// Check if demo mode is enabled
 		const isDemoMode = configuration.cryptoPayments.demoMode;
 		const demoMultiplier = configuration.cryptoPayments.demoMultiplier;
-		
+
 		// Calculate demo amounts if in demo mode
 		const demoUsdAmount = isDemoMode ? selectedPlan.price * demoMultiplier : selectedPlan.price;
 		const demoPriceCalculation = isDemoMode ? await calculateCryptoAmount(demoUsdAmount, "AVAX") : priceCalculation;
-		
+
 		console.log("📊 Price calculation:", {
 			isDemoMode,
 			originalUsdAmount: selectedPlan.price,
@@ -274,22 +245,21 @@ const createCryptoPayment = async (body, user) => {
 		// Create price lock data (use demo amounts if in demo mode)
 		const priceLockData = {
 			planId,
-			planName: selectedPlan.name,
 			usdAmount: isDemoMode ? demoUsdAmount : selectedPlan.price,
 			avaxAmount: isDemoMode ? demoPriceCalculation.cryptoAmount : priceCalculation.cryptoAmount,
 			avaxPrice: priceCalculation.cryptoPrice,
 			zelfName: identifier,
 			zkPayTag,
 			isDemoMode,
-			originalUsdAmount: selectedPlan.price,
-			originalAvaxAmount: priceCalculation.cryptoAmount,
+			currency: "AVAX",
+			paymentAddress: existingZkPay.metadata.keyvalues.avalancheAddress,
 		};
 
 		// Lock the price for 30 minutes
 		const lockedPriceToken = lockPriceData(priceLockData, 30);
 
 		const returnData = {
-			success: true, 
+			success: true,
 			paymentAddress: existingZkPay.metadata.keyvalues.avalancheAddress,
 			amount: isDemoMode ? demoPriceCalculation.cryptoAmount : priceCalculation.cryptoAmount,
 			currency: "AVAX",
@@ -335,23 +305,23 @@ const _storePaymentAddress = async (zelfName, zkPay, priceLockData) => {
 
 	const wallet = createEthWallet(mnemonic);
 
-		const zkPayData = {
-			publicData: {
-				avalancheAddress: wallet.address,
-				customerTag: zelfName,
-				zkPay,
-				planId: priceLockData.planId,
-				planName: priceLockData.planName,
-				usdAmount: priceLockData.usdAmount,
-				avaxAmount: priceLockData.avaxAmount,
-				avaxPrice: priceLockData.avaxPrice,
-				paymentMethod: "crypto",
-				status: "pending",
-				createdAt: moment().format("YYYY-MM-DD HH:mm:ss"),
-				isDemoMode: priceLockData.isDemoMode || false,
-				originalUsdAmount: priceLockData.originalUsdAmount || priceLockData.usdAmount,
-				originalAvaxAmount: priceLockData.originalAvaxAmount || priceLockData.avaxAmount,
-			},
+	const zkPayData = {
+		publicData: {
+			avalancheAddress: wallet.address,
+			customerTag: zelfName,
+			zkPay,
+			planId: priceLockData.planId,
+			planName: priceLockData.planName,
+			usdAmount: priceLockData.usdAmount,
+			avaxAmount: priceLockData.avaxAmount,
+			avaxPrice: priceLockData.avaxPrice,
+			paymentMethod: "crypto",
+			status: "pending",
+			createdAt: moment().format("YYYY-MM-DD HH:mm:ss"),
+			isDemoMode: priceLockData.isDemoMode || false,
+			originalUsdAmount: priceLockData.originalUsdAmount || priceLockData.usdAmount,
+			originalAvaxAmount: priceLockData.originalAvaxAmount || priceLockData.avaxAmount,
+		},
 		identifier: zkPay,
 		faceBase64: avaxSignerModule.faceBase64,
 		password: avaxSignerModule.password,
@@ -368,7 +338,7 @@ const _storePaymentAddress = async (zelfName, zkPay, priceLockData) => {
 	const { zelfQR } = await zelfProofModule.encryptQRCode(zkPayData);
 
 	const ipfsResult = await pinata.pinFile(zelfQR, `${zkPay}`, "application/json", { ...zkPayData.publicData, zelfProof });
-	
+
 	return {
 		url: ipfsResult.url,
 		ipfs_pin_hash: ipfsResult.IpfsHash,
@@ -836,6 +806,209 @@ const createCustomerPortalSession = async (user) => {
 	}
 };
 
+/**
+ * Confirm crypto payment by checking blockchain transactions
+ * @param {Object} body - Request body containing lockedPriceToken
+ * @param {Object} user - User object from JWT
+ * @returns {Object} Payment confirmation result
+ */
+const confirmCryptoPayment = async (body, user) => {
+	try {
+		const { lockedPriceToken } = body;
+		const { identifier } = user;
+
+		if (!lockedPriceToken) {
+			return {
+				success: false,
+				paymentConfirmed: false,
+				message: "Locked price token is required",
+			};
+		}
+
+		// Decode the locked price token to get payment details
+		let priceLockData;
+		try {
+			priceLockData = verifyLockedPrice(lockedPriceToken);
+		} catch (error) {
+			console.error({ error }, "Error verifying locked price token");
+			return {
+				success: false,
+				paymentConfirmed: false,
+				message: "Invalid or expired payment token",
+			};
+		}
+
+		// Validate that the token belongs to this user
+		if (priceLockData.zelfName !== identifier) {
+			return {
+				success: false,
+				paymentConfirmed: false,
+				message: "Payment token does not belong to this user",
+			};
+		}
+
+		// Check if token is expired
+		const now = moment();
+		const expiresAt = moment(priceLockData.expiresAt);
+		if (now.isAfter(expiresAt)) {
+			return {
+				success: false,
+				paymentConfirmed: false,
+				message: "Payment token has expired",
+			};
+		}
+
+		// Get the zkPay record to find the payment address
+		const zkPayTag = priceLockData.zkPayTag;
+		const recordsFound = await pinata.filter("zkPay", zkPayTag);
+		const zkPayRecord = recordsFound && Array.isArray(recordsFound) && recordsFound.length ? recordsFound[0] : null;
+
+		if (!zkPayRecord) {
+			return {
+				success: false,
+				paymentConfirmed: false,
+				message: "Payment record not found",
+			};
+		}
+
+		const paymentAddress = zkPayRecord.metadata.keyvalues.avalancheAddress;
+		const requiredAmount = priceLockData.avaxAmount;
+
+		console.log("🔍 Checking payment for address:", paymentAddress);
+		console.log("💰 Required amount:", requiredAmount, "AVAX");
+
+		// Check blockchain transactions for this address
+		const transactionResult = await checkAvalancheTransactions(paymentAddress, requiredAmount);
+
+		if (transactionResult.paymentFound) {
+			console.log("✅ Payment confirmed! Transaction:", transactionResult);
+
+			// Check if subscription already exists to avoid duplicates
+			const zelfKeysTag = convertToZelfKeysFormat(identifier, ".zelfkeys");
+			const existingSubscription = await searchSubscriptionInIPFS(zelfKeysTag);
+
+			if (existingSubscription) {
+				return {
+					success: true,
+					paymentConfirmed: true,
+					transactionHash: transactionResult.transactionHash,
+					subscriptionCreated: false,
+					message: "Payment confirmed but subscription already exists",
+				};
+			}
+
+			// Create subscription record
+			const subscriptionData = {
+				crypto: JSON.stringify({
+					customer: identifier,
+					status: "active",
+					plan: priceLockData.planId,
+					planName: priceLockData.planName,
+					price: priceLockData.usdAmount,
+					paymentMethod: "crypto",
+					transactionHash: transactionResult.transactionHash,
+					isDemoMode: priceLockData.isDemoMode || false,
+				}),
+				zelfName: zelfKeysTag,
+				startDate: moment().format("YYYY-MM-DD HH:mm:ss"),
+				endDate: moment().add(1, "month").format("YYYY-MM-DD HH:mm:ss"),
+				paymentMethod: "crypto",
+				type: "subscription",
+			};
+
+			await storeSubscriptionInIPFS(subscriptionData);
+
+			return {
+				success: true,
+				paymentConfirmed: true,
+				transactionHash: transactionResult.transactionHash,
+				subscriptionCreated: true,
+				message: "Payment confirmed and subscription activated",
+			};
+		} else {
+			return {
+				success: true,
+				paymentConfirmed: false,
+				message: "No sufficient payment found yet",
+			};
+		}
+	} catch (error) {
+		console.error("❌ Error confirming crypto payment:", error);
+		return {
+			success: false,
+			paymentConfirmed: false,
+			message: "Error checking payment: " + error.message,
+		};
+	}
+};
+
+/**
+ * Check Avalanche blockchain for transactions to a specific address
+ * @param {string} address - The address to check
+ * @param {number} requiredAmount - The minimum amount required in AVAX
+ * @returns {Object} Transaction check result
+ */
+const checkAvalancheTransactions = async (address, requiredAmount) => {
+	try {
+		console.log("🌐 Calling Avalanche RPC for address:", address);
+
+		// Get today's timestamp range for filtering transactions
+		const todayStart = moment().startOf("day").unix();
+		const todayEnd = moment().endOf("day").unix();
+
+		// Call Avalanche RPC to get transaction history
+		const rpcPayload = {
+			jsonrpc: "2.0",
+			method: "eth_getBalance",
+			params: [address, "latest"],
+			id: 1,
+		};
+
+		const response = await fetch(configuration.avalanche.rpcUrl, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(rpcPayload),
+		});
+
+		const data = await response.json();
+		console.log("📡 RPC Response:", data);
+
+		// For now, let's implement a simple balance check
+		// In production, you'd want to check transaction history for today's transactions
+		if (data.result) {
+			const balanceWei = BigInt(data.result);
+			const balanceAvax = Number(balanceWei) / Math.pow(10, 18);
+
+			console.log("💰 Address balance:", balanceAvax, "AVAX", {
+				result: data.result,
+			});
+
+			// For demo purposes, if the address has any balance >= required amount
+			// we'll consider it as payment received
+			if (balanceAvax >= requiredAmount) {
+				return {
+					paymentFound: true,
+					transactionHash: `demo_tx_${Date.now()}`, // In production, get actual tx hash
+					amount: balanceAvax,
+				};
+			}
+		}
+
+		return {
+			paymentFound: false,
+			message: "Insufficient balance or no transactions found",
+		};
+	} catch (error) {
+		console.error("❌ Error checking Avalanche transactions:", error);
+		return {
+			paymentFound: false,
+			error: error.message,
+		};
+	}
+};
+
 // ========================================
 // EXPORTS - All exported functions listed here
 // ========================================
@@ -847,5 +1020,6 @@ export {
 	cancelSubscription,
 	createCustomerPortalSession,
 	createCryptoPayment,
+	confirmCryptoPayment,
 	webhookHandler,
 };

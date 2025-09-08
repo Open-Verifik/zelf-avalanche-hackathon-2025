@@ -22,4 +22,7 @@ export default (server) => {
 
 	// Create crypto payment for subscription
 	server.post(`${PATH}/crypto-payment`, Middleware.validateUserIdentifier, Controller.createCryptoPayment);
+
+	// Confirm crypto payment by checking blockchain transactions
+	server.post(`${PATH}/confirm-crypto-payment`, Middleware.validateUserIdentifier, Controller.confirmCryptoPayment);
 };

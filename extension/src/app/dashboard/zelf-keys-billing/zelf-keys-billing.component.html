@@ -1,5 +1,5 @@
 <div class="billing-container">
-	<div class="billing-header" *ngIf="!loading && !error && !hasActiveSubscription">
+	<div class="billing-header" *ngIf="!loading && !error && !hasActiveSubscription && !showCryptoPayment">
 		<h1 class="billing-title">Choose Your Plan</h1>
 		<p class="billing-subtitle">Select the plan that best fits your needs</p>
 	</div>
@@ -192,8 +192,12 @@
 					<div *ngIf="cryptoPaymentData?.isDemoMode && cryptoPaymentData?.originalAmount" class="original-amount-info">
 						<div class="original-label">Original Plan Price:</div>
 						<div class="original-values">
-							<span class="original-avax">{{ cryptoPaymentData.originalAmount.avax }} AVAX</span>
-							<span class="original-usd">≈ ${{ cryptoPaymentData.originalAmount.usd }}</span>
+							<span class="original-avax" *ngIf="cryptoPaymentData?.originalAmount"
+								>{{ cryptoPaymentData?.originalAmount?.avax }} AVAX</span
+							>
+							<span class="original-usd" *ngIf="cryptoPaymentData?.originalAmount"
+								>≈ ${{ cryptoPaymentData?.originalAmount?.usd }}</span
+							>
 						</div>
 						<div class="demo-savings">Demo Discount: {{ getDemoDiscount() }}%</div>
 					</div>

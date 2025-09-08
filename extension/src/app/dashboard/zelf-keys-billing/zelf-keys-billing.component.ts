@@ -231,19 +231,32 @@ export class ZelfKeysBillingComponent implements OnInit {
 	 * Check if crypto payment has been confirmed
 	 */
 	private checkPaymentStatus(): void {
-		if (!this.cryptoPaymentData?.zkPay) return;
+		if (!this.cryptoPaymentData?.lockedPriceToken) return;
+
+		console.log("🔍 Checking payment status...");
 
 		this.billingService
-			.checkCryptoPaymentStatus(this.cryptoPaymentData.zkPay.ipfs_pin_hash)
+			.confirmCryptoPayment(this.cryptoPaymentData.lockedPriceToken)
 			.then((response) => {
+				console.log("📡 Payment check response:", response);
+
 				if (response.success && response.paymentConfirmed) {
-					console.log("✅ Payment confirmed!");
+					console.log("✅ Payment confirmed!", response);
 					this.stopPaymentMonitoring();
+
+					// Show success message
+					if (response.subscriptionCreated) {
+						console.log("🎉 Subscription activated!");
+					}
+
+					// Hide crypto payment interface
 					this.showCryptoPayment = false;
 					this.cryptoPaymentData = null;
 
 					// Refresh subscription data
 					this.loadCurrentPlan();
+				} else {
+					console.log("⏳ Payment not confirmed yet:", response.message);
 				}
 			})
 			.catch((error) => {
@@ -265,6 +278,15 @@ export class ZelfKeysBillingComponent implements OnInit {
 	 * Cancel crypto payment and return to plan selection
 	 */
 	cancelCryptoPayment(): void {
+		this.stopPaymentMonitoring();
+		this.showCryptoPayment = false;
+		this.cryptoPaymentData = null;
+	}
+
+	/**
+	 * Go back to plan selection from crypto payment interface
+	 */
+	goBackToPlans(): void {
 		this.stopPaymentMonitoring();
 		this.showCryptoPayment = false;
 		this.cryptoPaymentData = null;

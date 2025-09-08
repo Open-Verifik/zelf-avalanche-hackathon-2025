@@ -46,7 +46,7 @@ const verifyLockedPrice = (token) => {
 
 		return {
 			success: true,
-			data: decoded,
+			...decoded,
 			isValid: true,
 			remainingTime: Math.max(0, Math.floor((expiresAt - now) / 1000)), // seconds remaining
 		};

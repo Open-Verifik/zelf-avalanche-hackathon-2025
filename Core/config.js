@@ -95,6 +95,12 @@ const configuration = {
 		demoMode: process.env.CRYPTO_PAYMENTS_DEMO_MODE === "true" || false,
 		demoMultiplier: 0.005, // 0.5% of original price for demo mode (max $0.049 for $9.99)
 	},
+	avalanche: {
+		rpcUrl:
+			process.env.AVALANCHE_RPC_URL ||
+			"https://wild-bitter-meadow.avalanche-mainnet.quiknode.pro/e2565749ca44c2873fe2a0a747f5ac68ae7eb14f/ext/bc/C/rpc/",
+		chainId: 43114, // Avalanche C-Chain mainnet
+	},
 	stripe: {
 		redirectUrl: process.env.STRIPE_REDIRECTURL || "https://verifik.app",
 		secretKey: process.env.STRIPE_SECRET_KEY,

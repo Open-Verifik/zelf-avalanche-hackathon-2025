@@ -128,6 +128,33 @@ const createCryptoPayment = async (ctx) => {
 };
 
 /**
+ * Confirm crypto payment by checking blockchain transactions
+ * @param {Object} ctx - Koa context
+ */
+const confirmCryptoPayment = async (ctx) => {
+	try {
+		const data = await Module.confirmCryptoPayment(ctx.request.body, ctx.state.user);
+
+		ctx.status = 200;
+		ctx.body = {
+			success: data.success,
+			paymentConfirmed: data.paymentConfirmed,
+			transactionHash: data.transactionHash,
+			subscriptionCreated: data.subscriptionCreated,
+			message: data.message,
+		};
+	} catch (error) {
+		console.error("❌ Error confirming crypto payment:", error);
+		ctx.status = error.status || 500;
+		ctx.body = {
+			success: false,
+			error: error.message,
+			paymentConfirmed: false,
+		};
+	}
+};
+
+/**
  * Stripe webhook handler
  * @param {Object} ctx - Koa context
  */
@@ -159,5 +186,6 @@ export {
 	cancelSubscription,
 	createCustomerPortalSession,
 	createCryptoPayment,
+	confirmCryptoPayment,
 	webhookHandler,
 };

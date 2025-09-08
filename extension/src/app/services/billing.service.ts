@@ -208,6 +208,33 @@ export class BillingService {
 	}
 
 	/**
+	 * Confirm crypto payment by checking blockchain transactions
+	 * @param lockedPriceToken - The JWT token containing payment details
+	 * @returns Promise with payment confirmation result
+	 */
+	async confirmCryptoPayment(lockedPriceToken: string): Promise<{
+		success: boolean;
+		paymentConfirmed: boolean;
+		transactionHash?: string;
+		subscriptionCreated?: boolean;
+		message?: string;
+	}> {
+		const apiKeysSessionJWT = this._walletService.getZelfKeyJWT();
+		return this._httpWrapper.sendRequest(
+			"post",
+			`${this.baseUrl}/api/subscription/confirm-crypto-payment`,
+			{
+				lockedPriceToken: lockedPriceToken,
+			},
+			{
+				headers: {
+					Authorization: `Bearer ${apiKeysSessionJWT}`,
+				},
+			}
+		);
+	}
+
+	/**
 	 * Transform API plans to pricing plans with additional UI properties
 	 * @param apiPlans - Plans from the API
 	 * @returns Transformed pricing plans
