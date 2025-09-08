@@ -52,15 +52,8 @@
 			</div>
 
 			<!-- Master Password Section -->
-			<div class="form-section">
-				<div class="password-toggle">
-					<label class="form-label">Add Master Password (Optional)</label>
-					<div class="toggle-switch" (click)="toggleMasterPassword()">
-						<div class="toggle-slider" [class.active]="noteData.useMasterPassword"></div>
-					</div>
-				</div>
-
-				<div *ngIf="noteData.useMasterPassword" class="password-input-field">
+			<div class="form-section" *ngIf="hasMasterPassword">
+				<div class="password-input-field">
 					<input
 						type="password"
 						id="masterPassword"
@@ -68,10 +61,11 @@
 						[(ngModel)]="noteData.masterPassword"
 						(ngModelChange)="checkFormValidity()"
 						class="form-input"
-						placeholder="Enter your master password (optional)"
+						placeholder="Enter your master password"
 					/>
 					<small class="form-hint"
-						>Adding a master password provides additional security layer. Biometric verification is always required.</small
+						>We require the {{ wallet.name }} password to encrypt and store your credentials. Biometric verification is always
+						required.</small
 					>
 				</div>
 			</div>

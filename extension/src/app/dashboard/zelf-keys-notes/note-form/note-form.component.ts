@@ -1,4 +1,4 @@
-import { Component, OnInit } from "@angular/core";
+import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TranslocoModule } from "@jsverse/transloco";
 import { RouterModule, Router, ActivatedRoute } from "@angular/router";
@@ -6,6 +6,8 @@ import { FormsModule } from "@angular/forms";
 import { ChromeService } from "../../../chrome.service";
 import { DataPassingService } from "../../../services/data-passing.service";
 import { DataBiometricsComponent } from "../../shared/data-biometrics.component";
+import { WalletService } from "app/wallet.service";
+import { Wallet } from "app/wallet";
 
 @Component({
 	selector: "app-note-form",
@@ -43,12 +45,17 @@ Next Steps:
 	formValid = false;
 	showBiometrics = false;
 	transformedNoteData: any = null;
+	wallet!: Wallet;
+	hasMasterPassword = false;
+	shareables: any = {};
 
 	constructor(
 		private router: Router,
 		private route: ActivatedRoute,
 		private chromeService: ChromeService,
-		private dataPassingService: DataPassingService
+		private dataPassingService: DataPassingService,
+		private _walletService: WalletService,
+		private _changeDetectorRef: ChangeDetectorRef
 	) {}
 
 	async ngOnInit(): Promise<void> {
@@ -62,6 +69,29 @@ Next Steps:
 		// TODO: Add edit route like "notes/edit/:id" for editing existing notes
 		this.isNewNote = true;
 
+		await this._setWallet();
+
+		this.checkFormValidity();
+	}
+
+	private async _setWallet(): Promise<any> {
+		const wallet = await this._walletService.getFirstWalletFromStorage();
+
+		if (!wallet?.name) {
+			this.router.navigate(["/welcome"]);
+
+			return;
+		}
+
+		this.shareables.wallet = wallet;
+
+		this.wallet = this.shareables.wallet;
+
+		console.log("wallet", wallet);
+
+		this.hasMasterPassword = wallet.hasPassword || false;
+
+		this._changeDetectorRef.detectChanges();
 		this.checkFormValidity();
 	}
 
@@ -81,15 +111,17 @@ Next Steps:
 		const hasTitle = !!this.noteData.title.trim();
 		const hasContent = !!this.noteData.content.trim();
 
-		// Master password is optional - only validate if user chose to use it
-		const hasValidMasterPassword = !this.noteData.useMasterPassword || (this.noteData.useMasterPassword && !!this.noteData.masterPassword.trim());
-
 		// Backend validation requirements:
 		// - title: required, minLength: 1, maxLength: 100
 		// - content: required, minLength: 1
 		// - masterPassword: optional (only if user enables it)
+		// Master password is only required if the wallet has a password
+		// Master password is optional - only validate if user chose to use it
+		const hasMasterPassword = !!this.noteData.masterPassword;
 
-		this.formValid = hasTitle && hasContent && hasValidMasterPassword;
+		const masterPasswordValid = this.hasMasterPassword ? hasMasterPassword : true;
+
+		this.formValid = hasTitle && hasContent && masterPasswordValid;
 	}
 
 	onCancel(): void {
