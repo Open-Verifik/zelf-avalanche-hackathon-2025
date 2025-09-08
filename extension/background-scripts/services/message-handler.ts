@@ -104,6 +104,28 @@ export class MessageHandler {
         }
     }
 
+    /**
+     * Handle close popup request
+     */
+    private async handleClosePopup(payload: any, sender: any): Promise<void> {
+        try {
+            console.log("MessageHandler: Handling close popup request...");
+
+            // Send a message to the popup to close itself
+            if (typeof chrome !== "undefined" && chrome.runtime) {
+                chrome.runtime.sendMessage({
+                    type: "CLOSE_POPUP",
+                    payload: {},
+                });
+                console.log("MessageHandler: Sent close popup message to popup");
+            } else {
+                console.warn("MessageHandler: Chrome runtime not available for sending close message");
+            }
+        } catch (error) {
+            console.error("MessageHandler: Error closing popup:", error);
+        }
+    }
+
     async handleAutofillMessage(message: any, sender: any, sendResponse: (response: any) => void) {
         try {
             switch (message.type) {
@@ -131,6 +153,10 @@ export class MessageHandler {
                     break;
                 case "DECRYPTION_RESULT_FROM_POPOUT":
                     await this.handleDecryptionResultFromPopout(message.payload, sender);
+                    sendResponse({ success: true });
+                    break;
+                case "CLOSE_POPUP":
+                    await this.handleClosePopup(message.payload, sender);
                     sendResponse({ success: true });
                     break;
                 default:
@@ -244,21 +270,30 @@ export class MessageHandler {
 
     private async handleDecryptionResultFromPopout(payload: any, sender: any) {
         try {
+            console.log("MessageHandler: Handling decryption result from popout...");
+            console.log("MessageHandler: Payload:", payload);
+            console.log("MessageHandler: Pending requests:", this.pendingDecryptionRequests);
+
             // Get the original sender tab ID
             const originalTabId = this.pendingDecryptionRequests?.get(payload.passwordId);
+            console.log("MessageHandler: Original tab ID:", originalTabId);
 
             if (originalTabId) {
                 // Send the result back to the content script
                 const tabs = this.browserApi.tabs;
                 if (tabs) {
+                    console.log("MessageHandler: Sending decryption result to tab:", originalTabId);
                     await (tabs as any).sendMessage(originalTabId, {
                         type: "DECRYPTION_RESULT",
                         payload: payload.result,
                     });
+                    console.log("MessageHandler: Decryption result sent successfully");
                 }
 
                 // Clean up
                 this.pendingDecryptionRequests?.delete(payload.passwordId);
+            } else {
+                console.error("MessageHandler: No original tab ID found for password:", payload.passwordId);
             }
         } catch (error) {
             console.error("Error handling decryption result from popout:", error);

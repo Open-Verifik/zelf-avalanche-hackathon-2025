@@ -7,6 +7,7 @@ export class UIOverlay {
     private icons: Map<HTMLInputElement, ZelfKeyIcon> = new Map();
     private currentMenu: HTMLElement | null = null;
     private currentField: FormField | null = null;
+    private currentFieldType: "username" | "email" | "password" | null = null;
 
     constructor() {
         this.passwordManager = new PasswordManager();
@@ -226,6 +227,7 @@ export class UIOverlay {
 
     private async handleIconClick(field: FormField): Promise<void> {
         this.currentField = field;
+        this.currentFieldType = field.type;
         this.hideMenu();
 
         // Extract hostname from current URL
@@ -493,6 +495,7 @@ export class UIOverlay {
                             website: password.publicData.website,
                         },
                         fieldId: this.currentField?.element.id,
+                        fieldType: this.currentFieldType,
                     },
                 });
 
@@ -531,6 +534,7 @@ export class UIOverlay {
                                 website: password.publicData.website,
                             },
                             fieldId: this.currentField?.element.id,
+                            fieldType: this.currentFieldType,
                         },
                     });
 
@@ -557,7 +561,9 @@ export class UIOverlay {
         // Listen for messages from background script about decryption results
         if (typeof chrome !== "undefined" && chrome.runtime) {
             chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+                console.log("UIOverlay: Received message:", message);
                 if (message.type === "DECRYPTION_RESULT") {
+                    console.log("UIOverlay: Handling decryption result:", message.payload);
                     this.handleDecryptionResult(message.payload);
                     sendResponse({ success: true });
                 }
@@ -567,30 +573,101 @@ export class UIOverlay {
     }
 
     private handleDecryptionResult(result: any): void {
+        console.log("UIOverlay: handleDecryptionResult called");
+        console.log("UIOverlay: result.success:", result.success);
+        console.log("UIOverlay: result.data:", result.data);
+        console.log("UIOverlay: this.currentField:", this.currentField);
+        console.log("UIOverlay: this.currentFieldType:", this.currentFieldType);
+
         if (result.success && result.data && this.currentField) {
+            console.log("UIOverlay: All conditions met, calling fillField");
             // Fill the field with the decrypted data
             this.fillField(this.currentField, result.data);
         } else if (!result.success) {
             console.error("Decryption failed:", result.error);
             // Could show an error message to the user
+        } else {
+            console.error("UIOverlay: Missing required data for form filling:");
+            console.error("- result.success:", result.success);
+            console.error("- result.data:", result.data);
+            console.error("- this.currentField:", this.currentField);
         }
     }
 
     private fillField(field: FormField, data: DecryptedPasswordData): void {
-        // Find the form this field belongs to
+        console.log("UIOverlay: fillField called with field type:", field.type);
+        console.log("UIOverlay: Available data:", data);
+
+        // Fill the specific field that was clicked based on its type (if visible)
+        if (this.isFieldVisibleAndFocusable(field.element)) {
+            if (field.type === "username" || field.type === "email") {
+                if (data.username) {
+                    console.log("UIOverlay: Filling username/email field with:", data.username);
+                    this.setFieldValue(field.element, data.username);
+                }
+            } else if (field.type === "password") {
+                if (data.password) {
+                    console.log("UIOverlay: Filling password field with:", data.password);
+                    this.setFieldValue(field.element, data.password);
+                }
+            }
+        } else {
+            console.log("UIOverlay: Primary field is not visible/focusable, skipping");
+        }
+
+        // Also try to fill other fields in the same form if they exist and are visible
         const form = field.element.closest("form");
-        if (!form) return;
+        if (form) {
+            // Find and fill username field if current field is password
+            if (field.type === "password" && data.username) {
+                const usernameField = this.findUsernameFieldInForm(form);
+                if (usernameField && usernameField !== field.element && this.isFieldVisibleAndFocusable(usernameField)) {
+                    console.log("UIOverlay: Also filling username field with:", data.username);
+                    this.setFieldValue(usernameField, data.username);
+                } else if (usernameField && !this.isFieldVisibleAndFocusable(usernameField)) {
+                    console.log("UIOverlay: Username field found but not visible/focusable, skipping");
+                }
+            }
+            // Find and fill password field if current field is username/email
+            else if ((field.type === "username" || field.type === "email") && data.password) {
+                const passwordField = form.querySelector('input[type="password"]') as HTMLInputElement;
+                if (passwordField && passwordField !== field.element && this.isFieldVisibleAndFocusable(passwordField)) {
+                    console.log("UIOverlay: Also filling password field with:", data.password);
+                    this.setFieldValue(passwordField, data.password);
+                } else if (passwordField && !this.isFieldVisibleAndFocusable(passwordField)) {
+                    console.log("UIOverlay: Password field found but not visible/focusable, skipping");
+                }
+            }
+        }
+    }
 
-        // Find username field
-        const usernameField = this.findUsernameFieldInForm(form);
-        if (usernameField && data.username) {
-            this.setFieldValue(usernameField, data.username);
+    private isFieldVisibleAndFocusable(element: HTMLInputElement): boolean {
+        // Check if element exists
+        if (!element) return false;
+
+        // Check if element is in the DOM
+        if (!document.contains(element)) return false;
+
+        // Check if element is visible (not hidden by CSS)
+        const style = window.getComputedStyle(element);
+        if (style.display === "none" || style.visibility === "hidden" || style.opacity === "0") {
+            return false;
         }
 
-        // Fill password field
-        if (field.type === "password" && data.password) {
-            this.setFieldValue(field.element, data.password);
-        }
+        // Check if element is not disabled
+        if (element.disabled) return false;
+
+        // Check if element is not readonly (for most cases, readonly fields can still be filled)
+        // if (element.readOnly) return false;
+
+        // Check if element has positive dimensions (not collapsed)
+        const rect = element.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) return false;
+
+        // Check if element is not off-screen
+        if (rect.top < -1000 || rect.left < -1000) return false;
+
+        return true;
     }
 
     private findUsernameFieldInForm(form: HTMLFormElement): HTMLInputElement | null {

@@ -131,6 +131,9 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
 
         // Wait for decryption data from background script before starting camera
         this._waitForDecryptionData();
+
+        // Setup close message listener
+        this.setupCloseMessageListener();
     }
 
     private async _setWallet(): Promise<any> {
@@ -273,10 +276,8 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
         // Send result back to background script
         this.sendDecryptionResultToBackground(result);
 
-        // Close the popup after a short delay to ensure message is sent
-        setTimeout(() => {
-            this.closePopup();
-        }, 100);
+        // Close the popup after cancellation
+        this.closePopup();
 
         this.biometricsCancel.emit();
     }
@@ -715,10 +716,8 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
                 // Send result back to background script
                 this.sendDecryptionResultToBackground(result);
 
-                // Close the popup after a short delay to ensure message is sent
-                setTimeout(() => {
-                    this.closePopup();
-                }, 100);
+                // Close the popup after successful decryption
+                this.closePopup();
 
                 // Emit success with retrieved data
                 this.biometricsSuccess.emit({
@@ -774,27 +773,27 @@ export class PasswordDecryptorComponent implements OnInit, OnDestroy {
     }
 
     /**
-     * Close the popup window
+     * Close the popup
      */
+    private setupCloseMessageListener(): void {
+        if (typeof chrome !== "undefined" && chrome.runtime) {
+            chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+                if (message.type === "CLOSE_POPUP") {
+                    console.log("PasswordDecryptor: Received close popup message");
+                    this.closePopup();
+                    sendResponse({ success: true });
+                }
+                return true; // Keep message channel open
+            });
+        }
+    }
+
     private closePopup(): void {
         try {
-            if (typeof chrome !== "undefined" && chrome.windows) {
-                // Get the current window and close it
-                chrome.windows.getCurrent((window) => {
-                    if (window && window.id) {
-                        chrome.windows.remove(window.id);
-                    }
-                });
-            } else if (typeof window !== "undefined") {
-                // Fallback: close the current window
-                window.close();
-            }
+            console.log("PasswordDecryptor: Closing popup with window.close()");
+            window.close();
         } catch (error) {
             console.warn("Error closing popup:", error);
-            // Fallback: try to close the window
-            if (typeof window !== "undefined") {
-                window.close();
-            }
         }
     }
 
