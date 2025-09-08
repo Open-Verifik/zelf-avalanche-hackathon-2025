@@ -91,8 +91,6 @@ const validateOwnership = async (zelfProof, faceBase64, masterPassword) => {
 const storePassword = async (data, authToken) => {
 	const { website, faceBase64, masterPassword, name, folder, insideFolder, zelfProof } = data;
 
-	await validateOwnership(zelfProof, faceBase64, masterPassword);
-
 	try {
 		const { metadata, publicData } = await createMetadataAndPublicData("password", data, authToken);
 
@@ -131,22 +129,22 @@ const storePassword = async (data, authToken) => {
 			console.warn("⚠️ Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
 		}
 
-		// const NFT = await createNFT(
-		// 	{
-		// 		zelfQR,
-		// 		url: qrCodeIPFS.url,
-		// 		name: identifier,
-		// 		publicData,
-		// 		zelfProof,
-		// 	},
-		// 	authToken
-		// );
+		const NFT = await createNFT(
+			{
+				zelfQR,
+				url: qrCodeIPFS.url,
+				name: identifier,
+				publicData,
+				zelfProof,
+			},
+			authToken
+		);
 
 		const result = {
 			success: true,
 			zelfProof: zelfKey.zelfProof,
 			zelfQR, // Encrypted string
-			NFT: null,
+			NFT,
 			ipfs: qrCodeIPFS
 				? {
 						hash: qrCodeIPFS.IpfsHash,
@@ -179,8 +177,6 @@ const storePassword = async (data, authToken) => {
  */
 const storeNotes = async (data, authToken) => {
 	const { title, faceBase64, masterPassword, zelfProof } = data;
-
-	await validateOwnership(zelfProof, faceBase64, masterPassword);
 
 	try {
 		const identifier = `notes_${title}_${Date.now()}`;
@@ -224,10 +220,22 @@ const storeNotes = async (data, authToken) => {
 			}
 		}
 
+		const NFT = await createNFT(
+			{
+				zelfQR,
+				url: qrCodeIPFS.url,
+				name: identifier,
+				publicData,
+				zelfProof,
+			},
+			authToken
+		);
+
 		return {
 			success: true,
 			zelfProof: zelfKey.zelfProof,
 			zelfQR, // Encrypted string
+			NFT,
 			ipfs: qrCodeIPFS
 				? {
 						hash: qrCodeIPFS.IpfsHash,
@@ -262,8 +270,6 @@ const storeNotes = async (data, authToken) => {
  */
 const storeCreditCard = async (data, authToken) => {
 	const { cardName, cardNumber, expiryMonth, expiryYear, cvv, bankName, faceBase64, masterPassword, zelfProof } = data;
-
-	await validateOwnership(zelfProof, faceBase64, masterPassword);
 
 	try {
 		// Validate credit card data
@@ -321,10 +327,22 @@ const storeCreditCard = async (data, authToken) => {
 			}
 		}
 
+		const NFT = await createNFT(
+			{
+				zelfQR,
+				url: qrCodeIPFS.url,
+				name: identifier,
+				publicData,
+				zelfProof,
+			},
+			authToken
+		);
+
 		const result = {
 			success: true,
 			zelfProof: zelfKey.zelfProof,
 			zelfQR, // Encrypted string
+			NFT,
 			ipfs: qrCodeIPFS
 				? {
 						hash: qrCodeIPFS.IpfsHash,
@@ -357,12 +375,14 @@ const storeCreditCard = async (data, authToken) => {
  */
 const storeData = async (data, authToken) => {
 	try {
-		const { type, payload, faceBase64, password } = data;
+		const { type, payload, faceBase64, password, zelfProof, masterPassword } = data;
 
 		// Validate required fields
-		if (!type || !payload || !faceBase64 || !password) {
+		if (!type || !faceBase64 || !password) {
 			throw new Error("Missing required fields: type, payload, faceBase64, password");
 		}
+
+		await validateOwnership(zelfProof, faceBase64, masterPassword);
 
 		// Route to appropriate storage function
 		let result;
@@ -613,4 +633,4 @@ const listData = async (data, authToken) => {
 	}
 };
 
-export { storeData, storePassword, storeNotes, storeCreditCard, retrieveData, previewData, createNFTReadyData, listData };
+export { storeData, retrieveData, previewData, createNFTReadyData, listData };

@@ -288,21 +288,42 @@ function ZelfKeysPasswordsComponent_div_8_Template(rf, ctx) {
     _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtextInterpolate"](ctx_r1.error);
   }
 }
-function ZelfKeysPasswordsComponent_div_9_app_data_card_7_Template(rf, ctx) {
+function ZelfKeysPasswordsComponent_div_9_div_1_Template(rf, ctx) {
+  if (rf & 1) {
+    const _r3 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵgetCurrentView"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](0, "div", 15)(1, "h3");
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtext"](2);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementEnd"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](3, "button", 10);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵlistener"]("click", function ZelfKeysPasswordsComponent_div_9_div_1_Template_button_click_3_listener() {
+      _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵrestoreView"](_r3);
+      const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵnextContext"](2);
+      return _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵresetView"](ctx_r1.onRefresh());
+    });
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtext"](4, "Refresh");
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementEnd"]()();
+  }
+  if (rf & 2) {
+    const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵnextContext"](2);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵadvance"](2);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtextInterpolate2"]("", ctx_r1.storedPasswords.length, " stored password", ctx_r1.storedPasswords.length !== 1 ? "s" : "", "");
+  }
+}
+function ZelfKeysPasswordsComponent_div_9_ng_container_3_app_data_card_1_Template(rf, ctx) {
   if (rf & 1) {
     const _r4 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵgetCurrentView"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](0, "app-data-card", 15);
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵlistener"]("cardClick", function ZelfKeysPasswordsComponent_div_9_app_data_card_7_Template_app_data_card_cardClick_0_listener($event) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](0, "app-data-card", 17);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵlistener"]("cardClick", function ZelfKeysPasswordsComponent_div_9_ng_container_3_app_data_card_1_Template_app_data_card_cardClick_0_listener($event) {
       _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵrestoreView"](_r4);
-      const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵnextContext"](2);
+      const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵnextContext"](3);
       return _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵresetView"](ctx_r1.onPasswordClick($event));
-    })("launchClick", function ZelfKeysPasswordsComponent_div_9_app_data_card_7_Template_app_data_card_launchClick_0_listener($event) {
+    })("launchClick", function ZelfKeysPasswordsComponent_div_9_ng_container_3_app_data_card_1_Template_app_data_card_launchClick_0_listener($event) {
       _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵrestoreView"](_r4);
-      const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵnextContext"](2);
+      const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵnextContext"](3);
       return _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵresetView"](ctx_r1.onPasswordClick($event));
-    })("optionsClick", function ZelfKeysPasswordsComponent_div_9_app_data_card_7_Template_app_data_card_optionsClick_0_listener($event) {
+    })("optionsClick", function ZelfKeysPasswordsComponent_div_9_ng_container_3_app_data_card_1_Template_app_data_card_optionsClick_0_listener($event) {
       _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵrestoreView"](_r4);
-      const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵnextContext"](2);
+      const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵnextContext"](3);
       return _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵresetView"](ctx_r1.onPasswordClick($event));
     });
     _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementEnd"]();
@@ -312,16 +333,28 @@ function ZelfKeysPasswordsComponent_div_9_app_data_card_7_Template(rf, ctx) {
     _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵproperty"]("item", password_r5);
   }
 }
-function ZelfKeysPasswordsComponent_div_9_div_8_Template(rf, ctx) {
+function ZelfKeysPasswordsComponent_div_9_ng_container_3_Template(rf, ctx) {
+  if (rf & 1) {
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementContainerStart"](0);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtemplate"](1, ZelfKeysPasswordsComponent_div_9_ng_container_3_app_data_card_1_Template, 1, 1, "app-data-card", 16);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementContainerEnd"]();
+  }
+  if (rf & 2) {
+    const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵnextContext"](2);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵadvance"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵproperty"]("ngForOf", ctx_r1.storedPasswords)("ngForTrackBy", ctx_r1.trackByPassword);
+  }
+}
+function ZelfKeysPasswordsComponent_div_9_div_4_Template(rf, ctx) {
   if (rf & 1) {
     const _r6 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵgetCurrentView"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](0, "div", 11)(1, "div", 16);
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵlistener"]("click", function ZelfKeysPasswordsComponent_div_9_div_8_Template_div_click_1_listener() {
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](0, "div", 11)(1, "div", 18);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵlistener"]("click", function ZelfKeysPasswordsComponent_div_9_div_4_Template_div_click_1_listener() {
       _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵrestoreView"](_r6);
       const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵnextContext"](2);
       return _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵresetView"](ctx_r1.onAddPassword());
     });
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](2, "div", 17);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](2, "div", 19);
     _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtext"](3, "+");
     _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementEnd"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](4, "h3");
@@ -334,28 +367,18 @@ function ZelfKeysPasswordsComponent_div_9_div_8_Template(rf, ctx) {
 }
 function ZelfKeysPasswordsComponent_div_9_Template(rf, ctx) {
   if (rf & 1) {
-    const _r3 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵgetCurrentView"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](0, "div", 11)(1, "div", 12)(2, "h3");
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtext"](3);
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementEnd"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](4, "button", 10);
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵlistener"]("click", function ZelfKeysPasswordsComponent_div_9_Template_button_click_4_listener() {
-      _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵrestoreView"](_r3);
-      const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵnextContext"]();
-      return _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵresetView"](ctx_r1.onRefresh());
-    });
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtext"](5, "Refresh");
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementEnd"]()();
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](6, "div", 13);
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtemplate"](7, ZelfKeysPasswordsComponent_div_9_app_data_card_7_Template, 1, 1, "app-data-card", 14)(8, ZelfKeysPasswordsComponent_div_9_div_8_Template, 8, 0, "div", 5);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](0, "div", 11);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtemplate"](1, ZelfKeysPasswordsComponent_div_9_div_1_Template, 5, 2, "div", 12);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](2, "div", 13);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtemplate"](3, ZelfKeysPasswordsComponent_div_9_ng_container_3_Template, 2, 2, "ng-container", 14)(4, ZelfKeysPasswordsComponent_div_9_div_4_Template, 8, 0, "div", 5);
     _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementEnd"]()();
   }
   if (rf & 2) {
     const ctx_r1 = _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵnextContext"]();
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵadvance"](3);
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtextInterpolate2"]("", ctx_r1.storedPasswords.length, " stored password", ctx_r1.storedPasswords.length !== 1 ? "s" : "", "");
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵadvance"](4);
-    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵproperty"]("ngForOf", ctx_r1.storedPasswords)("ngForTrackBy", ctx_r1.trackByPassword);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵadvance"]();
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵproperty"]("ngIf", !ctx_r1.loading && !ctx_r1.error && ctx_r1.storedPasswords.length > 0);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵadvance"](2);
+    _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵproperty"]("ngIf", ctx_r1.storedPasswords.length > 0);
     _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵadvance"]();
     _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵproperty"]("ngIf", !ctx_r1.loading && !ctx_r1.error);
   }
@@ -441,7 +464,7 @@ class ZelfKeysPasswordsComponent {
     selectors: [["app-zelf-keys-passwords"]],
     decls: 10,
     vars: 3,
-    consts: [[1, "zelf-keys-passwords"], [1, "header"], [1, "content"], ["class", "loading-state", 4, "ngIf"], ["class", "error-state", 4, "ngIf"], ["class", "passwords-grid", 4, "ngIf"], [1, "loading-state"], [1, "spinner"], [1, "error-state"], [1, "icon"], [1, "btn-secondary", 3, "click"], [1, "passwords-grid"], [1, "list-header"], [1, "password-cards"], ["category", "password", 3, "item", "cardClick", "launchClick", "optionsClick", 4, "ngFor", "ngForOf", "ngForTrackBy"], ["category", "password", 3, "cardClick", "launchClick", "optionsClick", "item"], [1, "add-password", 3, "click"], [1, "add-icon"]],
+    consts: [[1, "zelf-keys-passwords"], [1, "header"], [1, "content"], ["class", "loading-state", 4, "ngIf"], ["class", "error-state", 4, "ngIf"], ["class", "passwords-grid", 4, "ngIf"], [1, "loading-state"], [1, "spinner"], [1, "error-state"], [1, "icon"], [1, "btn-secondary", 3, "click"], [1, "passwords-grid"], ["class", "list-header", 4, "ngIf"], [1, "password-cards"], [4, "ngIf"], [1, "list-header"], ["category", "password", 3, "item", "cardClick", "launchClick", "optionsClick", 4, "ngFor", "ngForOf", "ngForTrackBy"], ["category", "password", 3, "cardClick", "launchClick", "optionsClick", "item"], [1, "add-password", 3, "click"], [1, "add-icon"]],
     template: function ZelfKeysPasswordsComponent_Template(rf, ctx) {
       if (rf & 1) {
         _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](0, "div", 0)(1, "div", 1)(2, "h2");
@@ -451,7 +474,7 @@ class ZelfKeysPasswordsComponent {
         _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtext"](5, "Manage your secure passwords and credentials");
         _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementEnd"]()();
         _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementStart"](6, "div", 2);
-        _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtemplate"](7, ZelfKeysPasswordsComponent_div_7_Template, 4, 0, "div", 3)(8, ZelfKeysPasswordsComponent_div_8_Template, 9, 1, "div", 4)(9, ZelfKeysPasswordsComponent_div_9_Template, 9, 5, "div", 5);
+        _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵtemplate"](7, ZelfKeysPasswordsComponent_div_7_Template, 4, 0, "div", 3)(8, ZelfKeysPasswordsComponent_div_8_Template, 9, 1, "div", 4)(9, ZelfKeysPasswordsComponent_div_9_Template, 5, 3, "div", 5);
         _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵelementEnd"]()();
       }
       if (rf & 2) {
@@ -460,7 +483,7 @@ class ZelfKeysPasswordsComponent {
         _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵadvance"]();
         _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵproperty"]("ngIf", ctx.error && !ctx.loading);
         _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵadvance"]();
-        _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵproperty"]("ngIf", !ctx.loading && !ctx.error && ctx.storedPasswords.length > 0);
+        _angular_core__WEBPACK_IMPORTED_MODULE_6__["ɵɵproperty"]("ngIf", !ctx.loading);
       }
     },
     dependencies: [_angular_common__WEBPACK_IMPORTED_MODULE_9__.CommonModule, _angular_common__WEBPACK_IMPORTED_MODULE_9__.NgForOf, _angular_common__WEBPACK_IMPORTED_MODULE_9__.NgIf, _jsverse_transloco__WEBPACK_IMPORTED_MODULE_10__.TranslocoModule, _angular_router__WEBPACK_IMPORTED_MODULE_11__.RouterModule, _shared_data_card_component__WEBPACK_IMPORTED_MODULE_1__.DataCardComponent],

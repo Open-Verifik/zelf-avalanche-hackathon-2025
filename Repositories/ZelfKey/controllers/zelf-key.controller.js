@@ -12,6 +12,7 @@ import * as Module from "../modules/zelf-key.module.js";
 const storeData = async (ctx) => {
 	try {
 		const data = await Module.storeData(ctx.request.body, ctx.state.user);
+
 		ctx.body = { ...data };
 	} catch (error) {
 		console.error(error);
@@ -26,7 +27,14 @@ const storeData = async (ctx) => {
  */
 const storePassword = async (ctx) => {
 	try {
-		const data = await Module.storePassword(ctx.request.body, ctx.state.user);
+		const data = await Module.storeData(
+			{
+				...ctx.request.body,
+				type: "password",
+			},
+			ctx.state.user
+		);
+
 		ctx.body = { ...data };
 	} catch (error) {
 		console.error(error);
@@ -41,7 +49,14 @@ const storePassword = async (ctx) => {
  */
 const storeNotes = async (ctx) => {
 	try {
-		const data = await Module.storeNotes(ctx.request.body, ctx.state.user);
+		const data = await Module.storeData(
+			{
+				...ctx.request.body,
+				type: "notes",
+			},
+			ctx.state.user
+		);
+
 		ctx.body = { ...data };
 	} catch (error) {
 		console.error(error);
@@ -56,22 +71,13 @@ const storeNotes = async (ctx) => {
  */
 const storeCreditCard = async (ctx) => {
 	try {
-		const data = await Module.storeCreditCard(ctx.request.body, ctx.state.user);
-		ctx.body = { ...data };
-	} catch (error) {
-		console.error(error);
-		ctx.status = error.status || 500;
-		ctx.body = { error: error.message };
-	}
-};
-
-/**
- * Store contact information
- * @param {Object} ctx - Koa context
- */
-const storeContact = async (ctx) => {
-	try {
-		const data = await Module.storeContact(ctx.request.body, ctx.state.user);
+		const data = await Module.storeData(
+			{
+				...ctx.request.body,
+				type: "credit_card",
+			},
+			ctx.state.user
+		);
 		ctx.body = { ...data };
 	} catch (error) {
 		console.error(error);
@@ -87,6 +93,7 @@ const storeContact = async (ctx) => {
 const retrieveData = async (ctx) => {
 	try {
 		const data = await Module.retrieveData(ctx.request.body, ctx.state.user);
+
 		ctx.body = { ...data };
 	} catch (error) {
 		console.error(error);
@@ -102,6 +109,7 @@ const retrieveData = async (ctx) => {
 const previewData = async (ctx) => {
 	try {
 		const data = await Module.previewData(ctx.request.body, ctx.state.user);
+
 		ctx.body = { ...data };
 	} catch (error) {
 		console.error(error);
@@ -117,6 +125,7 @@ const previewData = async (ctx) => {
 const listData = async (ctx) => {
 	try {
 		const data = await Module.listData(ctx.request.query, ctx.state.user);
+
 		ctx.body = { ...data };
 	} catch (error) {
 		console.error(error);
@@ -125,4 +134,4 @@ const listData = async (ctx) => {
 	}
 };
 
-export { storeData, storePassword, storeNotes, storeCreditCard, storeContact, retrieveData, previewData, listData };
+export { storeData, storePassword, storeNotes, storeCreditCard, retrieveData, previewData, listData };
