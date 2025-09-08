@@ -456,6 +456,7 @@ async function searchSubscriptionInIPFS(zelfKeysTag) {
 					name: element.metadata.name,
 					...keyValues,
 					stripeData: keyValues.stripeData ? JSON.parse(keyValues.stripeData) : null,
+					cryptoData: keyValues.cryptoData ? JSON.parse(keyValues.cryptoData) : null,
 				};
 				break;
 			}
