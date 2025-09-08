@@ -330,6 +330,62 @@ export class ZelfKeysBillingComponent implements OnInit {
 		return discountPercentage.toFixed(1);
 	}
 
+	/**
+	 * Get crypto payment data from active subscription
+	 * @returns Crypto payment data or null
+	 */
+	getCryptoData(): any {
+		if (this.activeSubscription?.paymentMethod === "crypto" && this.activeSubscription?.cryptoData) {
+			try {
+				return typeof this.activeSubscription.cryptoData === "string"
+					? JSON.parse(this.activeSubscription.cryptoData)
+					: this.activeSubscription.cryptoData;
+			} catch (error) {
+				console.error("Error parsing crypto data:", error);
+				return null;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Get subscription status based on payment method
+	 * @returns Status string
+	 */
+	getSubscriptionStatus(): string {
+		if (this.activeSubscription?.paymentMethod === "crypto") {
+			const cryptoData = this.getCryptoData();
+			return cryptoData?.status || "Active";
+		} else {
+			// Stripe subscription status
+			return this.isCancelledActive() ? "Cancelled (Active Until Period End)" : this.activeSubscription?.stripeData?.status || "Active";
+		}
+	}
+
+	/**
+	 * Get transaction URL for blockchain explorer
+	 * @returns Transaction URL
+	 */
+	getTransactionUrl(): string {
+		const cryptoData = this.getCryptoData();
+		if (cryptoData?.transactionHash) {
+			return `https://snowtrace.io/tx/${cryptoData.transactionHash}`;
+		}
+		return "#";
+	}
+
+	/**
+	 * Get appropriate end date label based on payment method
+	 * @returns Label string
+	 */
+	getEndDateLabel(): string {
+		if (this.activeSubscription?.paymentMethod === "crypto") {
+			return "Expires On:";
+		} else {
+			return this.isCancelledActive() ? "Access Ends:" : "Next Billing:";
+		}
+	}
+
 	private createCheckoutSession(planId: string): void {
 		this.billingService
 			.createCheckoutSession(planId)

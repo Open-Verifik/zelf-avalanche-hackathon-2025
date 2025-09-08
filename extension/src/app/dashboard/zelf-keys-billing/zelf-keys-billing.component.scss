@@ -241,6 +241,103 @@
 					max-width: 400px;
 					margin: 0 auto;
 				}
+
+				.crypto-subscription-info {
+					.crypto-info-card {
+						display: flex;
+						gap: 16px;
+						background: #f8f9ff;
+						border: 1px solid #e0e4ff;
+						border-radius: 12px;
+						padding: 20px;
+						text-align: left;
+
+						.info-icon {
+							color: #667eea;
+							flex-shrink: 0;
+							margin-top: 2px;
+						}
+
+						.crypto-info-content {
+							flex: 1;
+
+							h4 {
+								margin: 0 0 8px 0;
+								font-size: 16px;
+								font-weight: 600;
+								color: #1a1a1a;
+							}
+
+							p {
+								margin: 0 0 8px 0;
+								font-size: 14px;
+								color: #666;
+								line-height: 1.5;
+
+								&:last-child {
+									margin-bottom: 0;
+								}
+
+								&.transaction-note {
+									color: #667eea;
+									font-weight: 500;
+								}
+							}
+						}
+					}
+				}
+			}
+
+			.payment-method {
+				display: inline-flex;
+				align-items: center;
+				gap: 6px;
+				font-weight: 500;
+
+				&.crypto {
+					color: #f7931e;
+
+					.demo-badge {
+						background: #667eea;
+						color: white;
+						font-size: 10px;
+						font-weight: 600;
+						padding: 2px 6px;
+						border-radius: 4px;
+						margin-left: 4px;
+						text-transform: uppercase;
+						letter-spacing: 0.5px;
+					}
+				}
+
+				&.stripe {
+					color: #635bff;
+				}
+
+				svg {
+					width: 16px;
+					height: 16px;
+				}
+			}
+
+			.transaction-hash {
+				a {
+					color: #f7931e;
+					text-decoration: none;
+					font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+					font-size: 13px;
+					display: inline-flex;
+					align-items: center;
+					gap: 4px;
+
+					&:hover {
+						text-decoration: underline;
+					}
+
+					svg {
+						opacity: 0.7;
+					}
+				}
 			}
 		}
 	}

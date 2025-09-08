@@ -83,9 +83,57 @@
 					<span class="detail-value">{{ getCurrentPlanPrice() }}</span>
 				</div>
 				<div class="detail-row">
+					<span class="detail-label">Payment Method:</span>
+					<span class="detail-value">
+						<span *ngIf="activeSubscription?.paymentMethod === 'crypto'" class="payment-method crypto">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+								<path d="M8 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+							</svg>
+							Crypto (AVAX)
+							<span *ngIf="getCryptoData()?.isDemoMode" class="demo-badge">DEMO</span>
+						</span>
+						<span *ngIf="activeSubscription?.paymentMethod === 'stripe'" class="payment-method stripe">
+							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+								<rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" stroke-width="2" />
+								<line x1="1" y1="10" x2="23" y2="10" stroke="currentColor" stroke-width="2" />
+							</svg>
+							Stripe
+						</span>
+					</span>
+				</div>
+				<div class="detail-row">
 					<span class="detail-label">Status:</span>
 					<span class="detail-value" [class.status-active]="!isCancelledActive()" [class.status-cancelled]="isCancelledActive()">
-						{{ isCancelledActive() ? "Cancelled (Active Until Period End)" : activeSubscription?.stripeData?.status || "Active" }}
+						{{ getSubscriptionStatus() }}
+					</span>
+				</div>
+				<div *ngIf="activeSubscription?.paymentMethod === 'crypto' && getCryptoData()?.transactionHash" class="detail-row">
+					<span class="detail-label">Transaction:</span>
+					<span class="detail-value transaction-hash">
+						<a [href]="getTransactionUrl()" target="_blank" rel="noopener noreferrer">
+							{{ getCryptoData()?.transactionHash | slice: 0 : 10 }}...{{ getCryptoData()?.transactionHash | slice: -8 }}
+						</a>
+						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path
+								d="M18 13V19A2 2 0 0116 21H5A2 2 0 013 19V8A2 2 0 015 6H11"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+							<polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+							<line
+								x1="10"
+								y1="14"
+								x2="21"
+								y2="3"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
 					</span>
 				</div>
 				<div class="detail-row">
@@ -97,7 +145,7 @@
 					<span class="detail-value">{{ activeSubscription?.startDate | date: "medium" }}</span>
 				</div>
 				<div class="detail-row">
-					<span class="detail-label">{{ isCancelledActive() ? "Access Ends:" : "Next Billing:" }}</span>
+					<span class="detail-label">{{ getEndDateLabel() }}</span>
 					<span class="detail-value" [class.status-cancelled]="isCancelledActive()">
 						{{ activeSubscription?.endDate | date: "medium" }}
 					</span>
@@ -109,25 +157,46 @@
 			</div>
 
 			<div class="subscription-actions">
-				<button class="manage-button" (click)="openCustomerPortal()">
-					<svg class="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path
-							d="M10.325 4.317C10.751 3.901 11.377 3.901 11.803 4.317L20.69 13.204C21.116 13.63 21.116 14.256 20.69 14.682L11.803 23.569C11.377 23.995 10.751 23.995 10.325 23.569L1.438 14.682C1.012 14.256 1.012 13.63 1.438 13.204L10.325 4.317Z"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-					Manage Subscription
-				</button>
-				<p class="management-note">
-					{{
-						isCancelledActive()
-							? "Your subscription is cancelled but remains active until the end of your billing period. You can reactivate or view billing history in the Stripe customer portal."
-							: "Manage your subscription, update payment methods, view billing history, and more in the Stripe customer portal."
-					}}
-				</p>
+				<!-- Only show manage button for Stripe subscriptions -->
+				<div *ngIf="activeSubscription?.paymentMethod === 'stripe'">
+					<button class="manage-button" (click)="openCustomerPortal()">
+						<svg class="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<path
+								d="M10.325 4.317C10.751 3.901 11.377 3.901 11.803 4.317L20.69 13.204C21.116 13.63 21.116 14.256 20.69 14.682L11.803 23.569C11.377 23.995 10.751 23.995 10.325 23.569L1.438 14.682C1.012 14.256 1.012 13.63 1.438 13.204L10.325 4.317Z"
+								stroke="currentColor"
+								stroke-width="2"
+								stroke-linecap="round"
+								stroke-linejoin="round"
+							/>
+						</svg>
+						Manage Subscription
+					</button>
+					<p class="management-note">
+						{{
+							isCancelledActive()
+								? "Your subscription is cancelled but remains active until the end of your billing period. You can reactivate or view billing history in the Stripe customer portal."
+								: "Manage your subscription, update payment methods, view billing history, and more in the Stripe customer portal."
+						}}
+					</p>
+				</div>
+				<!-- Message for crypto subscriptions -->
+				<div *ngIf="activeSubscription?.paymentMethod === 'crypto'" class="crypto-subscription-info">
+					<div class="crypto-info-card">
+						<svg class="info-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+							<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+							<path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+						</svg>
+						<div class="crypto-info-content">
+							<h4>Crypto Subscription Active</h4>
+							<p>
+								Your subscription was paid with AVAX cryptocurrency. This is a one-time payment valid until the end date shown above.
+							</p>
+							<p *ngIf="getCryptoData()?.transactionHash" class="transaction-note">
+								<strong>Transaction verified on Avalanche blockchain.</strong>
+							</p>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 	</div>
