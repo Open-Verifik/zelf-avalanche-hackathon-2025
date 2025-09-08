@@ -219,10 +219,12 @@ const createCryptoPayment = async (body, user) => {
 
         // Check for existing zkPay record first
         const recordsFound = await pinata.filter("zkPay", zkPayTag);
+
         const existingZkPay = recordsFound && Array.isArray(recordsFound) && recordsFound.length ? recordsFound[0] : null;
 
         // Get real-time AVAX price and calculate amount
         console.log("💰 Fetching real-time AVAX price...");
+
         const priceCalculation = await calculateCryptoAmount(selectedPlan.price, "AVAX");
 
         // Check if demo mode is enabled
@@ -290,20 +292,20 @@ const createCryptoPayment = async (body, user) => {
         // Create new zkPay record with locked pricing
         const zkPay = await _storePaymentAddress(identifier, zkPayTag, priceLockData);
 
-        // Build return data with the newly created payment address
+        // Build return data with the newly created payment address and pricing info
         const returnData = {
             success: true,
             paymentAddress: zkPay.publicData.avalancheAddress,
-            amount: isDemoMode ? demoPriceCalculation.cryptoAmount : priceCalculation.cryptoAmount,
+            amount: priceLockData.avaxAmount,
             currency: "AVAX",
-            usdAmount: isDemoMode ? demoUsdAmount : selectedPlan.price,
-            avaxPrice: priceCalculation.cryptoPrice,
+            usdAmount: priceLockData.usdAmount,
+            avaxPrice: priceLockData.avaxPrice,
             lockedPriceToken,
             expiresAt: moment().add(30, "minutes").format("YYYY-MM-DD HH:mm:ss"),
-            isDemoMode,
+            isDemoMode: priceLockData.isDemoMode,
             originalAmount: {
-                usd: selectedPlan.price,
-                avax: priceCalculation.cryptoAmount,
+                usd: priceLockData.originalUsdAmount,
+                avax: priceLockData.originalAvaxAmount,
             },
         };
 
@@ -326,19 +328,8 @@ const _storePaymentAddress = async (zelfName, zkPay, priceLockData) => {
     const zkPayData = {
         publicData: {
             avalancheAddress: wallet.address,
-            customerTag: zelfName,
             zkPay,
-            planId: priceLockData.planId,
-            planName: priceLockData.planName,
-            usdAmount: priceLockData.usdAmount,
-            avaxAmount: priceLockData.avaxAmount,
-            avaxPrice: priceLockData.avaxPrice,
-            paymentMethod: "crypto",
-            status: "pending",
-            createdAt: moment().format("YYYY-MM-DD HH:mm:ss"),
-            isDemoMode: priceLockData.isDemoMode || false,
-            originalUsdAmount: priceLockData.originalUsdAmount || priceLockData.usdAmount,
-            originalAvaxAmount: priceLockData.originalAvaxAmount || priceLockData.avaxAmount,
+            customerTag: zelfName,
         },
         identifier: zkPay,
         faceBase64: avaxSignerModule.faceBase64,
