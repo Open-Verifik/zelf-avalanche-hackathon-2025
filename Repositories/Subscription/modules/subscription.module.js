@@ -899,7 +899,7 @@ const confirmCryptoPayment = async (body, user) => {
 
 			// Create subscription record
 			const subscriptionData = {
-				crypto: JSON.stringify({
+				cryptoData: JSON.stringify({
 					customer: identifier,
 					status: "active",
 					plan: priceLockData.planId,
@@ -956,49 +956,75 @@ const checkAvalancheTransactions = async (address, requiredAmount) => {
 		const todayStart = moment().startOf("day").unix();
 		const todayEnd = moment().endOf("day").unix();
 
-		// Call Avalanche RPC to get transaction history
-		const rpcPayload = {
-			jsonrpc: "2.0",
-			method: "eth_getBalance",
-			params: [address, "latest"],
-			id: 1,
-		};
+		// Use SnowTrace API (Avalanche's block explorer API) to find transactions
+		console.log("🔍 Trying SnowTrace API for transaction history...");
+		try {
+			const snowTraceResponse = await fetch(
+				`https://api.snowtrace.io/api?module=account&action=txlist&address=${address}&startblock=0&endblock=99999999&page=1&offset=10&sort=desc&apikey=YourApiKeyToken`
+			);
+			const snowTraceData = await snowTraceResponse.json();
 
-		const response = await fetch(configuration.avalanche.rpcUrl, {
+			console.log("📊 SnowTrace API response:", snowTraceData);
+
+			if (snowTraceData.status === "1" && snowTraceData.result) {
+				for (const tx of snowTraceData.result) {
+					const txAmount = parseFloat(tx.value) / Math.pow(10, 18); // Convert from wei to AVAX
+					const txTimestamp = parseInt(tx.timeStamp);
+
+					console.log(`🔍 SnowTrace TX: ${tx.hash} - ${txAmount} AVAX at ${txTimestamp}`);
+
+					// Check if transaction meets our criteria
+					if (txAmount >= requiredAmount && txTimestamp >= todayStart && txTimestamp <= todayEnd) {
+						return {
+							paymentFound: true,
+							transactionHash: tx.hash,
+							amount: txAmount,
+							blockNumber: tx.blockNumber,
+							timestamp: txTimestamp,
+							source: "snowtrace_api",
+						};
+					}
+				}
+			}
+		} catch (snowTraceError) {
+			console.error("❌ SnowTrace API error:", snowTraceError);
+		}
+
+		// Fallback: Simple balance check for demo purposes
+		const balanceResponse = await fetch(configuration.avalanche.rpcUrl, {
 			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(rpcPayload),
+			headers: { "Content-Type": "application/json" },
+			body: JSON.stringify({
+				jsonrpc: "2.0",
+				method: "eth_getBalance",
+				params: [address, "latest"],
+				id: 4,
+			}),
 		});
 
-		const data = await response.json();
-		console.log("📡 RPC Response:", data);
-
-		// For now, let's implement a simple balance check
-		// In production, you'd want to check transaction history for today's transactions
-		if (data.result) {
-			const balanceWei = BigInt(data.result);
+		const balanceData = await balanceResponse.json();
+		if (balanceData.result) {
+			const balanceWei = BigInt(balanceData.result);
 			const balanceAvax = Number(balanceWei) / Math.pow(10, 18);
 
-			console.log("💰 Address balance:", balanceAvax, "AVAX", {
-				result: data.result,
-			});
+			console.log("💰 Address balance:", balanceAvax, "AVAX");
 
-			// For demo purposes, if the address has any balance >= required amount
-			// we'll consider it as payment received
+			// For demo/testing: if balance >= required, consider it paid
 			if (balanceAvax >= requiredAmount) {
+				console.log("✅ Using balance check as fallback (demo mode)");
 				return {
 					paymentFound: true,
-					transactionHash: `demo_tx_${Date.now()}`, // In production, get actual tx hash
+					transactionHash: `balance_check_${Date.now()}`,
 					amount: balanceAvax,
+					note: "Payment confirmed via balance check (demo mode)",
+					source: "balance_check",
 				};
 			}
 		}
 
 		return {
 			paymentFound: false,
-			message: "Insufficient balance or no transactions found",
+			message: "No sufficient payment transactions found today",
 		};
 	} catch (error) {
 		console.error("❌ Error checking Avalanche transactions:", error);

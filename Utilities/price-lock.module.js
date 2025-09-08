@@ -53,6 +53,16 @@ const verifyLockedPrice = (token) => {
 	} catch (error) {
 		console.error("Error verifying locked price:", error);
 
+		//Error verifying locked price: TokenExpiredError: jwt expired
+		// check for jwt expired
+		if (error.name === "TokenExpiredError") {
+			return {
+				success: false,
+				error: "Price lock has expired",
+				isValid: false,
+			};
+		}
+
 		if (error.name === "TokenExpiredError") {
 			return {
 				success: false,
