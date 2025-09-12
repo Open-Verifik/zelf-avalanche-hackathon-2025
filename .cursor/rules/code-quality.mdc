@@ -1,0 +1,44 @@
+---
+description:
+globs:
+alwaysApply: true
+---
+
+### General code quality (typescript/javascript)
+
+-   Ensure proper typing, avoid `any` or `unknown` where possible
+-   Use BEM css conventions
+-   Early exit strategy required
+-   Clearly named functions, variables and methods
+-   Remove unused code after testing
+-   Avoid console logs unless for testing - remove once working
+-   Ensure security best practices where possible
+-   Consider accessibility where possible
+-   Keep it simple.
+-   Methods/functions must be within 50 lines - if not, refactor to meet this requirement
+-   `private` variable declarations in classes should always be prefixed with `_` unless static or readonly
+-   `readonly` and `static` should always be `SCREAMING_SNAKE_CASE`
+-   Order class declarations as follows:
+    -   VARIABLES
+    -   `private readonly`
+    -   `private`
+    -   `static`
+    -   `public`
+    -   METHODS
+    -   `constructor`
+    -   angular lifecycles (if applicable)
+    -   `get` / `set`
+    -   `static`
+    -   `private`
+    -   `public`
+
+### Refactoring
+
+-   Don't refactor existing code without permission from the developer
+-   Do not add unnecessary comments, jsblocks (unless in javascript)
+-   Typescript should be typed strongly enough that jsblocks are unecessary unless describing complicated functions
+
+### Testing
+
+-   If writing a test, do not alter working codebase code unless test discovers a genuine failure
+-   Check with developer before making changes to core code.
