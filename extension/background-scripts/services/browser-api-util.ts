@@ -12,28 +12,12 @@ export class BrowserApiUtil {
     }
 
     initializeApis() {
-        // Check for Chrome API
-        if (typeof chrome !== "undefined") {
-            this._chrome = chrome;
-            this._isChrome = true;
-        }
-
-        // Check for Browser API (Firefox)
-        if (typeof browser !== "undefined") {
-            this._browser = browser;
-            this._isBrowser = true;
-        }
+        this.initializeChromeApi();
+        this.initializeBrowserApi();
     }
 
-    // Smart method that returns the appropriate API or null
     get(moduleName: string) {
-        if (this._isChrome && this._chrome?.[moduleName as keyof typeof chrome]) {
-            return this._chrome[moduleName as keyof typeof chrome];
-        }
-        if (this._isBrowser && this._browser?.[moduleName as keyof typeof browser]) {
-            return this._browser[moduleName as keyof typeof browser];
-        }
-        return null;
+        return this.getChromeModule(moduleName) || this.getBrowserModule(moduleName) || null;
     }
 
     // Check if a module exists
@@ -41,22 +25,14 @@ export class BrowserApiUtil {
         return this.get(moduleName) !== null;
     }
 
-    // Get the runtime API with smart sendMessage handling
     get runtime() {
         const runtime = this.get("runtime");
         if (!runtime) return null;
 
-        // Return a smart runtime object that handles sendMessage differences
         return {
             ...runtime,
             sendMessage: (message: any, callback?: (response: any) => void) => {
-                if (this._isChrome) {
-                    // Chrome uses callback
-                    (runtime as any).sendMessage(message, callback);
-                } else if (this._isBrowser) {
-                    // Firefox returns Promise
-                    return (runtime as any).sendMessage(message);
-                }
+                return this.handleSendMessage(runtime, message, callback);
             },
         };
     }
@@ -166,5 +142,35 @@ export class BrowserApiUtil {
         if (!storage?.local) return;
 
         await storage.local.set({ [key]: value });
+    }
+
+    private initializeChromeApi(): void {
+        if (typeof chrome !== "undefined") {
+            this._chrome = chrome;
+            this._isChrome = true;
+        }
+    }
+
+    private initializeBrowserApi(): void {
+        if (typeof browser !== "undefined") {
+            this._browser = browser;
+            this._isBrowser = true;
+        }
+    }
+
+    private getChromeModule(moduleName: string) {
+        return this._isChrome && this._chrome?.[moduleName as keyof typeof chrome] ? this._chrome[moduleName as keyof typeof chrome] : null;
+    }
+
+    private getBrowserModule(moduleName: string) {
+        return this._isBrowser && this._browser?.[moduleName as keyof typeof browser] ? this._browser[moduleName as keyof typeof browser] : null;
+    }
+
+    private handleSendMessage(runtime: any, message: any, callback?: (response: any) => void) {
+        if (this._isChrome) {
+            runtime.sendMessage(message, callback);
+        } else if (this._isBrowser) {
+            return runtime.sendMessage(message);
+        }
     }
 }

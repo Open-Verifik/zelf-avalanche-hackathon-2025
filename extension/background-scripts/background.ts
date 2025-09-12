@@ -15,13 +15,13 @@ extensionLifecycle.initialize();
 // Initialize the message handler
 const messageHandler = new MessageHandler(browserApi);
 
-if (!browserApi.has("runtime")) process.exit(1);
+if (!browserApi.has("runtime")) {
+    console.error("[ZELF_KEYS] Runtime API not available - extension cannot function");
+
+    throw new Error("Runtime API not available");
+}
 
 browserApi.addMessageListener((message, sender, sendResponse) => {
-    console.log("Background: Received message:", message);
-    console.log("Background: Sender:", sender);
-
     messageHandler.handleAutofillMessage(message, sender, sendResponse);
-
     return true;
 });

@@ -1,4 +1,4 @@
-import { AutofillMessage, AutofillResponse, PasswordEntry, DecryptedPasswordData } from "@shared/types/autofill.types";
+import { AutofillMessage, AutofillResponse, DecryptedPasswordData, PasswordEntry } from "@shared/types/autofill.types";
 
 // Chrome extension API declaration
 declare const chrome: any;
@@ -8,9 +8,8 @@ export class CommunicationService {
     private serviceWorkerReadyCallbacks: (() => void)[] = [];
 
     public static getInstance(): CommunicationService {
-        if (!CommunicationService.instance) {
-            CommunicationService.instance = new CommunicationService();
-        }
+        if (!CommunicationService.instance) CommunicationService.instance = new CommunicationService();
+
         return CommunicationService.instance;
     }
 
@@ -79,7 +78,14 @@ export class CommunicationService {
 
             // Check if we're in a Chrome extension context
             if (typeof chrome !== "undefined" && chrome.runtime) {
+                // Add timeout to prevent hanging
+                const timeout = setTimeout(() => {
+                    console.error("Message timeout after 10 seconds");
+                    reject(new Error("Message timeout - background script did not respond"));
+                }, 10000);
+
                 chrome.runtime.sendMessage(message, (response: any) => {
+                    clearTimeout(timeout);
                     console.log("Received response from background script:", response);
                     if (chrome.runtime.lastError) {
                         console.error("Chrome runtime error:", chrome.runtime.lastError);

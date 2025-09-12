@@ -64,3 +64,48 @@ export interface MessageSender {
 export interface SendResponse {
     (response: AutofillResponse): void;
 }
+
+export interface DecryptionRequest {
+    passwordId: string;
+    publicData: {
+        zelfProof: string;
+        title: string;
+        website: string;
+    };
+    fieldId?: string;
+    fieldType?: "username" | "email" | "password";
+}
+
+export interface DecryptionResult {
+    success: boolean;
+    data?: DecryptedPasswordData;
+    error?: string;
+}
+
+export interface UrlInfo {
+    hash: string;
+    hostname: string;
+    href: string;
+    origin: string;
+    pathname: string;
+    port: string;
+    protocol: string;
+    search: string;
+    title: string;
+}
+
+export interface TabInfo {
+    id: number;
+    url: string;
+    active?: boolean;
+}
+
+export interface MessagePayload {
+    website?: string;
+    urlInfo?: UrlInfo;
+    passwordId?: string;
+    publicData?: any;
+    fieldId?: string;
+    fieldType?: string;
+    result?: DecryptionResult;
+}

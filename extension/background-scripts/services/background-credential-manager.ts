@@ -43,7 +43,6 @@ export class BackgroundCredentialManager {
     }
 
     constructor(private browserApi?: BrowserApiUtil) {
-        // Load JWT from storage asynchronously
         this.loadJWTFromStorage().catch((error) => {
             console.error("Error loading JWT from storage in constructor:", error);
         });
@@ -59,11 +58,8 @@ export class BackgroundCredentialManager {
                 this.zelfKeyJWT = result.zelfKeyJWT || null;
                 this.zelfKeyJWTExpiry = result.zelfKeyJWTExpiry || null;
 
-                // Check if token is expired
-                if (this.zelfKeyJWT && this.zelfKeyJWTExpiry && Date.now() >= this.zelfKeyJWTExpiry) {
-                    console.log("JWT token expired, clearing from storage");
-                    this.zelfKeyJWT = null;
-                    this.zelfKeyJWTExpiry = null;
+                if (this.isTokenExpired()) {
+                    this.clearExpiredToken();
                     await this.saveJWTToStorage();
                 }
             } else {
@@ -108,51 +104,69 @@ export class BackgroundCredentialManager {
         }
     }
 
-    /**
-     * Get the current JWT token if valid, or initialize session if needed
-     */
     public async getZelfKeyJWT(): Promise<string | null> {
-        // Check if we have a valid cached token
-        if (this.zelfKeyJWT && this.zelfKeyJWTExpiry && Date.now() < this.zelfKeyJWTExpiry) {
+        if (this.hasValidToken()) {
             return this.zelfKeyJWT;
         }
 
-        // Try to reload from storage first
         await this.loadJWTFromStorage();
-
-        // Check again after loading from storage
-        if (this.zelfKeyJWT && this.zelfKeyJWTExpiry && Date.now() < this.zelfKeyJWTExpiry) {
+        if (this.hasValidToken()) {
             return this.zelfKeyJWT;
         }
 
-        // If still no valid token, try to initialize a new session
         const sessionResult = await this.initZelfKeySession();
         return sessionResult?.data?.token || null;
     }
 
-    /**
-     * Clear the JWT token (replicating clearZelfKeyJWT from Angular service)
-     */
     public clearZelfKeyJWT(): void {
         this.zelfKeyJWT = null;
         this.zelfKeyJWTExpiry = null;
         this.saveJWTToStorage();
     }
 
-    /**
-     * Check if user is authenticated
-     */
     public async isAuthenticated(): Promise<boolean> {
         const jwt = await this.getZelfKeyJWT();
         return !!jwt;
     }
 
-    /**
-     * Initialize ZelfKey session (replicating initZelfKeySession from Angular service)
-     */
+    private isTokenExpired(): boolean {
+        return !!(this.zelfKeyJWT && this.zelfKeyJWTExpiry && Date.now() >= this.zelfKeyJWTExpiry);
+    }
+
+    private hasValidToken(): boolean {
+        return !!(this.zelfKeyJWT && this.zelfKeyJWTExpiry && Date.now() < this.zelfKeyJWTExpiry);
+    }
+
+    private clearExpiredToken(): void {
+        this.zelfKeyJWT = null;
+        this.zelfKeyJWTExpiry = null;
+    }
+
+    private cacheToken(token: string): void {
+        this.zelfKeyJWT = token;
+        this.zelfKeyJWTExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
+        this.saveJWTToStorage();
+    }
+
+    private filterPasswordsByWebsite(data: any[], website: string): PasswordEntry[] {
+        return data
+            .filter((password: any) => password.publicData?.type === "website_password")
+            .filter((password: any) => this.matchesWebsite(password, website));
+    }
+
+    private matchesWebsite(password: any, website: string): boolean {
+        if (!website) return true;
+
+        const targetDomain = website.replace(/^https?:\/\//, "").replace(/^www\./, "");
+        const passwordDomain = password.publicData?.website ? new URL(password.publicData.website).hostname : undefined;
+
+        return (
+            passwordDomain === targetDomain || password.publicData?.website?.includes(targetDomain) || password.publicData?.website === targetDomain
+        );
+    }
+
     public async initZelfKeySession(): Promise<any> {
-        // Check if we have a valid cached JWT token
-        if (this.zelfKeyJWT && this.zelfKeyJWTExpiry && Date.now() < this.zelfKeyJWTExpiry) {
+        if (this.hasValidToken()) {
             return { data: { token: this.zelfKeyJWT } };
         }
 
@@ -167,11 +181,8 @@ export class BackgroundCredentialManager {
             identifier: wallet.name,
         });
 
-        // Cache the JWT token with expiry (24 hours)
         if (response?.data?.token) {
-            this.zelfKeyJWT = response.data.token;
-            this.zelfKeyJWTExpiry = Date.now() + 24 * 60 * 60 * 1000; // 24 hours
-            this.saveJWTToStorage();
+            this.cacheToken(response.data.token);
         }
 
         return response;
@@ -208,49 +219,19 @@ export class BackgroundCredentialManager {
         }
     }
 
-    /**
-     * List stored passwords from IPFS (replicating listStoredPasswords from Angular service)
-     */
     public async listStoredPasswords(): Promise<any> {
         const jwt = await this.getZelfKeyJWT();
-
         if (!jwt) {
             throw new Error("Unable to authenticate with ZelfKey API");
         }
-
         return this.makeApiCall("GET", "/api/zelf-key/list?category=password");
     }
 
-    /**
-     * Get passwords for a specific website (wrapper for listStoredPasswords with filtering)
-     */
     public async getPasswords(website: string): Promise<PasswordEntry[]> {
         try {
             const rawResponse = await this.listStoredPasswords();
-
-            // Handle different response formats
             const data = rawResponse.data || rawResponse || [];
-
-            // Transform the raw password data to match PasswordEntry interface
-            const passwords: PasswordEntry[] = data
-                .filter((password: any) => {
-                    return password.publicData?.type === "website_password";
-                })
-                .filter((password: any) => {
-                    // Filter by website if provided
-                    if (!website) return true;
-
-                    const targetDomain = website.replace(/^https?:\/\//, "").replace(/^www\./, "");
-                    const passwordDomain = password.publicData?.website ? new URL(password.publicData.website).hostname : undefined;
-
-                    return (
-                        passwordDomain === targetDomain ||
-                        password.publicData?.website?.includes(targetDomain) ||
-                        password.publicData?.website === targetDomain
-                    );
-                });
-
-            return passwords;
+            return this.filterPasswordsByWebsite(data, website);
         } catch (error) {
             console.error("Error getting passwords:", error);
             return [];

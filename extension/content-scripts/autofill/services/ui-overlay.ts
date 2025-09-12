@@ -1,5 +1,6 @@
 /// <reference path="../types/browser.d.ts" />
 import { FormField, PasswordEntry, ZelfKeyIcon, DecryptedPasswordData } from "../types/autofill.types";
+import { logger } from "./logger";
 import { PasswordManager } from "./password-manager";
 
 export class UIOverlay {
@@ -8,6 +9,7 @@ export class UIOverlay {
     private currentMenu: HTMLElement | null = null;
     private currentField: FormField | null = null;
     private currentFieldType: "username" | "email" | "password" | null = null;
+    private isFetchingPasswords: boolean = false;
 
     constructor() {
         this.passwordManager = new PasswordManager();
@@ -19,135 +21,166 @@ export class UIOverlay {
 
     private setupStyles(): void {
         const style = document.createElement("style");
-        style.textContent = `
-      .zelfkey-icon {
-        position: absolute;
-        width: 28px;
-        height: 28px;
-        cursor: pointer;
-        opacity: 0.3;
-        z-index: 10000;
-        pointer-events: auto;
-        transition: opacity 0.2s ease-in-out;
-      }
-
-      .zelfkey-icon:hover {
-        opacity: 1;
-      }
-
-      .zelfkey-menu {
-        position: absolute;
-        background: white;
-        border: 1px solid #e0e0e0;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        z-index: 10001;
-        min-width: 200px;
-        max-width: 300px;
-        max-height: 300px;
-        overflow-y: auto;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      }
-
-      .zelfkey-menu-item {
-        padding: 12px 16px;
-        cursor: pointer;
-        border-bottom: 1px solid #f0f0f0;
-        display: flex;
-        align-items: center;
-        gap: 12px;
-        transition: background-color 0.2s ease;
-      }
-
-      .zelfkey-menu-item:hover {
-        background-color: #f8f9fa;
-      }
-
-      .zelfkey-menu-item:last-child {
-        border-bottom: none;
-      }
-
-      .zelfkey-menu-item.create {
-        color: #007bff;
-        font-weight: 500;
-      }
-
-      .zelfkey-menu-item.create:hover {
-        background-color: #e3f2fd;
-      }
-
-      .zelfkey-menu-item.loading {
-        color: #666;
-        font-style: italic;
-      }
-
-      .zelfkey-menu-item.no-credentials {
-        color: #999;
-        font-style: italic;
-        text-align: center;
-        padding: 16px;
-      }
-
-      .zelfkey-menu-item.loading .loading-spinner {
-        width: 16px;
-        height: 16px;
-        border: 2px solid #e0e0e0;
-        border-top: 2px solid #007bff;
-        border-radius: 50%;
-        animation: spin 1s linear infinite;
-        margin-right: 8px;
-      }
-
-      @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-      }
-
-      .zelfkey-menu-item-icon {
-        width: 20px;
-        height: 20px;
-        background: #171717;
-        border-radius: 4px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 12px;
-        font-weight: bold;
-      }
-
-      .zelfkey-menu-item-content {
-        flex: 1;
-        min-width: 0;
-      }
-
-      .zelfkey-menu-item-title {
-        font-weight: 500;
-        color: #333;
-        margin-bottom: 2px;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-
-      .zelfkey-menu-item-subtitle {
-        font-size: 12px;
-        color: #666;
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    `;
+        style.textContent = this.generateStyles();
         document.head.appendChild(style);
+    }
+
+    private generateStyles(): string {
+        return `
+            ${this.getIconStyles()}
+            ${this.getMenuStyles()}
+            ${this.getMenuItemStyles()}
+            ${this.getSpinnerStyles()}
+        `;
+    }
+
+    private getIconStyles(): string {
+        return `
+            .zelfkey-icon {
+                position: absolute;
+                width: 25px;
+                height: 25px;
+                cursor: pointer;
+                opacity: 0.6;
+                z-index: 10000;
+                pointer-events: auto;
+                transition: opacity 0.2s ease-in-out;
+            }
+            .zelfkey-icon:hover {
+                opacity: 1;
+            }
+        `;
+    }
+
+    private getMenuStyles(): string {
+        return `
+            .zelfkey-menu {
+                position: absolute;
+                background: white;
+                border: 1px solid #e0e0e0;
+                border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+                z-index: 10001;
+                min-width: 200px;
+                max-width: 300px;
+                max-height: 300px;
+                overflow-y: auto;
+                font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            }
+        `;
+    }
+
+    private getMenuItemStyles(): string {
+        return `
+            .zelfkey-menu-item {
+                padding: 12px 16px;
+                cursor: pointer;
+                border-bottom: 1px solid #f0f0f0;
+                display: flex;
+                align-items: center;
+                gap: 12px;
+                transition: background-color 0.2s ease;
+            }
+            .zelfkey-menu-item:hover {
+                background-color: #f8f9fa;
+            }
+            .zelfkey-menu-item:last-child {
+                border-bottom: none;
+            }
+            .zelfkey-menu-item--create {
+                color: #007bff;
+                font-weight: 500;
+            }
+            .zelfkey-menu-item--create:hover {
+                background-color: #e3f2fd;
+            }
+            .zelfkey-menu-item--loading {
+                color: #666;
+                font-style: italic;
+            }
+            .zelfkey-menu-item--no-credentials {
+                color: #999;
+                font-style: italic;
+                text-align: center;
+                padding: 16px;
+            }
+            .zelfkey-menu-item__icon {
+                width: 20px;
+                height: 20px;
+                background: #171717;
+                border-radius: 4px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                color: white;
+                font-size: 12px;
+                font-weight: bold;
+            }
+            .zelfkey-menu-item__content {
+                flex: 1;
+                min-width: 0;
+            }
+            .zelfkey-menu-item__title {
+                font-weight: 500;
+                color: #333;
+                margin-bottom: 2px;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+            .zelfkey-menu-item__subtitle {
+                font-size: 12px;
+                color: #666;
+                white-space: nowrap;
+                overflow: hidden;
+                text-overflow: ellipsis;
+            }
+        `;
+    }
+
+    private getSpinnerStyles(): string {
+        return `
+            .zelfkey-menu-item--loading .loading-spinner {
+                width: 16px;
+                height: 16px;
+                border: 2px solid #e0e0e0;
+                border-top: 2px solid #007bff;
+                border-radius: 50%;
+                animation: spin 1s linear infinite;
+                margin-right: 8px;
+            }
+            @keyframes spin {
+                0% { transform: rotate(0deg); }
+                100% { transform: rotate(360deg); }
+            }
+        `;
     }
 
     public showIconForField(field: FormField): void {
         if (this.icons.has(field.element)) {
-            return; // Icon already exists
+            const icon = this.icons.get(field.element);
+
+            if (icon) this.positionIcon(icon);
+
+            return;
         }
 
+        // Don't show icons on buttons or other non-input elements
+        if (field.element.tagName !== "INPUT") return;
+
+        // Don't show icons on very small inputs (likely decorative or hidden)
+        const rect = field.element.getBoundingClientRect();
+
+        if (rect.width < 30 || rect.height < 15) return;
+
+        if (!this.isFieldVisibleAndFocusable(field.element)) return;
+
         const icon = this.createZelfKeyIcon(field);
+
+        if (!icon) return;
+
         this.icons.set(field.element, icon);
+
         this.positionIcon(icon);
     }
 
@@ -164,22 +197,97 @@ export class UIOverlay {
         this.icons.clear();
     }
 
-    private createZelfKeyIcon(field: FormField): ZelfKeyIcon {
-        const iconElement = document.createElement("div");
+    public getIconCount(): number {
+        return this.icons.size;
+    }
 
-        iconElement.className = "zelfkey-icon";
+    private _repositionTimeout: number | null = null;
+
+    public repositionAllIcons(): void {
+        // Debounce repositioning to avoid excessive calls
+        if (this._repositionTimeout) {
+            clearTimeout(this._repositionTimeout);
+        }
+
+        this._repositionTimeout = window.setTimeout(() => {
+            this.icons.forEach((icon) => {
+                this.positionIcon(icon);
+            });
+            this._repositionTimeout = null;
+        }, 50); // 50ms debounce
+    }
+
+    public hasIconsInContainer(container: Element): boolean {
+        for (const icon of this.icons.values()) {
+            const iconRect = icon.element.getBoundingClientRect();
+            const containerRect = container.getBoundingClientRect();
+
+            // Check if icon is visible within the container
+            if (
+                iconRect.top >= containerRect.top &&
+                iconRect.bottom <= containerRect.bottom &&
+                iconRect.left >= containerRect.left &&
+                iconRect.right <= containerRect.right
+            ) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    public validateIcons(): void {
+        const iconsToRemove: HTMLInputElement[] = [];
+
+        this.icons.forEach((icon, fieldElement) => {
+            if (!document.contains(fieldElement) || !document.contains(icon.element)) {
+                iconsToRemove.push(fieldElement);
+                return;
+            }
+
+            if (!this.isFieldVisibleAndFocusable(fieldElement)) {
+                this.hideIconForField({ element: fieldElement, type: icon.field.type } as FormField);
+                iconsToRemove.push(fieldElement);
+                return;
+            }
+
+            this.positionIcon(icon);
+        });
+
+        // Remove invalid icons
+        iconsToRemove.forEach((fieldElement) => {
+            this.icons.delete(fieldElement);
+        });
+    }
+
+    private createZelfKeyIcon(field: FormField): ZelfKeyIcon | null {
+        if (!document.body || !document.contains(field.element)) {
+            logger.warn("Field element no longer in DOM or document.body not available");
+            return null;
+        }
+
+        // Create isolated icon with selective CSS reset
+        const iconElement = document.createElement("div");
+        iconElement.style.cssText = `
+            position: fixed;
+            width: 25px;
+            height: 25px;
+            cursor: pointer;
+            opacity: 0.6;
+            z-index: 10000;
+            pointer-events: auto;
+            isolation: isolate;
+            transition: opacity 0.2s ease-in-out;
+            display: block;
+            margin: 0;
+            padding: 0;
+            border: none;
+            background: none;
+            box-shadow: none;
+            transform: none;
+        `;
         iconElement.innerHTML = this.getZelfKeySVG();
 
-        // Position the icon
-        const rect = field.element.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
-
-        const position = {
-            top: rect.top + scrollTop + (rect.height - 39) / 2,
-            left: rect.right + scrollLeft - 60,
-        };
-
+        const position = this.calculateIconPosition(field.element);
         iconElement.style.top = `${position.top}px`;
         iconElement.style.left = `${position.left}px`;
 
@@ -187,6 +295,17 @@ export class UIOverlay {
         iconElement.addEventListener("click", (e) => {
             e.stopPropagation();
             this.handleIconClick(field);
+        });
+
+        // Add hover effects
+        iconElement.addEventListener("mouseenter", () => {
+            iconElement.style.opacity = "1";
+        });
+
+        iconElement.addEventListener("mouseleave", () => {
+            if (!this.isFetchingPasswords) {
+                iconElement.style.opacity = "0.6";
+            }
         });
 
         document.body.appendChild(iconElement);
@@ -198,9 +317,28 @@ export class UIOverlay {
         };
     }
 
+    private updateIconLoadingState(icon: ZelfKeyIcon, isLoading: boolean): void {
+        if (isLoading) {
+            icon.element.style.opacity = "0.5";
+            icon.element.style.cursor = "not-allowed";
+            icon.element.title = "Loading passwords...";
+            // Keep the same SVG, just disable interaction
+        } else {
+            icon.element.style.opacity = "0.6";
+            icon.element.style.cursor = "pointer";
+            icon.element.title = "ZelfKey Autofill";
+        }
+    }
+
+    private updateAllIconsLoadingState(isLoading: boolean): void {
+        this.icons.forEach((icon) => {
+            this.updateIconLoadingState(icon, isLoading);
+        });
+    }
+
     private getZelfKeySVG(): string {
         return `
-      <svg width="28" height="28" viewBox="0 0 40 39" fill="none" xmlns="http://www.w3.org/2000/svg">
+      <svg width="25" height="25" viewBox="0 0 40 39" fill="none" xmlns="http://www.w3.org/2000/svg" style="display: block; width: 25px; height: 25px;">
         <rect width="40" height="39" rx="4" fill="#171717"/>
         <path d="M20.022 5.97266C21.4836 8.01557 23.3686 10.3437 25.7409 12.7465H15.0908C17.3993 10.2408 18.9747 7.83793 20.0265 5.97266H20.022Z" fill="white"/>
         <path d="M7.00455 19.3558C8.88049 18.4255 11.3438 16.9529 13.8117 14.7136C14.0302 14.5173 14.2442 14.3163 14.4491 14.1152H23.97C23.97 14.1152 17.0718 24.1241 13.2972 24.1522C10.1827 24.1802 8.88049 20.5432 7 19.3511L7.00455 19.3558Z" fill="white"/>
@@ -211,45 +349,65 @@ export class UIOverlay {
     }
 
     private positionIcon(icon: ZelfKeyIcon): void {
-        const rect = icon.field.element.getBoundingClientRect();
-        const scrollTop = window.pageYOffset || document.documentElement.scrollTop;
-        const scrollLeft = window.pageXOffset || document.documentElement.scrollLeft;
+        const position = this.calculateIconPosition(icon.field.element);
 
-        const position = {
-            top: rect.top + scrollTop + (rect.height - 28) / 2,
-            left: rect.right + scrollLeft - 32,
-        };
+        // Check if position actually changed to avoid unnecessary updates
+        if (icon.position && Math.abs(icon.position.top - position.top) < 1 && Math.abs(icon.position.left - position.left) < 1) {
+            return; // Position hasn't changed significantly
+        }
 
+        // Position the icon element
         icon.element.style.top = `${position.top}px`;
         icon.element.style.left = `${position.left}px`;
         icon.position = position;
+
+        // Log positioning for debugging
+        logger.logIconPositioning(icon.field.element, position);
+
+        // Immediate verification of positioning
+        setTimeout(() => {
+            const actualRect = icon.element.getBoundingClientRect();
+
+            // Only log if there's a significant positioning issue
+            const verticalDiff = Math.abs(actualRect.top - position.top);
+            const horizontalDiff = Math.abs(actualRect.left - position.left);
+
+            // Position verification - no logging needed for production
+
+            // Debug indicator removed to prevent red boxes
+        }, 10);
+
+        // Test and adjust position if needed
+        this.testAndAdjustPosition(icon, icon.field.element);
     }
 
     private async handleIconClick(field: FormField): Promise<void> {
+        // Prevent multiple simultaneous fetches
+        if (this.isFetchingPasswords) {
+            return;
+        }
+
         this.currentField = field;
         this.currentFieldType = field.type;
         this.hideMenu();
 
-        // Extract hostname from current URL
-        const website = this.extractHostname(window.location.href);
+        // Disable all icons during fetch
+        this.updateAllIconsLoadingState(true);
 
-        // Show menu immediately with loading state
+        const website = this.extractHostname(window.location.href);
         this.showMenuWithLoading(field, website);
 
+        this.isFetchingPasswords = true;
         try {
-            // Add timeout to prevent hanging
-            const passwords = await Promise.race([
-                this.passwordManager.getPasswordsForWebsite(website),
-                new Promise<PasswordEntry[]>((resolve) => {
-                    setTimeout(() => {
-                        resolve([]);
-                    }, 2000);
-                }),
-            ]);
+            const passwords = await this.fetchPasswordsWithTimeout(website);
             this.updateMenuWithPasswords(passwords);
         } catch (error) {
-            console.error("Error fetching passwords:", error);
+            logger.logError(error as Error, "Password fetching");
             this.updateMenuWithPasswords([]);
+        } finally {
+            this.isFetchingPasswords = false;
+            // Re-enable all icons
+            this.updateAllIconsLoadingState(false);
         }
     }
 
@@ -315,23 +473,22 @@ export class UIOverlay {
         const item = document.createElement("div");
         item.className = "zelfkey-menu-item";
 
-        // Extract host name from website/domain/url
         const hostName = this.extractHostName(password);
         const hostInitial = hostName.charAt(0).toUpperCase();
 
         const icon = document.createElement("div");
-        icon.className = "zelfkey-menu-item-icon";
+        icon.className = "zelfkey-menu-item__icon";
         icon.textContent = hostInitial;
 
         const content = document.createElement("div");
-        content.className = "zelfkey-menu-item-content";
+        content.className = "zelfkey-menu-item__content";
 
         const title = document.createElement("div");
-        title.className = "zelfkey-menu-item-title";
+        title.className = "zelfkey-menu-item__title";
         title.textContent = hostName;
 
         const subtitle = document.createElement("div");
-        subtitle.className = "zelfkey-menu-item-subtitle";
+        subtitle.className = "zelfkey-menu-item__subtitle";
         subtitle.textContent = this.extractUsername(password);
 
         content.appendChild(title);
@@ -392,16 +549,16 @@ export class UIOverlay {
 
     private createLoadingMenuItem(): HTMLElement {
         const item = document.createElement("div");
-        item.className = "zelfkey-menu-item loading";
+        item.className = "zelfkey-menu-item zelfkey-menu-item--loading";
 
         const spinner = document.createElement("div");
         spinner.className = "loading-spinner";
 
         const content = document.createElement("div");
-        content.className = "zelfkey-menu-item-content";
+        content.className = "zelfkey-menu-item__content";
 
         const title = document.createElement("div");
-        title.className = "zelfkey-menu-item-title";
+        title.className = "zelfkey-menu-item__title";
         title.textContent = "Loading passwords...";
 
         content.appendChild(title);
@@ -413,13 +570,13 @@ export class UIOverlay {
 
     private createNoCredentialsMenuItem(): HTMLElement {
         const item = document.createElement("div");
-        item.className = "zelfkey-menu-item no-credentials";
+        item.className = "zelfkey-menu-item zelfkey-menu-item--no-credentials";
 
         const content = document.createElement("div");
-        content.className = "zelfkey-menu-item-content";
+        content.className = "zelfkey-menu-item__content";
 
         const title = document.createElement("div");
-        title.className = "zelfkey-menu-item-title";
+        title.className = "zelfkey-menu-item__title";
         title.textContent = "No credentials found";
 
         content.appendChild(title);
@@ -430,17 +587,17 @@ export class UIOverlay {
 
     private createCreateMenuItem(): HTMLElement {
         const item = document.createElement("div");
-        item.className = "zelfkey-menu-item create";
+        item.className = "zelfkey-menu-item zelfkey-menu-item--create";
 
         const icon = document.createElement("div");
-        icon.className = "zelfkey-menu-item-icon";
+        icon.className = "zelfkey-menu-item__icon";
         icon.textContent = "+";
 
         const content = document.createElement("div");
-        content.className = "zelfkey-menu-item-content";
+        content.className = "zelfkey-menu-item__content";
 
         const title = document.createElement("div");
-        title.className = "zelfkey-menu-item-title";
+        title.className = "zelfkey-menu-item__title";
         title.textContent = "Create new password";
 
         content.appendChild(title);
@@ -481,9 +638,6 @@ export class UIOverlay {
 
     private async openBiometricsPopout(password: PasswordEntry): Promise<void> {
         try {
-            console.log("Storing password decryption data for popup:", password.id);
-
-            // Send message to background script to store decryption data
             if (typeof chrome !== "undefined" && chrome.runtime) {
                 const response = await chrome.runtime.sendMessage({
                     type: "OPEN_PASSWORD_DECRYPTOR",
@@ -499,19 +653,16 @@ export class UIOverlay {
                     },
                 });
 
-                console.log("Response from background script:", response);
-
                 if (response?.success) {
-                    // Popup should open automatically, wait for it to be ready and send data
                     await this.waitForPopoutAndSendData(password);
                 } else {
-                    console.error("Failed to open popup:", response);
+                    logger.warn("Failed to open popup:", response);
                 }
             } else {
-                console.error("Chrome runtime not available");
+                logger.warn("Chrome runtime not available");
             }
         } catch (error) {
-            console.error("Error storing password decryption data:", error);
+            logger.logError(error as Error, "Password decryption data storage");
         }
     }
 
@@ -539,7 +690,6 @@ export class UIOverlay {
                     });
 
                     if (response?.success) {
-                        console.log("Decryption data sent to popout successfully");
                         return;
                     }
                 } catch (error) {
@@ -551,9 +701,9 @@ export class UIOverlay {
                 retries++;
             }
 
-            console.error("Timeout waiting for popout to be ready");
+            logger.warn("Timeout waiting for popout to be ready");
         } catch (error) {
-            console.error("Error waiting for popout and sending data:", error);
+            logger.logError(error as Error, "Popout communication");
         }
     }
 
@@ -561,9 +711,7 @@ export class UIOverlay {
         // Listen for messages from background script about decryption results
         if (typeof chrome !== "undefined" && chrome.runtime) {
             chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-                console.log("UIOverlay: Received message:", message);
                 if (message.type === "DECRYPTION_RESULT") {
-                    console.log("UIOverlay: Handling decryption result:", message.payload);
                     this.handleDecryptionResult(message.payload);
                     sendResponse({ success: true });
                 }
@@ -573,46 +721,33 @@ export class UIOverlay {
     }
 
     private handleDecryptionResult(result: any): void {
-        console.log("UIOverlay: handleDecryptionResult called");
-        console.log("UIOverlay: result.success:", result.success);
-        console.log("UIOverlay: result.data:", result.data);
-        console.log("UIOverlay: this.currentField:", this.currentField);
-        console.log("UIOverlay: this.currentFieldType:", this.currentFieldType);
-
         if (result.success && result.data && this.currentField) {
-            console.log("UIOverlay: All conditions met, calling fillField");
             // Fill the field with the decrypted data
             this.fillField(this.currentField, result.data);
         } else if (!result.success) {
-            console.error("Decryption failed:", result.error);
+            logger.logError(new Error(result.error), "Password decryption");
             // Could show an error message to the user
         } else {
-            console.error("UIOverlay: Missing required data for form filling:");
-            console.error("- result.success:", result.success);
-            console.error("- result.data:", result.data);
-            console.error("- this.currentField:", this.currentField);
+            logger.debug("Missing required data for form filling:", {
+                success: result.success,
+                hasData: !!result.data,
+                hasField: !!this.currentField,
+            });
         }
     }
 
     private fillField(field: FormField, data: DecryptedPasswordData): void {
-        console.log("UIOverlay: fillField called with field type:", field.type);
-        console.log("UIOverlay: Available data:", data);
-
         // Fill the specific field that was clicked based on its type (if visible)
         if (this.isFieldVisibleAndFocusable(field.element)) {
             if (field.type === "username" || field.type === "email") {
                 if (data.username) {
-                    console.log("UIOverlay: Filling username/email field with:", data.username);
                     this.setFieldValue(field.element, data.username);
                 }
             } else if (field.type === "password") {
                 if (data.password) {
-                    console.log("UIOverlay: Filling password field with:", data.password);
                     this.setFieldValue(field.element, data.password);
                 }
             }
-        } else {
-            console.log("UIOverlay: Primary field is not visible/focusable, skipping");
         }
 
         // Also try to fill other fields in the same form if they exist and are visible
@@ -622,20 +757,14 @@ export class UIOverlay {
             if (field.type === "password" && data.username) {
                 const usernameField = this.findUsernameFieldInForm(form);
                 if (usernameField && usernameField !== field.element && this.isFieldVisibleAndFocusable(usernameField)) {
-                    console.log("UIOverlay: Also filling username field with:", data.username);
                     this.setFieldValue(usernameField, data.username);
-                } else if (usernameField && !this.isFieldVisibleAndFocusable(usernameField)) {
-                    console.log("UIOverlay: Username field found but not visible/focusable, skipping");
                 }
             }
             // Find and fill password field if current field is username/email
             else if ((field.type === "username" || field.type === "email") && data.password) {
                 const passwordField = form.querySelector('input[type="password"]') as HTMLInputElement;
                 if (passwordField && passwordField !== field.element && this.isFieldVisibleAndFocusable(passwordField)) {
-                    console.log("UIOverlay: Also filling password field with:", data.password);
                     this.setFieldValue(passwordField, data.password);
-                } else if (passwordField && !this.isFieldVisibleAndFocusable(passwordField)) {
-                    console.log("UIOverlay: Password field found but not visible/focusable, skipping");
                 }
             }
         }
@@ -726,16 +855,122 @@ export class UIOverlay {
             const urlObj = new URL(url);
             let hostname = urlObj.hostname;
 
-            // Remove 'www.' prefix if present
             if (hostname.startsWith("www.")) {
                 hostname = hostname.substring(4);
             }
 
             return hostname;
         } catch (error) {
-            // Fallback for invalid URLs (like file:// URLs)
             console.warn("Could not parse URL:", url, error);
             return "localhost";
         }
+    }
+
+    private async fetchPasswordsWithTimeout(website: string): Promise<PasswordEntry[]> {
+        return Promise.race([
+            this.passwordManager.getPasswordsForWebsite(website),
+            new Promise<PasswordEntry[]>((resolve) => {
+                setTimeout(() => {
+                    resolve([]);
+                }, 3000);
+            }),
+        ]);
+    }
+
+    private calculateIconPosition(element: HTMLInputElement): { top: number; left: number } {
+        const rect = element.getBoundingClientRect();
+
+        // Icon size is now 25px (25% larger than 20px)
+        const iconSize = 25;
+        const padding = 6; // Small padding from the input edge
+
+        // Get computed styles to understand the actual rendered input
+        const computedStyle = window.getComputedStyle(element);
+
+        // Calculate the actual content area (excluding borders but including padding)
+        const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
+        const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
+        const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
+        const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
+
+        const paddingTop = parseFloat(computedStyle.paddingTop) || 0;
+        const paddingBottom = parseFloat(computedStyle.paddingBottom) || 0;
+        const paddingLeft = parseFloat(computedStyle.paddingLeft) || 0;
+        const paddingRight = parseFloat(computedStyle.paddingRight) || 0;
+
+        // Calculate the actual content area dimensions
+        const contentWidth = rect.width - borderLeft - borderRight;
+        const contentHeight = rect.height - borderTop - borderBottom;
+
+        // Calculate the content area position (inside borders)
+        const contentLeft = rect.left + borderLeft;
+        const contentTop = rect.top + borderTop;
+        const contentRight = contentLeft + contentWidth;
+        const contentBottom = contentTop + contentHeight;
+
+        // For position: fixed, we use viewport coordinates (no scroll offset needed)
+        const top = rect.top + (rect.height - iconSize) / 2;
+
+        // Position icon inside the content area on the right side
+        // Account for right padding to avoid overlapping with text
+        const minContentWidth = iconSize + padding * 2;
+        let left;
+
+        if (contentWidth >= minContentWidth) {
+            // Content area is wide enough - position inside, accounting for right padding
+            const rightPadding = Math.max(padding, paddingRight);
+            // Position from the right edge of the input, accounting for right padding
+            left = rect.right - iconSize - rightPadding;
+
+            // Safety check: ensure icon is within the input bounds
+            const iconRightEdge = left + iconSize;
+            if (left < rect.left) {
+                left = rect.left + 2; // Small margin from left edge
+            }
+            if (iconRightEdge > rect.right) {
+                left = rect.right - iconSize - 2; // Small margin from right edge
+            }
+        } else {
+            // Content area is too narrow - position just outside the input
+            left = rect.right - iconSize - 2;
+        }
+
+        return { top, left };
+    }
+
+    private testAndAdjustPosition(icon: ZelfKeyIcon, element: HTMLInputElement): void {
+        // After positioning, check if the icon is actually visible and properly positioned
+        setTimeout(() => {
+            const iconRect = icon.element.getBoundingClientRect();
+            const inputRect = element.getBoundingClientRect();
+            const computedStyle = window.getComputedStyle(element);
+
+            // Calculate the actual content area (same logic as positioning)
+            const borderTop = parseFloat(computedStyle.borderTopWidth) || 0;
+            const borderBottom = parseFloat(computedStyle.borderBottomWidth) || 0;
+            const borderLeft = parseFloat(computedStyle.borderLeftWidth) || 0;
+            const borderRight = parseFloat(computedStyle.borderRightWidth) || 0;
+
+            const contentWidth = inputRect.width - borderLeft - borderRight;
+            const contentHeight = inputRect.height - borderTop - borderBottom;
+            const contentLeft = inputRect.left + borderLeft;
+            const contentTop = inputRect.top + borderTop;
+            const contentRight = contentLeft + contentWidth;
+
+            // Check if icon is positioned within reasonable bounds of the input
+            const verticalDistance = Math.abs(iconRect.top - inputRect.top);
+            const horizontalDistance = Math.abs(iconRect.left - inputRect.right);
+
+            // Allow some tolerance for positioning
+            const verticalTolerance = inputRect.height * 0.5; // Half the input height
+            const horizontalTolerance = 30; // 30px horizontal tolerance
+
+            if (verticalDistance > verticalTolerance || horizontalDistance > horizontalTolerance) {
+                // Icon positioning needs adjustment
+
+                // Reposition the icon
+                this.positionIcon(icon);
+            }
+        }, 100);
     }
 }

@@ -13,102 +13,22 @@ export class ExtensionLifecycle {
         console.log("Browser API available:", this.browserApi.isBrowser);
         console.log("Chrome API available:", this.browserApi.isChrome);
 
-        // Force immediate activation
-        if (typeof self !== "undefined") {
-            console.log("Service worker is running in correct context");
-        } else {
-            console.error("Service worker is NOT running in correct context");
-        }
-
-        // Force service worker activation
-        if (typeof self !== "undefined") {
-            self.addEventListener("install", (event) => {
-                console.log("Service worker installing...");
-                (event as any).waitUntil((self as any).skipWaiting());
-            });
-
-            self.addEventListener("activate", (event) => {
-                console.log("Service worker activating...");
-                (event as any).waitUntil(
-                    (self as any).clients
-                        .claim()
-                        .then(() => {
-                            // Notify content scripts after activation is complete
-                            this.notifyServiceWorkerReady();
-                            return Promise.resolve();
-                        })
-                        .catch((error: any) => {
-                            console.error("Service worker activation failed:", error);
-                            // Still try to notify content scripts even if activation had issues
-                            this.notifyServiceWorkerReady();
-                            return Promise.resolve();
-                        })
-                );
-            });
-        }
-
+        this.validateServiceWorkerContext();
+        this.setupServiceWorkerEvents();
         this.setupSidePanel();
         this.setupEventListeners();
-
-        // For cases where the service worker is already active, notify immediately
-        // This handles the case where the service worker doesn't go through install/activate
-        setTimeout(() => {
-            this.notifyServiceWorkerReady();
-        }, 100);
+        this.scheduleServiceWorkerNotification();
     }
 
     private setupSidePanel() {
-        // Chrome API setup (primary)
-        if (this.browserApi.sidePanel) {
-            (this.browserApi.sidePanel as any).setOptions({
-                path: this.DEFAULT_INDEX,
-                enabled: true,
-            });
-        }
-
-        // Firefox specific (only if browser API is available)
-        if (this.browserApi.isBrowser) {
-            (this.browserApi.sidebarAction as any)?.setPanel({ panel: this.DEFAULT_INDEX });
-
-            (this.browserApi.menus as any)?.onClicked.addListener(() => {
-                if (this.browserApi.sidebarAction) (this.browserApi.sidebarAction as any).open();
-            });
-        }
+        this.setupChromeSidePanel();
+        this.setupFirefoxSidePanel();
     }
 
     private setupEventListeners() {
-        // Extension lifecycle events
-        if (this.browserApi.isBrowser) {
-            (this.browserApi.runtime as any)?.onInstalled.addListener(() => {
-                console.log("Extension installed");
-                // Don't automatically open full page - let popup work normally
-                // this.openFullPage();
-            });
-        } else if (this.browserApi.isChrome && this.browserApi.has("runtime")) {
-            (this.browserApi.runtime as any)?.onInstalled.addListener(() => {
-                console.log("Extension installed");
-                // Don't automatically open full page - let popup work normally
-                // this.openFullPage();
-            });
-        }
-
-        // Runtime startup and suspend events
-        if (this.browserApi.has("runtime")) {
-            (this.browserApi.runtime as any)?.onStartup.addListener(() => {
-                console.log("Background: Extension startup");
-            });
-
-            (this.browserApi.runtime as any)?.onSuspend.addListener(() => {
-                console.log("Background: Extension suspending");
-            });
-        }
-
-        // Also listen for messages on the global object
-        if (typeof self !== "undefined") {
-            self.addEventListener("message", (event) => {
-                console.log("Background: Received message via addEventListener:", event.data);
-            });
-        }
+        this.setupInstallListeners();
+        this.setupRuntimeListeners();
+        this.setupGlobalMessageListener();
     }
 
     private openFullPage() {
@@ -168,5 +88,99 @@ export class ExtensionLifecycle {
         } catch (error) {
             console.error("Error notifying content scripts:", error);
         }
+    }
+
+    private validateServiceWorkerContext(): void {
+        if (typeof self === "undefined") {
+            console.error("Service worker is NOT running in correct context");
+        } else {
+            console.log("Service worker is running in correct context");
+        }
+    }
+
+    private setupServiceWorkerEvents(): void {
+        if (typeof self === "undefined") return;
+
+        self.addEventListener("install", (event) => {
+            console.log("Service worker installing...");
+            (event as any).waitUntil((self as any).skipWaiting());
+        });
+
+        self.addEventListener("activate", (event) => {
+            console.log("Service worker activating...");
+            (event as any).waitUntil(
+                (self as any).clients
+                    .claim()
+                    .then(() => {
+                        console.log("Service worker activated successfully");
+                        this.notifyServiceWorkerReady();
+                        return Promise.resolve();
+                    })
+                    .catch((error: any) => {
+                        console.error("Service worker activation failed:", error);
+                        this.notifyServiceWorkerReady();
+                        return Promise.resolve();
+                    })
+            );
+        });
+    }
+
+    private setupChromeSidePanel(): void {
+        if (this.browserApi.sidePanel) {
+            (this.browserApi.sidePanel as any).setOptions({
+                path: this.DEFAULT_INDEX,
+                enabled: true,
+            });
+        }
+    }
+
+    private setupFirefoxSidePanel(): void {
+        if (!this.browserApi.isBrowser) return;
+
+        (this.browserApi.sidebarAction as any)?.setPanel({ panel: this.DEFAULT_INDEX });
+        (this.browserApi.menus as any)?.onClicked.addListener(() => {
+            if (this.browserApi.sidebarAction) (this.browserApi.sidebarAction as any).open();
+        });
+    }
+
+    private setupInstallListeners(): void {
+        if (this.browserApi.isBrowser) {
+            (this.browserApi.runtime as any)?.onInstalled.addListener(() => {
+                console.log("Extension installed (Firefox)");
+            });
+        } else if (this.browserApi.isChrome && this.browserApi.has("runtime")) {
+            (this.browserApi.runtime as any)?.onInstalled.addListener(() => {
+                console.log("Extension installed (Chrome)");
+            });
+        }
+    }
+
+    private setupRuntimeListeners(): void {
+        if (!this.browserApi.has("runtime")) return;
+
+        (this.browserApi.runtime as any)?.onStartup.addListener(() => {
+            console.log("Background: Extension startup");
+        });
+
+        (this.browserApi.runtime as any)?.onSuspend.addListener(() => {
+            console.log("Background: Extension suspending");
+        });
+    }
+
+    private setupGlobalMessageListener(): void {
+        if (typeof self !== "undefined") {
+            self.addEventListener("message", (event) => {
+                // Handle global messages if needed
+            });
+        }
+    }
+
+    private scheduleServiceWorkerNotification(): void {
+        // For cases where the service worker is already active, notify immediately
+        // This handles the case where the service worker doesn't go through install/activate
+        setTimeout(() => {
+            console.log("Scheduling service worker ready notification...");
+            this.notifyServiceWorkerReady();
+        }, 100);
     }
 }
