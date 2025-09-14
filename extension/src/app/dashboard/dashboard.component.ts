@@ -1,44 +1,62 @@
-import { Component, OnInit } from "@angular/core";
+import { Component, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TranslocoModule } from "@jsverse/transloco";
 import { RouterModule, Router, ActivatedRoute } from "@angular/router";
 import { WalletService } from "../wallet.service";
 import { WalletModel } from "../wallet";
 import { ChromeService } from "../chrome.service";
+import { HomeHeaderAccountsComponent } from "../home/home-header-accounts/home-header-accounts.component";
+import { MatBottomSheet } from "@angular/material/bottom-sheet";
+import { Subject, takeUntil } from "rxjs";
 
 @Component({
-    selector: "app-dashboard",
-    standalone: true,
     imports: [CommonModule, TranslocoModule, RouterModule],
-    templateUrl: "./dashboard.component.html",
+    selector: "dashboard",
+    standalone: true,
     styleUrls: ["./dashboard.component.scss"],
+    templateUrl: "./dashboard.component.html",
 })
-export class DashboardComponent implements OnInit {
-    wallet: Partial<WalletModel> = {};
-    loaded: boolean = false;
+export class DashboardComponent implements OnInit, OnDestroy {
+    private unsubscriber$: Subject<void> = new Subject<void>();
+
     activeTab: string = "start";
+    loaded: boolean = false;
+    wallet: Partial<WalletModel> = {};
 
     constructor(
-        private walletService: WalletService,
-        private router: Router,
-        private route: ActivatedRoute,
-        private chromeService: ChromeService
-    ) {}
+        private _activatedRoute: ActivatedRoute,
+        private _bottomSheet: MatBottomSheet,
+        private _chromeService: ChromeService,
+        private _router: Router,
+        private _walletService: WalletService
+    ) {
+        this.unsubscriber$ = new Subject();
+    }
 
     async ngOnInit(): Promise<void> {
         await this._initWallet();
+
         this._initNavigation();
     }
 
+    async ngOnDestroy(): Promise<void> {
+        this.unsubscriber$.next();
+        this.unsubscriber$.complete();
+    }
+
+    get zelfName(): string {
+        return this.wallet?.name ? this.wallet.name.toUpperCase() : "USER.ZELF";
+    }
+
     private async _initWallet(): Promise<void> {
-        const { wallet } = await this.walletService.getAllWalletsFromStorage();
+        const { wallet } = await this._walletService.getAllWalletsFromStorage();
+
         this.wallet = wallet || {};
         this.loaded = true;
     }
 
     private _initNavigation(): void {
-        // Get the current route to set active tab
-        this.route.url.subscribe((segments) => {
+        this._activatedRoute.url.pipe(takeUntil(this.unsubscriber$)).subscribe((segments) => {
             if (segments.length > 0) {
                 this.activeTab = segments[0].path;
             } else {
@@ -50,50 +68,40 @@ export class DashboardComponent implements OnInit {
     async navigateToTab(tab: string): Promise<void> {
         this.activeTab = tab;
 
-        console.log("DashboardComponent: Navigating to tab:", tab);
-        console.log("DashboardComponent: Is extension:", this.chromeService.isExtension);
-        console.log("DashboardComponent: Is popout:", this.chromeService.isPopout);
-        console.log("DashboardComponent: Is side panel:", this.chromeService.isSidePanel);
-
-        // Check if we're navigating to the password-decryptor route
-        // If so, don't open fullscreen - stay in popup mode
         if (tab === "passwords/decrypt") {
-            console.log("DashboardComponent: Decrypt route detected - staying in popup mode");
-            // Navigate normally without opening fullscreen
-            this.router.navigate(["/dashboard", tab]);
+            this._router.navigate(["/dashboard", tab]);
+
             return;
         }
 
-        // Ensure extension opens in full screen for better user experience
-        // This is especially important for the passwords tab and other sensitive data
-        if (this.chromeService.isExtension) {
-            // Check if we're currently in a popup or side panel
-            if (this.chromeService.isPopout || this.chromeService.isSidePanel) {
-                console.log("DashboardComponent: Opening full page for popup/sidepanel");
-                // Open the specific tab in full page mode
-                await this.chromeService.openFullPage(`dashboard/${tab}`);
+        if (this._chromeService.isExtension) {
+            if (this._chromeService.isPopout || this._chromeService.isSidePanel) {
+                await this._chromeService.openFullPage(`dashboard/${tab}`);
+
                 return;
             } else {
-                console.log("DashboardComponent: Ensuring full screen for tab");
-                // Ensure we're in full screen mode for the current tab
-                await this.chromeService.ensureFullScreen(`dashboard/${tab}`);
+                await this._chromeService.ensureFullScreen(`dashboard/${tab}`);
+
                 return;
             }
         }
 
-        // If not in extension mode, navigate normally
         if (tab === "start") {
-            this.router.navigate(["/dashboard"]);
+            this._router.navigate(["/dashboard"]);
         } else {
-            this.router.navigate(["/dashboard", tab]);
+            this._router.navigate(["/dashboard", tab]);
         }
     }
 
     navigateToWallet(): void {
-        this.router.navigate(["/home"]);
+        this._router.navigate(["/home"]);
     }
 
-    get zelfName(): string {
-        return this.wallet?.name ? this.wallet.name.toUpperCase() : "USER.ZELF";
+    openBottomSheet(): void {
+        this._bottomSheet.open(HomeHeaderAccountsComponent, {
+            backdropClass: "zelf-backdrop",
+            panelClass: "zelf-bottom-sheet-seasalt",
+            data: this.wallet,
+        });
     }
 }

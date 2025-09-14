@@ -1,59 +1,61 @@
-<div class="dashboard-container">
-	<div class="dashboard-card">
-		<header class="dashboard-header">
-			<div class="header-left">
-				<div class="logo">
-					<div class="logo-icon"></div>
-					<span class="logo-text">ZelfKeys</span>
-				</div>
-			</div>
+<div class="zelf-card dashboard" *transloco="let t">
+    <div class="dashboard__header">
+        <div class="dashboard__wallet-badge" [routerLink]="['/home']">
+            <div class="dashboard__wallet-icon" data-svg-wrapper>
+                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path
+                        d="M21.0002 4.66602H7.00016C4.42183 4.66602 2.3335 6.75435 2.3335 9.33268V18.666C2.3335 21.2444 4.42183 23.3327 7.00016 23.3327H21.0002C23.5785 23.3327 25.6668 21.2444 25.6668 18.666V9.33268C25.6668 6.75435 23.5785 4.66602 21.0002 4.66602ZM18.8302 16.0644C18.5502 16.2977 18.1652 16.391 17.8035 16.2977L4.84183 13.1243C5.19183 12.2727 6.02016 11.666 7.00016 11.666H21.0002C21.7818 11.666 22.4702 12.0627 22.9018 12.646L18.8302 16.0644ZM7.00016 6.99935H21.0002C22.2835 6.99935 23.3335 8.04935 23.3335 9.33268V9.97435C22.6452 9.57768 21.8518 9.33268 21.0002 9.33268H7.00016C6.1485 9.33268 5.35516 9.57768 4.66683 9.97435V9.33268C4.66683 8.04935 5.71683 6.99935 7.00016 6.99935Z"
+                        fill="#181818"
+                    />
+                </svg>
+            </div>
 
-			<div class="header-center">
-				<div class="user-info">
-					<span class="username">{{ zelfName }}</span>
-				</div>
-			</div>
+            <div class="dashboard__wallet-text">WALLET</div>
+        </div>
 
-			<div class="header-right">
-				<button class="wallet-button" (click)="navigateToWallet()" title="Go to Wallet">
-					<div class="wallet-icon">
-						<svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path
-								d="M21 18V19C21 19.55 20.55 20 20 20H4C3.45 20 3 19.55 3 19V5C3 4.45 3.45 4 4 4H20C20.55 4 21 4.45 21 5V6H12C11.45 6 11 6.45 11 7V17C11 17.55 11.45 18 12 18H21ZM12 16H22V8H12V16ZM16 13.5C15.17 13.5 14.5 12.83 14.5 12C14.5 11.17 15.17 10.5 16 10.5C16.83 10.5 17.5 11.17 17.5 12C17.5 12.83 16.83 13.5 16 13.5Z"
-								fill="currentColor"
-							/>
-						</svg>
-					</div>
-					<span class="button-text">Wallet</span>
-				</button>
-			</div>
-		</header>
+        <div class="dashboard__user-info" (click)="openBottomSheet()">
+            <div class="dashboard__user-content">
+                <div class="dashboard__user-text">{{ zelfName }}</div>
 
-		<nav class="dashboard-nav">
-			<div class="nav-item" [class.active]="activeTab === 'start'" (click)="navigateToTab('start')">
-				<span class="nav-text">Start</span>
-				<div class="active-indicator" *ngIf="activeTab === 'start'"></div>
-			</div>
-			<div class="nav-item" [class.active]="activeTab === 'passwords'" (click)="navigateToTab('passwords')">
-				<span class="nav-text">Passwords</span>
-				<div class="active-indicator" *ngIf="activeTab === 'passwords'"></div>
-			</div>
-			<div class="nav-item" [class.active]="activeTab === 'notes'" (click)="navigateToTab('notes')">
-				<span class="nav-text">Notes</span>
-				<div class="active-indicator" *ngIf="activeTab === 'notes'"></div>
-			</div>
-			<div class="nav-item" [class.active]="activeTab === 'payment-cards'" (click)="navigateToTab('payment-cards')">
-				<span class="nav-text">Payment Cards</span>
-				<div class="active-indicator" *ngIf="activeTab === 'payment-cards'"></div>
-			</div>
-			<div class="nav-item" [class.active]="activeTab === 'billing'" (click)="navigateToTab('billing')">
-				<span class="nav-text">Billing</span>
-				<div class="active-indicator" *ngIf="activeTab === 'billing'"></div>
-			</div>
-		</nav>
+                <div class="dashboard__user-icon" data-svg-wrapper>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <g clip-path="url(#clip0_131_2103)">
+                            <path
+                                d="M8 -3.8147e-06C9.58225 -3.8147e-06 11.129 0.469188 12.4446 1.34824C13.7602 2.22729 14.7855 3.47672 15.391 4.93853C15.9965 6.40034 16.155 8.00887 15.8463 9.56072C15.5376 11.1126 14.7757 12.538 13.6569 13.6569C12.538 14.7757 11.1126 15.5376 9.56072 15.8463C8.00887 16.155 6.40034 15.9965 4.93853 15.391C3.47672 14.7855 2.22729 13.7602 1.34824 12.4446C0.469192 11.129 0 9.58225 0 8C0.00229405 5.87897 0.845886 3.84547 2.34568 2.34567C3.84547 0.845881 5.87897 0.00228977 8 -3.8147e-06ZM8 10.6667C8.48801 10.6672 8.95928 10.4888 9.32467 10.1653C9.54267 9.97133 9.74933 9.78266 9.88467 9.64733L11.8 7.76466C11.8666 7.70438 11.9203 7.63127 11.9579 7.54971C11.9955 7.46816 12.0163 7.37984 12.0189 7.29006C12.0216 7.20029 12.006 7.1109 11.9733 7.02728C11.9405 6.94365 11.8912 6.86751 11.8283 6.80342C11.7653 6.73933 11.6901 6.68861 11.6071 6.65432C11.5241 6.62002 11.435 6.60285 11.3452 6.60384C11.2554 6.60483 11.1667 6.62395 11.0845 6.66007C11.0023 6.69618 10.9282 6.74854 10.8667 6.814L8.94667 8.7C8.82133 8.82466 8.63467 8.994 8.44067 9.16666C8.31888 9.27409 8.16207 9.33337 7.99967 9.33337C7.83727 9.33337 7.68046 9.27409 7.55867 9.16666C7.36533 8.99466 7.17867 8.82533 7.05733 8.70466L5.13333 6.814C5.00572 6.69845 4.83836 6.63675 4.66628 6.64181C4.49421 6.64687 4.33076 6.7183 4.21016 6.84114C4.08955 6.96399 4.02115 7.12872 4.01925 7.30086C4.01736 7.473 4.08213 7.6392 4.2 7.76466L6.11867 9.65066C6.252 9.784 6.45667 9.97066 6.674 10.1633C7.03934 10.488 7.51124 10.6671 8 10.6667Z"
+                                fill="#181818"
+                            />
+                        </g>
 
-		<main class="dashboard-content">
-			<router-outlet></router-outlet>
-		</main>
-	</div>
+                        <defs>
+                            <clipPath id="clip0_131_2103">
+                                <rect width="16" height="16" fill="white" transform="matrix(1 0 0 -1 0 16)" />
+                            </clipPath>
+                        </defs>
+                    </svg>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <nav class="dashboard__nav">
+        <div class="dashboard__nav-item" [class.dashboard__nav-item--active]="activeTab === 'start'" (click)="navigateToTab('start')">
+            <div class="dashboard__nav-text">Start</div>
+        </div>
+        <div class="dashboard__nav-item" [class.dashboard__nav-item--active]="activeTab === 'passwords'" (click)="navigateToTab('passwords')">
+            <div class="dashboard__nav-text">Passwords</div>
+        </div>
+        <div class="dashboard__nav-item" [class.dashboard__nav-item--active]="activeTab === 'notes'" (click)="navigateToTab('notes')">
+            <div class="dashboard__nav-text">Notes</div>
+        </div>
+        <div class="dashboard__nav-item" [class.dashboard__nav-item--active]="activeTab === 'payment-cards'" (click)="navigateToTab('payment-cards')">
+            <div class="dashboard__nav-text">Payment Cards</div>
+        </div>
+        <div class="dashboard__nav-item" [class.dashboard__nav-item--active]="activeTab === 'billing'" (click)="navigateToTab('billing')">
+            <div class="dashboard__nav-text">Subscription</div>
+        </div>
+    </nav>
+
+    <main class="dashboard__content">
+        <router-outlet></router-outlet>
+    </main>
 </div>

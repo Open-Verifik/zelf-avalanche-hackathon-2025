@@ -1,226 +1,196 @@
-.dashboard-container {
-	min-height: 100vh;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	background: transparent;
-	padding: 20px;
-	box-sizing: border-box;
+@use "../../styles/variables";
 
-	.dashboard-card {
-		background: white;
-		border-radius: 24px;
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-		width: 100%;
-		max-width: 800px;
-		overflow: hidden;
-		display: flex;
-		flex-direction: column;
-		min-height: 600px;
+:host {
+    align-items: center;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    justify-content: center;
+}
 
-		.dashboard-header {
-			display: flex;
-			align-items: center;
-			justify-content: space-between;
-			padding: 24px 32px;
-			border-bottom: 1px solid #f0f0f0;
-			background: white;
+.dashboard {
+    width: 764px;
+    height: 840px;
+    padding: 40px;
+    background: white;
+    overflow: hidden;
+    border-radius: 40px;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    gap: 32px;
+    display: inline-flex;
 
-			.header-left {
-				.logo {
-					display: flex;
-					align-items: center;
-					gap: 12px;
+    &__header {
+        align-self: stretch;
+        justify-content: space-between;
+        align-items: flex-start;
+        display: inline-flex;
+    }
 
-					.logo-icon {
-						width: 32px;
-						height: 32px;
-						background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-						border-radius: 8px;
-						position: relative;
+    &__wallet-badge {
+        padding: 12px 16px;
+        background: #f9f9fc;
+        border-radius: 48px;
+        justify-content: center;
+        align-items: center;
+        gap: 8px;
+        display: flex;
+    }
 
-						&::before {
-							content: "";
-							position: absolute;
-							top: 50%;
-							left: 50%;
-							transform: translate(-50%, -50%);
-							width: 16px;
-							height: 16px;
-							background: white;
-							border-radius: 2px;
-						}
-					}
+    &__wallet-icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
 
-					.logo-text {
-						font-size: 20px;
-						font-weight: 700;
-						color: #1a1a1a;
-						letter-spacing: -0.5px;
-					}
-				}
-			}
+        svg {
+            fill: #181818;
+        }
+    }
 
-			.header-center {
-				.user-info {
-					.username {
-						font-size: 18px;
-						font-weight: 600;
-						color: #666;
-						background: #f8f9fa;
-						padding: 8px 16px;
-						border-radius: 20px;
-						border: 1px solid #e0e0e0;
-					}
-				}
-			}
+    &__wallet-text {
+        justify-content: center;
+        display: flex;
+        flex-direction: column;
+        color: #181818;
+        font-size: 14px;
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 600;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        word-wrap: break-word;
+    }
 
-			.header-right {
-				.wallet-button {
-					display: flex;
-					align-items: center;
-					gap: 8px;
-					background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-					border: none;
-					border-radius: 20px;
-					padding: 10px 16px;
-					cursor: pointer;
-					transition: all 0.2s ease;
-					color: white;
-					font-weight: 500;
-					font-size: 14px;
-					box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+    &__user-info {
+        align-self: stretch;
+        padding: 12px 16px 12px 24px;
+        background: white;
+        box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.04);
+        border-radius: 32px;
+        outline: 1px #eeedf1 solid;
+        outline-offset: -1px;
+        justify-content: flex-start;
+        align-items: center;
+        gap: 16px;
+        display: flex;
+    }
 
-					&:hover {
-						transform: translateY(-1px);
-						box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
-					}
+    &__user-content {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        width: 100%;
+    }
 
-					&:active {
-						transform: translateY(0);
-					}
+    &__user-text {
+        justify-content: center;
+        display: flex;
+        flex-direction: column;
+        color: #181818;
+        font-size: 14px;
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 600;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        word-wrap: break-word;
+    }
 
-					.wallet-icon {
-						width: 18px;
-						height: 18px;
-						color: white;
-						display: flex;
-						align-items: center;
-						justify-content: center;
-					}
+    &__user-icon {
+        position: relative;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
 
-					.button-text {
-						color: white;
-						font-weight: 600;
-					}
-				}
-			}
-		}
+        svg {
+            fill: #181818;
+        }
+    }
 
-		.dashboard-nav {
-			background: white;
-			padding: 0 32px;
-			border-bottom: 1px solid #f0f0f0;
-			display: flex;
-			gap: 4px;
-			overflow-x: auto;
-			scrollbar-width: none;
-			-ms-overflow-style: none;
+    &__nav {
+        align-self: stretch;
+        padding: 16px 0;
+        border-top: 1px #cdcdcd solid;
+        border-bottom: 1px #cdcdcd solid;
+        justify-content: flex-start;
+        align-items: flex-start;
+        display: inline-flex;
+    }
 
-			&::-webkit-scrollbar {
-				display: none;
-			}
+    &__nav-item {
+        flex: 1 1 0;
+        justify-content: center;
+        align-items: center;
+        gap: 10px;
+        display: flex;
+        cursor: pointer;
+        transition: all 0.2s ease;
 
-			.nav-item {
-				position: relative;
-				padding: 16px 20px;
-				cursor: pointer;
-				transition: all 0.2s ease;
-				white-space: nowrap;
-				display: flex;
-				align-items: center;
-				border-radius: 12px 12px 0 0;
-				font-size: 14px;
-				font-weight: 500;
-				color: #666;
+        &--active {
+            .dashboard__nav-text {
+                color: #181818;
+                font-weight: 500;
+            }
+        }
 
-				&:hover {
-					background: #f8f9fa;
-					color: #333;
-				}
+        &:hover {
+            .dashboard__nav-text {
+                color: #181818;
+            }
+        }
+    }
 
-				&.active {
-					background: #f0f8ff;
-					color: #1976d2;
-					font-weight: 600;
+    &__nav-text {
+        text-align: center;
+        justify-content: center;
+        display: flex;
+        flex-direction: column;
+        color: #73777f;
+        font-size: 14px;
+        font-family: "Poppins", Arial, sans-serif;
+        font-weight: 500;
+        line-height: 20px;
+        letter-spacing: 0.1px;
+        word-wrap: break-word;
+        transition: color 0.2s ease;
+    }
 
-					.nav-text {
-						color: #1976d2;
-					}
-
-					.active-indicator {
-						position: absolute;
-						bottom: 0;
-						left: 0;
-						right: 0;
-						height: 3px;
-						background: #1976d2;
-						border-radius: 3px 3px 0 0;
-					}
-				}
-
-				.nav-text {
-					transition: color 0.2s ease;
-				}
-			}
-		}
-
-		.dashboard-content {
-			flex: 1;
-			overflow: auto;
-			background: white;
-			padding: 32px;
-			min-height: 400px;
-		}
-	}
+    &__content {
+        flex: 1;
+        overflow: auto;
+        background: white;
+        padding: 32px;
+        min-height: 400px;
+    }
 }
 
 // Responsive design
 @media (max-width: 768px) {
-	.dashboard-container {
-		padding: 16px;
+    .dashboard {
+        width: 100%;
+        height: auto;
+        padding: 24px;
+        border-radius: 24px;
+        gap: 24px;
 
-		.dashboard-card {
-			border-radius: 20px;
-			min-height: 500px;
+        &__header {
+            flex-direction: column;
+            gap: 16px;
+        }
 
-			.dashboard-header {
-				padding: 20px 24px;
-				flex-direction: column;
-				gap: 16px;
+        &__user-info {
+            width: 100%;
+        }
 
-				.header-left,
-				.header-center,
-				.header-right {
-					width: 100%;
-					display: flex;
-					justify-content: center;
-				}
-			}
+        &__nav {
+            flex-wrap: wrap;
+            gap: 8px;
+        }
 
-			.dashboard-nav {
-				padding: 0 24px;
-				justify-content: center;
-
-				.nav-item {
-					padding: 12px 16px;
-					font-size: 13px;
-				}
-			}
-
-			.dashboard-content {
-				padding: 24px;
-			}
-		}
-	}
+        &__nav-item {
+            flex: 1 1 auto;
+            min-width: 120px;
+        }
+    }
 }
