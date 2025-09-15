@@ -1,89 +1,87 @@
-import { Component, OnInit, OnDestroy } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { Component, OnDestroy, OnInit } from "@angular/core";
+import { Router, RouterModule } from "@angular/router";
 import { TranslocoModule } from "@jsverse/transloco";
-import { RouterModule, Router } from "@angular/router";
-import { Subject, takeUntil } from "rxjs";
-import { WalletService } from "../../wallet.service";
+import { Subject } from "rxjs";
 import { ChromeService } from "../../chrome.service";
+import { NoteDataService } from "../../services/note-data.service";
+import { WalletService } from "../../wallet.service";
 import { DataCardComponent } from "../shared/data-card.component";
 
 @Component({
-	selector: "app-zelf-keys-notes",
-	standalone: true,
-	imports: [CommonModule, TranslocoModule, RouterModule, DataCardComponent],
-	templateUrl: "./zelf-keys-notes.component.html",
-	styleUrls: ["./zelf-keys-notes.component.scss"],
+    imports: [CommonModule, TranslocoModule, RouterModule, DataCardComponent],
+    selector: "app-zelf-keys-notes",
+    standalone: true,
+    styleUrls: ["./zelf-keys-notes.component.scss"],
+    templateUrl: "./zelf-keys-notes.component.html",
 })
 export class ZelfKeysNotesComponent implements OnInit, OnDestroy {
-	storedNotes: any[] = [];
-	loading = false;
-	error: string | null = null;
-	private destroy$ = new Subject<void>();
+    private destroy$ = new Subject<void>();
 
-	constructor(
-		private router: Router,
-		private walletService: WalletService,
-		private chromeService: ChromeService
-	) {}
+    error: string | null = null;
+    loading = false;
+    storedNotes: any[] = [];
 
-	async ngOnInit(): Promise<void> {
-		// Ensure extension is in full screen mode for better user experience
-		if (this.chromeService.isExtension) {
-			await this.chromeService.ensureFullScreen("dashboard/notes");
-		}
+    constructor(
+        private router: Router,
+        private walletService: WalletService,
+        private chromeService: ChromeService,
+        private noteDataService: NoteDataService
+    ) {}
 
-		this.loadStoredNotes();
-	}
+    async ngOnInit(): Promise<void> {
+        // Ensure extension is in full screen mode for better user experience
+        if (this.chromeService.isExtension) {
+            await this.chromeService.ensureFullScreen("dashboard/notes");
+        }
 
-	ngOnDestroy(): void {
-		this.destroy$.next();
-		this.destroy$.complete();
-	}
+        this.loadStoredNotes();
+    }
 
-	async loadStoredNotes(): Promise<void> {
-		this.loading = true;
-		this.error = null;
+    ngOnDestroy(): void {
+        this.destroy$.next();
+        this.destroy$.complete();
+    }
 
-		try {
-			const response = await this.walletService.listStoredNotes();
+    async loadStoredNotes(): Promise<void> {
+        this.loading = true;
+        this.error = null;
 
-			console.log("Full notes response:", response);
+        try {
+            const response = await this.walletService.listStoredNotes();
 
-			if (response?.data && Array.isArray(response.data)) {
-				this.storedNotes = response.data;
-				console.log("Stored notes:", this.storedNotes);
-			} else if (response?.data && Array.isArray(response.data.data)) {
-				// Handle nested data structure
-				this.storedNotes = response.data.data;
-				console.log("Stored notes (nested):", this.storedNotes);
-			} else {
-				console.log("No valid data structure found in notes response");
-				this.storedNotes = [];
-			}
-		} catch (error) {
-			console.error("Error loading stored notes:", error);
-			this.error = "Failed to load stored notes. Please try again.";
-			this.storedNotes = [];
-		} finally {
-			this.loading = false;
-		}
-	}
+            if (response?.data && Array.isArray(response.data)) {
+                this.storedNotes = response.data;
+            } else if (response?.data && Array.isArray(response.data.data)) {
+                // Handle nested data structure
+                this.storedNotes = response.data.data;
+            } else {
+                this.storedNotes = [];
+            }
+        } catch (error) {
+            console.error("Error loading stored notes:", error);
+            this.error = "Failed to load stored notes. Please try again.";
+            this.storedNotes = [];
+        } finally {
+            this.loading = false;
+        }
+    }
 
-	onAddNote(): void {
-		this.router.navigate(["/dashboard/notes/new"]);
-	}
+    onAddNote(): void {
+        this.router.navigate(["/dashboard/notes/new"]);
+    }
 
-	onRefresh(): void {
-		this.loadStoredNotes();
-	}
+    onRefresh(): void {
+        this.loadStoredNotes();
+    }
 
-	onNoteClick(note: any): void {
-		console.log("Note clicked:", note);
-		// Navigate to note detail view or handle note action
-		// this.router.navigate(["/dashboard/notes/detail"]);
-	}
+    onNoteClick(note: any): void {
+        // Store the note data and navigate to detail view
+        this.noteDataService.setCurrentNote(note);
+        this.router.navigate(["/dashboard/notes/detail"]);
+    }
 
-	trackByNote(index: number, note: any): any {
-		return note.id || note.publicData?.id || index;
-	}
+    trackByNote(index: number, note: any): any {
+        return note.id || note.publicData?.id || index;
+    }
 }

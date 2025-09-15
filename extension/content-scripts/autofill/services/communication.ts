@@ -114,9 +114,52 @@ export class CommunicationService {
         // Handle any incoming messages from background script
         if (message.type === "SERVICE_WORKER_READY") {
             this.serviceWorkerReadyCallbacks.forEach((callback) => callback());
+        } else if (message.type === "WAIT_FOR_FORM_READY") {
+            // Store the tab ID and wait for forms to be ready
+            this.waitForFormReady(message.payload?.tabId);
         }
 
         sendResponse({ success: true });
+    }
+
+    private waitForFormReady(tabId: number): void {
+        // Check if forms are already present
+        const hasForms = document.querySelectorAll('input[type="password"], input[type="email"], input[type="text"]').length > 0;
+
+        if (hasForms) {
+            // Forms are already ready, send immediate response
+            this.sendFormReadyMessage(tabId);
+        } else {
+            // Wait for forms to appear
+            const observer = new MutationObserver((mutations) => {
+                const hasFormsNow = document.querySelectorAll('input[type="password"], input[type="email"], input[type="text"]').length > 0;
+                if (hasFormsNow) {
+                    observer.disconnect();
+                    this.sendFormReadyMessage(tabId);
+                }
+            });
+
+            observer.observe(document.body, {
+                childList: true,
+                subtree: true,
+            });
+
+            // Timeout after 10 seconds
+            setTimeout(() => {
+                observer.disconnect();
+                this.sendFormReadyMessage(tabId);
+            }, 10000);
+        }
+    }
+
+    private sendFormReadyMessage(tabId: number): void {
+        // Send message back to the extension
+        if (typeof chrome !== "undefined" && chrome.runtime) {
+            chrome.runtime.sendMessage({
+                type: "FORM_READY",
+                payload: { tabId },
+            });
+        }
     }
 
     public onServiceWorkerReady(callback: () => void): void {

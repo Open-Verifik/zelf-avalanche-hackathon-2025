@@ -2,16 +2,20 @@ import { NgModule } from "@angular/core";
 import { RouterModule, Routes } from "@angular/router";
 import { environment } from "../environments/environment";
 
-import { LoginGuard } from "./guards/login.guard";
-
 import { ExternalRedirectGuard } from "./guards/external-redirect.guard";
-import { PasswordGuard } from "./guards/password.guard";
-import { ZelfNameGuard } from "./guards/zelf-name.guard";
-import { WalletGuard } from "./guards/wallet.guard";
+import { LoginGuard } from "./guards/login.guard";
 import { MnemonicGuard } from "./guards/mnemonic.guard";
 import { OnboardingGuard } from "./guards/onboarding.guard";
+import { PasswordGuard } from "./guards/password.guard";
 import { PopoutOnlyGuard } from "./guards/popout-only.guard";
+import { WalletGuard } from "./guards/wallet.guard";
+import { ZelfKeysPasswordGuard } from "./guards/zelf-keys-password.guard";
+import { ZelfKeysNoteGuard } from "./guards/zelf-keys-note.guard";
+import { ZelfKeysResultGuard } from "./guards/zelf-keys-result.guard";
+import { ZelfKeysPaymentCardGuard } from "./guards/zelf-keys-payment-card.guard";
+import { ZelfNameGuard } from "./guards/zelf-name.guard";
 import { JWTResolver } from "./resolvers/jwt.resolver";
+
 import { SecurityBiometricsComponent } from "./security-biometrics/security-biometrics.component";
 
 const routes: Routes = [
@@ -42,12 +46,14 @@ const routes: Routes = [
                 children: [
                     { path: "", redirectTo: "start", pathMatch: "full" },
                     { path: "start", loadComponent: () => import("./dashboard/start/start.component").then((m) => m.StartComponent) },
+
                     // Redirect singular 'password' to plural 'passwords' to fix routing issues
-                    { path: "password", redirectTo: "passwords", pathMatch: "full" },
-                    { path: "note", redirectTo: "notes", pathMatch: "full" },
                     { path: "address", redirectTo: "addresses", pathMatch: "full" },
-                    { path: "payment-card", redirectTo: "payment-cards", pathMatch: "full" },
                     { path: "bank-account", redirectTo: "bank-accounts", pathMatch: "full" },
+                    { path: "note", redirectTo: "notes", pathMatch: "full" },
+                    { path: "password", redirectTo: "passwords", pathMatch: "full" },
+                    { path: "payment-card", redirectTo: "payment-cards", pathMatch: "full" },
+
                     {
                         path: "passwords",
                         loadComponent: () =>
@@ -58,13 +64,13 @@ const routes: Routes = [
                         loadComponent: () =>
                             import("./dashboard/zelf-keys-passwords/password-form/password-form.component").then((m) => m.PasswordFormComponent),
                     },
-
                     {
                         path: "passwords/result",
                         loadComponent: () =>
                             import("./dashboard/zelf-keys-passwords/password-result/password-result.component").then(
                                 (m) => m.PasswordResultComponent
                             ),
+                        canActivate: [ZelfKeysResultGuard],
                     },
                     {
                         path: "passwords/detail",
@@ -72,6 +78,7 @@ const routes: Routes = [
                             import("./dashboard/zelf-keys-passwords/password-detail/password-detail.component").then(
                                 (m) => m.PasswordDetailComponent
                             ),
+                        canActivate: [ZelfKeysPasswordGuard],
                     },
                     {
                         path: "notes",
@@ -81,11 +88,17 @@ const routes: Routes = [
                         path: "notes/new",
                         loadComponent: () => import("./dashboard/zelf-keys-notes/note-form/note-form.component").then((m) => m.NoteFormComponent),
                     },
-                    // Removed notes/biometrics route - using modal instead
                     {
                         path: "notes/result",
                         loadComponent: () =>
                             import("./dashboard/zelf-keys-notes/note-result/note-result.component").then((m) => m.NoteResultComponent),
+                        canActivate: [ZelfKeysResultGuard],
+                    },
+                    {
+                        path: "notes/detail",
+                        loadComponent: () =>
+                            import("./dashboard/zelf-keys-notes/note-detail/note-detail.component").then((m) => m.NoteDetailComponent),
+                        canActivate: [ZelfKeysNoteGuard],
                     },
                     {
                         path: "payment-cards",
@@ -107,6 +120,15 @@ const routes: Routes = [
                             import("./dashboard/zelf-keys-payment-cards/payment-card-result/payment-card-result.component").then(
                                 (m) => m.PaymentCardResultComponent
                             ),
+                        canActivate: [ZelfKeysResultGuard],
+                    },
+                    {
+                        path: "payment-cards/detail",
+                        loadComponent: () =>
+                            import("./dashboard/zelf-keys-payment-cards/payment-card-detail/payment-card-detail.component").then(
+                                (m) => m.PaymentCardDetailComponent
+                            ),
+                        canActivate: [ZelfKeysPaymentCardGuard],
                     },
                     {
                         path: "billing",

@@ -5,26 +5,28 @@ import { Router } from "@angular/router";
 import { ChromeService } from "../../chrome.service";
 import { HttpWrapperService } from "../../http-wrapper.service";
 import { WalletService } from "../../wallet.service";
+import { PaymentCardDataService } from "../../services/payment-card-data.service";
 import { environment } from "../../../environments/environment";
 
 @Component({
+    imports: [CommonModule, TranslocoModule],
     selector: "app-zelf-keys-payment-cards",
     standalone: true,
-    imports: [CommonModule, TranslocoModule],
-    templateUrl: "./zelf-keys-payment-cards.component.html",
     styleUrls: ["./zelf-keys-payment-cards.component.scss"],
+    templateUrl: "./zelf-keys-payment-cards.component.html",
 })
 export class ZelfKeysPaymentCardsComponent implements OnInit, AfterViewInit {
-    paymentCards: any[] = [];
-    isLoading = false;
-    error: string | null = null;
     apiKeysSessionJWT: string = "";
+    error: string | null = null;
+    isLoading = false;
+    paymentCards: any[] = [];
 
     constructor(
         private chromeService: ChromeService,
         private router: Router,
         private httpWrapperService: HttpWrapperService,
-        private walletService: WalletService
+        private walletService: WalletService,
+        private _paymentCardDataService: PaymentCardDataService
     ) {}
 
     async ngOnInit(): Promise<void> {
@@ -54,18 +56,14 @@ export class ZelfKeysPaymentCardsComponent implements OnInit, AfterViewInit {
                 return;
             }
 
-            console.log("Initializing ZelfKey session for wallet:", wallet.ethAddress);
-
             // The wallet service now caches the JWT token
             const sessionResponse = await this.walletService.initZelfKeySession();
-            console.log("Session response:", sessionResponse);
 
             // Get the cached token
             const jwt = await this.walletService.getZelfKeyJWT();
 
             if (jwt) {
                 this.apiKeysSessionJWT = jwt;
-                console.log("JWT token obtained successfully");
             } else {
                 console.error("Failed to get ZelfKey JWT token");
                 this.error = "Authentication failed. Please ensure you have a valid wallet.";
@@ -115,6 +113,7 @@ export class ZelfKeysPaymentCardsComponent implements OnInit, AfterViewInit {
                     // Extract expiry month and year from the expires field (format: "12/26")
                     let expiryMonth = "";
                     let expiryYear = "";
+
                     if (parsedCardData.expires) {
                         const [month, year] = parsedCardData.expires.split("/");
                         expiryMonth = month;
@@ -122,20 +121,23 @@ export class ZelfKeysPaymentCardsComponent implements OnInit, AfterViewInit {
                     }
 
                     const _item = {
-                        id: item.id,
-                        zelfQR: item.url,
+                        bankName: parsedCardData.bankName || "Unknown Bank",
                         cardName: parsedCardData.name || "Unknown",
                         cardNumber: parsedCardData.number || "",
+                        createdAt: new Date(item.timestamp),
                         expiryMonth: expiryMonth,
                         expiryYear: expiryYear,
-                        bankName: parsedCardData.bankName || "Unknown Bank",
-                        zelfProof: item.zelfProof || item.id,
-                        createdAt: new Date(item.timestamp),
+                        id: item.id,
+                        name: item.name,
+                        publicData: item.publicData, // Preserve the original publicData
+                        size: item.size,
+                        timestamp: item.timestamp,
+                        url: item.url,
+                        zelfProof: item.publicData?.zelfProof || item.id,
+                        zelfQR: item.url,
                         // Store the full item for potential future use
                         rawData: item,
                     };
-
-                    console.log({ item: _item });
 
                     return _item;
                 });
@@ -158,14 +160,9 @@ export class ZelfKeysPaymentCardsComponent implements OnInit, AfterViewInit {
         await this.loadPaymentCards();
     }
 
-    onEditCard(card: any): void {
-        // TODO: Implement edit functionality
-        console.log("Edit card:", card);
-    }
-
-    onDeleteCard(card: any): void {
-        // TODO: Implement delete functionality
-        console.log("Delete card:", card);
+    onPaymentCardClick(paymentCard: any): void {
+        this._paymentCardDataService.setCurrentPaymentCard(paymentCard);
+        this.router.navigate(["/dashboard/payment-cards/detail"]);
     }
 
     // Get card type from card number

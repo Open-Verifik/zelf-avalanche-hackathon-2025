@@ -1,4 +1,6 @@
-.password-detail {
+@use "../../../../styles/variables";
+
+.note-detail {
     padding: 24px;
     height: 100%;
 
@@ -51,39 +53,33 @@
         padding: 60px 20px;
 
         .icon {
-            font-size: 64px;
-            margin-bottom: 24px;
+            font-size: 48px;
+            margin-bottom: 16px;
         }
 
         h3 {
-            font-size: 24px;
-            font-weight: 600;
-            color: #d32f2f;
-            margin: 0 0 16px 0;
+            font-size: 20px;
+            color: #e53e3e;
+            margin: 0 0 8px 0;
         }
 
         p {
             font-size: 16px;
             color: #666;
-            margin: 0 0 32px 0;
-            max-width: 400px;
-            margin-left: auto;
-            margin-right: auto;
+            margin: 0 0 24px 0;
         }
 
         .btn-secondary {
-            background: #6c757d;
+            background: #e53e3e;
             color: white;
             border: none;
             padding: 12px 24px;
             border-radius: 8px;
-            font-size: 16px;
-            font-weight: 500;
             cursor: pointer;
-            transition: background-color 0.2s;
+            font-size: 16px;
 
             &:hover {
-                background: #545b62;
+                background: #c53030;
             }
         }
     }
@@ -92,142 +88,67 @@
         display: flex;
         flex-direction: column;
         gap: 24px;
-        padding-bottom: 24px;
     }
 
     &__header-card {
         background: white;
-        border: 1px solid #e9ecef;
         border-radius: 16px;
         padding: 24px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0px 4px 12px rgba(0, 0, 0, 0.05);
+        border: 1px solid #f0f0f0;
+    }
+
+    &__header-info {
         display: flex;
         align-items: center;
         gap: 16px;
+    }
 
-        .password-detail__header-info {
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            flex: 1;
-            min-width: 0; // Allow flex item to shrink
-        }
+    &__icon {
+        font-size: 32px;
+        width: 48px;
+        height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background: #f8f9fa;
+        border-radius: 12px;
+    }
 
-        .password-detail__icon {
-            font-size: 32px;
-            flex-shrink: 0;
-        }
+    &__title-info {
+        flex: 1;
+    }
 
-        .password-detail__title-info {
-            flex: 1;
-            min-width: 0; // Allow flex item to shrink
-        }
+    &__note-title {
+        font-size: 20px;
+        font-weight: 600;
+        color: #181818;
+        margin: 0 0 4px 0;
+        word-break: break-word;
+    }
 
-        .password-detail__website-title {
-            font-size: 20px;
-            font-weight: 600;
-            color: #1a1a1a;
-            margin: 0 0 4px 0;
-            word-break: break-word;
-            overflow-wrap: break-word;
-            hyphens: auto;
-        }
-
-        .password-detail__subtitle {
-            font-size: 14px;
-            color: #666;
-            margin: 0;
-        }
+    &__subtitle {
+        font-size: 14px;
+        color: #666;
+        margin: 0;
     }
 
     &__decrypt-button {
         width: 100%;
-        height: 48px;
-        font-size: 16px;
-        font-weight: 600;
+        margin-bottom: 8px;
     }
 
-    &__website-container {
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
-        gap: 16px;
-        width: 100%;
-    }
-
-    &__website-text {
-        font-family: monospace;
-        font-size: 12px;
-        word-break: break-all;
-        overflow-wrap: break-word;
-        hyphens: auto;
-        flex: 1;
-        min-width: 0;
-        line-height: 1.4;
-        color: #181818;
-        text-align: right;
-    }
-
-    &__website-link {
-        display: flex;
-        align-items: flex-start;
-        gap: 8px;
-        color: #007bff;
-        text-decoration: none;
-        font-family: monospace;
-        font-size: 12px;
-        word-break: break-all;
-        overflow-wrap: break-word;
-        hyphens: auto;
-        flex: 1;
-        min-width: 0;
-        line-height: 1.4;
-
-        &:hover {
-            text-decoration: underline;
-        }
-
-        svg {
-            flex-shrink: 0;
-            margin-top: 2px; // Align with first line of text
-        }
-    }
-
-    &__no-website {
-        color: #666;
-        font-style: italic;
-        flex: 1;
-        min-width: 0;
-        text-align: right;
-    }
-
-    &__website-actions {
-        display: flex;
-        align-items: center;
-        gap: 8px;
-        flex-shrink: 0;
-    }
-
-    &__info-section,
-    &__decrypted-section {
+    &__info-section {
         display: flex;
         flex-direction: column;
         gap: 16px;
     }
 
-    &__decrypted-section {
-        padding-bottom: 16px;
-    }
-
     &__section-title {
         font-size: 18px;
         font-weight: 600;
-        color: #1a1a1a;
-        margin: 0 0 8px 0;
-
-        &--decrypted {
-            color: #28a745;
-        }
+        color: #181818;
+        margin: 0 0 16px 0;
     }
 
     &__hash {
@@ -235,27 +156,31 @@
         font-size: 12px;
         color: #666;
         word-break: break-all;
+        overflow-wrap: break-word;
+        flex: 1;
     }
 
-    &__password-field,
-    &__website-field {
+    &__decrypted-section {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding-bottom: 16px;
+    }
+
+    &__id-field,
+    &__proof-field,
+    &__title-field {
         display: flex;
         align-items: center;
         justify-content: flex-end;
         gap: 8px;
     }
 
-    &__monospace {
-        font-family: "Courier New", Courier, monospace;
-        font-size: 14px;
-        letter-spacing: 0.5px;
-        word-break: break-all;
-    }
-
-    &__password-text {
-        flex: 1;
-        word-break: break-all;
-        overflow-wrap: break-word;
+    &__content-field {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        width: 100%;
     }
 
     &__image-row {
@@ -341,15 +266,21 @@
         padding: 20px;
     }
 
-    &__difficulty-badge {
-        background: #e3f2fd;
-        color: #1976d2;
-        padding: 4px 12px;
-        border-radius: 16px;
-        font-size: 12px;
-        font-weight: 600;
-        text-transform: uppercase;
-        display: inline-block;
+    &__content-text {
+        font-size: 14px;
+        color: #181818;
+        flex: 1;
+        word-break: break-word;
+        line-height: 1.5;
+
+        &--multiline {
+            white-space: pre-wrap;
+            min-height: 60px;
+            padding: 12px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
     }
 }
 
@@ -359,5 +290,24 @@
     }
     100% {
         transform: rotate(360deg);
+    }
+}
+
+// Responsive Design
+@media (max-width: 768px) {
+    .note-detail {
+        padding: 16px;
+
+        &__header {
+            margin-bottom: 24px;
+        }
+
+        &__title {
+            font-size: 20px;
+        }
+
+        &__header-card {
+            padding: 16px;
+        }
     }
 }

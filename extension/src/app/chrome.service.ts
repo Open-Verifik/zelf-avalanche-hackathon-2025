@@ -31,19 +31,12 @@ export class ChromeService {
             this._tabId = tab?.id;
 
             const popupViews = browser.extension.getViews({ type: "popup" });
+
             this._isPopout = window === popupViews[0];
-
-            console.log("ChromeService: Tab ID:", this._tabId);
-            console.log("ChromeService: Popup views:", popupViews);
-            console.log("ChromeService: Current window:", window);
-            console.log("ChromeService: Is popout:", this._isPopout);
-
             this._isPopout$.next(this._isPopout);
 
             this._isSidePanel = !this._isPopout && !this._tabId;
             this._isSidePanel$.next(this._isSidePanel);
-
-            console.log("ChromeService: Is side panel:", this._isSidePanel);
         });
 
         browser.tabs.onRemoved.addListener(async (closedTabId) => {
@@ -446,5 +439,17 @@ export class ChromeService {
                 }
             }
         });
+    }
+
+    async openTab(url: string): Promise<{ id?: number } | null> {
+        if (!this.isExtension) return null;
+
+        try {
+            const tab = await browser.tabs.create({ url });
+            return tab;
+        } catch (error) {
+            console.error("Failed to open tab:", error);
+            return null;
+        }
     }
 }

@@ -9,6 +9,7 @@ import { PopoutCommunicationService } from "./popout-communication.service";
 })
 export class AutofillIntegrationService {
     private isListening = false;
+    private pendingFillData = new Map<number, any>();
 
     constructor(
         private autofillDataService: AutofillDataService,
@@ -20,12 +21,11 @@ export class AutofillIntegrationService {
     private setupMessageListener(): void {
         if (this.isListening) return;
 
-        // Listen for messages from background script and content scripts
         if (typeof chrome !== "undefined" && chrome.runtime) {
             chrome.runtime.onMessage.addListener((message: any, sender: MessageSender, sendResponse: SendResponse) => {
                 this.handleMessage(message, sender, sendResponse);
 
-                return true; // Keep message channel open for async response
+                return true;
             });
         }
 
@@ -36,7 +36,6 @@ export class AutofillIntegrationService {
         try {
             switch (message.type) {
                 case "PING":
-                    // Respond to ping to indicate the tab is ready
                     sendResponse({ success: true });
                     break;
                 case "AUTOFILL_CREATE_PASSWORD_DATA":
@@ -44,6 +43,9 @@ export class AutofillIntegrationService {
                     break;
                 case "PASSWORD_DECRYPTOR_DATA":
                     await this.handlePasswordDecryptorData(message.payload, sendResponse);
+                    break;
+                case "FORM_READY":
+                    await this.handleFormReady(message.payload, sendResponse);
                     break;
                 default:
                     sendResponse({ success: false, error: "Unknown message type" });
@@ -118,7 +120,42 @@ export class AutofillIntegrationService {
         }
     }
 
-    public testService(): void {
-        // Test method for debugging
+    public async waitForFormAndFill(tabId: number, fillData: any): Promise<void> {
+        try {
+            // Store the fill data for when the form is ready
+            this.pendingFillData.set(tabId, fillData);
+
+            // Send WAIT_FOR_FORM_READY message to the content script
+            await this.sendMessageToContentScript({
+                type: "WAIT_FOR_FORM_READY",
+                payload: { tabId },
+            });
+        } catch (error) {
+            console.error("Error waiting for form and filling:", error);
+        }
+    }
+
+    private async handleFormReady(payload: { tabId: number }, sendResponse: SendResponse): Promise<void> {
+        try {
+            const tabId = payload.tabId;
+            const fillData = this.pendingFillData.get(tabId);
+
+            if (fillData) {
+                // Send the actual fill data now that the form is ready
+                await this.sendMessageToContentScript({
+                    type: "FILL_PASSWORD",
+                    payload: fillData,
+                });
+
+                // Clean up the pending data
+                this.pendingFillData.delete(tabId);
+                console.log("Form ready, sent fill data for tab:", tabId);
+            }
+
+            sendResponse({ success: true });
+        } catch (error) {
+            console.error("Error handling form ready:", error);
+            sendResponse({ success: false, error: (error as Error).message });
+        }
     }
 }

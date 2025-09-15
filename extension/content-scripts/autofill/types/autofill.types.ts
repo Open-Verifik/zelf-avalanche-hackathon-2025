@@ -108,4 +108,5 @@ export interface MessagePayload {
     fieldId?: string;
     fieldType?: string;
     result?: DecryptionResult;
+    tabId?: number;
 }

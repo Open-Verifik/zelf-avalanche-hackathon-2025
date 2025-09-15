@@ -1,213 +1,239 @@
-import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { TranslocoModule } from "@jsverse/transloco";
-import { RouterModule, Router, ActivatedRoute } from "@angular/router";
+import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { FormsModule } from "@angular/forms";
+import { MatBottomSheet } from "@angular/material/bottom-sheet";
+import { Router, RouterModule } from "@angular/router";
+import { TranslocoModule } from "@jsverse/transloco";
+
+import { Wallet } from "app/wallet";
+import { WalletService } from "app/wallet.service";
 import { ChromeService } from "../../../chrome.service";
 import { DataPassingService } from "../../../services/data-passing.service";
-import { DataBiometricsComponent } from "../../shared/data-biometrics.component";
-import { WalletService } from "app/wallet.service";
-import { Wallet } from "app/wallet";
+import { BiometricResult, BiometricsBottomSheetComponent, BiometricsBottomSheetData } from "../../shared/biometrics-bottom-sheet.component";
+
 @Component({
-	selector: "app-payment-card-form",
-	standalone: true,
-	imports: [CommonModule, TranslocoModule, RouterModule, FormsModule, DataBiometricsComponent],
-	templateUrl: "./payment-card-form.component.html",
-	styleUrls: ["./payment-card-form.component.scss"],
+    imports: [CommonModule, TranslocoModule, RouterModule, FormsModule],
+    selector: "app-payment-card-form",
+    standalone: true,
+    styleUrls: ["./payment-card-form.component.scss"],
+    templateUrl: "./payment-card-form.component.html",
 })
 export class PaymentCardFormComponent implements OnInit {
-	cardData = {
-		cardName: "John Doe",
-		cardNumber: "4111111111111111",
-		expiryMonth: "12",
-		expiryYear: "2026",
-		cvv: "123",
-		bankName: "Chase Bank",
-		folder: "Personal",
-		insideFolder: true,
-		useMasterPassword: false,
-		masterPassword: "",
-	};
+    cardData = {
+        bankName: "Chase Bank",
+        cardName: "John Doe",
+        cardNumber: "4111111111111111",
+        cvv: "123",
+        expiryMonth: "12",
+        expiryYear: "2026",
+        folder: "Personal",
+        insideFolder: true,
+        masterPassword: "",
+        useMasterPassword: false,
+    };
 
-	isNewCard = true;
-	formValid = false;
-	showBiometrics = false;
-	transformedCardData: any = null;
+    formValid = false;
+    hasMasterPassword = false;
+    isNewCard = true;
+    shareables: any = {};
+    showMasterPassword = false;
+    transformedCardData: any = null;
+    wallet!: Wallet;
 
-	wallet!: Wallet;
-	hasMasterPassword = false;
-	shareables: any = {};
+    constructor(
+        private router: Router,
+        private chromeService: ChromeService,
+        private dataPassingService: DataPassingService,
+        private _walletService: WalletService,
+        private _changeDetectorRef: ChangeDetectorRef,
+        private _bottomSheet: MatBottomSheet
+    ) {}
 
-	constructor(
-		private router: Router,
-		private route: ActivatedRoute,
-		private chromeService: ChromeService,
-		private dataPassingService: DataPassingService,
-		private _walletService: WalletService,
-		private _changeDetectorRef: ChangeDetectorRef
-	) {}
+    async ngOnInit(): Promise<void> {
+        // Ensure extension is in full screen mode for better security when handling payment cards
+        if (this.chromeService.isExtension) {
+            await this.chromeService.ensureFullScreen("dashboard/payment-cards/new");
+        }
 
-	async ngOnInit(): Promise<void> {
-		// Ensure extension is in full screen mode for better security when handling payment cards
-		if (this.chromeService.isExtension) {
-			await this.chromeService.ensureFullScreen("dashboard/payment-cards/new");
-		}
+        // Check if this is a new card or editing existing
+        // For now, this route is always for creating new cards
+        // TODO: Add edit route like "payment-cards/edit/:id" for editing existing cards
+        this.isNewCard = true;
 
-		// Check if this is a new card or editing existing
-		// For now, this route is always for creating new cards
-		// TODO: Add edit route like "payment-cards/edit/:id" for editing existing cards
-		this.isNewCard = true;
+        await this._setWallet();
+        // Initialize form validation after a short delay to ensure all data is loaded
+        setTimeout(() => {
+            this.checkFormValidity();
+        }, 100);
+    }
 
-		await this._setWallet();
-		// Initialize form validation after a short delay to ensure all data is loaded
-		setTimeout(() => {
-			this.checkFormValidity();
-		}, 100);
-	}
+    private async _setWallet(): Promise<any> {
+        const wallet = await this._walletService.getFirstWalletFromStorage();
 
-	private async _setWallet(): Promise<any> {
-		const wallet = await this._walletService.getFirstWalletFromStorage();
+        if (!wallet?.name) {
+            this.router.navigate(["/welcome"]);
 
-		if (!wallet?.name) {
-			this.router.navigate(["/welcome"]);
+            return;
+        }
 
-			return;
-		}
+        this.shareables.wallet = wallet;
 
-		this.shareables.wallet = wallet;
+        this.wallet = this.shareables.wallet;
 
-		this.wallet = this.shareables.wallet;
+        this.hasMasterPassword = wallet.hasPassword || false;
 
-		console.log("wallet", wallet);
+        this._changeDetectorRef.detectChanges();
+        this.checkFormValidity();
+    }
 
-		this.hasMasterPassword = wallet.hasPassword || false;
+    toggleFolder(): void {
+        this.cardData.insideFolder = !this.cardData.insideFolder;
+    }
 
-		this._changeDetectorRef.detectChanges();
-		this.checkFormValidity();
-	}
+    toggleMasterPassword(): void {
+        this.cardData.useMasterPassword = !this.cardData.useMasterPassword;
+        if (!this.cardData.useMasterPassword) {
+            this.cardData.masterPassword = ""; // Clear password when toggling off
+        }
+        this.checkFormValidity();
+    }
 
-	toggleFolder(): void {
-		this.cardData.insideFolder = !this.cardData.insideFolder;
-	}
+    checkFormValidity(): void {
+        const hasCardName = !!this.cardData.cardName?.trim();
+        const hasCardNumber = !!this.cardData.cardNumber?.trim() && this.cardData.cardNumber.length >= 13;
+        const hasExpiryMonth = !!this.cardData.expiryMonth;
+        const hasExpiryYear = !!this.cardData.expiryYear && String(this.cardData.expiryYear).length === 4;
+        const hasCvv = !!this.cardData.cvv?.trim() && this.cardData.cvv.length >= 3;
+        const hasBankName = !!this.cardData.bankName?.trim();
 
-	toggleMasterPassword(): void {
-		this.cardData.useMasterPassword = !this.cardData.useMasterPassword;
-		if (!this.cardData.useMasterPassword) {
-			this.cardData.masterPassword = ""; // Clear password when toggling off
-		}
-		this.checkFormValidity();
-	}
+        // Master password is optional - only validate if user chose to use it
+        const hasMasterPassword = !!this.cardData.masterPassword;
 
-	checkFormValidity(): void {
-		const hasCardName = !!this.cardData.cardName?.trim();
-		const hasCardNumber = !!this.cardData.cardNumber?.trim() && this.cardData.cardNumber.length >= 13;
-		const hasExpiryMonth = !!this.cardData.expiryMonth;
-		const hasExpiryYear = !!this.cardData.expiryYear && String(this.cardData.expiryYear).length === 4;
-		const hasCvv = !!this.cardData.cvv?.trim() && this.cardData.cvv.length >= 3;
-		const hasBankName = !!this.cardData.bankName?.trim();
+        const masterPasswordValid = this.hasMasterPassword ? hasMasterPassword : true;
 
-		// Master password is optional - only validate if user chose to use it
-		const hasMasterPassword = !!this.cardData.masterPassword;
+        // Backend validation requirements:
+        // - cardName: required, minLength: 1
+        // - cardNumber: required, minLength: 13, maxLength: 19
+        // - expiryMonth: required, enum: ["01", "02", ..., "12"]
+        // - expiryYear: required, minLength: 4, maxLength: 4
+        // - cvv: required, minLength: 3, maxLength: 4
+        // - bankName: required, minLength: 1
+        // - masterPassword: optional (only if user enables it)
 
-		const masterPasswordValid = this.hasMasterPassword ? hasMasterPassword : true;
+        this.formValid = hasCardName && hasCardNumber && hasExpiryMonth && hasExpiryYear && hasCvv && hasBankName && masterPasswordValid;
+    }
 
-		// Backend validation requirements:
-		// - cardName: required, minLength: 1
-		// - cardNumber: required, minLength: 13, maxLength: 19
-		// - expiryMonth: required, enum: ["01", "02", ..., "12"]
-		// - expiryYear: required, minLength: 4, maxLength: 4
-		// - cvv: required, minLength: 3, maxLength: 4
-		// - bankName: required, minLength: 1
-		// - masterPassword: optional (only if user enables it)
+    onCancel(): void {
+        this.router.navigate(["/dashboard/payment-cards"]);
+    }
 
-		this.formValid = hasCardName && hasCardNumber && hasExpiryMonth && hasExpiryYear && hasCvv && hasBankName && masterPasswordValid;
-	}
+    onBiometricsSuccess(biometricData: BiometricResult): void {
+        // Navigate to result page after successful biometrics
+        this.router.navigate(["/dashboard/payment-cards/result"]);
+    }
 
-	onCancel(): void {
-		this.router.navigate(["/dashboard/payment-cards"]);
-	}
+    onBiometricsCancel(): void {
+        // Bottom sheet handles its own dismissal
+    }
 
-	onBiometricsSuccess(biometricData: any): void {
-		// Navigate to result page after successful biometrics
-		this.router.navigate(["/dashboard/payment-cards/result"]);
-	}
+    async onSave(): Promise<void> {
+        if (!this.formValid) {
+            return;
+        }
 
-	onBiometricsCancel(): void {
-		this.showBiometrics = false;
-	}
+        // Transform card data to match backend API expectations
+        // Backend expects: cardName, cardNumber, expiryMonth, expiryYear, cvv, bankName
+        this.transformedCardData = {
+            cardName: this.cardData.cardName,
+            cardNumber: this.cardData.cardNumber,
+            expiryMonth: this.cardData.expiryMonth.padStart(2, "0"), // Ensure 2 digits
+            expiryYear: this.cardData.expiryYear,
+            cvv: this.cardData.cvv,
+            bankName: this.cardData.bankName,
+            folder: this.cardData.folder,
+            insideFolder: this.cardData.insideFolder,
+            useMasterPassword: this.cardData.useMasterPassword,
+            masterPassword: this.cardData.masterPassword,
+            type: "payment-cards",
+        };
 
-	async onSave(): Promise<void> {
-		if (!this.formValid) {
-			return;
-		}
+        await this.dataPassingService.storeData("payment-cards", this.transformedCardData);
 
-		// Transform card data to match backend API expectations
-		// Backend expects: cardName, cardNumber, expiryMonth, expiryYear, cvv, bankName
-		this.transformedCardData = {
-			cardName: this.cardData.cardName,
-			cardNumber: this.cardData.cardNumber,
-			expiryMonth: this.cardData.expiryMonth.padStart(2, "0"), // Ensure 2 digits
-			expiryYear: this.cardData.expiryYear,
-			cvv: this.cardData.cvv,
-			bankName: this.cardData.bankName,
-			folder: this.cardData.folder,
-			insideFolder: this.cardData.insideFolder,
-			useMasterPassword: this.cardData.useMasterPassword,
-			masterPassword: this.cardData.masterPassword,
-			type: "payment-cards",
-		};
+        // Show biometrics bottom sheet instead of navigating
+        this._openBiometricsBottomSheet();
+    }
 
-		await this.dataPassingService.storeData("payment-cards", this.transformedCardData);
+    // Helper method to format card number as user types
+    onCardNumberChange(): void {
+        // Remove all non-digits
+        let value = this.cardData.cardNumber.replace(/\D/g, "");
 
-		// Show biometrics modal instead of navigating
-		this.showBiometrics = true;
-	}
+        // Limit to 19 digits (max card length)
+        if (value.length > 19) {
+            value = value.substring(0, 19);
+        }
 
-	// Helper method to format card number as user types
-	onCardNumberChange(): void {
-		// Remove all non-digits
-		let value = this.cardData.cardNumber.replace(/\D/g, "");
+        this.cardData.cardNumber = value;
+        this.checkFormValidity();
+    }
 
-		// Limit to 19 digits (max card length)
-		if (value.length > 19) {
-			value = value.substring(0, 19);
-		}
+    // Helper method to format CVV as user types
+    onCvvChange(): void {
+        // Remove all non-digits
+        let value = this.cardData.cvv.replace(/\D/g, "");
 
-		this.cardData.cardNumber = value;
-		this.checkFormValidity();
-	}
+        // Limit to 4 digits (max CVV length)
+        if (value.length > 4) {
+            value = value.substring(0, 4);
+        }
 
-	// Helper method to format CVV as user types
-	onCvvChange(): void {
-		// Remove all non-digits
-		let value = this.cardData.cvv.replace(/\D/g, "");
+        this.cardData.cvv = value;
+        this.checkFormValidity();
+    }
 
-		// Limit to 4 digits (max CVV length)
-		if (value.length > 4) {
-			value = value.substring(0, 4);
-		}
+    // Helper method to get card type from number
+    getCardType(): string {
+        const number = this.cardData.cardNumber;
+        if (number.startsWith("4")) return "VISA";
+        if (number.startsWith("5") || number.startsWith("2")) return "MASTERCARD";
+        if (number.startsWith("3")) return "AMEX";
+        if (number.startsWith("6")) return "DISCOVER";
+        return "CARD";
+    }
 
-		this.cardData.cvv = value;
-		this.checkFormValidity();
-	}
+    // Helper method to mask card number for display
+    getMaskedCardNumber(): string {
+        const number = this.cardData.cardNumber;
+        if (number.length < 4) return number;
 
-	// Helper method to get card type from number
-	getCardType(): string {
-		const number = this.cardData.cardNumber;
-		if (number.startsWith("4")) return "VISA";
-		if (number.startsWith("5") || number.startsWith("2")) return "MASTERCARD";
-		if (number.startsWith("3")) return "AMEX";
-		if (number.startsWith("6")) return "DISCOVER";
-		return "CARD";
-	}
+        const lastFour = number.slice(-4);
+        const masked = "•".repeat(Math.max(0, number.length - 4));
+        return masked + lastFour;
+    }
 
-	// Helper method to mask card number for display
-	getMaskedCardNumber(): string {
-		const number = this.cardData.cardNumber;
-		if (number.length < 4) return number;
+    toggleMasterPasswordVisibility(): void {
+        this.showMasterPassword = !this.showMasterPassword;
+    }
 
-		const lastFour = number.slice(-4);
-		const masked = "•".repeat(Math.max(0, number.length - 4));
-		return masked + lastFour;
-	}
+    private _openBiometricsBottomSheet(): void {
+        const data: BiometricsBottomSheetData = {
+            itemData: this.transformedCardData,
+            itemType: "payment-card",
+            mode: "encrypt",
+        };
+
+        const bottomSheetRef = this._bottomSheet.open(BiometricsBottomSheetComponent, {
+            data: data,
+            backdropClass: "zelf-backdrop",
+            panelClass: "zelf-bottom-sheet-biometrics",
+        });
+
+        bottomSheetRef.afterDismissed().subscribe((result: BiometricResult | undefined) => {
+            if (result) {
+                this.onBiometricsSuccess(result);
+            } else {
+                this.onBiometricsCancel();
+            }
+        });
+    }
 }

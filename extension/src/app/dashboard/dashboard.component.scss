@@ -10,7 +10,7 @@
 
 .dashboard {
     width: 764px;
-    height: 840px;
+    max-height: 900px;
     padding: 40px;
     background: white;
     overflow: hidden;
@@ -36,6 +36,24 @@
         align-items: center;
         gap: 8px;
         display: flex;
+        cursor: pointer;
+        user-select: none;
+        transition:
+            color 0.3s variables.$smoothBezier,
+            background-color 0.3s variables.$smoothBezier;
+
+        &:hover {
+            background-color: variables.$secondaryColor;
+            color: white;
+
+            .dashboard__wallet-icon svg {
+                fill: white;
+            }
+
+            .dashboard__wallet-text {
+                color: white;
+            }
+        }
     }
 
     &__wallet-icon {
@@ -46,6 +64,7 @@
 
         svg {
             fill: #181818;
+            transition: fill 0.3s variables.$smoothBezier;
         }
     }
 
@@ -60,9 +79,12 @@
         line-height: 20px;
         letter-spacing: 0.1px;
         word-wrap: break-word;
+        transition: color 0.3s variables.$smoothBezier;
     }
 
     &__user-info {
+        user-select: none;
+        cursor: pointer;
         align-self: stretch;
         padding: 12px 16px 12px 24px;
         background: white;
@@ -74,6 +96,26 @@
         align-items: center;
         gap: 16px;
         display: flex;
+        transition:
+            color 0.2s variables.$smoothBezier,
+            background-color 0.2s variables.$smoothBezier,
+            box-shadow 0.2s variables.$smoothBezier;
+
+        &:hover {
+            background-color: variables.$secondaryColor;
+            color: white;
+            box-shadow: 0px 8px 24px rgba(0, 0, 0, 0.08);
+
+            .dashboard__user-text {
+                color: white;
+            }
+
+            .dashboard__user-icon {
+                svg {
+                    fill: white;
+                }
+            }
+        }
     }
 
     &__user-content {
@@ -94,6 +136,8 @@
         line-height: 20px;
         letter-spacing: 0.1px;
         word-wrap: break-word;
+        margin: 0;
+        transition: color 0.2s variables.$smoothBezier;
     }
 
     &__user-icon {
@@ -105,6 +149,7 @@
 
         svg {
             fill: #181818;
+            transition: fill 0.2s variables.$smoothBezier;
         }
     }
 
@@ -113,28 +158,36 @@
         padding: 16px 0;
         border-top: 1px #cdcdcd solid;
         border-bottom: 1px #cdcdcd solid;
-        justify-content: flex-start;
+        justify-content: space-between;
         align-items: flex-start;
         display: inline-flex;
     }
 
     &__nav-item {
-        flex: 1 1 0;
         justify-content: center;
         align-items: center;
         gap: 10px;
         display: flex;
         cursor: pointer;
-        transition: all 0.2s ease;
+        padding: 8px 16px;
+        border-radius: 20px;
+        transition:
+            background-color 0.3s variables.$smoothBezier,
+            color 0.3s variables.$smoothBezier;
 
         &--active {
+            background-color: variables.$secondaryColor;
+            color: white;
+
             .dashboard__nav-text {
-                color: #181818;
-                font-weight: 500;
+                color: white;
+                font-weight: 600;
             }
         }
 
         &:hover {
+            background-color: rgba(variables.$secondaryColor, 0.1);
+
             .dashboard__nav-text {
                 color: #181818;
             }
@@ -153,15 +206,18 @@
         line-height: 20px;
         letter-spacing: 0.1px;
         word-wrap: break-word;
-        transition: color 0.2s ease;
+        transition:
+            color 0.3s variables.$smoothBezier,
+            font-weight 0.3s variables.$smoothBezier;
     }
 
     &__content {
         flex: 1;
-        overflow: auto;
         background: white;
-        padding: 32px;
-        min-height: 400px;
+        width: 100%;
+        min-height: 480px;
+        padding: 0 12px;
+        overflow: auto;
     }
 }
 

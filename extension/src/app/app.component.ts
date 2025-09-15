@@ -32,11 +32,9 @@ export class AppComponent implements OnInit, OnDestroy {
         private _httpWrapperService: HttpWrapperService,
         private _walletService: WalletService,
         private _chromeService: ChromeService,
-        private _autofillIntegrationService: AutofillIntegrationService,
         private _popoutCommunicationService: PopoutCommunicationService,
         private _router: Router
     ) {
-        console.log("AppComponent: Constructor called - Angular app is loading");
         this.isPopout = this._chromeService.isPopout;
 
         this._chromeService.isPopout$.pipe(takeUntil(this.unsubscriber$)).subscribe((isPopout) => {
@@ -46,17 +44,6 @@ export class AppComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this._getPublicKey();
-        // Ensure AutofillIntegrationService is instantiated
-        console.log("AppComponent: AutofillIntegrationService injected:", !!this._autofillIntegrationService);
-
-        // Force the service to be used to ensure it's instantiated
-        if (this._autofillIntegrationService) {
-            console.log("AppComponent: AutofillIntegrationService is ready");
-            this._autofillIntegrationService.testService();
-        }
-
-        console.log("AppComponent: Is popout:", this.isPopout);
-        console.log("AppComponent: Current URL:", this._router.url);
 
         // Check if we're in a popup and have pending decryption data
         this.checkForPendingDecryption();
@@ -69,24 +56,13 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     private checkForPendingDecryption(): void {
-        console.log("AppComponent: checkForPendingDecryption called");
-        console.log("AppComponent: isPopout:", this.isPopout);
+        if (!this.isPopout) return;
 
-        if (this.isPopout) {
-            const decryptionData = this._popoutCommunicationService.getDecryptionData();
-            console.log("AppComponent: decryptionData:", decryptionData);
+        const decryptionData = this._popoutCommunicationService.getDecryptionData();
 
-            if (decryptionData) {
-                console.log("AppComponent: Found pending decryption data, navigating to decrypt route");
-                console.log("AppComponent: Current URL before navigation:", this._router.url);
-                // Use replace instead of navigate to avoid going through the normal route flow
-                this._router.navigateByUrl("/passwords/decrypt", { replaceUrl: true });
-            } else {
-                console.log("AppComponent: No pending decryption data found");
-            }
-        } else {
-            console.log("AppComponent: Not in popout mode, skipping decryption check");
-        }
+        if (!decryptionData) return;
+
+        this._router.navigateByUrl("/passwords/decrypt", { replaceUrl: true });
     }
 
     private notifyPopupReady(): void {

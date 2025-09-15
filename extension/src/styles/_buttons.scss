@@ -89,6 +89,12 @@
         }
     }
 
+    &--dense {
+        height: 34px;
+        padding: 6px 16px;
+        font-size: 12px;
+    }
+
     &--black {
         background-color: variables.$black !important;
         color: variables.$white !important;

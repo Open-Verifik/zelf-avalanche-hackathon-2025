@@ -1,21 +1,21 @@
-import { Component, OnInit, OnDestroy, EventEmitter, Output, ViewChild, ElementRef, ChangeDetectorRef, Input } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { FormsModule } from "@angular/forms";
-import { TranslocoModule } from "@jsverse/transloco";
-import { RouterModule, Router } from "@angular/router";
-import { WebcamComponent, WebcamImage, WebcamInitError, WebcamModule } from "ngx-webcam";
-import { Subject, takeUntil, Observable } from "rxjs";
+import { ChangeDetectorRef, Component, ElementRef, EventEmitter, Input, OnDestroy, OnInit, Output, ViewChild } from "@angular/core";
 import { FlexLayoutModule } from "@angular/flex-layout";
+import { FormsModule } from "@angular/forms";
 import { MatButtonModule } from "@angular/material/button";
 import { MatProgressBarModule } from "@angular/material/progress-bar";
 import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
-import { ZelfLoaderComponent } from "app/zelf-loader/zelf-loader.component";
-import { HttpWrapperService } from "app/http-wrapper.service";
-import { WalletService } from "../../wallet.service";
-import { environment } from "environments/environment";
+import { Router, RouterModule } from "@angular/router";
+import { TranslocoModule } from "@jsverse/transloco";
 import * as faceapi from "@vladmandic/face-api";
-import { DataPassingService } from "../../services/data-passing.service";
+import { HttpWrapperService } from "app/http-wrapper.service";
 import { Wallet } from "app/wallet";
+import { ZelfLoaderComponent } from "app/zelf-loader/zelf-loader.component";
+import { environment } from "environments/environment";
+import { WebcamComponent, WebcamImage, WebcamInitError, WebcamModule } from "ngx-webcam";
+import { Observable, Subject, takeUntil } from "rxjs";
+import { DataPassingService } from "../../services/data-passing.service";
+import { WalletService } from "../../wallet.service";
 
 export interface BiometricData {
     faceBase64: string;
@@ -42,501 +42,393 @@ export interface BiometricData {
     styleUrls: ["./data-biometrics.component.scss"],
 })
 export class DataBiometricsComponent implements OnInit, OnDestroy {
-	@ViewChild("maskResult", { static: false }) public maskResultCanvasRef: ElementRef | undefined;
-	@ViewChild("toSend", { static: false }) public ToSendCanvasRef: ElementRef | undefined;
-	@ViewChild("webcam", { static: false }) public webcamRef?: WebcamComponent;
-
-	@Input() isDecryptMode: boolean = false;
-	@Input() itemData: any = {};
-	@Output() canNavigate: EventEmitter<boolean> = new EventEmitter<boolean>();
-	@Output() error: EventEmitter<any> = new EventEmitter<any>();
-	@Output() imageCaptured: EventEmitter<string> = new EventEmitter<string>();
-	@Output() biometricsSuccess: EventEmitter<BiometricData> = new EventEmitter<BiometricData>();
-	@Output() biometricsCancel: EventEmitter<void> = new EventEmitter<void>();
-
-	private unsubscriber$: Subject<void> = new Subject<void>();
-	private _takePicture: Subject<void> = new Subject<void>();
-	private _intervals: any = {};
-
-	// Camera and face detection properties
-	camera = {
-		isLoading: true,
-		hasPermissions: true,
-		isLowQuality: false,
-		dimensions: {
-			video: { width: 0, height: 0, max: { width: 800, height: 600 } },
-			result: { width: 0, height: 0, offsetX: 0, offsetY: 0 },
-			real: { width: 0, height: 0, offsetX: 0, offsetY: 0 },
-		} as { [key: string]: { width: number; height: number; offsetX?: number; offsetY?: number; max?: { width: number; height: number } } },
-		configuration: {
-			facingMode: "user",
-			width: { ideal: 800 },
-			height: { ideal: 600 },
-		},
-	};
-
-	face = {
-		video: { center: { x: 0, y: 0 }, radius: { x: 0, y: 0 }, margin: { x: 0, y: 0 } },
-		real: { center: { x: 0, y: 0 }, radius: { x: 0, y: 0 }, margin: { x: 0, y: 0 } },
-		minHeight: 200,
-		minPixels: 200,
-		successPosition: 0,
-		threshold: 0.25,
-	};
-
-	response = {
-		base64Image: "",
-		isLoading: false,
-	};
-	apiKeysSessionJWT: string;
-	errorFace: any = null;
-	lastFace: any;
-	aspectRatio = 0.75;
-	masterPassword: string = "";
-
-	// Error handling
-	apiError: string = "";
-	hasApiError: boolean = false;
-
-	// Category-specific properties
-	dataType: string = "";
-	dataTitle: string = "";
-	wallet!: Wallet;
-	hasMasterPassword!: boolean;
-	shareables!: any;
-	useMasterPassword: boolean = false;
-
-	// Make Math and Date available in template
-	Math = Math;
-	Date = Date;
-
-	// Active Liveness Detection properties
-	livenessDetection = {
-		isActive: false,
-		currentStep: 0,
-		totalSteps: 3,
-		steps: [
-			{ name: "Center", angle: 0, tolerance: 15, completed: false },
-			{ name: "Left", angle: -30, tolerance: 15, completed: false },
-			{ name: "Right", angle: 30, tolerance: 15, completed: false },
-		],
-		faceAngles: [] as number[],
-		requiredHoldTime: 1000, // 1 second to hold position
-		holdStartTime: 0,
-		isHolding: false,
-	};
-
-	constructor(
-		private _changeDetectorRef: ChangeDetectorRef,
-		private _httpWrapperService: HttpWrapperService,
-		private _walletService: WalletService,
-		private _router: Router,
-		private dataPassingService: DataPassingService
-	) {
-		this.apiKeysSessionJWT = "";
-
-		this.shareables = {
-			wallet: {},
-		};
-	}
-
-	async ngOnInit(): Promise<void> {
-		// First, get the dataType from the route path
-		const currentPath = this._router.url;
-
-		if (currentPath.includes("/notes/")) {
-			this.dataType = "notes";
-			this.dataTitle = "Note";
-		} else if (currentPath.includes("/passwords/")) {
-			this.dataType = "passwords";
-			this.dataTitle = "Password";
-		} else if (currentPath.includes("/payment-cards/")) {
-			this.dataType = "payment-cards";
-			this.dataTitle = "Payment Card";
-		}
-
-		// Get data from service instead of query params
-		this._getDataFromService();
-
-		await this._setWallet();
-
-		// Initialize ZelfKey session
-		this.initZelfKeySession();
-
-		// Initialize biometric verification
-		this._initializeBiometrics();
-	}
-
-	private async _setWallet(): Promise<any> {
-		const wallet = await this._walletService.getFirstWalletFromStorage();
-
-		if (!wallet?.name) {
-			this._router.navigate(["/welcome"]);
-
-			return;
-		}
-
-		this.shareables.wallet = wallet;
-
-		this.wallet = this.shareables.wallet;
-
-		this.hasMasterPassword = wallet.hasPassword || false;
-
-		this._changeDetectorRef.detectChanges();
-	}
-
-	/**
-	 * Get data from the data passing service or input
-	 */
-	private _getDataFromService(): void {
-		// If itemData is provided as input (for decrypt mode), use it
-		if (this.itemData && Object.keys(this.itemData).length > 0) {
-			// Use input itemData
-		} else {
-			// Otherwise, get data from service based on data type
-			const serviceData = this.dataPassingService.getData(this.dataType);
-
-			if (serviceData) {
-				this.itemData = serviceData;
-			} else {
-				this.itemData = {};
-			}
-		}
-
-		// Set master password if available
-		if ((this.dataType === "notes" || this.dataType === "passwords") && this.itemData.masterPassword) {
-			this.masterPassword = this.itemData.masterPassword;
-		}
-	}
-
-	ngOnDestroy(): void {
-		// Clear intervals
-		if (this._intervals.detectFace) {
-			clearInterval(this._intervals.detectFace);
-		}
-		if (this._intervals.checkNgxVideo) {
-			clearInterval(this._intervals.checkNgxVideo);
-		}
-
-		// Stop camera stream
-		this._stopCamera();
-
-		// Complete observables
-		this.unsubscriber$.next();
-
-		this.unsubscriber$.complete();
-	}
-
-	get takePicture$(): Observable<void> {
-		return this._takePicture.asObservable();
-	}
-
-	async initZelfKeySession(): Promise<void> {
-		// The wallet service now caches the JWT token
-		await this._walletService.initZelfKeySession();
-
-		// Get the cached token
-		const jwt = await this._walletService.getZelfKeyJWT();
-
-		if (jwt) {
-			this.apiKeysSessionJWT = jwt;
-		}
-	}
-
-	/**
-	 * Handle successful biometrics verification in decrypt mode
-	 */
-	onBiometricsSuccess(faceBase64: string, password?: string): void {
-		if (this.isDecryptMode) {
-			// Stop camera before emitting success
-			this._stopCamera();
-			this.biometricsSuccess.emit({
-				faceBase64,
-				password: this.masterPassword || password,
-			});
-		}
-	}
-
-	/**
-	 * Handle biometrics cancellation in both decrypt and create modes
-	 */
-	onBiometricsCancel(): void {
-		// Stop camera before closing
-		this._stopCamera();
-		this.biometricsCancel.emit();
-	}
-
-	/**
-	 * Stop camera stream and cleanup
-	 */
-	private _stopCamera(): void {
-		try {
-			// Stop the webcam component
-			if (this.webcamRef) {
-				// Access the native video element and stop its stream
-				const videoElement = this.webcamRef.nativeVideoElement;
-				if (videoElement && videoElement.srcObject) {
-					const stream = videoElement.srcObject as MediaStream;
-					if (stream) {
-						stream.getTracks().forEach((track) => {
-							track.stop();
-						});
-					}
-					videoElement.srcObject = null;
-				}
-			}
-		} catch (error) {
-			console.warn("Error stopping camera:", error);
-		}
-	}
-
-	/**
-	 * Toggle master password input visibility
-	 */
-	toggleMasterPassword(): void {
-		this.useMasterPassword = !this.useMasterPassword;
-		if (!this.useMasterPassword) {
-			this.masterPassword = ""; // Clear password when toggling off
-		}
-	}
-
-	/**
-	 * Clear API error and retry
-	 */
-	clearApiError(): void {
-		this.apiError = "";
-		this.hasApiError = false;
-		this.response.isLoading = false;
-		this.response.base64Image = "";
-		this._changeDetectorRef.markForCheck();
-
-		// Restart face detection
-		this._startFaceDetectionInterval();
-	}
-
-	/**
-	 * Start active liveness detection
-	 */
-	startLivenessDetection(): void {
-		this.livenessDetection.isActive = true;
-		this.livenessDetection.currentStep = 0;
-		this.livenessDetection.steps.forEach((step) => (step.completed = false));
-		this.livenessDetection.faceAngles = [];
-		this._changeDetectorRef.markForCheck();
-	}
-
-	/**
-	 * Calculate face angle from face landmarks
-	 */
-	private _calculateFaceAngle(face: any): number {
-		if (!face.landmarks || face.landmarks.length < 68) return 0;
-
-		// Use eye landmarks to calculate head rotation
-		const leftEye = face.landmarks.slice(36, 42); // Left eye points
-		const rightEye = face.landmarks.slice(42, 48); // Right eye points
-
-		// Calculate center of each eye
-		const leftEyeCenter = {
-			x: leftEye.reduce((sum: number, point: any) => sum + point.x, 0) / leftEye.length,
-			y: leftEye.reduce((sum: number, point: any) => sum + point.y, 0) / leftEye.length,
-		};
-
-		const rightEyeCenter = {
-			x: rightEye.reduce((sum: number, point: any) => sum + point.x, 0) / rightEye.length,
-			y: rightEye.reduce((sum: number, point: any) => sum + point.y, 0) / rightEye.length,
-		};
-
-		// Calculate angle based on eye positions
-		const eyeDistance = Math.sqrt(Math.pow(rightEyeCenter.x - leftEyeCenter.x, 2) + Math.pow(rightEyeCenter.y - leftEyeCenter.y, 2));
-
-		// Normalize and convert to degrees
-		const normalizedDistance = (rightEyeCenter.x - leftEyeCenter.x) / eyeDistance;
-		const angle = Math.asin(normalizedDistance) * (180 / Math.PI);
-
-		return angle;
-	}
-
-	/**
-	 * Check if face is at the correct angle for current step
-	 */
-	private _isFaceAtCorrectAngle(face: any): boolean {
-		const currentStep = this.livenessDetection.steps[this.livenessDetection.currentStep];
-		const faceAngle = this._calculateFaceAngle(face);
-
-		// Check if face is within tolerance of required angle
-		const angleDiff = Math.abs(faceAngle - currentStep.angle);
-		return angleDiff <= currentStep.tolerance;
-	}
-
-	/**
-	 * Update liveness detection progress
-	 */
-	private _updateLivenessProgress(face: any): void {
-		if (!this.livenessDetection.isActive) return;
-
-		const currentStep = this.livenessDetection.steps[this.livenessDetection.currentStep];
-
-		if (this._isFaceAtCorrectAngle(face)) {
-			if (!this.livenessDetection.isHolding) {
-				this.livenessDetection.isHolding = true;
-				this.livenessDetection.holdStartTime = Date.now();
-			}
-
-			// Check if held long enough
-			const holdTime = Date.now() - this.livenessDetection.holdStartTime;
-			if (holdTime >= this.livenessDetection.requiredHoldTime) {
-				// Mark step as completed
-				currentStep.completed = true;
-				this.livenessDetection.faceAngles.push(this._calculateFaceAngle(face));
-
-				// Move to next step
-				if (this.livenessDetection.currentStep < this.livenessDetection.totalSteps - 1) {
-					this.livenessDetection.currentStep++;
-					this.livenessDetection.isHolding = false;
-				} else {
-					// All steps completed
-					this._onLivenessDetectionComplete();
-				}
-
-				this._changeDetectorRef.markForCheck();
-			}
-		} else {
-			// Reset holding if face moves away
-			this.livenessDetection.isHolding = false;
-		}
-	}
-
-	/**
-	 * Handle liveness detection completion
-	 */
-	private _onLivenessDetectionComplete(): void {
-		this.livenessDetection.isActive = false;
-		// Capture the final image and proceed
-		this._captureFinalImage();
-	}
-
-	/**
-	 * Capture final image after liveness detection
-	 */
-	private _captureFinalImage(): void {
-		if (this.webcamRef?.nativeVideoElement) {
-			const video = this.webcamRef.nativeVideoElement;
-			const canvas = document.createElement("canvas");
-			const ctx = canvas.getContext("2d");
-
-			if (ctx) {
-				canvas.width = video.videoWidth;
-				canvas.height = video.videoHeight;
-				ctx.drawImage(video, 0, 0);
-
-				const img = new Image();
-				img.onload = () => {
-					this._takePictureLiveness(img);
-				};
-				img.src = canvas.toDataURL("image/jpeg");
-			}
-		}
-	}
-
-	private async _initializeBiometrics(): Promise<void> {
-		try {
-			// Always wait for the wallet service to load the models
-			this._walletService.faceapi$.pipe(takeUntil(this.unsubscriber$)).subscribe(async (isLoaded) => {
-				if (!isLoaded) return;
-
-				this.camera.isLoading = false;
-				await this._setMaxVideoDimensions();
-				this._startNgxVideoInterval();
-			});
-		} catch (error) {
-			console.error("❌ Error initializing biometrics:", error);
-			this.error.emit(error);
-		}
-	}
-
-	private async _setMaxVideoDimensions(): Promise<void> {
-		const maxWidth = 800;
-		const maxHeight = 600;
-
-		// Set initial video dimensions
-		this.camera.dimensions.video.width = maxWidth;
-		this.camera.dimensions.video.height = maxHeight;
-
-		// Set result dimensions
-		this.camera.dimensions.result.width = maxWidth;
-		this.camera.dimensions.result.height = maxHeight;
-
-		// Initialize face dimensions
-		this.face.video = this._getCenterAndRadius(maxHeight, maxWidth);
-
-		this._changeDetectorRef.markForCheck();
-	}
-
-	private _startNgxVideoInterval(): void {
-		if (this._intervals.checkNgxVideo) {
-			clearInterval(this._intervals.checkNgxVideo);
-
-			this._intervals.checkNgxVideo = null;
-		}
-
-		this._intervals.checkNgxVideo = setInterval(this._checkVideoStreamReady, 100);
-	}
-
-	private _checkVideoStreamReady = () => {
-		const videoNgx = this.webcamRef?.nativeVideoElement;
-
-		if (!videoNgx) return;
-
-		clearInterval(this._intervals.checkNgxVideo);
-
-		this._intervals.checkNgxVideo = null;
-
-		videoNgx.addEventListener(
-			"loadeddata",
-			() => {
-				this._startFaceDetectionInterval();
-				this.canNavigate.emit(true);
-
-				this._setVideoDimensions(videoNgx);
-				this._drawOvalCenterAndMask();
-			},
-			{ once: true }
-		);
-
-		this._setVideoDimensions(videoNgx);
-		this._drawOvalCenterAndMask();
-	};
-
-	private _setVideoDimensions(videoElement: HTMLVideoElement) {
-		const actualWidth = videoElement.clientWidth;
-		const actualHeight = videoElement.clientHeight;
-
-		this.camera.dimensions.video.height = actualHeight;
-		this.camera.dimensions.video.width = actualWidth;
-		this.camera.dimensions.result = { height: 0, width: 0, offsetX: 0, offsetY: 0 };
-
-		this._setResultDimensions("result", actualHeight, actualWidth);
-
-		this.face.video = this._getCenterAndRadius(actualHeight, actualWidth);
-
-		const maskResultCanvas = this.maskResultCanvasRef?.nativeElement;
-
-		if (maskResultCanvas) {
-			maskResultCanvas.style.marginLeft = `0px`;
-			maskResultCanvas.style.marginTop = `0px`;
-		}
-
-		this._changeDetectorRef.markForCheck();
-	}
-
-	private _getCenterAndRadius(
-		height: number,
-		width: number
-	): { center: { x: number; y: number }; radius: { x: number; y: number }; margin: { x: number; y: number } } {
-		const center = {
-			x: width / 2,
-			y: height / 2,
-		};
+    @ViewChild("maskResult", { static: false }) public maskResultCanvasRef: ElementRef | undefined;
+    @ViewChild("toSend", { static: false }) public ToSendCanvasRef: ElementRef | undefined;
+    @ViewChild("webcam", { static: false }) public webcamRef?: WebcamComponent;
+    @ViewChild("dataBiometricsContainer", { static: false }) public dataBiometricsContainerRef?: ElementRef;
+
+    @Input() isDecryptMode: boolean = false;
+    @Input() itemData: any = {};
+    @Output() canNavigate: EventEmitter<boolean> = new EventEmitter<boolean>();
+    @Output() error: EventEmitter<any> = new EventEmitter<any>();
+    @Output() imageCaptured: EventEmitter<string> = new EventEmitter<string>();
+    @Output() biometricsSuccess: EventEmitter<BiometricData> = new EventEmitter<BiometricData>();
+    @Output() biometricsCancel: EventEmitter<void> = new EventEmitter<void>();
+
+    private unsubscriber$: Subject<void> = new Subject<void>();
+    private _takePicture: Subject<void> = new Subject<void>();
+    private _intervals: any = {};
+
+    // Camera and face detection properties
+    camera = {
+        isLoading: true,
+        hasPermissions: true,
+        isLowQuality: false,
+        dimensions: {
+            video: { width: 0, height: 0, max: { width: 800, height: 600 } },
+            result: { width: 0, height: 0, offsetX: 0, offsetY: 0 },
+            real: { width: 0, height: 0, offsetX: 0, offsetY: 0 },
+        } as { [key: string]: { width: number; height: number; offsetX?: number; offsetY?: number; max?: { width: number; height: number } } },
+        configuration: {
+            facingMode: "user",
+            width: { ideal: 1920 },
+            height: { ideal: 1080 },
+        },
+    };
+
+    face = {
+        video: { center: { x: 0, y: 0 }, radius: { x: 0, y: 0 }, margin: { x: 0, y: 0 } },
+        real: { center: { x: 0, y: 0 }, radius: { x: 0, y: 0 }, margin: { x: 0, y: 0 } },
+        minHeight: 150, // Reduced from 200
+        minPixels: 150, // Reduced from 200
+        successPosition: 0,
+        threshold: 0.15, // Reduced from 0.25 (lower = less strict)
+    };
+
+    response = {
+        base64Image: "",
+        isLoading: false,
+    };
+    apiKeysSessionJWT: string;
+    errorFace: any = null;
+    lastFace: any;
+    aspectRatio = 0.5625; // 16:9 aspect ratio for landscape
+    masterPassword: string = "";
+
+    // Error handling
+    apiError: string = "";
+    hasApiError: boolean = false;
+
+    // Category-specific properties
+    dataType: string = "";
+    dataTitle: string = "";
+    wallet!: Wallet;
+    hasMasterPassword!: boolean;
+    shareables!: any;
+    useMasterPassword: boolean = false;
+
+    // Active Liveness Detection properties
+    livenessDetection = {
+        isActive: false,
+        currentStep: 0,
+        totalSteps: 3,
+        steps: [
+            { name: "Center", angle: 0, tolerance: 15, completed: false },
+            { name: "Left", angle: -30, tolerance: 15, completed: false },
+            { name: "Right", angle: 30, tolerance: 15, completed: false },
+        ],
+        faceAngles: [] as number[],
+        requiredHoldTime: 1000, // 1 second to hold position
+        holdStartTime: 0,
+        isHolding: false,
+    };
+
+    constructor(
+        private _changeDetectorRef: ChangeDetectorRef,
+        private _httpWrapperService: HttpWrapperService,
+        private _walletService: WalletService,
+        private _router: Router,
+        private dataPassingService: DataPassingService
+    ) {
+        this.apiKeysSessionJWT = "";
+
+        this.shareables = {
+            wallet: {},
+        };
+    }
+
+    async ngOnInit(): Promise<void> {
+        // First, get the dataType from the route path
+        const currentPath = this._router.url;
+
+        if (currentPath.includes("/notes/")) {
+            this.dataType = "notes";
+            this.dataTitle = "Note";
+        } else if (currentPath.includes("/passwords/")) {
+            this.dataType = "passwords";
+            this.dataTitle = "Password";
+        } else if (currentPath.includes("/payment-cards/")) {
+            this.dataType = "payment-cards";
+            this.dataTitle = "Payment Card";
+        }
+
+        // Get data from service instead of query params
+        this._getDataFromService();
+
+        await this._setWallet();
+
+        // Initialize ZelfKey session
+        this.initZelfKeySession();
+
+        // Initialize biometric verification
+        this._initializeBiometrics();
+    }
+
+    private async _setWallet(): Promise<any> {
+        const wallet = await this._walletService.getFirstWalletFromStorage();
+
+        if (!wallet?.name) {
+            this._router.navigate(["/welcome"]);
+
+            return;
+        }
+
+        this.shareables.wallet = wallet;
+
+        this.wallet = this.shareables.wallet;
+
+        this.hasMasterPassword = wallet.hasPassword || false;
+
+        this._changeDetectorRef.detectChanges();
+    }
+
+    /**
+     * Get data from the data passing service or input
+     */
+    private _getDataFromService(): void {
+        // If itemData is provided as input (for decrypt mode), use it
+        if (this.itemData && Object.keys(this.itemData).length > 0) {
+            // Use input itemData
+        } else {
+            // Otherwise, get data from service based on data type
+            const serviceData = this.dataPassingService.getData(this.dataType);
+
+            if (serviceData) {
+                this.itemData = serviceData;
+            } else {
+                this.itemData = {};
+            }
+        }
+
+        // Set master password if available
+        if ((this.dataType === "notes" || this.dataType === "passwords") && this.itemData.masterPassword) {
+            this.masterPassword = this.itemData.masterPassword;
+        }
+    }
+
+    ngOnDestroy(): void {
+        // Clear intervals
+        if (this._intervals.detectFace) {
+            clearInterval(this._intervals.detectFace);
+        }
+        if (this._intervals.checkNgxVideo) {
+            clearInterval(this._intervals.checkNgxVideo);
+        }
+
+        // Stop camera stream
+        this._stopCamera();
+
+        // Complete observables
+        this.unsubscriber$.next();
+
+        this.unsubscriber$.complete();
+    }
+
+    get takePicture$(): Observable<void> {
+        return this._takePicture.asObservable();
+    }
+
+    async initZelfKeySession(): Promise<void> {
+        // The wallet service now caches the JWT token
+        await this._walletService.initZelfKeySession();
+
+        // Get the cached token
+        const jwt = await this._walletService.getZelfKeyJWT();
+
+        if (jwt) {
+            this.apiKeysSessionJWT = jwt;
+        }
+    }
+
+    /**
+     * Handle successful biometrics verification in decrypt mode
+     */
+    onBiometricsSuccess(faceBase64: string, password?: string): void {
+        if (this.isDecryptMode) {
+            // Stop camera before emitting success
+            this._stopCamera();
+            this.biometricsSuccess.emit({
+                faceBase64,
+                password: this.masterPassword || password,
+            });
+        }
+    }
+
+    /**
+     * Handle biometrics cancellation in both decrypt and create modes
+     */
+    onBiometricsCancel(): void {
+        // Stop camera before closing
+        this._stopCamera();
+        this.biometricsCancel.emit();
+    }
+
+    /**
+     * Stop camera stream and cleanup
+     */
+    private _stopCamera(): void {
+        try {
+            // Stop the webcam component
+            if (this.webcamRef) {
+                // Access the native video element and stop its stream
+                const videoElement = this.webcamRef.nativeVideoElement;
+
+                if (videoElement && videoElement.srcObject) {
+                    const stream = videoElement.srcObject as MediaStream;
+
+                    if (stream) {
+                        stream.getTracks().forEach((track) => {
+                            track.stop();
+                        });
+                    }
+
+                    videoElement.srcObject = null;
+                }
+            }
+        } catch (error) {
+            console.warn("Error stopping camera:", error);
+        }
+    }
+
+    /**
+     * Toggle master password input visibility
+     */
+    toggleMasterPassword(): void {
+        this.useMasterPassword = !this.useMasterPassword;
+
+        if (!this.useMasterPassword) {
+            this.masterPassword = ""; // Clear password when toggling off
+        }
+    }
+
+    /**
+     * Clear API error and retry
+     */
+    clearApiError(): void {
+        this.apiError = "";
+        this.hasApiError = false;
+        this.response.isLoading = false;
+        this.response.base64Image = "";
+        this._changeDetectorRef.markForCheck();
+
+        // Restart face detection
+        this._startFaceDetectionInterval();
+    }
+
+    /**
+     * Start active liveness detection
+     */
+    startLivenessDetection(): void {
+        this.livenessDetection.isActive = true;
+        this.livenessDetection.currentStep = 0;
+        this.livenessDetection.steps.forEach((step) => (step.completed = false));
+        this.livenessDetection.faceAngles = [];
+        this._changeDetectorRef.markForCheck();
+    }
+
+    private async _initializeBiometrics(): Promise<void> {
+        try {
+            // Always wait for the wallet service to load the models
+            this._walletService.faceapi$.pipe(takeUntil(this.unsubscriber$)).subscribe(async (isLoaded) => {
+                if (!isLoaded) return;
+
+                this.camera.isLoading = false;
+                await this._setMaxVideoDimensions();
+                this._startNgxVideoInterval();
+            });
+        } catch (error) {
+            console.error("❌ Error initializing biometrics:", error);
+            this.error.emit(error);
+        }
+    }
+
+    private async _setMaxVideoDimensions(): Promise<void> {
+        const maxWidth = 800;
+        const maxHeight = 600;
+
+        // Set initial video dimensions
+        this.camera.dimensions.video.width = maxWidth;
+        this.camera.dimensions.video.height = maxHeight;
+
+        // Set result dimensions
+        this.camera.dimensions.result.width = maxWidth;
+        this.camera.dimensions.result.height = maxHeight;
+
+        // Initialize face dimensions
+        this.face.video = this._getCenterAndRadius(maxHeight, maxWidth);
+
+        this._changeDetectorRef.markForCheck();
+    }
+
+    private _startNgxVideoInterval(): void {
+        if (this._intervals.checkNgxVideo) {
+            clearInterval(this._intervals.checkNgxVideo);
+
+            this._intervals.checkNgxVideo = null;
+        }
+
+        this._intervals.checkNgxVideo = setInterval(this._checkVideoStreamReady, 100);
+    }
+
+    private _checkVideoStreamReady = () => {
+        const videoNgx = this.webcamRef?.nativeVideoElement;
+
+        if (!videoNgx) return;
+
+        clearInterval(this._intervals.checkNgxVideo);
+
+        this._intervals.checkNgxVideo = null;
+
+        videoNgx.addEventListener(
+            "loadeddata",
+            () => {
+                this._startFaceDetectionInterval();
+                this.canNavigate.emit(true);
+
+                this._setVideoDimensions(videoNgx);
+                this._drawOvalCenterAndMask();
+            },
+            { once: true }
+        );
+
+        this._setVideoDimensions(videoNgx);
+        this._drawOvalCenterAndMask();
+    };
+
+    private _setVideoDimensions(videoElement: HTMLVideoElement) {
+        const containerWidth = this.dataBiometricsContainerRef?.nativeElement?.clientWidth || 800;
+        const containerHeight = Math.round(containerWidth * 0.5625);
+
+        videoElement.style.objectFit = "cover";
+        videoElement.style.objectPosition = "center";
+        videoElement.style.transform = "scaleX(1)";
+
+        this.camera.dimensions.video.width = containerWidth;
+        this.camera.dimensions.video.height = containerHeight;
+        this.camera.dimensions.result = { height: 0, width: 0, offsetX: 0, offsetY: 0 };
+
+        this._setResultDimensions("result", containerHeight, containerWidth);
+
+        this.face.video = this._getCenterAndRadius(containerHeight, containerWidth);
+
+        const maskResultCanvas = this.maskResultCanvasRef?.nativeElement;
+
+        if (maskResultCanvas) {
+            maskResultCanvas.style.marginLeft = `0px`;
+            maskResultCanvas.style.marginTop = `0px`;
+        }
+
+        this._changeDetectorRef.markForCheck();
+    }
+
+    private _getCenterAndRadius(
+        height: number,
+        width: number
+    ): { center: { x: number; y: number }; radius: { x: number; y: number }; margin: { x: number; y: number } } {
+        const center = {
+            x: width / 2,
+            y: height / 2,
+        };
 
         const margin = {
             y: height * 0.05,
@@ -546,15 +438,18 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
         margin.x = margin.y * 0.8;
 
         const radius = {
-            y: height * 0.42,
+            y: height * 0.378, // Reduced by 10% (0.42 * 0.9 = 0.378)
             x: 0,
         };
 
-        radius.x = radius.y * this.aspectRatio;
+        // Use the actual aspect ratio of the container (16:9 = 0.5625) and make it 25% wider
+        const containerAspectRatio = height / width;
+        radius.x = radius.y * containerAspectRatio * 1.25; // 25% wider
 
+        // Ensure the oval fits within the container
         if (radius.x * 2 >= width) {
             radius.x = width * 0.48;
-            radius.y = radius.x / this.aspectRatio;
+            radius.y = radius.x / containerAspectRatio;
         }
 
         return { center, radius, margin };
@@ -581,609 +476,647 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
             return;
         }
 
-		const videoDim = this.camera.dimensions.video;
-		if (!videoDim.width || !videoDim.height) {
-			return;
-		}
-		maskResultCanvas.width = videoDim.width;
-		maskResultCanvas.height = videoDim.height;
-
-		const { center, radius } = this.face.video || { center: { x: 0, y: 0 }, radius: { x: 0, y: 0 } };
-
-		ctx.clearRect(0, 0, maskResultCanvas.width, maskResultCanvas.height);
-
-		ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
-		ctx.fillRect(0, 0, maskResultCanvas.width, maskResultCanvas.height);
-
-		ctx.globalCompositeOperation = "destination-out";
-
-		ctx.fillStyle = "rgba(255, 255, 255, 1)";
-		ctx.beginPath();
-		ctx.ellipse(center.x, center.y, radius.x, radius.y, 0, 0, 2 * Math.PI);
-		ctx.fill();
-		ctx.closePath();
-
-		ctx.globalCompositeOperation = "source-over";
-	}
-
-	private _drawStatusOval(ctx: any, isOk: boolean): void {
-		const { center, radius } = this.face.video || { center: { x: 0, y: 0 }, radius: { x: 0, y: 0 } };
-
-		ctx.beginPath();
-		ctx.ellipse(center.x, center.y, radius.x, radius.y, 0, 0, 2 * Math.PI);
-		ctx.lineWidth = 5;
-		ctx.strokeStyle = isOk ? "green" : "red";
-		ctx.stroke();
-		ctx.closePath();
-	}
-
-	private _inRange(value: number, min: number, max: number): boolean {
-		return value >= min && value <= max;
-	}
-
-	private _isFaceCentered(nose: any): void {
-		const faceCenterX = nose.x;
-		const faceCenterY = nose.y;
-
-		const { center, margin } = this.face.real || { center: { x: 0, y: 0 }, margin: { x: 0, y: 0 } };
-
-		const inRangeX = this._inRange(faceCenterX, center.x - margin.x, center.x + margin.x);
-		const inRangeY = this._inRange(faceCenterY, center.y, center.y + margin.y * 2.5);
-
-		const isFaceCentered = inRangeX && inRangeY;
-
-		if (isFaceCentered) return;
-
-		let direction = "";
-
-		if (!inRangeX) direction += `${faceCenterX < center.x - margin.x ? "←" : "→"}`;
-		if (!inRangeY) direction += `${faceCenterY < center.y ? "↓" : "↑"}`;
-
-		this.errorFace = {
-			canvas: direction,
-			subtitle: "Center your face in the oval",
-			title: "Center your face",
-		};
-	}
-
-	private _isFaceClose(landmarks: any): void {
-		const realDim = this.camera.dimensions.real || { height: 0, width: 0 };
-		const totalFaceArea = landmarks.imageHeight * landmarks.imageWidth;
-		const totalImageArea = realDim.height * realDim.width;
-		const faceProportion = totalFaceArea / totalImageArea;
-
-		if (faceProportion < this.face.threshold || landmarks.imageHeight < this.face.minPixels || landmarks.imageWidth < this.face.minPixels) {
-			this.errorFace = {
-				title: "Get closer",
-				subtitle: "Move your face closer to the camera",
-			};
-		}
-	}
-
-	private _startFaceDetectionInterval(): void {
-		if (this._intervals.detectFace) {
-			clearInterval(this._intervals.detectFace);
-			this._intervals.detectFace = null;
-		}
-
-		this._intervals.detectFace = setInterval(() => {
-			this._detectFace();
-		}, 100);
-	}
-
-	private async _detectFace(): Promise<void> {
-		const videoNgx = this.webcamRef?.nativeVideoElement;
-		if (!videoNgx || this.response.base64Image) {
-			return;
-		}
-
-		try {
-			const detection = await faceapi.detectAllFaces(videoNgx, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.2 })).withFaceLandmarks();
-
-			const context = this.maskResultCanvasRef?.nativeElement.getContext("2d", { willReadFrequently: true });
-			if (!context) return;
-
-			// Always redraw the base oval mask first
-			this._drawOvalCenterAndMask();
-
-			if (detection.length > 0) {
-				this.lastFace = detection[0];
-				this.errorFace = null;
-
-				// Set real dimensions for face positioning calculations
-				this.camera.dimensions.real = {
-					height: videoNgx.videoHeight,
-					width: videoNgx.videoWidth,
-					offsetX: 0,
-					offsetY: 0,
-				};
-				this.face.real = this._getCenterAndRadius(videoNgx.videoHeight, videoNgx.videoWidth);
-
-				// Check face positioning
-				this._isFaceCentered(this.lastFace.landmarks.getNose()[3]);
-				this._isFaceClose(this.lastFace.landmarks);
-
-				// Draw status oval (green if no errors, red if errors)
-				this._drawStatusOval(context, !this.errorFace);
-
-				if (!this.errorFace) {
-					++this.face.successPosition;
-				} else {
-					this.face.successPosition = 0;
-				}
-
-				// Update liveness detection if active
-				if (this.livenessDetection.isActive) {
-					this._updateLivenessProgress(this.lastFace);
-				} else if (this.face.successPosition > 2) {
-					// Capture after 3 successful frames (original behavior)
-					this.face.successPosition = 0;
-					this._takePicture.next(); // Trigger image capture
-					clearInterval(this._intervals.detectFace); // Stop detection after capture
-				}
-			} else {
-				this.face.successPosition = 0;
-				this.errorFace = {
-					title: "No face detected",
-					subtitle: "Please look at the camera",
-				};
-				// Draw red oval if no face detected
-				this._drawStatusOval(context, false);
-			}
-
-			this._changeDetectorRef.markForCheck();
-		} catch (error: any) {
-			console.error("Face detection error:", error);
-			this.error.emit(error);
-			const context = this.maskResultCanvasRef?.nativeElement.getContext("2d");
-			if (context) this._drawStatusOval(context, false);
-		}
-	}
-
-	private _setImageOnCanvas(canvas: HTMLCanvasElement, img: HTMLImageElement, dimensions: any, resultDimensions: any): void {
-		const context = canvas.getContext("2d");
-		if (!context) return;
-
-		canvas.width = resultDimensions.width;
-		canvas.height = resultDimensions.height;
-
-		context.drawImage(
-			img,
-			dimensions.offsetX,
-			dimensions.offsetY,
-			dimensions.width,
-			dimensions.height,
-			0,
-			0,
-			resultDimensions.width,
-			resultDimensions.height
-		);
-	}
-
-	private _takePictureLiveness(img: HTMLImageElement): void {
-		const maskResultCanvas = this.maskResultCanvasRef?.nativeElement;
-		const toSendCanvas = this.ToSendCanvasRef?.nativeElement;
-
-		if (!maskResultCanvas || !toSendCanvas) return;
-
-		if (!this.camera.dimensions.real || !this.camera.dimensions.result) {
-			console.error("Camera dimensions not properly initialized");
-			return;
-		}
-
-		this._setImageOnCanvas(maskResultCanvas, img, this.camera.dimensions.real, this.camera.dimensions.result);
-		this._setImageOnCanvas(toSendCanvas, img, this.camera.dimensions.real, this.camera.dimensions.real);
-
-		this.response.base64Image = toSendCanvas.toDataURL("image/jpeg");
-		this.response.isLoading = true;
-
-		this._emitBiometricCapture();
-	}
-
-	private async _emitBiometricCapture(): Promise<void> {
-		try {
-			const base64Data = this.response.base64Image.split(",")[1];
-
-			if (this.isDecryptMode) {
-				// In decrypt mode, retrieve the data based on category
-				await this._retrieveDataByCategory(base64Data);
-			} else {
-				// In create mode, store the data based on category
-				await this._storeDataByCategory(base64Data);
-			}
-		} catch (error) {
-			console.error("Error in biometric capture:", error);
-			// Reset loading state
-			this.response.isLoading = false;
-			this.response.base64Image = "";
-			this._changeDetectorRef.markForCheck();
-			this.error.emit(error);
-		}
-	}
-
-	private async _storeDataByCategory(faceBase64: string): Promise<void> {
-		try {
-			let response: any;
-
-			// Get the correct data source based on data type
-			const dataSource = this._getDataSource();
-
-			// Safety check: Ensure we have data before proceeding
-			if (!dataSource || Object.keys(dataSource).length === 0) {
-				throw new Error(`No data available for ${this.dataType}. Cannot proceed with storage.`);
-			}
-
-			const walletKeys = {
-				zelfProof: this.wallet.zelfProof,
-				masterPassword: this.wallet.hasPassword ? dataSource.masterPassword : undefined,
-			};
-
-			switch (this.dataType) {
-				case "notes":
-					// Store note data
-					const notePayload = {
-						title: dataSource.title,
-						keyValuePairs: dataSource.keyValuePairs,
-						folder: dataSource.folder,
-						insideFolder: dataSource.insideFolder,
-						faceBase64: faceBase64,
-						...walletKeys,
-					};
-
-					response = await this._httpWrapperService.sendRequest("post", `${environment.keysApiUrl}/api/zelf-key/store/notes`, notePayload, {
-						headers: {
-							Authorization: `Bearer ${this.apiKeysSessionJWT}`,
-						},
-					});
-					break;
-
-				case "passwords":
-					// Store password data
-					const passwordPayload = {
-						website: dataSource.url,
-						username: dataSource.email,
-						password: dataSource.password,
-						notes: dataSource.notes,
-						folder: dataSource.folder,
-						insideFolder: dataSource.insideFolder,
-						name: dataSource.title,
-						faceBase64: faceBase64,
-						...walletKeys,
-					};
-
-					response = await this._httpWrapperService.sendRequest(
-						"post",
-						`${environment.keysApiUrl}/api/zelf-key/store/password`,
-						passwordPayload,
-						{
-							headers: {
-								Authorization: `Bearer ${this.apiKeysSessionJWT}`,
-							},
-						}
-					);
-					break;
-
-				case "payment-cards":
-					// Store payment card data
-					const cardPayload = {
-						cardName: dataSource.cardName,
-						cardNumber: dataSource.cardNumber,
-						expiryMonth: dataSource.expiryMonth,
-						expiryYear: dataSource.expiryYear,
-						folder: dataSource.folder,
-						insideFolder: dataSource.insideFolder,
-						cvv: dataSource.cvv,
-						bankName: dataSource.bankName,
-						faceBase64: faceBase64,
-						...walletKeys,
-					};
-
-					response = await this._httpWrapperService.sendRequest(
-						"post",
-						`${environment.keysApiUrl}/api/zelf-key/store/credit-card`,
-						cardPayload,
-						{
-							headers: {
-								Authorization: `Bearer ${this.apiKeysSessionJWT}`,
-							},
-						}
-					);
-
-					break;
-
-				default:
-					throw new Error(`Unsupported data type: ${this.dataType}`);
-			}
-
-			this.imageCaptured.emit(this.response.base64Image);
-
-			// Store the API result in the service
-			await this.dataPassingService.storeResult(this.dataType, response);
-
-			// Navigate to result page based on category
-			await this._navigateToResult(response);
-		} catch (error: any) {
-			console.error(`Error storing ${this.dataType} data:`, error);
-
-			// Reset loading state
-			this.response.isLoading = false;
-			this._changeDetectorRef.markForCheck();
-
-			// Extract user-friendly error message
-			let errorMessage = `Error storing ${this.dataType}`;
-
-			if (error?.error?.error) {
-				errorMessage = error.error.error;
-			} else if (error?.error?.message) {
-				errorMessage = error.error.message;
-			} else if (error?.message) {
-				errorMessage = error.message;
-			}
-
-			// Set error state for display
-			this.apiError = errorMessage;
-			this.hasApiError = true;
-
-			// Create user-friendly error object
-			const userError = {
-				message: errorMessage,
-				type: "storage_error",
-				originalError: error,
-			};
-
-			this.error.emit(userError);
-		}
-	}
-
-	private async _retrieveDataByCategory(faceBase64: string): Promise<any> {
-		try {
-			// Get the correct data source based on data type
-			const dataSource = this._getDataSource();
-
-			// For retrieve mode, we need zelfProof and optional password
-			if (!dataSource.publicData.zelfProof) {
-				throw new Error(`No zelfProof available for ${this.dataType}. Cannot proceed with retrieval.`);
-			}
-
-			const retrievePayload = {
-				zelfProof: dataSource.publicData.zelfProof,
-				faceBase64: faceBase64,
-				...(this.useMasterPassword && this.masterPassword && { password: this.masterPassword }), // Optional password
-			};
-
-			// Call the retrieve endpoint
-			const response = await this._httpWrapperService.sendRequest("post", `${environment.keysApiUrl}/api/zelf-key/retrieve`, retrievePayload, {
-				headers: {
-					Authorization: `Bearer ${this.apiKeysSessionJWT}`,
-				},
-			});
-
-			// Store the retrieved data in the service
-			await this.dataPassingService.storeResult(this.dataType, response);
-
-			// Navigate to result page for retrieved data
-			await this._navigateToResult(response);
-
-			return response;
-		} catch (error: any) {
-			console.error(`Error retrieving ${this.dataType} data:`, error);
-
-			// Reset loading state
-			this.response.isLoading = false;
-			this._changeDetectorRef.markForCheck();
-
-			// Extract user-friendly error message
-			let errorMessage = `Error retrieving ${this.dataType}`;
-
-			if (error?.error?.error) {
-				errorMessage = error.error.error;
-			} else if (error?.error?.message) {
-				errorMessage = error.error.message;
-			} else if (error?.message) {
-				errorMessage = error.message;
-			}
-
-			// Set error state for display
-			this.apiError = errorMessage;
-			this.hasApiError = true;
-
-			// Create user-friendly error object
-			const userError = {
-				message: errorMessage,
-				type: "retrieval_error",
-				originalError: error,
-			};
-
-			this.error.emit(userError);
-			throw userError;
-		}
-	}
-
-	private async _navigateToResult(apiResponse?: any): Promise<void> {
-		// Stop camera before navigating
-		this._stopCamera();
-
-		// Get the correct data source for navigation
-		const dataSource = this._getDataSource();
-
-		// Determine if this is store or retrieve mode
-		const isRetrieveMode = this.isDecryptMode;
-
-		const messageText = isRetrieveMode ? "Note retrieved successfully" : "Note stored successfully";
-
-		// For decrypt mode, emit result instead of navigating
-		if (this.isDecryptMode) {
-			this.biometricsSuccess.emit({
-				faceBase64: this.response.base64Image.split(",")[1],
-				password: this.masterPassword,
-				retrievedData: apiResponse?.data,
-			});
-			return;
-		}
-
-		// Switch case for different categories
-		switch (this.dataType) {
-			case "notes":
-				this._router.navigate(["/dashboard/notes/result"], {
-					queryParams: {
-						result: encodeURIComponent(
-							JSON.stringify({
-								success: true,
-								message: messageText,
-								publicData: {
-									title: dataSource.title || apiResponse?.data?.title,
-									type: "notes",
-									timestamp: new Date().toISOString(),
-								},
-								zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
-								zelfQR: apiResponse?.data?.zelfQR || "data:image/png;base64,sample_qr_code",
-								// Include retrieved data if in retrieve mode
-								...(isRetrieveMode && { retrievedData: apiResponse?.data }),
-							})
-						),
-					},
-				});
-				break;
-
-			case "passwords":
-				this._router.navigate(["/dashboard/passwords/result"], {
-					queryParams: {
-						result: encodeURIComponent(
-							JSON.stringify({
-								success: true,
-								message: isRetrieveMode ? "Password retrieved successfully" : "Password stored successfully",
-								publicData: {
-									title: dataSource.title || apiResponse?.data?.title,
-									type: "password",
-									timestamp: new Date().toISOString(),
-								},
-								zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
-								zelfQR: apiResponse?.data?.zelfQR || "data:image/png;base64,sample_qr_code",
-								// Include retrieved data if in retrieve mode
-								...(isRetrieveMode && { retrievedData: apiResponse?.data }),
-							})
-						),
-					},
-				});
-				break;
-
-			case "payment-cards":
-				// Parse the card data from the JSON string in publicData.card
-				let parsedCardData: any = {};
-				if (apiResponse?.data?.publicData?.card) {
-					try {
-						parsedCardData = JSON.parse(apiResponse.data.publicData.card);
-					} catch (error) {
-						console.error("Error parsing card data:", error);
-					}
-				}
-
-				await this.dataPassingService.storeResult("payment-cards", apiResponse);
-
-				this._router.navigate(["/dashboard/payment-cards/result"]);
-				break;
-
-			default:
-				this._router.navigate(["/dashboard"]);
-				break;
-		}
-	}
-
-	cameraError(error: WebcamInitError): void {
-		console.error("Camera error:", error);
-		this.canNavigate.emit(true);
-		this.error.emit(error);
-
-		if (!error.mediaStreamError || error.mediaStreamError.name !== "NotAllowedError") return;
-
-		this.camera.hasPermissions = false;
-	}
-
-	processImage(webcamImage: WebcamImage): void {
-		if (this.response.base64Image) {
-			return;
-		}
-
-		const img = new Image();
-		img.src = webcamImage.imageAsDataUrl;
-
-		img.onload = async () => {
-			if (img.height < this.face.minHeight) {
-				this.camera.isLowQuality = true;
-				this.canNavigate.emit(true);
-				this.error.emit({ error: "low_quality" });
-				return;
-			}
-
-			// This is for capturing the final image after successful liveness detection
-			this._takePictureLiveness(img);
-		};
-	}
-
-	onBack(): void {
-		if (this.isDecryptMode) {
-			// In decrypt mode, emit cancel event
-			this.onBiometricsCancel();
-		} else {
-			// In create mode, emit cancel event to close modal and return to form
-			this.onBiometricsCancel();
-		}
-	}
-
-	private _navigateBackToForm(): void {
-		// Get the correct data source for navigation back
-		const dataSource = this._getDataSource();
-
-		// Switch case for different categories
-		switch (this.dataType) {
-			case "notes":
-				this._router.navigate(["/dashboard/notes/new"], {
-					queryParams: { noteData: encodeURIComponent(JSON.stringify(dataSource)) },
-				});
-				break;
-
-			case "passwords":
-				this._router.navigate(["/dashboard/passwords/new"], {
-					queryParams: { passwordData: encodeURIComponent(JSON.stringify(dataSource)) },
-				});
-				break;
-
-			case "payment-cards":
-				this._router.navigate(["/dashboard/payment-cards/new"], {
-					queryParams: { cardData: encodeURIComponent(JSON.stringify(dataSource)) },
-				});
-				break;
-
-			default:
-				// Fallback to dashboard
-				this._router.navigate(["/dashboard"]);
-				break;
-		}
-	}
-
-	/**
-	 * Get the correct data source based on data type
-	 */
-	private _getDataSource(): any {
-		// All data now comes from itemData (populated from service)
-		return this.itemData;
-	}
-
-	// Helper methods for UI
-	getDataTypeIcon(): string {
-		switch (this.dataType) {
-			case "passwords":
-				return "🔐";
-			case "notes":
-				return "📝";
-			case "payment-cards":
-				return "💳";
-			default:
-				return "📄";
-		}
-	}
-
-	getDataTypeTitle(): string {
-		return this.dataTitle;
-	}
+        const videoDim = this.camera.dimensions.video;
+        if (!videoDim.width || !videoDim.height) {
+            return;
+        }
+        maskResultCanvas.width = videoDim.width;
+        maskResultCanvas.height = videoDim.height;
+
+        const { center, radius } = this.face.video || { center: { x: 0, y: 0 }, radius: { x: 0, y: 0 } };
+
+        ctx.clearRect(0, 0, maskResultCanvas.width, maskResultCanvas.height);
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+        ctx.fillRect(0, 0, maskResultCanvas.width, maskResultCanvas.height);
+
+        ctx.globalCompositeOperation = "destination-out";
+
+        ctx.fillStyle = "rgba(255, 255, 255, 1)";
+        ctx.beginPath();
+        ctx.ellipse(center.x, center.y, radius.x, radius.y, 0, 0, 2 * Math.PI);
+        ctx.fill();
+        ctx.closePath();
+
+        ctx.globalCompositeOperation = "source-over";
+    }
+
+    private _drawStatusOval(ctx: any, isOk: boolean): void {
+        const { center, radius } = this.face.video || { center: { x: 0, y: 0 }, radius: { x: 0, y: 0 } };
+
+        ctx.beginPath();
+        ctx.ellipse(center.x, center.y, radius.x, radius.y, 0, 0, 2 * Math.PI);
+        ctx.lineWidth = 5;
+        ctx.strokeStyle = isOk ? "green" : "red";
+        ctx.stroke();
+        ctx.closePath();
+    }
+
+    private _inRange(value: number, min: number, max: number): boolean {
+        return value >= min && value <= max;
+    }
+
+    private _isFaceCentered(nose: any): void {
+        const faceCenterX = nose.x;
+        const faceCenterY = nose.y;
+
+        const { center, margin } = this.face.real || { center: { x: 0, y: 0 }, margin: { x: 0, y: 0 } };
+
+        const inRangeX = this._inRange(faceCenterX, center.x - margin.x, center.x + margin.x);
+        const inRangeY = this._inRange(faceCenterY, center.y, center.y + margin.y * 2.5);
+
+        const isFaceCentered = inRangeX && inRangeY;
+
+        if (isFaceCentered) return;
+
+        let direction = "";
+
+        if (!inRangeX) direction += `${faceCenterX < center.x - margin.x ? "←" : "→"}`;
+        if (!inRangeY) direction += `${faceCenterY < center.y ? "↓" : "↑"}`;
+
+        this.errorFace = {
+            canvas: direction,
+            subtitle: "Center your face in the oval",
+            title: "Center your face",
+        };
+    }
+
+    private _isFaceClose(landmarks: any): void {
+        const realDim = this.camera.dimensions.real || { height: 0, width: 0 };
+        const totalFaceArea = landmarks.imageHeight * landmarks.imageWidth;
+        const totalImageArea = realDim.height * realDim.width;
+        const faceProportion = totalFaceArea / totalImageArea;
+
+        if (faceProportion < this.face.threshold || landmarks.imageHeight < this.face.minPixels || landmarks.imageWidth < this.face.minPixels) {
+            this.errorFace = {
+                title: "Get closer",
+                subtitle: "Move your face closer to the camera",
+            };
+        }
+    }
+
+    private _startFaceDetectionInterval(): void {
+        if (this._intervals.detectFace) {
+            clearInterval(this._intervals.detectFace);
+            this._intervals.detectFace = null;
+        }
+
+        this._intervals.detectFace = setInterval(() => {
+            this._detectFace();
+        }, 200); // Reduced from 100ms to 200ms for better performance
+    }
+
+    private async _detectFace(): Promise<void> {
+        const videoNgx = this.webcamRef?.nativeVideoElement;
+        if (!videoNgx || this.response.base64Image) {
+            return;
+        }
+
+        // Early return if video is not ready
+        if (videoNgx.readyState !== 4) {
+            return;
+        }
+
+        try {
+            // Use higher confidence threshold for better performance
+            const detection = await faceapi.detectAllFaces(videoNgx, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 })).withFaceLandmarks();
+
+            const context = this.maskResultCanvasRef?.nativeElement.getContext("2d", { willReadFrequently: true });
+            if (!context) return;
+
+            if (detection.length > 0) {
+                this.lastFace = detection[0];
+                this.errorFace = null;
+
+                // Set real dimensions for face positioning calculations (only if changed)
+                if (!this.camera.dimensions.real.width || this.camera.dimensions.real.width !== videoNgx.videoWidth) {
+                    this.camera.dimensions.real = {
+                        height: videoNgx.videoHeight,
+                        width: videoNgx.videoWidth,
+                        offsetX: 0,
+                        offsetY: 0,
+                    };
+                    this.face.real = this._getCenterAndRadius(videoNgx.videoHeight, videoNgx.videoWidth);
+                    // Only redraw mask when dimensions change
+                    this._drawOvalCenterAndMask();
+                }
+
+                // Check face positioning
+                this._isFaceCentered(this.lastFace.landmarks.getNose()[3]);
+                this._isFaceClose(this.lastFace.landmarks);
+
+                // Draw status oval (green if no errors, red if errors)
+                this._drawStatusOval(context, !this.errorFace);
+
+                if (!this.errorFace) {
+                    ++this.face.successPosition;
+                } else {
+                    this.face.successPosition = 0;
+                }
+
+                if (this.face.successPosition > 0) {
+                    // Capture after 1 successful frame (very responsive)
+                    this.face.successPosition = 0;
+                    this._takePicture.next(); // Trigger image capture
+                    clearInterval(this._intervals.detectFace); // Stop detection after capture
+                }
+            } else {
+                this.face.successPosition = 0;
+                this.errorFace = {
+                    title: "No face detected",
+                    subtitle: "Please look at the camera",
+                };
+                // Redraw mask and draw red oval if no face detected
+                this._drawOvalCenterAndMask();
+                this._drawStatusOval(context, false);
+            }
+
+            this._changeDetectorRef.markForCheck();
+        } catch (error: any) {
+            console.error("Face detection error:", error);
+            this.error.emit(error);
+            const context = this.maskResultCanvasRef?.nativeElement.getContext("2d");
+            if (context) this._drawStatusOval(context, false);
+        }
+    }
+
+    private _setImageOnCanvas(canvas: HTMLCanvasElement, img: HTMLImageElement, dimensions: any, resultDimensions: any): void {
+        const context = canvas.getContext("2d");
+        if (!context) return;
+
+        canvas.width = resultDimensions.width;
+        canvas.height = resultDimensions.height;
+
+        context.drawImage(
+            img,
+            dimensions.offsetX,
+            dimensions.offsetY,
+            dimensions.width,
+            dimensions.height,
+            0,
+            0,
+            resultDimensions.width,
+            resultDimensions.height
+        );
+    }
+
+    private _takePictureLiveness(img: HTMLImageElement): void {
+        const maskResultCanvas = this.maskResultCanvasRef?.nativeElement;
+        const toSendCanvas = this.ToSendCanvasRef?.nativeElement;
+
+        if (!maskResultCanvas || !toSendCanvas) return;
+
+        if (!this.camera.dimensions.real || !this.camera.dimensions.result) {
+            console.error("Camera dimensions not properly initialized");
+            return;
+        }
+
+        this._setImageOnCanvas(maskResultCanvas, img, this.camera.dimensions.real, this.camera.dimensions.result);
+        this._setImageOnCanvas(toSendCanvas, img, this.camera.dimensions.real, this.camera.dimensions.real);
+
+        this.response.base64Image = toSendCanvas.toDataURL("image/jpeg");
+        this.response.isLoading = true;
+
+        this._emitBiometricCapture();
+    }
+
+    private async _emitBiometricCapture(): Promise<void> {
+        try {
+            const base64Data = this.response.base64Image.split(",")[1];
+
+            if (this.isDecryptMode) {
+                // In decrypt mode, retrieve the data based on category
+                await this._retrieveDataByCategory(base64Data);
+            } else {
+                // In create mode, store the data based on category
+                await this._storeDataByCategory(base64Data);
+            }
+        } catch (error) {
+            console.error("Error in biometric capture:", error);
+            // Reset loading state
+            this.response.isLoading = false;
+            this.response.base64Image = "";
+            this._changeDetectorRef.markForCheck();
+            this.error.emit(error);
+        }
+    }
+
+    private async _storeDataByCategory(faceBase64: string): Promise<void> {
+        try {
+            let response: any;
+
+            // Get the correct data source based on data type
+            const dataSource = this._getDataSource();
+
+            // Safety check: Ensure we have data before proceeding
+            if (!dataSource || Object.keys(dataSource).length === 0) {
+                throw new Error(`No data available for ${this.dataType}. Cannot proceed with storage.`);
+            }
+
+            const walletKeys = {
+                zelfProof: this.wallet.zelfProof,
+                masterPassword: this.wallet.hasPassword ? dataSource.masterPassword : undefined,
+            };
+
+            switch (this.dataType) {
+                case "notes":
+                    // Store note data
+                    const notePayload = {
+                        title: dataSource.title,
+                        keyValuePairs: dataSource.keyValuePairs,
+                        folder: dataSource.folder,
+                        insideFolder: dataSource.insideFolder,
+                        faceBase64: faceBase64,
+                        ...walletKeys,
+                    };
+
+                    response = await this._httpWrapperService.sendRequest("post", `${environment.keysApiUrl}/api/zelf-key/store/notes`, notePayload, {
+                        headers: {
+                            Authorization: `Bearer ${this.apiKeysSessionJWT}`,
+                        },
+                    });
+                    break;
+
+                case "passwords":
+                    // Store password data
+                    const passwordPayload = {
+                        website: dataSource.url,
+                        username: dataSource.email,
+                        password: dataSource.password,
+                        notes: dataSource.notes,
+                        folder: dataSource.folder,
+                        insideFolder: dataSource.insideFolder,
+                        name: dataSource.title,
+                        faceBase64: faceBase64,
+                        ...walletKeys,
+                    };
+
+                    response = await this._httpWrapperService.sendRequest(
+                        "post",
+                        `${environment.keysApiUrl}/api/zelf-key/store/password`,
+                        passwordPayload,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${this.apiKeysSessionJWT}`,
+                            },
+                        }
+                    );
+                    break;
+
+                case "payment-cards":
+                    // Store payment card data
+                    const cardPayload = {
+                        cardName: dataSource.cardName,
+                        cardNumber: dataSource.cardNumber,
+                        expiryMonth: dataSource.expiryMonth,
+                        expiryYear: dataSource.expiryYear,
+                        folder: dataSource.folder,
+                        insideFolder: dataSource.insideFolder,
+                        cvv: dataSource.cvv,
+                        bankName: dataSource.bankName,
+                        faceBase64: faceBase64,
+                        ...walletKeys,
+                    };
+
+                    response = await this._httpWrapperService.sendRequest(
+                        "post",
+                        `${environment.keysApiUrl}/api/zelf-key/store/credit-card`,
+                        cardPayload,
+                        {
+                            headers: {
+                                Authorization: `Bearer ${this.apiKeysSessionJWT}`,
+                            },
+                        }
+                    );
+
+                    break;
+
+                default:
+                    throw new Error(`Unsupported data type: ${this.dataType}`);
+            }
+
+            this.imageCaptured.emit(this.response.base64Image);
+
+            // Store the API result in the service
+            await this.dataPassingService.storeResult(this.dataType, response);
+
+            // Navigate to result page based on category
+            await this._navigateToResult(response);
+        } catch (error: any) {
+            console.error(`Error storing ${this.dataType} data:`, error);
+
+            // Reset loading state
+            this.response.isLoading = false;
+            this._changeDetectorRef.markForCheck();
+
+            // Extract user-friendly error message
+            let errorMessage = `Error storing ${this.dataType}`;
+
+            if (error?.error?.error) {
+                errorMessage = error.error.error;
+            } else if (error?.error?.message) {
+                errorMessage = error.error.message;
+            } else if (error?.message) {
+                errorMessage = error.message;
+            }
+
+            // Set error state for display
+            this.apiError = errorMessage;
+            this.hasApiError = true;
+
+            // Create user-friendly error object
+            const userError = {
+                message: errorMessage,
+                type: "storage_error",
+                originalError: error,
+            };
+
+            this.error.emit(userError);
+        }
+    }
+
+    private async _retrieveDataByCategory(faceBase64: string): Promise<any> {
+        try {
+            // Get the correct data source based on data type
+            const dataSource = this._getDataSource();
+
+            // For retrieve mode, we need zelfProof and optional password
+            if (!dataSource.publicData.zelfProof) {
+                throw new Error(`No zelfProof available for ${this.dataType}. Cannot proceed with retrieval.`);
+            }
+
+            const retrievePayload = {
+                zelfProof: dataSource.publicData.zelfProof,
+                faceBase64: faceBase64,
+                ...(this.useMasterPassword && this.masterPassword && { password: this.masterPassword }), // Optional password
+            };
+
+            // Call the retrieve endpoint
+            const response = await this._httpWrapperService.sendRequest("post", `${environment.keysApiUrl}/api/zelf-key/retrieve`, retrievePayload, {
+                headers: {
+                    Authorization: `Bearer ${this.apiKeysSessionJWT}`,
+                },
+            });
+
+            // Store the retrieved data in the service
+            await this.dataPassingService.storeResult(this.dataType, response);
+
+            // Navigate to result page for retrieved data
+            await this._navigateToResult(response);
+
+            return response;
+        } catch (error: any) {
+            console.error(`Error retrieving ${this.dataType} data:`, error);
+
+            // Reset loading state
+            this.response.isLoading = false;
+            this._changeDetectorRef.markForCheck();
+
+            // Extract user-friendly error message
+            let errorMessage = `Error retrieving ${this.dataType}`;
+
+            if (error?.error?.error) {
+                errorMessage = error.error.error;
+            } else if (error?.error?.message) {
+                errorMessage = error.error.message;
+            } else if (error?.message) {
+                errorMessage = error.message;
+            }
+
+            // Set error state for display
+            this.apiError = errorMessage;
+            this.hasApiError = true;
+
+            // Create user-friendly error object
+            const userError = {
+                message: errorMessage,
+                type: "retrieval_error",
+                originalError: error,
+            };
+
+            this.error.emit(userError);
+            throw userError;
+        }
+    }
+
+    private async _navigateToResult(apiResponse?: any): Promise<void> {
+        // Stop camera before navigating
+        this._stopCamera();
+
+        // Get the correct data source for navigation
+        const dataSource = this._getDataSource();
+
+        // Determine if this is store or retrieve mode
+        const isRetrieveMode = this.isDecryptMode;
+
+        const messageText = isRetrieveMode ? "Note retrieved successfully" : "Note stored successfully";
+
+        // For decrypt mode, emit result instead of navigating
+        if (this.isDecryptMode) {
+            this.biometricsSuccess.emit({
+                faceBase64: this.response.base64Image.split(",")[1],
+                password: this.masterPassword,
+                retrievedData: apiResponse?.data,
+            });
+            return;
+        }
+
+        // Switch case for different categories
+        switch (this.dataType) {
+            case "notes":
+                this._router.navigate(["/dashboard/notes/result"], {
+                    queryParams: {
+                        result: encodeURIComponent(
+                            JSON.stringify({
+                                success: true,
+                                message: messageText,
+                                publicData: {
+                                    title: dataSource.title || apiResponse?.data?.title,
+                                    type: "notes",
+                                    timestamp: new Date().toISOString(),
+                                },
+                                zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
+                                zelfQR: apiResponse?.data?.zelfQR || "data:image/png;base64,sample_qr_code",
+                                // Include retrieved data if in retrieve mode
+                                ...(isRetrieveMode && { retrievedData: apiResponse?.data }),
+                            })
+                        ),
+                    },
+                });
+                break;
+
+            case "passwords":
+                this._router.navigate(["/dashboard/passwords/result"], {
+                    queryParams: {
+                        result: encodeURIComponent(
+                            JSON.stringify({
+                                success: true,
+                                message: isRetrieveMode ? "Password retrieved successfully" : "Password stored successfully",
+                                publicData: {
+                                    title: dataSource.title || apiResponse?.data?.title,
+                                    type: "password",
+                                    timestamp: new Date().toISOString(),
+                                },
+                                zelfProof: apiResponse?.data?.zelfProof || "sample_proof_string",
+                                zelfQR: apiResponse?.data?.zelfQR || "data:image/png;base64,sample_qr_code",
+                                // Include retrieved data if in retrieve mode
+                                ...(isRetrieveMode && { retrievedData: apiResponse?.data }),
+                            })
+                        ),
+                    },
+                });
+                break;
+
+            case "payment-cards":
+                // Parse the card data from the JSON string in publicData.card
+                let parsedCardData: any = {};
+                if (apiResponse?.data?.publicData?.card) {
+                    try {
+                        parsedCardData = JSON.parse(apiResponse.data.publicData.card);
+                    } catch (error) {
+                        console.error("Error parsing card data:", error);
+                    }
+                }
+
+                await this.dataPassingService.storeResult("payment-cards", apiResponse);
+
+                this._router.navigate(["/dashboard/payment-cards/result"]);
+                break;
+
+            default:
+                this._router.navigate(["/dashboard"]);
+                break;
+        }
+    }
+
+    cameraError(error: WebcamInitError): void {
+        console.error("Camera error:", error);
+        this.canNavigate.emit(true);
+        this.error.emit(error);
+
+        if (!error.mediaStreamError || error.mediaStreamError.name !== "NotAllowedError") return;
+
+        this.camera.hasPermissions = false;
+    }
+
+    processImage(webcamImage: WebcamImage): void {
+        if (this.response.base64Image) {
+            return;
+        }
+
+        const img = new Image();
+        img.src = webcamImage.imageAsDataUrl;
+
+        img.onload = async () => {
+            if (img.height < this.face.minHeight) {
+                this.camera.isLowQuality = true;
+                this.canNavigate.emit(true);
+                this.error.emit({ error: "low_quality" });
+                return;
+            }
+
+            // This is for capturing the final image after successful liveness detection
+            this._takePictureLiveness(img);
+        };
+    }
+
+    onBack(): void {
+        if (this.isDecryptMode) {
+            // In decrypt mode, emit cancel event
+            this.onBiometricsCancel();
+        } else {
+            // In create mode, emit cancel event to close modal and return to form
+            this.onBiometricsCancel();
+        }
+    }
+
+    private _navigateBackToForm(): void {
+        // Get the correct data source for navigation back
+        const dataSource = this._getDataSource();
+
+        // Switch case for different categories
+        switch (this.dataType) {
+            case "notes":
+                this._router.navigate(["/dashboard/notes/new"], {
+                    queryParams: { noteData: encodeURIComponent(JSON.stringify(dataSource)) },
+                });
+                break;
+
+            case "passwords":
+                this._router.navigate(["/dashboard/passwords/new"], {
+                    queryParams: { passwordData: encodeURIComponent(JSON.stringify(dataSource)) },
+                });
+                break;
+
+            case "payment-cards":
+                this._router.navigate(["/dashboard/payment-cards/new"], {
+                    queryParams: { cardData: encodeURIComponent(JSON.stringify(dataSource)) },
+                });
+                break;
+
+            default:
+                // Fallback to dashboard
+                this._router.navigate(["/dashboard"]);
+                break;
+        }
+    }
+
+    /**
+     * Get the correct data source based on data type
+     */
+    private _getDataSource(): any {
+        // All data now comes from itemData (populated from service)
+        return this.itemData;
+    }
+
+    // Helper methods for UI
+    getDataTypeIcon(): string {
+        switch (this.dataType) {
+            case "passwords":
+                return "🔐";
+            case "notes":
+                return "📝";
+            case "payment-cards":
+                return "💳";
+            default:
+                return "📄";
+        }
+    }
+
+    getDataTypeTitle(): string {
+        return this.dataTitle;
+    }
+
+    getHumanReadableItemInfo(): string {
+        if (!this.itemData) return "";
+
+        switch (this.dataType) {
+            case "passwords":
+                // Show website hostname or username
+                if (this.itemData.website) {
+                    try {
+                        const url = new URL(this.itemData.website);
+                        return url.hostname;
+                    } catch {
+                        return this.itemData.website;
+                    }
+                }
+                return this.itemData.username || "Password";
+
+            case "payment-cards":
+                // Show last 4 digits of card number
+                if (this.itemData.cardNumber) {
+                    const cardNumber = this.itemData.cardNumber.replace(/\s/g, "");
+                    return `**** **** **** ${cardNumber.slice(-4)}`;
+                }
+                return this.itemData.cardName || "Payment Card";
+
+            case "notes":
+                // Show note title
+                return this.itemData.title || "Note";
+
+            default:
+                return this.dataTitle;
+        }
+    }
 }

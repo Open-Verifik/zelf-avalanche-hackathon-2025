@@ -1,48 +1,81 @@
 <div class="zelf-keys-notes">
-	<div class="header">
-		<h2>Notes</h2>
-		<p>Manage your secure notes and key-value pairs</p>
-	</div>
+    <div class="zelf-keys-notes__header">
+        <h2>Notes</h2>
+        <p>Manage your secure notes and key-value pairs</p>
+    </div>
 
-	<div class="content">
-		<!-- Loading State -->
-		<div *ngIf="loading" class="loading-state">
-			<div class="spinner"></div>
-			<p>Loading your notes...</p>
-		</div>
+    <div class="zelf-keys-notes__content">
+        <!-- Loading State -->
+        <div *ngIf="loading" class="zelf-keys-notes__loading-state">
+            <div class="zelf-keys-notes__loading-spinner"></div>
+            <h3>Loading your notes</h3>
+            <p>Please wait while we fetch your secure data...</p>
+        </div>
 
-		<!-- Error State -->
-		<div *ngIf="error && !loading" class="error-state">
-			<div class="icon">⚠️</div>
-			<h3>Error loading notes</h3>
-			<p>{{ error }}</p>
-			<button class="btn-secondary" (click)="onRefresh()">Try Again</button>
-		</div>
+        <!-- Error State -->
+        <div *ngIf="error && !loading" class="zelf-keys-notes__error-state">
+            <div class="zelf-keys-notes__error-icon">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <circle cx="12" cy="12" r="10" stroke="#ff6b6b" stroke-width="2" />
+                    <path d="m15 9-6 6" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" />
+                    <path d="m9 9 6 6" stroke="#ff6b6b" stroke-width="2" stroke-linecap="round" />
+                </svg>
+            </div>
+            <h3>Oops! Something went wrong</h3>
+            <p>We couldn't load your notes. {{ error }}</p>
+            <button class="zelf-button zelf-button--black" (click)="onRefresh()">
+                <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                    <path
+                        d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"
+                    />
+                </svg>
+                Try Again
+            </button>
+        </div>
 
-		<!-- Notes Grid -->
-		<div *ngIf="!loading && !error" class="notes-grid">
-			<div class="list-header">
-				<h3>{{ storedNotes.length }} stored note{{ storedNotes.length !== 1 ? "s" : "" }}</h3>
-				<button class="btn-secondary" (click)="onRefresh()">Refresh</button>
-			</div>
+        <!-- Notes Grid -->
+        <div *ngIf="!loading && !error" class="zelf-keys-notes__notes-grid">
+            <div class="zelf-keys-notes__list-header" *ngIf="storedNotes.length > 0">
+                <h3>{{ storedNotes.length }} stored note{{ storedNotes.length !== 1 ? "s" : "" }}</h3>
+                <button class="zelf-icon-button zelf-icon-button--anti-flash-white" (click)="onRefresh()" mat-flat-button>
+                    <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
+                        <path
+                            d="M480-160q-134 0-227-93t-93-227q0-134 93-227t227-93q69 0 132 28.5T720-690v-110h80v280H520v-80h168q-32-56-87.5-88T480-720q-100 0-170 70t-70 170q0 100 70 170t170 70q77 0 139-44t87-116h84q-28 106-114 173t-196 67Z"
+                        />
+                    </svg>
+                </button>
+            </div>
 
-			<div class="notes-cards">
-				<app-data-card
-					*ngFor="let note of storedNotes; trackBy: trackByNote"
-					[item]="note"
-					category="notes"
-					(cardClick)="onNoteClick($event)"
-					(launchClick)="onNoteClick($event)"
-					(optionsClick)="onNoteClick($event)"
-				>
-				</app-data-card>
-				<!-- Add Note Card - Always show when no notes exist -->
-				<div *ngIf="storedNotes.length === 0" class="add-note" (click)="onAddNote()">
-					<div class="add-icon">+</div>
-					<h3>Add New Note</h3>
-					<p>Securely store a new note</p>
-				</div>
-			</div>
-		</div>
-	</div>
+            <div class="zelf-keys-notes__notes-cards">
+                <!-- Add Note Card - Always show first -->
+                <div class="zelf-keys-notes__add-note" (click)="onAddNote()">
+                    <div class="zelf-keys-notes__add-note-icon" data-svg-wrapper data-style="Round">
+                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <g opacity="0.7">
+                                <path
+                                    d="M36 26H26V36C26 37.1 25.1 38 24 38C22.9 38 22 37.1 22 36V26H12C10.9 26 10 25.1 10 24C10 22.9 10.9 22 12 22H22V12C22 10.9 22.9 10 24 10C25.1 10 26 10.9 26 12V22H36C37.1 22 38 22.9 38 24C38 25.1 37.1 26 36 26Z"
+                                    fill="#181818"
+                                />
+                            </g>
+                        </svg>
+                    </div>
+                    <div class="zelf-keys-notes__add-note-content">
+                        <div class="zelf-keys-notes__add-note-title">Add New Note</div>
+                        <div class="zelf-keys-notes__add-note-description">Securely store a new note</div>
+                    </div>
+                </div>
+
+                <!-- Note Cards -->
+                <app-data-card
+                    *ngFor="let note of storedNotes; trackBy: trackByNote"
+                    [item]="note"
+                    category="notes"
+                    (cardClick)="onNoteClick($event)"
+                    (launchClick)="onNoteClick($event)"
+                    (optionsClick)="onNoteClick($event)"
+                >
+                </app-data-card>
+            </div>
+        </div>
+    </div>
 </div>

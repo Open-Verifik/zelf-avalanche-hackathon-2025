@@ -4,17 +4,18 @@ import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { TranslocoModule } from "@jsverse/transloco";
+import { MatBottomSheet } from "@angular/material/bottom-sheet";
 import { Wallet } from "app/wallet";
 import { WalletService } from "app/wallet.service";
 import { ChromeService } from "../../../chrome.service";
 import { AutofillDataService, AutofillUrlInfo } from "../../../services/autofill-data.service";
 import { DataPassingService } from "../../../services/data-passing.service";
-import { DataBiometricsComponent } from "../../shared/data-biometrics.component";
+import { BiometricsBottomSheetComponent, BiometricResult, BiometricsBottomSheetData } from "../../shared/biometrics-bottom-sheet.component";
 
 @Component({
     selector: "app-password-form",
     standalone: true,
-    imports: [CommonModule, TranslocoModule, RouterModule, ReactiveFormsModule, DataBiometricsComponent],
+    imports: [CommonModule, TranslocoModule, RouterModule, ReactiveFormsModule],
     templateUrl: "./password-form.component.html",
     styleUrls: ["./password-form.component.scss"],
 })
@@ -29,7 +30,6 @@ export class PasswordFormComponent implements OnInit {
     showPassword = false;
     showMasterPassword = false;
     formValid = false;
-    showBiometrics = false;
     transformedPasswordData: any = null;
 
     constructor(
@@ -41,7 +41,8 @@ export class PasswordFormComponent implements OnInit {
         private _walletService: WalletService,
         private _changeDetectorRef: ChangeDetectorRef,
         private autofillDataService: AutofillDataService,
-        private formBuilder: FormBuilder
+        private formBuilder: FormBuilder,
+        private _bottomSheet: MatBottomSheet
     ) {
         this.view = this.route.snapshot.queryParamMap.get("view") || "home";
 
@@ -144,13 +145,13 @@ export class PasswordFormComponent implements OnInit {
         this.router.navigate(["/dashboard/passwords"]);
     }
 
-    onBiometricsSuccess(biometricData: any): void {
+    onBiometricsSuccess(biometricData: BiometricResult): void {
         // Navigate to result page after successful biometrics
         this.router.navigate(["/dashboard/passwords/result"]);
     }
 
     onBiometricsCancel(): void {
-        this.showBiometrics = false;
+        // Bottom sheet handles its own dismissal
     }
 
     async onSave(): Promise<void> {
@@ -175,8 +176,8 @@ export class PasswordFormComponent implements OnInit {
 
         await this.dataPassingService.storeData("passwords", this.transformedPasswordData);
 
-        // Show biometrics modal instead of navigating
-        this.showBiometrics = true;
+        // Show biometrics bottom sheet instead of navigating
+        this._openBiometricsBottomSheet();
     }
 
     private setupAutofillSubscription(): void {
@@ -203,5 +204,27 @@ export class PasswordFormComponent implements OnInit {
 
     private generateTitleFromUrl(urlInfo: AutofillUrlInfo): string {
         return this.autofillDataService.generateTitleFromUrl(urlInfo);
+    }
+
+    private _openBiometricsBottomSheet(): void {
+        const data: BiometricsBottomSheetData = {
+            itemData: this.transformedPasswordData,
+            itemType: "password",
+            mode: "encrypt",
+        };
+
+        const bottomSheetRef = this._bottomSheet.open(BiometricsBottomSheetComponent, {
+            data: data,
+            backdropClass: "zelf-backdrop",
+            panelClass: "zelf-bottom-sheet-biometrics",
+        });
+
+        bottomSheetRef.afterDismissed().subscribe((result: BiometricResult | undefined) => {
+            if (result) {
+                this.onBiometricsSuccess(result);
+            } else {
+                this.onBiometricsCancel();
+            }
+        });
     }
 }

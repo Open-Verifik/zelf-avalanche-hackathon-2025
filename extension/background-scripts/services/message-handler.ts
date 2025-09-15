@@ -162,6 +162,10 @@ export class MessageHandler {
                     sendResponse({ success: true });
 
                     break;
+                case "FORM_READY":
+                    await this.handleFormReady(message.payload || {}, sendResponse);
+
+                    break;
                 default:
                     sendResponse({ success: false, error: "Unknown message type" });
             }
@@ -383,5 +387,25 @@ export class MessageHandler {
         });
 
         return newTab.id;
+    }
+
+    private async handleFormReady(payload: MessagePayload, sendResponse: SendResponse) {
+        try {
+            console.log("MessageHandler: Form ready for tab:", payload.tabId);
+
+            // Forward the FORM_READY message to the extension
+            const runtime = this.browserApi.runtime;
+            if (runtime) {
+                await (runtime as any).sendMessage({
+                    type: "FORM_READY",
+                    payload: payload,
+                });
+            }
+
+            sendResponse({ success: true });
+        } catch (error) {
+            console.error("MessageHandler: Error handling form ready:", error);
+            sendResponse({ success: false, error: (error as Error).message });
+        }
     }
 }

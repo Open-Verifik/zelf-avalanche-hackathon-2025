@@ -1,0 +1,28 @@
+<!-- Bottom Sheet Container -->
+<div class="biometrics-bottom-sheet__container">
+    <!-- Header -->
+    <div class="biometrics-bottom-sheet__header">
+        <div class="biometrics-bottom-sheet__title-section">
+            <h3 class="biometrics-bottom-sheet__title">{{ getTitle() }}</h3>
+            <div class="biometrics-bottom-sheet__item-info" *ngIf="itemData">
+                <span class="biometrics-bottom-sheet__item-type">{{ getItemType() }}</span>
+                <span class="biometrics-bottom-sheet__item-preview">{{ getItemInfo() }}</span>
+            </div>
+        </div>
+        <button class="biometrics-bottom-sheet__close" (click)="onClose()" aria-label="Close biometrics verification">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 6L6 18M6 6L18 18" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+        </button>
+    </div>
+
+    <!-- Content -->
+    <div class="biometrics-bottom-sheet__content">
+        <app-data-biometrics
+            [isDecryptMode]="mode === 'decrypt'"
+            [itemData]="itemData"
+            (biometricsSuccess)="onBiometricsSuccess($event)"
+            (biometricsCancel)="onBiometricsCancel()"
+        ></app-data-biometrics>
+    </div>
+</div>

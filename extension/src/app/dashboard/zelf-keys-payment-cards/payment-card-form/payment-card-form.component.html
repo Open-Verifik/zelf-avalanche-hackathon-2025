@@ -1,195 +1,247 @@
 <div class="payment-card-form">
-	<div class="form-header">
-		<h2>Secure Payment Card</h2>
-		<p>Add a new payment card to your secure vault</p>
-	</div>
+    <div class="form-header">
+        <button (click)="onCancel()" mat-flat-button class="zelf-icon-button zelf-icon-button--anti-flash-white zelf-icon-button--40">
+            <svg width="22" height="14" viewBox="0 0 22 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M20.0898 5.8277H4.72478L8.08478 2.4677C8.53978 2.0127 8.53978 1.2777 8.08478 0.822695C7.62978 0.367695 6.89478 0.367695 6.43978 0.822695L1.08478 6.1777C0.62978 6.6327 0.62978 7.3677 1.08478 7.8227L6.43978 13.1777C6.89478 13.6327 7.62978 13.6327 8.08478 13.1777C8.53978 12.7227 8.53978 11.9877 8.08478 11.5327L4.72478 8.16103H20.0898C20.7314 8.16103 21.2564 7.63603 21.2564 6.99436C21.2564 6.3527 20.7314 5.8277 20.0898 5.8277Z"
+                />
+            </svg>
+        </button>
+        <h2>Add Payment Card</h2>
+    </div>
 
-	<div class="form-content">
-		<form (ngSubmit)="onSave()" #cardForm="ngForm">
-			<!-- Card Preview Section -->
-			<div class="form-section">
-				<div class="card-preview" [class]="getCardType().toLowerCase()">
-					<div class="card-header">
-						<div class="card-type">{{ getCardType() }}</div>
-					</div>
-					<!-- QR Code replacing NFC chip on the left -->
-					<div class="card-qr-chip">
-						<div class="qr-placeholder">QR</div>
-					</div>
-					<div class="card-number">{{ getMaskedCardNumber() || "•••• •••• •••• ••••" }}</div>
-					<div class="card-details">
-						<div class="card-holder">
-							<span class="label">Card Holder</span>
-							<span class="value">{{ cardData.cardName || "CARD HOLDER" }}</span>
-						</div>
-						<div class="card-expiry">
-							<span class="label">Expires</span>
-							<span class="value">{{ cardData.expiryMonth || "MM" }}/{{ cardData.expiryYear || "YY" }}</span>
-						</div>
-					</div>
-				</div>
-			</div>
+    <div class="form-content">
+        <form (ngSubmit)="onSave()" #cardForm="ngForm">
+            <div class="form-section">
+                <div class="field-row">
+                    <div class="field-group">
+                        <div class="zelf-input zelf-input--wide">
+                            <input
+                                (ngModelChange)="checkFormValidity()"
+                                [(ngModel)]="cardData.bankName"
+                                class="zelf-input__control"
+                                id="bankName"
+                                name="bankName"
+                                placeholder="Payment Card Name"
+                                required
+                                type="text"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-			<!-- Card Information Section -->
-			<div class="form-section">
-				<label class="form-label">Card Information</label>
+            <!-- Card Preview Section -->
+            <div class="form-section">
+                <div class="card-preview" [class]="getCardType().toLowerCase()">
+                    <div class="card-header">
+                        <div class="card-type">{{ getCardType() }}</div>
+                    </div>
+                    <!-- QR Code replacing NFC chip on the left -->
+                    <div class="card-qr-chip">
+                        <div class="qr-placeholder">QR</div>
+                    </div>
+                    <div class="card-number">{{ getMaskedCardNumber() || "•••• •••• •••• ••••" }}</div>
+                    <div class="card-details">
+                        <div class="card-holder">
+                            <span class="label">Card Holder</span>
+                            <span class="value">{{ cardData.cardName || "CARD HOLDER" }}</span>
+                        </div>
+                        <div class="card-expiry">
+                            <span class="label">Expires</span>
+                            <span class="value">{{ cardData.expiryMonth || "MM" }}/{{ cardData.expiryYear || "YY" }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-				<div class="field-row">
-					<div class="field-group">
-						<input
-							type="text"
-							class="form-input"
-							[(ngModel)]="cardData.cardName"
-							(ngModelChange)="checkFormValidity()"
-							name="cardName"
-							placeholder="Card Holder Name"
-							required
-						/>
-					</div>
-					<div class="field-group">
-						<input
-							type="text"
-							class="form-input"
-							[(ngModel)]="cardData.cardNumber"
-							(ngModelChange)="onCardNumberChange()"
-							name="cardNumber"
-							placeholder="Card Number"
-							maxlength="19"
-							required
-						/>
-					</div>
-				</div>
+            <!-- Card Information Section -->
+            <div class="form-section">
+                <label class="form-label">Card Information</label>
 
-				<div class="field-row">
-					<div class="field-group">
-						<select
-							class="form-input"
-							[(ngModel)]="cardData.expiryMonth"
-							(ngModelChange)="checkFormValidity()"
-							name="expiryMonth"
-							required
-						>
-							<option value="">Month</option>
-							<option value="01">01 - January</option>
-							<option value="02">02 - February</option>
-							<option value="03">03 - March</option>
-							<option value="04">04 - April</option>
-							<option value="05">05 - May</option>
-							<option value="06">06 - June</option>
-							<option value="07">07 - July</option>
-							<option value="08">08 - August</option>
-							<option value="09">09 - September</option>
-							<option value="10">10 - October</option>
-							<option value="11">11 - November</option>
-							<option value="12">12 - December</option>
-						</select>
-					</div>
-					<div class="field-group">
-						<input
-							type="number"
-							class="form-input"
-							[(ngModel)]="cardData.expiryYear"
-							(ngModelChange)="checkFormValidity()"
-							name="expiryYear"
-							placeholder="Year (YYYY)"
-							min="2024"
-							max="2030"
-							required
-						/>
-					</div>
-					<div class="field-group">
-						<input
-							type="text"
-							class="form-input"
-							[(ngModel)]="cardData.cvv"
-							(ngModelChange)="onCvvChange()"
-							name="cvv"
-							placeholder="CVV"
-							maxlength="4"
-							required
-						/>
-					</div>
-				</div>
+                <div class="field-row">
+                    <div class="field-group">
+                        <div class="zelf-input zelf-input--wide">
+                            <input
+                                type="text"
+                                class="zelf-input__control"
+                                [(ngModel)]="cardData.cardName"
+                                (ngModelChange)="checkFormValidity()"
+                                name="cardName"
+                                id="cardName"
+                                placeholder="Card Holder Name"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div class="field-group">
+                        <div class="zelf-input zelf-input--wide">
+                            <input
+                                type="text"
+                                class="zelf-input__control"
+                                [(ngModel)]="cardData.cardNumber"
+                                (ngModelChange)="onCardNumberChange()"
+                                name="cardNumber"
+                                id="cardNumber"
+                                placeholder="Card Number"
+                                maxlength="19"
+                                required
+                            />
+                        </div>
+                    </div>
+                </div>
 
-				<div class="field-row">
-					<div class="field-group">
-						<input
-							type="text"
-							class="form-input"
-							[(ngModel)]="cardData.bankName"
-							(ngModelChange)="checkFormValidity()"
-							name="bankName"
-							placeholder="Bank Name"
-							required
-						/>
-					</div>
-				</div>
-			</div>
+                <div class="field-row field-row--three-columns">
+                    <div class="field-group field-group--small">
+                        <div class="zelf-input zelf-input--wide">
+                            <select
+                                class="zelf-input__control"
+                                [(ngModel)]="cardData.expiryMonth"
+                                (ngModelChange)="checkFormValidity()"
+                                name="expiryMonth"
+                                id="expiryMonth"
+                                required
+                            >
+                                <option value="">MM</option>
+                                <option value="01">01</option>
+                                <option value="02">02</option>
+                                <option value="03">03</option>
+                                <option value="04">04</option>
+                                <option value="05">05</option>
+                                <option value="06">06</option>
+                                <option value="07">07</option>
+                                <option value="08">08</option>
+                                <option value="09">09</option>
+                                <option value="10">10</option>
+                                <option value="11">11</option>
+                                <option value="12">12</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="field-group field-group--small">
+                        <div class="zelf-input zelf-input--wide">
+                            <input
+                                type="number"
+                                class="zelf-input__control"
+                                [(ngModel)]="cardData.expiryYear"
+                                (ngModelChange)="checkFormValidity()"
+                                name="expiryYear"
+                                id="expiryYear"
+                                placeholder="YY"
+                                min="2024"
+                                max="2030"
+                                required
+                            />
+                        </div>
+                    </div>
+                    <div class="field-group field-group--small">
+                        <div class="zelf-input zelf-input--wide">
+                            <input
+                                type="text"
+                                class="zelf-input__control"
+                                [(ngModel)]="cardData.cvv"
+                                (ngModelChange)="onCvvChange()"
+                                name="cvv"
+                                id="cvv"
+                                placeholder="CVV"
+                                maxlength="4"
+                                required
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-			<!-- Folder Section -->
-			<div class="form-section">
-				<div class="folder-toggle">
-					<label class="form-label">Store in Folder</label>
-					<div class="toggle-switch" (click)="toggleFolder()">
-						<div class="toggle-slider" [class.active]="cardData.insideFolder"></div>
-					</div>
-				</div>
+            <!-- Folder Section -->
+            <div class="form-section">
+                <div class="folder-toggle">
+                    <label class="form-label">Store in Folder</label>
+                    <div
+                        class="zelf-toggle"
+                        [class.zelf-toggle--active]="cardData.insideFolder"
+                        (click)="toggleFolder()"
+                        tabindex="0"
+                        role="switch"
+                        [attr.aria-checked]="cardData.insideFolder"
+                        [attr.aria-label]="'Toggle folder storage'"
+                    >
+                        <div class="zelf-toggle__track"></div>
+                        <div class="zelf-toggle__thumb"></div>
+                    </div>
+                </div>
 
-				<div *ngIf="cardData.insideFolder" class="folder-input">
-					<input type="text" class="form-input" [(ngModel)]="cardData.folder" name="folder" placeholder="Folder name" />
-				</div>
-			</div>
+                <div *ngIf="cardData.insideFolder" class="folder-input">
+                    <div class="zelf-input zelf-input--wide">
+                        <input type="text" class="zelf-input__control" [(ngModel)]="cardData.folder" name="folder" placeholder="Folder name" />
+                    </div>
+                </div>
+            </div>
 
-			<!-- Master Password Section -->
-			<div class="form-section" *ngIf="hasMasterPassword">
-				<div class="password-input-field">
-					<input
-						type="password"
-						id="masterPassword"
-						name="masterPassword"
-						[(ngModel)]="cardData.masterPassword"
-						(ngModelChange)="checkFormValidity()"
-						class="form-input"
-						placeholder="Enter your master password"
-					/>
-					<small class="form-hint"
-						>We require the {{ wallet.name }} password to encrypt and store your card details. Biometric verification is always
-						required.</small
-					>
-				</div>
-			</div>
+            <!-- Master Password Section -->
+            <div class="form-section" *ngIf="hasMasterPassword">
+                <div class="password-input-field">
+                    <div class="zelf-input zelf-input--wide">
+                        <input
+                            [type]="showMasterPassword ? 'text' : 'password'"
+                            id="masterPassword"
+                            name="masterPassword"
+                            [(ngModel)]="cardData.masterPassword"
+                            (ngModelChange)="checkFormValidity()"
+                            class="zelf-input__control"
+                            placeholder="Enter your master password"
+                        />
+                        <button
+                            type="button"
+                            class="zelf-icon-button zelf-icon-button--transparent zelf-icon-button--no-fill"
+                            (click)="toggleMasterPasswordVisibility()"
+                            tabindex="-1"
+                        >
+                            <svg
+                                *ngIf="!showMasterPassword"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="#181818"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                                <circle cx="12" cy="12" r="3"></circle>
+                            </svg>
+                            <svg
+                                *ngIf="showMasterPassword"
+                                width="24"
+                                height="24"
+                                viewBox="0 0 24 24"
+                                fill="none"
+                                stroke="#181818"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            >
+                                <path
+                                    d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"
+                                ></path>
+                                <line x1="1" y1="1" x2="23" y2="23"></line>
+                            </svg>
+                        </button>
+                    </div>
+                    <small class="form-hint"
+                        >We require the {{ wallet.name }} password to encrypt and store your card details. Biometric verification is always
+                        required.</small
+                    >
+                </div>
+            </div>
 
-			<!-- Action Buttons -->
-			<div class="form-actions">
-				<button type="button" class="btn-secondary" (click)="onCancel()">Cancel</button>
-				<button type="submit" class="btn-primary" [disabled]="!formValid" [class.btn-disabled]="!formValid">
-					{{ isNewCard ? "Create Card" : "Update Card" }}
-				</button>
-			</div>
-		</form>
-	</div>
-
-	<!-- Biometrics Modal -->
-	<div *ngIf="showBiometrics" class="biometrics-modal" (click)="onBiometricsCancel()">
-		<div class="modal-content" (click)="$event.stopPropagation()">
-			<div class="modal-header">
-				<button class="modal-close" (click)="onBiometricsCancel()" type="button">
-					<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
-						<path d="M18 6L6 18M6 6L18 18" stroke="#666" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-					</svg>
-				</button>
-				<h3>Verify Your Identity</h3>
-				<p>Please verify your face to create this payment card</p>
-			</div>
-			<div class="modal-body">
-				<app-data-biometrics
-					[isDecryptMode]="false"
-					[itemData]="transformedCardData"
-					(biometricsSuccess)="onBiometricsSuccess($event)"
-					(biometricsCancel)="onBiometricsCancel()"
-				>
-				</app-data-biometrics>
-			</div>
-		</div>
-	</div>
+            <!-- Action Buttons -->
+            <div class="form-actions">
+                <button type="button" class="zelf-button zelf-button--white" (click)="onCancel()">Cancel</button>
+                <button type="submit" class="zelf-button zelf-button--black" [disabled]="!formValid">
+                    {{ isNewCard ? "Create Card" : "Update Card" }}
+                </button>
+            </div>
+        </form>
+    </div>
 </div>
