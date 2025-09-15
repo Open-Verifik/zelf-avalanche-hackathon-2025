@@ -83,7 +83,6 @@ const _store = async (publicData, metadata, faceBase64, identifier, authToken) =
         publicData,
         metadata,
         faceBase64,
-        // password: masterPassword,
         identifier,
         requireLiveness: true,
         tolerance: "REGULAR",
@@ -94,7 +93,6 @@ const _store = async (publicData, metadata, faceBase64, identifier, authToken) =
         publicData,
         metadata,
         faceBase64,
-        // password: masterPassword,
         identifier,
         requireLiveness: true,
         tolerance: "REGULAR",
@@ -106,6 +104,7 @@ const _store = async (publicData, metadata, faceBase64, identifier, authToken) =
     try {
         qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
             ...publicData,
+            identifier,
             zelfProof: zelfKey.zelfProof,
         });
     } catch (ipfsError) {
@@ -125,6 +124,29 @@ const _store = async (publicData, metadata, faceBase64, identifier, authToken) =
                   authToken
               )
             : null;
+
+    try {
+        const NFTJSON = JSON.stringify(NFT, null, 2);
+
+        const base64Data = Buffer.from(NFTJSON).toString("base64");
+
+        qrCodeIPFS = await pinata.pinFile(base64Data, `${identifier}_nft_transaction.json`, "image/png", {
+            transactionHash: NFT.transactionHash,
+            receipt: JSON.stringify({
+                cost: NFT.cost,
+                owner: NFT.owner,
+                contractAddress: NFT.contractAddress,
+                metadataUrl: NFT.metadataUrl,
+                tokenId: NFT.tokenId,
+            }),
+            identifier,
+            metadata: JSON.stringify(NFT.metadata),
+            explorerUrl: NFT.explorerUrl,
+            category: `${publicData.category}_nft_transaction`,
+        });
+    } catch (ipfsError) {
+        console.warn("⚠️ Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
+    }
 
     return {
         success: true,
@@ -153,7 +175,7 @@ const storePassword = async (data, authToken) => {
     try {
         const { metadata, publicData } = await createMetadataAndPublicData("password", data, authToken);
 
-        const identifier = name ? `${authToken.identifier}_${name}` : `${authToken.identifier}_${website}`;
+        const identifier = name ? `${authToken.identifier}_${name}_${Date.now()}` : `${authToken.identifier}_${website}_${Date.now()}`;
 
         const result = await _store(publicData, metadata, faceBase64, identifier, authToken);
 
@@ -180,7 +202,7 @@ const storeNotes = async (data, authToken) => {
     const { title, faceBase64 } = data;
 
     try {
-        const identifier = `notes_${title}_${Date.now()}`;
+        const identifier = `${authToken.identifier}_notes_${title}_${Date.now()}`;
 
         const { metadata, publicData } = await createMetadataAndPublicData("notes", data, authToken);
 
@@ -240,7 +262,7 @@ const storeCreditCard = async (data, authToken) => {
     try {
         _validateCreditCardData(cardNumber, expiryMonth, expiryYear);
 
-        const identifier = `${authToken.identifier}_${bankName}`;
+        const identifier = `${authToken.identifier}_${bankName}_${Date.now()}`;
 
         const { metadata, publicData } = await createMetadataAndPublicData("credit_card", data, authToken);
 
@@ -495,13 +517,10 @@ const listData = async (data, authToken) => {
         // The category is stored as `${authToken.identifier}_${category}` in the metadata
         const categoryFilter = `${authToken.identifier}_${category}`;
 
-        console.log("🔍 Category filter:", categoryFilter);
-
-        // Import the pinata module to use the filter function
-        const { filter } = await import("../../IPFS/modules/pinata.js");
-
         // Filter files by the category metadata
-        const files = await filter("category", categoryFilter);
+        const files = await pinata.filter("category", categoryFilter);
+
+        const nftTransactionFiles = await pinata.filter("category", `${categoryFilter}_nft_transaction`);
 
         // Transform the files to include relevant information
         const transformedData = files.map((file) => ({
@@ -511,18 +530,49 @@ const listData = async (data, authToken) => {
             size: file.size,
             timestamp: file.date_pinned,
             name: file.metadata?.name,
-            // Extract the public data from metadata if available
+
             publicData: file.metadata?.keyvalues || {},
         }));
 
+        const transformedNftTransactionData = nftTransactionFiles.map((file) => ({
+            id: file.ipfs_pin_hash,
+            name: file.name,
+            url: file.url,
+            size: file.size,
+            timestamp: file.date_pinned,
+            publicData: file.metadata?.keyvalues || {},
+        }));
+
+        // Map over transformedData as the main collection and optionally add NFT transaction data if it exists
+        const finalData = transformedData.map((data) => {
+            const matchingNftTransaction = transformedNftTransactionData.find(
+                (nftTransaction) => nftTransaction.publicData.identifier === data.publicData.identifier
+            );
+
+            const result = {
+                ...data,
+            };
+
+            // If we have matching NFT transaction data, add it to the result
+            if (matchingNftTransaction?.publicData) {
+                result.NFT = {
+                    ...JSON.parse(matchingNftTransaction.publicData.receipt || "{}"),
+                    ...JSON.parse(matchingNftTransaction.publicData.metadata || "{}"),
+                    ...matchingNftTransaction.publicData,
+                };
+            }
+
+            return result;
+        });
+
         return {
             success: true,
-            message: `Found ${transformedData.length} items in category: ${category}`,
+            message: `Found ${finalData.length} items in category: ${category}`,
             category: category,
-            data: transformedData,
+            data: finalData,
             timestamp: new Date().toISOString(),
             zelfName: authToken.identifier,
-            totalCount: transformedData.length,
+            totalCount: finalData.length,
         };
     } catch (error) {
         console.error("Error listing data:", error);

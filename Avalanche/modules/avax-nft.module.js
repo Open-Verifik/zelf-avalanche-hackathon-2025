@@ -95,13 +95,14 @@ const createNFT = async (data, authToken) => {
 
     const { masterWallet, contract, balance } = await getMasterWallet();
 
-    const zelfKeyData = await insertMetadata(NFTData);
+    const zelfKeyData = await insertMetadata(NFTData, data.publicData);
 
     const tokenURI = zelfKeyData.ipfsUrl;
 
     const gasEstimate = await contract.mintNFT.estimateGas(authToken.address, tokenURI);
 
     const gasPrice = ethers.parseUnits(CONSTANTS.gasPrice, "wei");
+
     const estimatedCost = gasEstimate * gasPrice;
 
     const tx = await contract.mintNFT(authToken.address, tokenURI, {
@@ -128,7 +129,6 @@ const createNFT = async (data, authToken) => {
         explorerUrl: `https://snowtrace.io/tx/${tx.hash}`,
         owner: authToken.address,
         contractAddress: CONSTANTS.contractAddress,
-        receipt,
     };
 };
 
@@ -178,14 +178,17 @@ const prepareNFTData = async (data, authToken) => {
     return metadata;
 };
 
-const insertMetadata = async (NFTData) => {
+/**
+ *
+ * @param {Object} NFTData
+ * @param {Object} publicData
+ */
+const insertMetadata = async (NFTData, publicData) => {
     const PINATA_CONFIG = {
         apiKey: process.env.PINATA_API_KEY,
         secretKey: process.env.PINATA_API_SECRET,
         gateway: process.env.PINATA_GATEWAY_URL || "https://chocolate-occasional-kite-546.mypinata.cloud",
     };
-
-    log.info("📤 Uploading metadata to IPFS via Pinata...");
 
     const metadataBlob = new Blob([JSON.stringify(NFTData, null, 2)], {
         type: "application/json",
@@ -198,8 +201,8 @@ const insertMetadata = async (NFTData) => {
         JSON.stringify({
             name: NFTData.name,
             keyvalues: {
-                type: "nft_metadata",
-                project: "zelfkey_avalanche",
+                ...publicData,
+                category: `nft_${publicData.category}`,
             },
         })
     );
@@ -220,6 +223,7 @@ const insertMetadata = async (NFTData) => {
     const result = await response.json();
 
     const ipfsHash = result.IpfsHash;
+
     const ipfsUrl = `https://${PINATA_CONFIG.gateway}/ipfs/${ipfsHash}`;
 
     return {
