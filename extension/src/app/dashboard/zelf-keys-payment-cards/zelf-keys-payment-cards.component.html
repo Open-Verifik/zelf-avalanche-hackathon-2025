@@ -48,53 +48,64 @@
 
             <!-- Cards Grid -->
             <div class="zelf-keys-payment-cards__cards-grid">
-                <!-- Add New Card - Always show first -->
-                <div
-                    class="zelf-keys-payment-cards__add-card"
-                    [class.zelf-keys-payment-cards__add-card--compact]="paymentCards.length > 0"
-                    (click)="onAddNewCard()"
-                >
-                    <div class="zelf-keys-payment-cards__add-card-icon" data-svg-wrapper data-style="Round">
-                        <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <g opacity="0.7">
-                                <path
-                                    d="M36 26H26V36C26 37.1 25.1 38 24 38C22.9 38 22 37.1 22 36V26H12C10.9 26 10 25.1 10 24C10 22.9 10.9 22 12 22H22V12C22 10.9 22.9 10 24 10C25.1 10 26 10.9 26 12V22H36C37.1 22 38 22.9 38 24C38 25.1 37.1 26 36 26Z"
-                                    fill="#181818"
-                                />
-                            </g>
-                        </svg>
-                    </div>
-                    <div class="zelf-keys-payment-cards__add-card-content">
-                        <div class="zelf-keys-payment-cards__add-card-title">Add New Card</div>
-                        <div class="zelf-keys-payment-cards__add-card-description">Securely store a new payment card</div>
-                    </div>
-                </div>
+                <ng-container *ngIf="currentPlan === 'free'">
+                    <subscription-banner
+                        [route]="['/dashboard/billing']"
+                        description="Get advanced security, and more with ZelfKeys Premium"
+                        title="Unlock Premium Features"
+                    ></subscription-banner>
+                </ng-container>
 
-                <!-- Dynamic Payment Cards -->
-                <div
-                    *ngFor="let card of paymentCards"
-                    class="zelf-keys-payment-cards__card-item"
-                    [style.background]="getCardGradient(card.zelfProof)"
-                    (click)="onPaymentCardClick(card)"
-                >
-                    <div class="zelf-keys-payment-cards__card-header">
-                        <div class="zelf-keys-payment-cards__card-qr-chip">
-                            <img [src]="card.zelfQR" alt="QR Code" class="zelf-keys-payment-cards__chip-qr-code" />
+                <ng-container *ngIf="currentPlan !== 'free'">
+                    <!-- Add New Card - Always show first -->
+                    <div
+                        (click)="onAddNewCard()"
+                        [class.zelf-keys-payment-cards__add-card--compact]="paymentCards.length > 0"
+                        class="zelf-keys-payment-cards__add-card"
+                    >
+                        <div class="zelf-keys-payment-cards__add-card-icon" data-svg-wrapper data-style="Round">
+                            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <g opacity="0.7">
+                                    <path
+                                        d="M36 26H26V36C26 37.1 25.1 38 24 38C22.9 38 22 37.1 22 36V26H12C10.9 26 10 25.1 10 24C10 22.9 10.9 22 12 22H22V12C22 10.9 22.9 10 24 10C25.1 10 26 10.9 26 12V22H36C37.1 22 38 22.9 38 24C38 25.1 37.1 26 36 26Z"
+                                        fill="#181818"
+                                    />
+                                </g>
+                            </svg>
+                        </div>
+
+                        <div class="zelf-keys-payment-cards__add-card-content">
+                            <div class="zelf-keys-payment-cards__add-card-title">Add New Card</div>
+                            <div class="zelf-keys-payment-cards__add-card-description">Securely store a new payment card</div>
                         </div>
                     </div>
 
-                    <div class="zelf-keys-payment-cards__card-number">{{ getMaskedCardNumber(card.cardNumber) }}</div>
-                    <div class="zelf-keys-payment-cards__card-details">
-                        <div class="zelf-keys-payment-cards__card-holder">
-                            <span class="zelf-keys-payment-cards__label">Card Holder</span>
-                            <span class="zelf-keys-payment-cards__value">{{ card.cardName }}</span>
+                    <!-- Dynamic Payment Cards -->
+                    <div
+                        (click)="onPaymentCardClick(card)"
+                        [style.background]="getCardGradient(card.zelfProof)"
+                        *ngFor="let card of paymentCards"
+                        class="zelf-keys-payment-cards__card-item"
+                    >
+                        <div class="zelf-keys-payment-cards__card-header">
+                            <div class="zelf-keys-payment-cards__card-qr-chip">
+                                <img [src]="card.zelfQR" alt="QR Code" class="zelf-keys-payment-cards__chip-qr-code" />
+                            </div>
                         </div>
-                        <div class="zelf-keys-payment-cards__card-expiry">
-                            <span class="zelf-keys-payment-cards__label">Expires</span>
-                            <span class="zelf-keys-payment-cards__value">{{ card.expiryMonth }}/{{ card.expiryYear.slice(-2) }}</span>
+
+                        <div class="zelf-keys-payment-cards__card-number">{{ getMaskedCardNumber(card.cardNumber) }}</div>
+                        <div class="zelf-keys-payment-cards__card-details">
+                            <div class="zelf-keys-payment-cards__card-holder">
+                                <span class="zelf-keys-payment-cards__label">Card Holder</span>
+                                <span class="zelf-keys-payment-cards__value">{{ card.cardName }}</span>
+                            </div>
+                            <div class="zelf-keys-payment-cards__card-expiry">
+                                <span class="zelf-keys-payment-cards__label">Expires</span>
+                                <span class="zelf-keys-payment-cards__value">{{ card.expiryMonth }}/{{ card.expiryYear.slice(-2) }}</span>
+                            </div>
                         </div>
                     </div>
-                </div>
+                </ng-container>
             </div>
         </div>
     </div>

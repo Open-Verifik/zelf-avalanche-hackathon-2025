@@ -14,8 +14,8 @@ import { ZelfLoaderComponent } from "app/zelf-loader/zelf-loader.component";
 import { environment } from "environments/environment";
 import { WebcamComponent, WebcamImage, WebcamInitError, WebcamModule } from "ngx-webcam";
 import { Observable, Subject, takeUntil } from "rxjs";
-import { DataPassingService } from "../../services/data-passing.service";
-import { WalletService } from "../../wallet.service";
+import { DataPassingService } from "../../../services/data-passing.service";
+import { WalletService } from "../../../wallet.service";
 
 export interface BiometricData {
     faceBase64: string;

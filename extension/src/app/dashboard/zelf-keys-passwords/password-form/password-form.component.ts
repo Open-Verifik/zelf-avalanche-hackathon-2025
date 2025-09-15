@@ -10,7 +10,11 @@ import { WalletService } from "app/wallet.service";
 import { ChromeService } from "../../../chrome.service";
 import { AutofillDataService, AutofillUrlInfo } from "../../../services/autofill-data.service";
 import { DataPassingService } from "../../../services/data-passing.service";
-import { BiometricsBottomSheetComponent, BiometricResult, BiometricsBottomSheetData } from "../../shared/biometrics-bottom-sheet.component";
+import {
+    BiometricsBottomSheetComponent,
+    BiometricResult,
+    BiometricsBottomSheetData,
+} from "../../shared/biometrics-bottom-sheet/biometrics-bottom-sheet.component";
 
 @Component({
     selector: "app-password-form",

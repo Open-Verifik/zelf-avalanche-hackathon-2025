@@ -9,7 +9,11 @@ import { Wallet } from "app/wallet";
 import { WalletService } from "app/wallet.service";
 import { ChromeService } from "../../../chrome.service";
 import { DataPassingService } from "../../../services/data-passing.service";
-import { BiometricResult, BiometricsBottomSheetComponent, BiometricsBottomSheetData } from "../../shared/biometrics-bottom-sheet.component";
+import {
+    BiometricResult,
+    BiometricsBottomSheetComponent,
+    BiometricsBottomSheetData,
+} from "../../shared/biometrics-bottom-sheet/biometrics-bottom-sheet.component";
 
 @Component({
     imports: [CommonModule, TranslocoModule, RouterModule, FormsModule],
