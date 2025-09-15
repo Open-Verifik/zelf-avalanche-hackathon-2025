@@ -222,9 +222,6 @@ const createCryptoPayment = async (body, user) => {
 
         const existingZkPay = recordsFound && Array.isArray(recordsFound) && recordsFound.length ? recordsFound[0] : null;
 
-        // Get real-time AVAX price and calculate amount
-        console.log("💰 Fetching real-time AVAX price...");
-
         const priceCalculation = await calculateCryptoAmount(selectedPlan.price, "AVAX");
 
         // Check if demo mode is enabled
@@ -234,15 +231,6 @@ const createCryptoPayment = async (body, user) => {
         // Calculate demo amounts if in demo mode
         const demoUsdAmount = isDemoMode ? selectedPlan.price * demoMultiplier : selectedPlan.price;
         const demoPriceCalculation = isDemoMode ? await calculateCryptoAmount(demoUsdAmount, "AVAX") : priceCalculation;
-
-        console.log("📊 Price calculation:", {
-            isDemoMode,
-            originalUsdAmount: selectedPlan.price,
-            originalAvaxAmount: priceCalculation.cryptoAmount,
-            demoUsdAmount: isDemoMode ? demoUsdAmount : "N/A",
-            demoAvaxAmount: isDemoMode ? demoPriceCalculation.cryptoAmount : "N/A",
-            avaxPrice: priceCalculation.cryptoPrice,
-        });
 
         // Create price lock data (use demo amounts if in demo mode)
         const priceLockData = {
@@ -442,6 +430,8 @@ async function searchSubscriptionInIPFS(zelfKeysTag) {
     try {
         const files = await pinata.filter("zelfName", zelfKeysTag);
 
+        console.log("🔍 Files found in IPFS:", files);
+
         let activeSubscription = null;
 
         for (let index = 0; index < files.length; index++) {
@@ -449,16 +439,9 @@ async function searchSubscriptionInIPFS(zelfKeysTag) {
 
             const keyValues = element.metadata?.keyvalues;
 
-            // now we need to check if the currentDate moment now() is between the startDate and endDate
-            const currentDate = moment();
-            const startDate = moment(keyValues.startDate);
-            const endDate = moment(keyValues.endDate);
-
-            // Check if subscription is active (either active or cancelled but still within period)
-            const isWithinPeriod = currentDate.isBetween(startDate, endDate);
             const isActiveOrCancelledActive = !keyValues.status || keyValues.status === "active" || keyValues.status === "cancelled_active";
 
-            if (isWithinPeriod && isActiveOrCancelledActive) {
+            if (isActiveOrCancelledActive) {
                 activeSubscription = {
                     id: element.id,
                     url: element.url,
@@ -471,6 +454,8 @@ async function searchSubscriptionInIPFS(zelfKeysTag) {
                 break;
             }
         }
+
+        console.log("🔍 Active subscription:", activeSubscription);
 
         return activeSubscription;
     } catch (error) {
@@ -580,6 +565,8 @@ async function handleInvoicePaymentSucceeded(invoice) {
 
         // Check if subscription already exists to avoid duplicates
         const existingSubscription = await searchSubscriptionInIPFS(zelfKeysTag);
+
+        console.log("🔍 Existing subscription:", existingSubscription);
 
         if (existingSubscription) {
             return {
