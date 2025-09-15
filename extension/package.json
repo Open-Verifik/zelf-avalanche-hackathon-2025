@@ -7,10 +7,9 @@
     "private": true,
     "scripts": {
         "build": "npm run build:prod",
-        "build:prod": "node scripts/build-unified.js --prod",
-        "build:dev": "node scripts/build-unified.js",
-        "watch": "ng build --watch --configuration development",
-        "watch:ext": "ng build --watch --configuration 'ext_dev_chrome'",
+        "build:prod": "ng run zelf-extension:builder:prod_chrome && npm run test && npm run transloco:optimize && npm run bump:patch",
+        "build:dev": "ng run zelf-extension:builder:dev_chrome",
+        "watch": "ng run zelf-extension:builder:dev_chrome --watch",
         "bump:major": "npm version major --no-git-tag-version && node scripts/sync-versions.js",
         "bump:minor": "npm version minor --no-git-tag-version && node scripts/sync-versions.js",
         "bump:patch": "npm version patch --no-git-tag-version && node scripts/sync-versions.js",

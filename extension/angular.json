@@ -32,17 +32,43 @@
                         "scripts": []
                     }
                 },
+                "builder": {
+                    "builder": "./builders:extension",
+                    "defaultConfiguration": "dev_chrome",
+                    "options": {
+                        "webpackConfig": "webpack.extension.config.js"
+                    },
+                    "configurations": {
+                        "prod_chrome": {
+                            "angularTarget": "zelf-extension:build:ext_prod_chrome",
+                            "mode": "production"
+                        },
+                        "dev_chrome": {
+                            "angularTarget": "zelf-extension:build:ext_dev_chrome",
+                            "mode": "development"
+                        }
+                    }
+                },
                 "build": {
-                    "defaultConfiguration": "production",
+                    "defaultConfiguration": "ext_dev_chrome",
                     "builder": "@angular-devkit/build-angular:browser",
                     "options": {
                         "baseHref": "./index.html",
-                        "outputPath": "dist",
-                        "index": "src/index.html",
+                        "outputPath": "dist/dev",
+                        "index": "configurations/index.html",
                         "main": "src/main.ts",
                         "polyfills": "src/polyfills.ts",
                         "tsConfig": "tsconfig.app.json",
-                        "assets": ["src/favicon.ico", "src/assets", "src/master.css"],
+                        "assets": [
+                            "src/favicon.ico",
+                            "src/assets",
+                            "src/master.css",
+                            {
+                                "input": "configurations",
+                                "output": "/",
+                                "glob": "*.*"
+                            }
+                        ],
                         "allowedCommonJsDependencies": [
                             "@ethereumjs/rlp",
                             "@tensorflow/tfjs-core",
@@ -65,44 +91,6 @@
                         ]
                     },
                     "configurations": {
-                        "production": {
-                            "baseHref": "/",
-                            "buildOptimizer": true,
-                            "extractLicenses": true,
-                            "namedChunks": false,
-                            "outputHashing": "none",
-                            "outputPath": "dist/prod/web",
-                            "sourceMap": false,
-                            "vendorChunk": false,
-                            "assets": [
-                                "src/assets",
-                                "src/favicon.ico",
-                                "src/master.css",
-                                {
-                                    "input": "node_modules/webextension-polyfill/dist/",
-                                    "output": "/",
-                                    "glob": "*.min.*"
-                                }
-                            ],
-                            "budgets": [
-                                {
-                                    "type": "initial",
-                                    "maximumWarning": "5mb",
-                                    "maximumError": "10mb"
-                                },
-                                {
-                                    "type": "anyComponentStyle",
-                                    "maximumWarning": "40kb",
-                                    "maximumError": "50kb"
-                                }
-                            ],
-                            "fileReplacements": [
-                                {
-                                    "replace": "src/environments/environment.ts",
-                                    "with": "src/environments/environment.prod.ts"
-                                }
-                            ]
-                        },
                         "ext_prod_chrome": {
                             "buildOptimizer": true,
                             "extractLicenses": true,
@@ -125,16 +113,6 @@
                                     "input": "node_modules/webextension-polyfill/dist/",
                                     "output": "/",
                                     "glob": "*.min.*"
-                                },
-                                {
-                                    "input": "dist/out-tsc/background-scripts",
-                                    "output": "/",
-                                    "glob": "background.js"
-                                },
-                                {
-                                    "input": "dist/out-tsc/content-scripts/autofill",
-                                    "output": "/",
-                                    "glob": "autofill.js"
                                 }
                             ],
                             "budgets": [
@@ -164,26 +142,6 @@
                                 }
                             }
                         },
-                        "development": {
-                            "baseHref": "/",
-                            "buildOptimizer": false,
-                            "extractLicenses": false,
-                            "namedChunks": true,
-                            "optimization": false,
-                            "outputPath": "dist/dev/web",
-                            "sourceMap": true,
-                            "vendorChunk": true,
-                            "assets": [
-                                "src/assets",
-                                "src/favicon.ico",
-                                "src/master.css",
-                                {
-                                    "input": "node_modules/webextension-polyfill/dist/",
-                                    "output": "/",
-                                    "glob": "*.min.*"
-                                }
-                            ]
-                        },
                         "ext_dev_chrome": {
                             "buildOptimizer": false,
                             "extractLicenses": false,
@@ -206,16 +164,6 @@
                                     "input": "node_modules/webextension-polyfill/dist/",
                                     "output": "/",
                                     "glob": "*.min.*"
-                                },
-                                {
-                                    "input": "dist/out-tsc/background-scripts",
-                                    "output": "/",
-                                    "glob": "background.js"
-                                },
-                                {
-                                    "input": "dist/out-tsc/content-scripts/autofill",
-                                    "output": "/",
-                                    "glob": "autofill.js"
                                 }
                             ]
                         }
@@ -223,13 +171,13 @@
                 },
                 "serve": {
                     "builder": "@angular-devkit/build-angular:dev-server",
-                    "defaultConfiguration": "development",
+                    "defaultConfiguration": "ext_dev_chrome",
                     "configurations": {
-                        "development-tests": {
-                            "buildTarget": "zelf-extension:build:development-tests"
+                        "ext_dev_chrome": {
+                            "buildTarget": "zelf-extension:build:ext_dev_chrome"
                         },
-                        "development": {
-                            "buildTarget": "zelf-extension:build:development"
+                        "ext_prod_chrome": {
+                            "buildTarget": "zelf-extension:build:ext_prod_chrome"
                         }
                     }
                 },

@@ -1,16 +1,20 @@
 const path = require('path');
 
-module.exports = {
-  mode: 'production',
-  entry: {
-    background: './background-scripts/background.ts',
-    autofill: './content-scripts/autofill/autofill.ts'
-  },
-  output: {
-    path: path.resolve(__dirname, 'dist/extension-scripts'),
-    filename: '[name].js',
-    clean: true
-  },
+module.exports = (env, argv) => {
+  // Default output path - will be overridden by Angular builder
+  const outputPath = process.env.WEBPACK_OUTPUT_PATH || path.resolve(__dirname, 'dist/extension-scripts');
+  
+  return {
+    mode: process.env.NODE_ENV || 'development',
+    entry: {
+      background: './background-scripts/background.ts',
+      autofill: './content-scripts/autofill/autofill.ts'
+    },
+    output: {
+      path: outputPath,
+      filename: '[name].js',
+      clean: false // Don't clean when integrated with Angular
+    },
   module: {
     rules: [
       {
@@ -28,9 +32,10 @@ module.exports = {
       '@shared': path.resolve(__dirname, 'shared')
     }
   },
-  optimization: {
-    minimize: false // Keep readable for debugging
-  },
-  target: 'webworker',
-  devtool: 'source-map'
+    optimization: {
+      minimize: process.env.NODE_ENV === 'production'
+    },
+    target: 'webworker',
+    devtool: process.env.NODE_ENV === 'production' ? 'source-map' : 'inline-source-map'
+  };
 };
