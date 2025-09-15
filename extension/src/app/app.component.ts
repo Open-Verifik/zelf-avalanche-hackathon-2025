@@ -1,14 +1,13 @@
 import { Component, OnDestroy, OnInit, ViewEncapsulation } from "@angular/core";
+import { Router } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
 
 import { environment } from "environments/environment";
 
 import { ChromeService } from "./chrome.service";
 import { HttpWrapperService } from "./http-wrapper.service";
-import { WalletService } from "./wallet.service";
-import { AutofillIntegrationService } from "./services/autofill-integration.service";
 import { PopoutCommunicationService } from "./services/popout-communication.service";
-import { Router } from "@angular/router";
+import { WalletService } from "./wallet.service";
 
 @Component({
     encapsulation: ViewEncapsulation.None,

@@ -1,9 +1,12 @@
 import { Component, OnInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
-import { TranslocoModule } from "@jsverse/transloco";
+import { MatSnackBar } from "@angular/material/snack-bar";
+import { TranslocoModule, TranslocoService } from "@jsverse/transloco";
 import { RouterModule, Router, ActivatedRoute } from "@angular/router";
-import { ChromeService } from "../../../chrome.service";
-import { DataPassingService, ApiResult } from "../../../services/data-passing.service";
+
+import { CopyToClipboardBase } from "app/base/copy-to-clipboard/copy-to-clipboard.base";
+import { ChromeService } from "app/chrome.service";
+import { DataPassingService, ApiResult } from "app/services/data-passing.service";
 
 @Component({
     selector: "app-password-result",
@@ -12,7 +15,7 @@ import { DataPassingService, ApiResult } from "../../../services/data-passing.se
     templateUrl: "./password-result.component.html",
     styleUrls: ["./password-result.component.scss"],
 })
-export class PasswordResultComponent implements OnInit {
+export class PasswordResultComponent extends CopyToClipboardBase implements OnInit {
     apiResult: any = {};
     passwordData: any = {};
     loading = true;
@@ -22,8 +25,12 @@ export class PasswordResultComponent implements OnInit {
         private router: Router,
         private route: ActivatedRoute,
         private chromeService: ChromeService,
-        private dataPassingService: DataPassingService
-    ) {}
+        private dataPassingService: DataPassingService,
+        private snackBar: MatSnackBar,
+        private translocoService: TranslocoService
+    ) {
+        super(chromeService, snackBar, translocoService);
+    }
 
     async ngOnInit(): Promise<void> {
         // Ensure extension is in full screen mode for better security when showing password results
@@ -65,20 +72,9 @@ export class PasswordResultComponent implements OnInit {
     }
 
     async copyZelfProof(): Promise<void> {
-        if (this.apiResult.zelfProof) {
-            try {
-                await navigator.clipboard.writeText(this.apiResult.zelfProof);
-                // You could add a toast notification here
-            } catch (error) {
-                // Fallback for older browsers
-                const textArea = document.createElement("textarea");
-                textArea.value = this.apiResult.zelfProof;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand("copy");
-                document.body.removeChild(textArea);
-            }
-        }
+        if (!this.apiResult.zelfProof) return;
+
+        await this._copyToClipboard(this.apiResult.zelfProof);
     }
 
     getResultStatus(): "success" | "error" | "unknown" {

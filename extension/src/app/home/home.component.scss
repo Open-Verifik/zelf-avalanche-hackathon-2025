@@ -182,6 +182,48 @@
                 fill: white;
             }
         }
+
+        &--zelf-keys {
+            background: linear-gradient(135deg, #667eea 0%, #6b73d8 40%, #764ba2 100%);
+            position: relative;
+            overflow: hidden;
+            transition:
+                transform 0.3s variables.$smoothBezier,
+                box-shadow 0.3s variables.$smoothBezier,
+                background 0.3s variables.$smoothBezier;
+
+            svg {
+                fill: white;
+                transition: fill 0.3s variables.$smoothBezier;
+            }
+
+            // Sheen effect overlay
+            &::before {
+                content: "";
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                width: 141.42%; // sqrt(2) * 100% to cover diagonal
+                height: 141.42%;
+                background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.4), transparent);
+                transform: translate(-50%, -50%) rotate(45deg) translateX(-100%);
+                transform-origin: center;
+                transition: transform 0.6s variables.$smoothBezier;
+                z-index: 1;
+            }
+
+            &:hover {
+                background: linear-gradient(135deg, #5a6fd8 0%, #6369d0 40%, #6a4190 100%);
+                transform: translateY(-3px);
+                box-shadow:
+                    0 12px 35px rgba(118, 75, 162, 0.4),
+                    0 4px 15px rgba(102, 126, 234, 0.2);
+
+                &::before {
+                    transform: translate(-50%, -50%) rotate(45deg) translateX(100%);
+                }
+            }
+        }
     }
 
     &__icon-box {
@@ -191,6 +233,7 @@
         display: inline-flex;
         justify-content: center;
         align-items: center;
+        z-index: 2;
     }
 
     &__text {

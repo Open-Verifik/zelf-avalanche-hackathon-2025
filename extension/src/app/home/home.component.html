@@ -82,21 +82,6 @@
                     </div>
 
                     <div class="home-action">
-                        <div class="home-action__icon" [routerLink]="['/dashboard']">
-                            <div class="home-action__icon-box">
-                                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path
-                                        d="M24.4998 11.6667H14.7582C13.8015 8.94833 11.2115 7 8.1665 7C4.30484 7 1.1665 10.1383 1.1665 14C1.1665 17.8617 4.30484 21 8.1665 21C11.2115 21 13.8015 19.0517 14.7582 16.3333H15.1665L17.4998 18.6667L19.8332 16.3333L22.1665 18.6667L26.8332 13.9533L24.4998 11.6667ZM8.1665 17.5C6.2415 17.5 4.6665 15.925 4.6665 14C4.6665 12.075 6.2415 10.5 8.1665 10.5C10.0915 10.5 11.6665 12.075 11.6665 14C11.6665 15.925 10.0915 17.5 8.1665 17.5Z"
-                                        fill="#181818"
-                                    />
-                                </svg>
-                            </div>
-                        </div>
-
-                        <div class="home-action__text cursor-pointer">{{ t("home.keys") }}</div>
-                    </div>
-
-                    <div class="home-action">
                         <div (click)="refreshTokens()" class="home-action__icon">
                             <div class="home-action__icon-box">
                                 <svg height="28" width="28" xmlns="http://www.w3.org/2000/svg" viewBox="0 -960 960 960">
@@ -108,6 +93,21 @@
                         </div>
 
                         <div class="home-action__text cursor-pointer">{{ t("common.refresh") }}</div>
+                    </div>
+
+                    <div class="home-action">
+                        <div class="home-action__icon home-action__icon--zelf-keys" [routerLink]="['/dashboard']">
+                            <div class="home-action__icon-box">
+                                <svg width="28" height="28" viewBox="0 0 28 28" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                    <path
+                                        d="M24.4998 11.6667H14.7582C13.8015 8.94833 11.2115 7 8.1665 7C4.30484 7 1.1665 10.1383 1.1665 14C1.1665 17.8617 4.30484 21 8.1665 21C11.2115 21 13.8015 19.0517 14.7582 16.3333H15.1665L17.4998 18.6667L19.8332 16.3333L22.1665 18.6667L26.8332 13.9533L24.4998 11.6667ZM8.1665 17.5C6.2415 17.5 4.6665 15.925 4.6665 14C4.6665 12.075 6.2415 10.5 8.1665 10.5C10.0915 10.5 11.6665 12.075 11.6665 14C11.6665 15.925 10.0915 17.5 8.1665 17.5Z"
+                                        fill="white"
+                                    />
+                                </svg>
+                            </div>
+                        </div>
+
+                        <div class="home-action__text cursor-pointer">{{ t("home.keys") }}</div>
                     </div>
                 </div>
             </div>

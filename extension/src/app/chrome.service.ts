@@ -242,8 +242,10 @@ export class ChromeService {
 
         try {
             const url = browser.runtime.getURL("index.html");
+            // Ensure the path starts with a slash for proper routing
+            const normalizedPath = path.startsWith("/") ? path : `/${path}`;
 
-            browser.tabs.create({ url: `${url}#${path}` }).then(async (tab) => {
+            browser.tabs.create({ url: `${url}#${normalizedPath}` }).then(async (tab) => {
                 if (!tab?.id) return;
 
                 try {
@@ -267,7 +269,9 @@ export class ChromeService {
             if (currentTab) {
                 // We're already in a tab, update the URL to navigate to the desired path
                 const url = browser.runtime.getURL("index.html");
-                await browser.tabs.update(currentTab.id, { url: `${url}#${path}` });
+                // Ensure the path starts with a slash for proper routing
+                const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+                await browser.tabs.update(currentTab.id, { url: `${url}#${normalizedPath}` });
 
                 // Ensure the tab is focused and active
                 await browser.tabs.update(currentTab.id, { active: true });

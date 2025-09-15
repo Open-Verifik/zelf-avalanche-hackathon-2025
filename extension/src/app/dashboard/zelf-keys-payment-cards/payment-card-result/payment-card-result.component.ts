@@ -1,28 +1,34 @@
 import { CommonModule } from "@angular/common";
 import { Component, OnInit } from "@angular/core";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { Router, RouterModule } from "@angular/router";
-import { TranslocoModule } from "@jsverse/transloco";
+import { TranslocoModule, TranslocoService } from "@jsverse/transloco";
 
-import { ChromeService } from "../../../chrome.service";
-import { DataPassingService } from "../../../services/data-passing.service";
+import { CopyToClipboardBase } from "app/base/copy-to-clipboard/copy-to-clipboard.base";
+import { ChromeService } from "app/chrome.service";
+import { DataPassingService } from "app/services/data-passing.service";
 
 @Component({
+    imports: [CommonModule, TranslocoModule, RouterModule],
     selector: "app-payment-card-result",
     standalone: true,
-    imports: [CommonModule, TranslocoModule, RouterModule],
-    templateUrl: "./payment-card-result.component.html",
     styleUrls: ["./payment-card-result.component.scss"],
+    templateUrl: "./payment-card-result.component.html",
 })
-export class PaymentCardResultComponent implements OnInit {
-    result: any = null;
-    isSuccess = false;
+export class PaymentCardResultComponent extends CopyToClipboardBase implements OnInit {
     error: string | null = null;
+    isSuccess = false;
+    result: any = null;
 
     constructor(
+        private dataPassingService: DataPassingService,
         private router: Router,
-        private chromeService: ChromeService,
-        private dataPassingService: DataPassingService
-    ) {}
+        protected chromeService: ChromeService,
+        protected snackBar: MatSnackBar,
+        protected translocoService: TranslocoService
+    ) {
+        super(chromeService, snackBar, translocoService);
+    }
 
     async ngOnInit(): Promise<void> {
         // Ensure extension is in full screen mode
@@ -32,9 +38,11 @@ export class PaymentCardResultComponent implements OnInit {
 
         // Get result from data passing service
         this.result = this.dataPassingService.getResult("payment-cards");
+        console.log(`🚀 ~ PaymentCardResultComponent ~ ngOnInit ~ this.result:`, this.result);
 
         // after getting the result we need to format the data from publicData
         let parsedCardData: any = {};
+
         if (this.result?.publicData?.card) {
             try {
                 parsedCardData = JSON.parse(this.result?.publicData?.card);
@@ -46,8 +54,10 @@ export class PaymentCardResultComponent implements OnInit {
         // Extract expiry month and year from the expires field (format: "12/26")
         let expiryMonth = "";
         let expiryYear = "";
+
         if (parsedCardData.expires) {
             const [month, year] = parsedCardData.expires.split("/");
+
             expiryMonth = month;
             expiryYear = year ? `20${year}` : ""; // Convert "26" to "2026"
         }
@@ -60,12 +70,15 @@ export class PaymentCardResultComponent implements OnInit {
 
         if (this.result) {
             this.isSuccess = this.result?.success === true;
-            if (!this.isSuccess) {
-                this.error = this.result?.message || "Unknown error occurred";
-            }
-        } else {
-            this.error = "No result data found";
+
+            if (this.isSuccess) return;
+
+            this.error = this.result?.message || "Unknown error occurred";
+
+            return;
         }
+
+        this.error = "No result data found";
     }
 
     onBackToCards(): void {
@@ -77,39 +90,35 @@ export class PaymentCardResultComponent implements OnInit {
     }
 
     async copyZelfProof(): Promise<void> {
-        if (this.result?.zelfProof) {
-            try {
-                await navigator.clipboard.writeText(this.result.zelfProof);
-            } catch (error) {
-                // Fallback for older browsers
-                const textArea = document.createElement("textarea");
-                textArea.value = this.result.zelfProof;
-                document.body.appendChild(textArea);
-                textArea.select();
-                document.execCommand("copy");
-                document.body.removeChild(textArea);
-            }
-        }
+        if (!this.result?.zelfProof) return;
+
+        await this._copyToClipboard(this.result.zelfProof);
     }
 
     onImageError(event: Event): void {
         const img = event.target as HTMLImageElement;
+
         img.style.display = "none";
-        // Optionally show a placeholder or error message
+
         const container = img.parentElement;
-        if (container) {
-            container.innerHTML = '<div class="image-error">Image not available</div>';
-        }
+
+        if (!container) return;
+
+        container.innerHTML = '<div class="image-error">Image not available</div>';
     }
 
     onDownloadZelfProof(): void {
         if (!this.result?.url) return;
 
         const link = document.createElement("a");
+
         link.href = this.result.url;
         link.download = `zelfproof-${this.result.publicData?.cardName || "payment-card"}.png`;
+
         document.body.appendChild(link);
+
         link.click();
+
         document.body.removeChild(link);
     }
 }

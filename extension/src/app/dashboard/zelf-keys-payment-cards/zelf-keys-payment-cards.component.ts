@@ -2,11 +2,11 @@ import { Component, OnInit, AfterViewInit } from "@angular/core";
 import { CommonModule } from "@angular/common";
 import { TranslocoModule } from "@jsverse/transloco";
 import { Router } from "@angular/router";
-import { ChromeService } from "../../chrome.service";
-import { HttpWrapperService } from "../../http-wrapper.service";
-import { WalletService } from "../../wallet.service";
-import { PaymentCardDataService } from "../../services/payment-card-data.service";
-import { environment } from "../../../environments/environment";
+import { ChromeService } from "app/chrome.service";
+import { HttpWrapperService } from "app/http-wrapper.service";
+import { WalletService } from "app/wallet.service";
+import { PaymentCardDataService } from "app/services/payment-card-data.service";
+import { environment } from "environments/environment";
 
 @Component({
     imports: [CommonModule, TranslocoModule],
