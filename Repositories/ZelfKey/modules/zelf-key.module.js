@@ -102,7 +102,7 @@ const _store = async (publicData, metadata, faceBase64, identifier, authToken) =
     let qrCodeIPFS = null;
 
     try {
-        qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
+        qrCodeIPFS = await pinata.pinFile(zelfQR, `${identifier}.png`, "image/png", {
             ...publicData,
             identifier,
             zelfProof: zelfKey.zelfProof,
@@ -130,7 +130,7 @@ const _store = async (publicData, metadata, faceBase64, identifier, authToken) =
 
         const base64Data = Buffer.from(NFTJSON).toString("base64");
 
-        qrCodeIPFS = await pinata.pinFile(base64Data, `${identifier}_nft_transaction.json`, "image/png", {
+        await pinata.pinFile(base64Data, `${identifier}_nft_transaction.json`, "application/json", {
             transactionHash: NFT.transactionHash,
             receipt: JSON.stringify({
                 cost: NFT.cost,
@@ -555,10 +555,14 @@ const listData = async (data, authToken) => {
 
             // If we have matching NFT transaction data, add it to the result
             if (matchingNftTransaction?.publicData) {
+                const receipt = JSON.parse(matchingNftTransaction.publicData.receipt || "{}");
+                const metadata = JSON.parse(matchingNftTransaction.publicData.metadata || "{}");
+
                 result.NFT = {
-                    ...JSON.parse(matchingNftTransaction.publicData.receipt || "{}"),
-                    ...JSON.parse(matchingNftTransaction.publicData.metadata || "{}"),
                     ...matchingNftTransaction.publicData,
+                    ...receipt,
+                    // Preserve the important metadata fields, especially the image URL for Snowtrace
+                    ...metadata,
                 };
             }
 

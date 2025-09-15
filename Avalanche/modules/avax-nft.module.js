@@ -91,11 +91,13 @@ const getMasterWallet = async () => {
 };
 
 const createNFT = async (data, authToken) => {
+    const { identifier } = data;
+
     const NFTData = await prepareNFTData(data, authToken);
 
     const { masterWallet, contract, balance } = await getMasterWallet();
 
-    const zelfKeyData = await insertMetadata(NFTData, data.publicData);
+    const zelfKeyData = await insertMetadata(NFTData, data.publicData, identifier);
 
     const tokenURI = zelfKeyData.ipfsUrl;
 
@@ -183,11 +185,11 @@ const prepareNFTData = async (data, authToken) => {
  * @param {Object} NFTData
  * @param {Object} publicData
  */
-const insertMetadata = async (NFTData, publicData) => {
+const insertMetadata = async (NFTData, publicData, identifier) => {
     const PINATA_CONFIG = {
         apiKey: process.env.PINATA_API_KEY,
         secretKey: process.env.PINATA_API_SECRET,
-        gateway: process.env.PINATA_GATEWAY_URL || "https://chocolate-occasional-kite-546.mypinata.cloud",
+        gateway: process.env.PINATA_GATEWAY_URL || "https://gateway.pinata.cloud",
     };
 
     const metadataBlob = new Blob([JSON.stringify(NFTData, null, 2)], {
@@ -195,11 +197,11 @@ const insertMetadata = async (NFTData, publicData) => {
     });
 
     const formData = new FormData();
-    formData.append("file", metadataBlob, `${NFTData.name}.json`);
+    formData.append("file", metadataBlob, `${identifier}.json`);
     formData.append(
         "pinataMetadata",
         JSON.stringify({
-            name: NFTData.name,
+            name: identifier,
             keyvalues: {
                 ...publicData,
                 category: `nft_${publicData.category}`,
@@ -225,6 +227,8 @@ const insertMetadata = async (NFTData, publicData) => {
     const ipfsHash = result.IpfsHash;
 
     const ipfsUrl = `https://${PINATA_CONFIG.gateway}/ipfs/${ipfsHash}`;
+
+    console.log("ipfsUrl", ipfsUrl);
 
     return {
         ipfsHash,
