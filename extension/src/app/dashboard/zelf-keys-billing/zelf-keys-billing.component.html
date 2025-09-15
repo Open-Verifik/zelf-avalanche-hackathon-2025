@@ -1,344 +1,346 @@
 <div class="billing-container">
-	<div class="billing-header" *ngIf="!loading && !error && !hasActiveSubscription && !showCryptoPayment">
-		<h1 class="billing-title">Choose Your Plan</h1>
-		<p class="billing-subtitle">Select the plan that best fits your needs</p>
-	</div>
+    <div class="billing-header" *ngIf="!loading && !error && !hasActiveSubscription && !showCryptoPayment">
+        <h1 class="billing-title">Choose Your Plan</h1>
+        <p class="billing-subtitle">Select the plan that best fits your needs</p>
+    </div>
 
-	<!-- Loading State -->
-	<div *ngIf="loading" class="loading-container">
-		<div class="loading-spinner"></div>
-		<p>Loading subscription plans...</p>
-	</div>
+    <!-- Loading State -->
+    <div *ngIf="loadingPlans || loadingCurrentPlan" class="loading-container">
+        <div class="loading-spinner"></div>
+        <p>Loading subscription plans...</p>
+    </div>
 
-	<!-- Error State -->
-	<div *ngIf="error && !loading" class="error-container">
-		<div class="error-message">
-			<svg class="error-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-				<path
-					d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-					stroke="currentColor"
-					stroke-width="2"
-					stroke-linecap="round"
-					stroke-linejoin="round"
-				/>
-			</svg>
-			<p>{{ error }}</p>
-			<button class="retry-button" (click)="retryLoadPlans()">Try Again</button>
-		</div>
-	</div>
+    <!-- Error State -->
+    <div *ngIf="error && !loadingPlans && !loadingCurrentPlan" class="error-container">
+        <div class="error-message">
+            <svg class="error-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path
+                    d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                    stroke="currentColor"
+                    stroke-width="2"
+                    stroke-linecap="round"
+                    stroke-linejoin="round"
+                />
+            </svg>
 
-	<!-- Active Subscription Management View -->
-	<div *ngIf="!loading && !error && hasActiveSubscription" class="subscription-management">
-		<div class="subscription-card">
-			<div class="subscription-header">
-				<div class="subscription-status" [class.cancelled]="isCancelledActive()">
-					<svg
-						*ngIf="!isCancelledActive()"
-						class="status-icon"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-					<svg
-						*ngIf="isCancelledActive()"
-						class="status-icon cancelled"
-						width="24"
-						height="24"
-						viewBox="0 0 24 24"
-						fill="none"
-						xmlns="http://www.w3.org/2000/svg"
-					>
-						<path
-							d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12 C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-					<span class="status-text">
-						{{ isCancelledActive() ? "Cancelled (Active Until Period End)" : "Active Subscription" }}
-					</span>
-				</div>
-				<div class="subscription-plan">{{ getCurrentPlanName() }}</div>
-			</div>
+            <p>{{ error }}</p>
 
-			<div class="subscription-details">
-				<div class="detail-row">
-					<span class="detail-label">Plan:</span>
-					<span class="detail-value">{{ getCurrentPlanName() }}</span>
-				</div>
-				<div class="detail-row">
-					<span class="detail-label">Price:</span>
-					<span class="detail-value">{{ getCurrentPlanPrice() }}</span>
-				</div>
-				<div class="detail-row">
-					<span class="detail-label">Payment Method:</span>
-					<span class="detail-value">
-						<span *ngIf="activeSubscription?.paymentMethod === 'crypto'" class="payment-method crypto">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-								<path d="M8 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-							</svg>
-							Crypto (AVAX)
-							<span *ngIf="getCryptoData()?.isDemoMode" class="demo-badge">DEMO</span>
-						</span>
-						<span *ngIf="activeSubscription?.paymentMethod === 'stripe'" class="payment-method stripe">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" stroke-width="2" />
-								<line x1="1" y1="10" x2="23" y2="10" stroke="currentColor" stroke-width="2" />
-							</svg>
-							Stripe
-						</span>
-					</span>
-				</div>
-				<div class="detail-row">
-					<span class="detail-label">Status:</span>
-					<span class="detail-value" [class.status-active]="!isCancelledActive()" [class.status-cancelled]="isCancelledActive()">
-						{{ getSubscriptionStatus() }}
-					</span>
-				</div>
-				<div *ngIf="activeSubscription?.paymentMethod === 'crypto' && getCryptoData()?.transactionHash" class="detail-row">
-					<span class="detail-label">Transaction:</span>
-					<span class="detail-value transaction-hash">
-						<a [href]="getTransactionUrl()" target="_blank" rel="noopener noreferrer">
-							{{ getCryptoData()?.transactionHash | slice: 0 : 10 }}...{{ getCryptoData()?.transactionHash | slice: -8 }}
-						</a>
-						<svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path
-								d="M18 13V19A2 2 0 0116 21H5A2 2 0 013 19V8A2 2 0 015 6H11"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-							<polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-							<line
-								x1="10"
-								y1="14"
-								x2="21"
-								y2="3"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg>
-					</span>
-				</div>
-				<div class="detail-row">
-					<span class="detail-label">Zelf Name:</span>
-					<span class="detail-value">{{ activeSubscription?.zelfName || "N/A" }}</span>
-				</div>
-				<div class="detail-row">
-					<span class="detail-label">Start Date:</span>
-					<span class="detail-value">{{ activeSubscription?.startDate | date: "medium" }}</span>
-				</div>
-				<div class="detail-row">
-					<span class="detail-label">{{ getEndDateLabel() }}</span>
-					<span class="detail-value" [class.status-cancelled]="isCancelledActive()">
-						{{ activeSubscription?.endDate | date: "medium" }}
-					</span>
-				</div>
-				<div *ngIf="isCancelledActive() && activeSubscription?.stripeData?.cancelledAt" class="detail-row">
-					<span class="detail-label">Cancelled On:</span>
-					<span class="detail-value status-cancelled">{{ activeSubscription.stripeData.cancelledAt | date: "medium" }}</span>
-				</div>
-			</div>
+            <button class="retry-button" (click)="retryLoadPlans()">Try Again</button>
+        </div>
+    </div>
 
-			<div class="subscription-actions">
-				<!-- Only show manage button for Stripe subscriptions -->
-				<div *ngIf="activeSubscription?.paymentMethod === 'stripe'">
-					<button class="manage-button" (click)="openCustomerPortal()">
-						<svg class="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<path
-								d="M10.325 4.317C10.751 3.901 11.377 3.901 11.803 4.317L20.69 13.204C21.116 13.63 21.116 14.256 20.69 14.682L11.803 23.569C11.377 23.995 10.751 23.995 10.325 23.569L1.438 14.682C1.012 14.256 1.012 13.63 1.438 13.204L10.325 4.317Z"
-								stroke="currentColor"
-								stroke-width="2"
-								stroke-linecap="round"
-								stroke-linejoin="round"
-							/>
-						</svg>
-						Manage Subscription
-					</button>
-					<p class="management-note">
-						{{
-							isCancelledActive()
-								? "Your subscription is cancelled but remains active until the end of your billing period. You can reactivate or view billing history in the Stripe customer portal."
-								: "Manage your subscription, update payment methods, view billing history, and more in the Stripe customer portal."
-						}}
-					</p>
-				</div>
-				<!-- Message for crypto subscriptions -->
-				<div *ngIf="activeSubscription?.paymentMethod === 'crypto'" class="crypto-subscription-info">
-					<div class="crypto-info-card">
-						<svg class="info-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-							<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-							<path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-						</svg>
-						<div class="crypto-info-content">
-							<h4>Crypto Subscription Active</h4>
-							<p>
-								Your subscription was paid with AVAX cryptocurrency. This is a one-time payment valid until the end date shown above.
-							</p>
-							<p *ngIf="getCryptoData()?.transactionHash" class="transaction-note">
-								<strong>Transaction verified on Avalanche blockchain.</strong>
-							</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+    <!-- Active Subscription Management View -->
+    <div *ngIf="!loadingPlans && !loadingCurrentPlan && !error && hasActiveSubscription" class="subscription-management">
+        <div class="subscription-card">
+            <div class="subscription-header">
+                <div class="subscription-status" [class.cancelled]="isCancelledActive()">
+                    <svg
+                        *ngIf="!isCancelledActive()"
+                        class="status-icon"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+                    <svg
+                        *ngIf="isCancelledActive()"
+                        class="status-icon cancelled"
+                        width="24"
+                        height="24"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                    >
+                        <path
+                            d="M12 9V13M12 17H12.01M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12 C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+                    <span class="status-text">
+                        {{ isCancelledActive() ? "Cancelled (Active Until Period End)" : "Active Subscription" }}
+                    </span>
+                </div>
+                <div class="subscription-plan">{{ getCurrentPlanName() }}</div>
+            </div>
 
-	<!-- Crypto Payment Interface -->
-	<div *ngIf="!loading && !error && showCryptoPayment" class="crypto-payment-container">
-		<div class="crypto-payment-card">
-			<div class="payment-header">
-				<h2 class="payment-title">Complete Your Payment</h2>
-				<div *ngIf="cryptoPaymentData?.isDemoMode" class="demo-mode-banner">
-					<svg class="demo-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path
-							d="M13 2L3 14H12L11 22L21 10H12L13 2Z"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-					<span class="demo-text">DEMO MODE - Testing with reduced amounts</span>
-				</div>
-				<p class="payment-subtitle">Send {{ cryptoPaymentData?.amount }} AVAX to the address below</p>
-				<div class="price-lock-info">
-					<span class="lock-text">Price locked for 30 minutes</span>
-					<span class="rate-text">1 AVAX = ${{ cryptoPaymentData?.avaxPrice | number: "1.2-2" }}</span>
-				</div>
-			</div>
+            <div class="subscription-details">
+                <div class="detail-row">
+                    <span class="detail-label">Plan:</span>
+                    <span class="detail-value">{{ getCurrentPlanName() }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Price:</span>
+                    <span class="detail-value">{{ getCurrentPlanPrice() }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Payment Method:</span>
+                    <span class="detail-value">
+                        <span *ngIf="activeSubscription?.paymentMethod === 'crypto'" class="payment-method crypto">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                                <path d="M8 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            </svg>
+                            Crypto (AVAX)
+                            <span *ngIf="getCryptoData()?.isDemoMode" class="demo-badge">DEMO</span>
+                        </span>
+                        <span *ngIf="activeSubscription?.paymentMethod === 'stripe'" class="payment-method stripe">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" stroke-width="2" />
+                                <line x1="1" y1="10" x2="23" y2="10" stroke="currentColor" stroke-width="2" />
+                            </svg>
+                            Stripe
+                        </span>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Status:</span>
+                    <span class="detail-value" [class.status-active]="!isCancelledActive()" [class.status-cancelled]="isCancelledActive()">
+                        {{ getSubscriptionStatus() }}
+                    </span>
+                </div>
+                <div *ngIf="activeSubscription?.paymentMethod === 'crypto' && getCryptoData()?.transactionHash" class="detail-row">
+                    <span class="detail-label">Transaction:</span>
+                    <span class="detail-value transaction-hash">
+                        <a [href]="getTransactionUrl()" target="_blank" rel="noopener noreferrer">
+                            {{ getCryptoData()?.transactionHash | slice: 0 : 10 }}...{{ getCryptoData()?.transactionHash | slice: -8 }}
+                        </a>
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M18 13V19A2 2 0 0116 21H5A2 2 0 013 19V8A2 2 0 015 6H11"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                            <polyline points="15,3 21,3 21,9" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                            <line
+                                x1="10"
+                                y1="14"
+                                x2="21"
+                                y2="3"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
+                    </span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Zelf Name:</span>
+                    <span class="detail-value">{{ activeSubscription?.zelfName || "N/A" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">Start Date:</span>
+                    <span class="detail-value">{{ activeSubscription?.startDate | date: "medium" }}</span>
+                </div>
+                <div class="detail-row">
+                    <span class="detail-label">{{ getEndDateLabel() }}</span>
+                    <span class="detail-value" [class.status-cancelled]="isCancelledActive()">
+                        {{ activeSubscription?.endDate | date: "medium" }}
+                    </span>
+                </div>
+                <div *ngIf="isCancelledActive() && activeSubscription?.stripeData?.cancelledAt" class="detail-row">
+                    <span class="detail-label">Cancelled On:</span>
+                    <span class="detail-value status-cancelled">{{ activeSubscription.stripeData.cancelledAt | date: "medium" }}</span>
+                </div>
+            </div>
 
-			<div class="payment-details">
-				<div class="plan-info">
-					<h3>{{ cryptoPaymentData?.selectedPlan?.name }}</h3>
-					<p class="plan-price">${{ cryptoPaymentData?.selectedPlan?.price }}/{{ cryptoPaymentData?.selectedPlan?.interval }}</p>
-				</div>
+            <div class="subscription-actions">
+                <!-- Only show manage button for Stripe subscriptions -->
+                <div *ngIf="activeSubscription?.paymentMethod === 'stripe'">
+                    <button class="manage-button" (click)="openCustomerPortal()">
+                        <svg class="button-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <path
+                                d="M10.325 4.317C10.751 3.901 11.377 3.901 11.803 4.317L20.69 13.204C21.116 13.63 21.116 14.256 20.69 14.682L11.803 23.569C11.377 23.995 10.751 23.995 10.325 23.569L1.438 14.682C1.012 14.256 1.012 13.63 1.438 13.204L10.325 4.317Z"
+                                stroke="currentColor"
+                                stroke-width="2"
+                                stroke-linecap="round"
+                                stroke-linejoin="round"
+                            />
+                        </svg>
+                        Manage Subscription
+                    </button>
+                    <p class="management-note">
+                        {{
+                            isCancelledActive()
+                                ? "Your subscription is cancelled but remains active until the end of your billing period. You can reactivate or view billing history in the Stripe customer portal."
+                                : "Manage your subscription, update payment methods, view billing history, and more in the Stripe customer portal."
+                        }}
+                    </p>
+                </div>
+                <!-- Message for crypto subscriptions -->
+                <div *ngIf="activeSubscription?.paymentMethod === 'crypto'" class="crypto-subscription-info">
+                    <div class="crypto-info-card">
+                        <svg class="info-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                            <path d="M12 16V12M12 8H12.01" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                        </svg>
+                        <div class="crypto-info-content">
+                            <h4>Crypto Subscription Active</h4>
+                            <p>
+                                Your subscription was paid with AVAX cryptocurrency. This is a one-time payment valid until the end date shown above.
+                            </p>
+                            <p *ngIf="getCryptoData()?.transactionHash" class="transaction-note">
+                                <strong>Transaction verified on Avalanche blockchain.</strong>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
-				<div class="payment-address-section">
-					<div class="address-label">Payment Address (Avalanche C-Chain)</div>
-					<div class="address-container">
-						<div class="address-text">{{ cryptoPaymentData?.paymentAddress }}</div>
-						<button class="copy-button" (click)="copyPaymentAddress()">
-							<svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-								<path
-									d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"
-									fill="currentColor"
-								/>
-							</svg>
-							Copy
-						</button>
-					</div>
-				</div>
+    <!-- Crypto Payment Interface -->
+    <div *ngIf="!loading && !error && showCryptoPayment" class="crypto-payment-container">
+        <div class="crypto-payment-card">
+            <div class="payment-header">
+                <h2 class="payment-title">Complete Your Payment</h2>
+                <div *ngIf="cryptoPaymentData?.isDemoMode" class="demo-mode-banner">
+                    <svg class="demo-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M13 2L3 14H12L11 22L21 10H12L13 2Z"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+                    <span class="demo-text">DEMO MODE - Testing with reduced amounts</span>
+                </div>
+                <p class="payment-subtitle">Send {{ cryptoPaymentData?.amount }} AVAX to the address below</p>
+                <div class="price-lock-info">
+                    <span class="lock-text">Price locked for 30 minutes</span>
+                    <span class="rate-text">1 AVAX = ${{ cryptoPaymentData?.avaxPrice | number: "1.2-2" }}</span>
+                </div>
+            </div>
 
-				<div class="qr-code-section">
-					<div class="qr-label">Scan with your wallet</div>
-					<div class="qr-container">
-						<img [src]="generatePaymentQR()" alt="Payment QR Code" class="qr-code" />
-					</div>
-				</div>
+            <div class="payment-details">
+                <div class="plan-info">
+                    <h3>{{ cryptoPaymentData?.selectedPlan?.name }}</h3>
+                    <p class="plan-price">${{ cryptoPaymentData?.selectedPlan?.price }}/{{ cryptoPaymentData?.selectedPlan?.interval }}</p>
+                </div>
 
-				<div class="payment-amount">
-					<div class="amount-label">Amount to Send</div>
-					<div class="amount-value">{{ cryptoPaymentData?.amount }} AVAX</div>
-					<div class="usd-equivalent">≈ ${{ cryptoPaymentData?.usdAmount | number: "1.2-4" }}</div>
-					<div *ngIf="cryptoPaymentData?.isDemoMode && cryptoPaymentData?.originalAmount" class="original-amount-info">
-						<div class="original-label">Original Plan Price:</div>
-						<div class="original-values">
-							<span class="original-avax" *ngIf="cryptoPaymentData?.originalAmount"
-								>{{ cryptoPaymentData?.originalAmount?.avax }} AVAX</span
-							>
-							<span class="original-usd" *ngIf="cryptoPaymentData?.originalAmount"
-								>≈ ${{ cryptoPaymentData?.originalAmount?.usd }}</span
-							>
-						</div>
-						<div class="demo-savings">Demo Discount: {{ getDemoDiscount() }}%</div>
-					</div>
-				</div>
-			</div>
+                <div class="payment-address-section">
+                    <div class="address-label">Payment Address (Avalanche C-Chain)</div>
+                    <div class="address-container">
+                        <div class="address-text">{{ cryptoPaymentData?.paymentAddress }}</div>
+                        <button class="copy-button" (click)="copyPaymentAddress()">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path
+                                    d="M16 1H4C2.9 1 2 1.9 2 3V17H4V3H16V1ZM19 5H8C6.9 5 6 5.9 6 7V21C6 22.1 6.9 23 8 23H19C20.1 23 21 22.1 21 21V7C21 5.9 20.1 5 19 5ZM19 21H8V7H19V21Z"
+                                    fill="currentColor"
+                                />
+                            </svg>
+                            Copy
+                        </button>
+                    </div>
+                </div>
 
-			<div class="payment-status">
-				<div class="status-indicator">
-					<div class="loading-spinner"></div>
-					<span>Waiting for payment confirmation...</span>
-				</div>
-				<p class="status-note">This page will automatically update when payment is received</p>
-			</div>
+                <div class="qr-code-section">
+                    <div class="qr-label">Scan with your wallet</div>
+                    <div class="qr-container">
+                        <img [src]="generatePaymentQR()" alt="Payment QR Code" class="qr-code" />
+                    </div>
+                </div>
 
-			<div class="payment-actions">
-				<button class="cancel-button" (click)="cancelCryptoPayment()">Cancel Payment</button>
-			</div>
-		</div>
-	</div>
+                <div class="payment-amount">
+                    <div class="amount-label">Amount to Send</div>
+                    <div class="amount-value">{{ cryptoPaymentData?.amount }} AVAX</div>
+                    <div class="usd-equivalent">≈ ${{ cryptoPaymentData?.usdAmount | number: "1.2-4" }}</div>
+                    <div *ngIf="cryptoPaymentData?.isDemoMode && cryptoPaymentData?.originalAmount" class="original-amount-info">
+                        <div class="original-label">Original Plan Price:</div>
+                        <div class="original-values">
+                            <span class="original-avax" *ngIf="cryptoPaymentData?.originalAmount"
+                                >{{ cryptoPaymentData?.originalAmount?.avax }} AVAX</span
+                            >
+                            <span class="original-usd" *ngIf="cryptoPaymentData?.originalAmount"
+                                >≈ ${{ cryptoPaymentData?.originalAmount?.usd }}</span
+                            >
+                        </div>
+                        <div class="demo-savings">Demo Discount: {{ getDemoDiscount() }}%</div>
+                    </div>
+                </div>
+            </div>
 
-	<!-- Plans Grid -->
-	<div *ngIf="!loading && !error && !hasActiveSubscription && !showCryptoPayment" class="pricing-grid">
-		<div *ngFor="let plan of plans" class="pricing-card" [class.popular]="plan.isPopular" [class.current]="plan.isCurrent">
-			<div class="card-header">
-				<div class="plan-name">{{ plan.name }}</div>
-				<div *ngIf="plan.isPopular" class="popular-badge">POPULAR</div>
-			</div>
+            <div class="payment-status">
+                <div class="status-indicator">
+                    <div class="loading-spinner"></div>
+                    <span>Waiting for payment confirmation...</span>
+                </div>
+                <p class="status-note">This page will automatically update when payment is received</p>
+            </div>
 
-			<div class="plan-pricing">
-				<div class="price">
-					<span class="currency">$</span>
-					<span class="amount">{{ plan.price }}</span>
-					<span class="period">/{{ plan.interval }}</span>
-				</div>
-			</div>
+            <div class="payment-actions">
+                <button class="cancel-button" (click)="cancelCryptoPayment()">Cancel Payment</button>
+            </div>
+        </div>
+    </div>
 
-			<div class="plan-tagline">{{ plan.description }}</div>
+    <!-- Plans Grid -->
+    <div *ngIf="!loading && !error && !hasActiveSubscription && !showCryptoPayment" class="pricing-grid">
+        <div *ngFor="let plan of plans" class="pricing-card" [class.popular]="plan.isPopular" [class.current]="plan.isCurrent">
+            <div class="card-header">
+                <div class="plan-name">{{ plan.name }}</div>
+                <div *ngIf="plan.isPopular" class="popular-badge">POPULAR</div>
+            </div>
 
-			<div class="plan-features">
-				<div *ngFor="let feature of plan.features" class="feature-item">
-					<svg class="feature-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<path
-							d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
-							stroke="currentColor"
-							stroke-width="2"
-							stroke-linecap="round"
-							stroke-linejoin="round"
-						/>
-					</svg>
-					<span class="feature-text">{{ feature }}</span>
-				</div>
-			</div>
+            <div class="plan-pricing">
+                <div class="price">
+                    <span class="currency">$</span>
+                    <span class="amount">{{ plan.price }}</span>
+                    <span class="period">/{{ plan.interval }}</span>
+                </div>
+            </div>
 
-			<div class="payment-options" *ngIf="!plan.isCurrent">
-				<button class="payment-button stripe-button" (click)="selectPlan(plan.id, 'stripe')">
-					<svg class="payment-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" stroke-width="2" />
-						<line x1="1" y1="10" x2="23" y2="10" stroke="currentColor" stroke-width="2" />
-					</svg>
-					Pay with Stripe
-				</button>
-				<button class="payment-button crypto-button" (click)="selectPlan(plan.id, 'crypto')">
-					<svg class="payment-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-						<circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
-						<path d="M8 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
-					</svg>
-					Pay with Crypto
-				</button>
-			</div>
-			<button *ngIf="plan.isCurrent" class="plan-button current-plan" disabled>
-				{{ getPlanButtonText(plan) }}
-			</button>
-		</div>
-	</div>
+            <div class="plan-tagline">{{ plan.description }}</div>
+
+            <div class="plan-features">
+                <div *ngFor="let feature of plan.features" class="feature-item">
+                    <svg class="feature-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M9 12L11 14L15 10M21 12C21 16.9706 16.9706 21 12 21C7.02944 21 3 16.9706 3 12C3 7.02944 7.02944 3 12 3C16.9706 3 21 7.02944 21 12Z"
+                            stroke="currentColor"
+                            stroke-width="2"
+                            stroke-linecap="round"
+                            stroke-linejoin="round"
+                        />
+                    </svg>
+                    <span class="feature-text">{{ feature }}</span>
+                </div>
+            </div>
+
+            <div class="payment-options" *ngIf="!plan.isCurrent">
+                <button class="payment-button stripe-button" (click)="selectPlan(plan.id, 'stripe')">
+                    <svg class="payment-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect x="1" y="4" width="22" height="16" rx="2" ry="2" stroke="currentColor" stroke-width="2" />
+                        <line x1="1" y1="10" x2="23" y2="10" stroke="currentColor" stroke-width="2" />
+                    </svg>
+                    Pay with Stripe
+                </button>
+                <button class="payment-button crypto-button" (click)="selectPlan(plan.id, 'crypto')">
+                    <svg class="payment-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2" />
+                        <path d="M8 12l2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    Pay with Crypto
+                </button>
+            </div>
+            <button *ngIf="plan.isCurrent" class="plan-button current-plan" disabled>
+                {{ getPlanButtonText(plan) }}
+            </button>
+        </div>
+    </div>
 </div>

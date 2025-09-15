@@ -2,6 +2,7 @@ import { Injectable } from "@angular/core";
 import { HttpWrapperService } from "./../http-wrapper.service";
 import { environment } from "../../environments/environment";
 import { WalletService } from "app/wallet.service";
+import { Observable, Subject } from "rxjs";
 
 export interface PricingPlan {
     id: string;
@@ -97,11 +98,26 @@ export interface SubscriptionResponse {
 })
 export class BillingService {
     private baseUrl: string = environment.keysApiUrl;
+    private _currentPlan: string = "free";
+    private _currentPlan$: Subject<string> = new Subject<string>();
 
     constructor(
         private _httpWrapper: HttpWrapperService,
         private _walletService: WalletService
     ) {}
+
+    get currentPlan$(): Observable<string> {
+        return this._currentPlan$.asObservable();
+    }
+
+    get currentPlan(): string {
+        return this._currentPlan;
+    }
+
+    set currentPlan(plan: string) {
+        this._currentPlan = plan;
+        this._currentPlan$.next(plan);
+    }
 
     /**
      * Get available subscription plans

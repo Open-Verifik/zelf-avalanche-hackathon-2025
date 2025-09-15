@@ -11,7 +11,11 @@ import { AutofillIntegrationService } from "../../../services/autofill-integrati
 import { PasswordDataService } from "../../../services/password-data.service";
 import { ScrollToSectionService } from "../../../services/scroll-to-section.service";
 import { WalletService } from "../../../wallet.service";
-import { BiometricsBottomSheetComponent, BiometricResult, BiometricsBottomSheetData } from "../../shared/biometrics-bottom-sheet.component";
+import {
+    BiometricsBottomSheetComponent,
+    BiometricResult,
+    BiometricsBottomSheetData,
+} from "../../shared/biometrics-bottom-sheet/biometrics-bottom-sheet.component";
 import { MatBottomSheet } from "@angular/material/bottom-sheet";
 import { DecryptedItemData } from "../../../models/zelf-key-item.model";
 

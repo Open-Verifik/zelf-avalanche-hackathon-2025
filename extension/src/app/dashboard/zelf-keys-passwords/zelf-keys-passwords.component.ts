@@ -4,49 +4,56 @@ import { FormControl, ReactiveFormsModule } from "@angular/forms";
 import { Router, RouterModule } from "@angular/router";
 import { TranslocoModule } from "@jsverse/transloco";
 import { Subject, debounceTime, distinctUntilChanged, takeUntil } from "rxjs";
+
 import { ChromeService } from "../../chrome.service";
+import { BillingService } from "../../services/billing.service";
 import { DataPassingService } from "../../services/data-passing.service";
 import { PasswordDataService } from "../../services/password-data.service";
 import { WalletService } from "../../wallet.service";
-import { DataCardComponent } from "../shared/data-card.component";
+import { DataCardComponent } from "../shared/data-card/data-card.component";
+import { SubscriptionBannerComponent } from "../shared/subscription-banner/subscription-banner.component";
 
 @Component({
+    imports: [CommonModule, TranslocoModule, RouterModule, DataCardComponent, ReactiveFormsModule, SubscriptionBannerComponent],
     selector: "app-zelf-keys-passwords",
     standalone: true,
-    imports: [CommonModule, TranslocoModule, RouterModule, DataCardComponent, ReactiveFormsModule],
-    templateUrl: "./zelf-keys-passwords.component.html",
     styleUrls: ["./zelf-keys-passwords.component.scss"],
+    templateUrl: "./zelf-keys-passwords.component.html",
 })
 export class ZelfKeysPasswordsComponent implements OnInit, OnDestroy {
     private destroy$ = new Subject<void>();
 
+    currentPlan: string = "free";
     error: string | null = null;
-    loading = false;
+    loading = true;
     storedPasswords: any[] = [];
     filteredPasswords: any[] = [];
     searchControl = new FormControl("");
     showFilter = false;
 
     constructor(
-        private router: Router,
-        private walletService: WalletService,
-        private passwordDataService: PasswordDataService,
-        private chromeService: ChromeService,
-        private dataPassingService: DataPassingService
-    ) {}
+        private _billingService: BillingService,
+        private _router: Router,
+        private _walletService: WalletService,
+        private _passwordDataService: PasswordDataService,
+        private _chromeService: ChromeService,
+        private _dataPassingService: DataPassingService
+    ) {
+        this._subscribeToBillingService();
+    }
 
     async ngOnInit(): Promise<void> {
-        const currentUrl = this.router.url;
+        const currentUrl = this._router.url;
         const isDecryptRoute = currentUrl.includes("/passwords/decrypt");
 
-        if (this.chromeService.isExtension && !isDecryptRoute) {
-            await this.chromeService.ensureFullScreen("dashboard/passwords");
+        if (this._chromeService.isExtension && !isDecryptRoute) {
+            await this._chromeService.ensureFullScreen("dashboard/passwords");
         }
 
         this.loadStoredPasswords();
         this.setupSearchFilter();
 
-        this.dataPassingService.clearData("passwords");
+        this._dataPassingService.clearData("passwords");
     }
 
     ngOnDestroy(): void {
@@ -54,12 +61,20 @@ export class ZelfKeysPasswordsComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
+    private _subscribeToBillingService(): void {
+        this.currentPlan = this._billingService.currentPlan;
+
+        this._billingService.currentPlan$.pipe(takeUntil(this.destroy$)).subscribe((plan) => {
+            this.currentPlan = plan;
+        });
+    }
+
     async loadStoredPasswords(): Promise<void> {
         this.loading = true;
         this.error = null;
 
         try {
-            const response = await this.walletService.listStoredPasswords();
+            const response = await this._walletService.listStoredPasswords();
 
             if (response?.data && Array.isArray(response.data)) {
                 this.storedPasswords = response.data;
@@ -80,7 +95,7 @@ export class ZelfKeysPasswordsComponent implements OnInit, OnDestroy {
     }
 
     onAddPassword(): void {
-        this.router.navigate(["/dashboard/passwords/new"]);
+        this._router.navigate(["/dashboard/passwords/new"]);
     }
 
     onRefresh(): void {
@@ -88,9 +103,9 @@ export class ZelfKeysPasswordsComponent implements OnInit, OnDestroy {
     }
 
     onPasswordClick(password: any): void {
-        this.passwordDataService.setCurrentPassword(password);
+        this._passwordDataService.setCurrentPassword(password);
 
-        this.router.navigate(["/dashboard/passwords/detail"]);
+        this._router.navigate(["/dashboard/passwords/detail"]);
     }
 
     trackByPassword(index: number, password: any): any {
