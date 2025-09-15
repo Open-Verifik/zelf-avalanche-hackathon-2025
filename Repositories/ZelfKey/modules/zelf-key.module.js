@@ -153,7 +153,16 @@ const _store = async (publicData, metadata, faceBase64, identifier, authToken) =
         zelfProof: zelfKey.zelfProof,
         zelfQR, // Encrypted string
         NFT,
-        ipfs: qrCodeIPFS,
+        ipfs: qrCodeIPFS
+            ? {
+                  hash: qrCodeIPFS.IpfsHash,
+                  gatewayUrl: qrCodeIPFS.url,
+                  pinSize: qrCodeIPFS.PinSize,
+                  timestamp: `${new Date().toISOString()}`,
+                  name: qrCodeIPFS.name,
+                  metadata: qrCodeIPFS.metadata,
+              }
+            : null,
         publicData,
     };
 };
