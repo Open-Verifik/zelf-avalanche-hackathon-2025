@@ -78,6 +78,64 @@ const validateOwnership = async (zelfProof, faceBase64, masterPassword) => {
     return decryptedResponse.publicData;
 };
 
+const _store = async (publicData, metadata, faceBase64, identifier, authToken) => {
+    const { zelfQR } = await ZelfProofModule.encryptQRCode({
+        publicData,
+        metadata,
+        faceBase64,
+        // password: masterPassword,
+        identifier,
+        requireLiveness: true,
+        tolerance: "REGULAR",
+        os: "DESKTOP",
+    });
+
+    const zelfKey = await ZelfProofModule.encrypt({
+        publicData,
+        metadata,
+        faceBase64,
+        // password: masterPassword,
+        identifier,
+        requireLiveness: true,
+        tolerance: "REGULAR",
+        os: "DESKTOP",
+    });
+
+    let qrCodeIPFS = null;
+
+    try {
+        qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
+            ...publicData,
+            zelfProof: zelfKey.zelfProof,
+        });
+    } catch (ipfsError) {
+        console.warn("⚠️ Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
+    }
+
+    const NFT =
+        config.avalanche.createNFT && qrCodeIPFS
+            ? await createNFT(
+                  {
+                      zelfQR,
+                      url: qrCodeIPFS.url,
+                      name: identifier,
+                      publicData,
+                      zelfProof: zelfKey.zelfProof,
+                  },
+                  authToken
+              )
+            : null;
+
+    return {
+        success: true,
+        zelfProof: zelfKey.zelfProof,
+        zelfQR, // Encrypted string
+        NFT,
+        ipfs: qrCodeIPFS,
+        publicData,
+    };
+};
+
 /**
  * Store website passwords
  * @param {Object} data
@@ -95,74 +153,14 @@ const storePassword = async (data, authToken) => {
     try {
         const { metadata, publicData } = await createMetadataAndPublicData("password", data, authToken);
 
-        const identifier = name ? `${authToken.address}_${name}` : `password_${website}_${Date.now()}`;
+        const identifier = name ? `${authToken.identifier}_${name}` : `${authToken.identifier}_${website}`;
 
-        const { zelfQR } = await ZelfProofModule.encryptQRCode({
-            publicData,
-            metadata,
-            faceBase64,
-            // password: masterPassword,
-            identifier,
-            requireLiveness: true,
-            tolerance: "REGULAR",
-            os: "DESKTOP",
-        });
+        const result = await _store(publicData, metadata, faceBase64, identifier, authToken);
 
-        const zelfKey = await ZelfProofModule.encrypt({
-            publicData,
-            metadata,
-            faceBase64,
-            // password: masterPassword,
-            identifier,
-            requireLiveness: true,
-            tolerance: "REGULAR",
-            os: "DESKTOP",
-        });
-
-        let qrCodeIPFS = null;
-
-        try {
-            qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
-                ...publicData,
-                zelfProof: zelfKey.zelfProof,
-            });
-        } catch (ipfsError) {
-            console.warn("⚠️ Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
-        }
-
-        const NFT = config.avalanche.createNFT
-            ? await createNFT(
-                  {
-                      zelfQR,
-                      url: qrCodeIPFS.url,
-                      name: identifier,
-                      publicData,
-                      zelfProof,
-                  },
-                  authToken
-              )
-            : null;
-
-        const result = {
-            success: true,
-            zelfProof: zelfKey.zelfProof,
-            zelfQR, // Encrypted string
-            NFT,
-            ipfs: qrCodeIPFS
-                ? {
-                      hash: qrCodeIPFS.IpfsHash,
-                      gatewayUrl: qrCodeIPFS.url,
-                      pinSize: qrCodeIPFS.PinSize,
-                      timestamp: `${new Date().toISOString()}`,
-                      name: qrCodeIPFS.name,
-                      metadata: qrCodeIPFS.metadata,
-                  }
-                : null,
-            publicData,
+        return {
+            ...result,
             message: "Website password stored successfully as QR code and zelfProof string",
         };
-
-        return result;
     } catch (error) {
         console.error({ error });
         throw new Error("Failed to store website password");
@@ -179,84 +177,47 @@ const storePassword = async (data, authToken) => {
  * @returns {Promise<Object>}
  */
 const storeNotes = async (data, authToken) => {
-    const { title, faceBase64, masterPassword, zelfProof } = data;
+    const { title, faceBase64 } = data;
 
     try {
         const identifier = `notes_${title}_${Date.now()}`;
 
         const { metadata, publicData } = await createMetadataAndPublicData("notes", data, authToken);
 
-        // Encrypt using ZelfProof module
-        const { zelfQR } = await ZelfProofModule.encryptQRCode({
-            publicData,
-            metadata,
-            faceBase64,
-            // password: masterPassword,
-            identifier,
-            requireLiveness: true,
-            tolerance: "REGULAR",
-            os: "DESKTOP",
-        });
-
-        const zelfKey = await ZelfProofModule.encrypt({
-            publicData,
-            metadata,
-            faceBase64,
-            // password: masterPassword,
-            identifier,
-            requireLiveness: true,
-            tolerance: "REGULAR",
-            os: "DESKTOP",
-        });
-
-        // Pin the QR code to IPFS if available
-        let qrCodeIPFS = null;
-
-        if (zelfQR) {
-            try {
-                qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
-                    ...publicData,
-                    zelfProof: zelfKey.zelfProof,
-                });
-            } catch (ipfsError) {
-                console.warn("Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
-            }
-        }
-
-        const NFT = config.avalanche.createNFT
-            ? await createNFT(
-                  {
-                      zelfQR,
-                      url: qrCodeIPFS.url,
-                      name: identifier,
-                      publicData,
-                      zelfProof,
-                  },
-                  authToken
-              )
-            : null;
+        const result = await _store(publicData, metadata, faceBase64, identifier, authToken);
 
         return {
-            success: true,
-            zelfProof: zelfKey.zelfProof,
-            zelfQR, // Encrypted string
-            NFT,
-            ipfs: qrCodeIPFS
-                ? {
-                      hash: qrCodeIPFS.IpfsHash,
-                      gatewayUrl: qrCodeIPFS.url,
-                      pinSize: qrCodeIPFS.PinSize,
-                      timestamp: `${new Date().toISOString()}`,
-                      name: qrCodeIPFS.name,
-                      metadata: qrCodeIPFS.metadata,
-                  }
-                : null,
-            publicData,
+            ...result,
             message: "Notes stored successfully",
         };
     } catch (error) {
         console.error("Error storing notes:", { error });
         throw new Error("Failed to store notes");
+    }
+};
+
+/**
+ * Validate credit card data
+ * @param {Object} data
+ * @param {string} data.cardNumber - Credit card number
+ * @param {string} data.expiryMonth - Expiry month (MM)
+ * @param {string} data.expiryYear - Expiry year (YYYY)
+ */
+const _validateCreditCardData = (cardNumber, expiryMonth, expiryYear) => {
+    if (!cardNumber || cardNumber.length < 13 || cardNumber.length > 19) {
+        throw new Error("Invalid credit card number");
+    }
+
+    const currentYear = new Date().getFullYear();
+
+    const currentMonth = new Date().getMonth() + 1;
+
+    if (parseInt(expiryYear) < currentYear || (parseInt(expiryYear) === currentYear && parseInt(expiryMonth) < currentMonth)) {
+        throw new Error("Credit card has expired");
+    }
+
+    if (parseInt(expiryMonth) < 1 || parseInt(expiryMonth) > 12) {
+        throw new Error("Invalid expiry month");
     }
 };
 
@@ -274,97 +235,21 @@ const storeNotes = async (data, authToken) => {
  * @returns {Promise<Object>}
  */
 const storeCreditCard = async (data, authToken) => {
-    const { cardName, cardNumber, expiryMonth, expiryYear, cvv, bankName, faceBase64, masterPassword, zelfProof } = data;
+    const { cardNumber, expiryMonth, expiryYear, bankName, faceBase64 } = data;
 
     try {
-        // Validate credit card data
-        if (!cardNumber || cardNumber.length < 13 || cardNumber.length > 19) {
-            throw new Error("Invalid credit card number");
-        }
+        _validateCreditCardData(cardNumber, expiryMonth, expiryYear);
 
-        const currentYear = new Date().getFullYear();
-        const currentMonth = new Date().getMonth() + 1;
-
-        if (parseInt(expiryYear) < currentYear || (parseInt(expiryYear) === currentYear && parseInt(expiryMonth) < currentMonth)) {
-            throw new Error("Credit card has expired");
-        }
-
-        if (parseInt(expiryMonth) < 1 || parseInt(expiryMonth) > 12) {
-            throw new Error("Invalid expiry month");
-        }
-
-        const identifier = `creditcard_${bankName}_${Date.now()}`;
+        const identifier = `${authToken.identifier}_${bankName}`;
 
         const { metadata, publicData } = await createMetadataAndPublicData("credit_card", data, authToken);
 
-        // Encrypt using ZelfProof module
-        const { zelfQR } = await ZelfProofModule.encryptQRCode({
-            publicData,
-            metadata,
-            faceBase64,
-            // password: masterPassword,
-            identifier,
-            requireLiveness: true,
-            tolerance: "REGULAR",
-            os: "DESKTOP",
-        });
+        const result = await _store(publicData, metadata, faceBase64, identifier, authToken);
 
-        const zelfKey = await ZelfProofModule.encrypt({
-            publicData,
-            metadata,
-            faceBase64,
-            // password: masterPassword,
-            identifier,
-        });
-
-        // store in ipfs
-        let qrCodeIPFS = null;
-
-        if (zelfQR) {
-            try {
-                qrCodeIPFS = await pinata.pinFile(zelfQR, `${authToken.address}_${identifier}.png`, "image/png", {
-                    ...publicData,
-                    zelfProof: zelfKey.zelfProof,
-                });
-            } catch (error) {
-                console.error("Error storing credit card:", error);
-                throw new Error("Failed to store credit card");
-            }
-        }
-
-        const NFT = config.avalanche.createNFT
-            ? await createNFT(
-                  {
-                      zelfQR,
-                      url: qrCodeIPFS.url,
-                      name: identifier,
-                      publicData,
-                      zelfProof,
-                  },
-                  authToken
-              )
-            : null;
-
-        const result = {
-            success: true,
-            zelfProof: zelfKey.zelfProof,
-            zelfQR, // Encrypted string
-            NFT,
-            ipfs: qrCodeIPFS
-                ? {
-                      hash: qrCodeIPFS.IpfsHash,
-                      gatewayUrl: qrCodeIPFS.url,
-                      pinSize: qrCodeIPFS.PinSize,
-                      timestamp: `${new Date().toISOString()}`,
-                      name: qrCodeIPFS.name,
-                      metadata: qrCodeIPFS.metadata,
-                  }
-                : null,
-            publicData,
+        return {
+            ...result,
             message: "Credit card stored successfully",
         };
-
-        return result;
     } catch (error) {
         console.error("Error storing credit card:", error);
         throw new Error("Failed to store credit card");
