@@ -47,6 +47,20 @@
                             addressRow;
                             context: {
                                 $implicit: {
+                                    address: zelfNameObject?.publicData?.ethAddress,
+                                    label: t('common.avax_address'),
+                                    logo: 'assets/networks/avax.png',
+                                    value: zelfNameObject?.displayEthAddress,
+                                },
+                            }
+                        "
+                    ></ng-container>
+
+                    <ng-container
+                        *ngTemplateOutlet="
+                            addressRow;
+                            context: {
+                                $implicit: {
                                     address: zelfNameObject?.publicData?.btcAddress,
                                     label: t('common.btc_address'),
                                     logo: 'assets/networks/btc.png',

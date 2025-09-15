@@ -1,14 +1,15 @@
 import { CommonModule } from "@angular/common";
 import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { MatButtonModule } from "@angular/material/button";
+import { MatSnackBar } from "@angular/material/snack-bar";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { TranslocoModule, TranslocoService } from "@jsverse/transloco";
+
+import { CopyToClipboardBase } from "app/base/copy-to-clipboard/copy-to-clipboard.base";
+import { ChromeService } from "app/chrome.service";
 import { ZelfNamePipe } from "app/pipes/zelf-name.pipe";
 import { WalletModel } from "app/wallet";
 import { ZelfNameService } from "app/zelf-name-service.service";
-import { CopyToClipboardBase } from "app/base/copy-to-clipboard/copy-to-clipboard.base";
-import { ChromeService } from "app/chrome.service";
-import { MatSnackBar } from "@angular/material/snack-bar";
 
 @Component({
     imports: [CommonModule, RouterModule, TranslocoModule, MatButtonModule, ZelfNamePipe],
