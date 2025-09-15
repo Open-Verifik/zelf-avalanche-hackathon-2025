@@ -50,7 +50,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     }
 
     get zelfName(): string {
-        return this.wallet?.name ? this.wallet.name.toUpperCase() : "USER.ZELF";
+        return this.wallet?.publicData?.zelfName ? this.wallet.publicData.zelfName.toUpperCase() : "USER.ZELF";
     }
 
     private _initSubscriptions(): void {

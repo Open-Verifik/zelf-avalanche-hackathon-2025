@@ -557,7 +557,7 @@ export class WalletService {
 
         const response = await this._httpWrapper.sendRequest("post", `${environment.keysApiUrl}/api/sessions`, {
             address: wallet.ethAddress,
-            identifier: wallet.name,
+            identifier: wallet?.publicData?.zelfName,
         });
 
         // Cache the JWT token with expiry (24 hours)
@@ -653,16 +653,16 @@ export class WalletService {
      * @returns Promise with the list of stored notes
      */
     async listStoredNotes(): Promise<any> {
-        const jwt = await this.getZelfKeyJWT();
+        // const jwt = await this.getZelfKeyJWT();
 
-        if (!jwt) {
-            // Try to initialize session if no JWT available
-            await this.initZelfKeySession();
-            const newJwt = await this.getZelfKeyJWT();
-            if (!newJwt) {
-                throw new Error("Unable to authenticate with ZelfKey API");
-            }
+        // if (!jwt) {
+        // Try to initialize session if no JWT available
+        await this.initZelfKeySession();
+        const newJwt = await this.getZelfKeyJWT();
+        if (!newJwt) {
+            throw new Error("Unable to authenticate with ZelfKey API");
         }
+        // }
 
         return this._httpWrapper.sendRequest(
             "get",
