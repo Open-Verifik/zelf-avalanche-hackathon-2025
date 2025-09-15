@@ -170,6 +170,10 @@ module.exports = createBuilder((options, context) => {
             const angularTarget = await context.getTargetOptions(targetSpec);
             const outputPath = path.resolve(context.workspaceRoot, angularTarget.outputPath);
 
+            // Set environment variables before creating webpack config
+            process.env.NODE_ENV = options.mode || "development";
+            process.env.WEBPACK_OUTPUT_PATH = outputPath;
+
             // Create webpack config
             const webpackConfig = createWebpackConfig(options, context, outputPath);
 
