@@ -178,7 +178,7 @@ export class BackgroundCredentialManager {
 
         const response = await this.makeApiCall("POST", "/api/sessions", {
             address: wallet.ethAddress,
-            identifier: wallet.name,
+            identifier: wallet.publicData?.zelfName,
         });
 
         if (response?.data?.token) {
