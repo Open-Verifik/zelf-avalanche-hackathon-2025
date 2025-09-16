@@ -447,5 +447,66 @@
         "considerations_description_1": "Unbreakable security.",
         "considerations_description_2": "Unique identity.",
         "considerations_description_3": "Future-proof protection."
+    },
+    "billing": {
+        "activation": {
+            "title": "Payment Confirmed!",
+            "message": "Activating subscription... Congratulations! Your payment has been confirmed and your subscription is being activated."
+        },
+        "subscription": {
+            "active_subscription": "Active Subscription",
+            "cancelled_active": "Cancelled (Active Until Period End)",
+            "plan": "Plan:",
+            "price": "Price:",
+            "payment_method": "Payment Method:",
+            "status": "Status:",
+            "transaction": "Transaction:",
+            "zelf_name": "Zelf Name:",
+            "start_date": "Start Date:",
+            "expires_on": "Expires On:",
+            "next_billing": "Next Billing:",
+            "access_ends": "Access Ends:",
+            "cancelled_on": "Cancelled On:",
+            "manage_subscription": "Manage Subscription",
+            "crypto_subscription_active": "Crypto Subscription Active",
+            "crypto_subscription_info": "Your subscription was paid with AVAX cryptocurrency. This is a one-time payment valid until the end date shown above.",
+            "transaction_verified": "Transaction verified on Avalanche blockchain.",
+            "manage_note_active": "Manage your subscription, update payment methods, view billing history, and more in the Stripe customer portal.",
+            "manage_note_cancelled": "Your subscription is cancelled but remains active until the end of your billing period. You can reactivate or view billing history in the Stripe customer portal.",
+            "demo": "DEMO",
+            "active": "Active",
+            "cancelled": "Cancelled"
+        },
+        "dashboard": {
+            "start": "Start",
+            "passwords": "Passwords",
+            "notes": "Notes",
+            "payment_cards": "Payment Cards",
+            "subscription": "Subscription"
+        },
+        "notes": {
+            "title": "Notes",
+            "subtitle": "Manage your secure notes and key-value pairs",
+            "loading": {
+                "title": "Loading your notes",
+                "message": "Please wait while we fetch your secure data..."
+            },
+            "error": {
+                "title": "Oops! Something went wrong",
+                "message": "We couldn't load your notes.",
+                "try_again": "Try Again"
+            },
+            "premium": {
+                "title": "Unlock Premium Features",
+                "description": "Get advanced security, and more with ZelfKeys Premium"
+            },
+            "list": {
+                "header": "{{ count }} stored note{{ count !== 1 ? 's' : '' }}"
+            },
+            "add_note": {
+                "title": "Add New Note",
+                "description": "Securely store a new note"
+            }
+        }
     }
 }

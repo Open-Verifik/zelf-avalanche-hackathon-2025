@@ -39,23 +39,23 @@
 
     <nav class="dashboard__nav">
         <div class="dashboard__nav-item" [class.dashboard__nav-item--active]="activeTab === 'start'" (click)="navigateToTab('start')">
-            <div class="dashboard__nav-text">Start</div>
+            <div class="dashboard__nav-text">{{ "billing.dashboard.start" | transloco }}</div>
         </div>
 
         <div class="dashboard__nav-item" [class.dashboard__nav-item--active]="activeTab === 'passwords'" (click)="navigateToTab('passwords')">
-            <div class="dashboard__nav-text">Passwords</div>
+            <div class="dashboard__nav-text">{{ "billing.dashboard.passwords" | transloco }}</div>
         </div>
 
         <div class="dashboard__nav-item" [class.dashboard__nav-item--active]="activeTab === 'notes'" (click)="navigateToTab('notes')">
-            <div class="dashboard__nav-text">Notes</div>
+            <div class="dashboard__nav-text">{{ "billing.dashboard.notes" | transloco }}</div>
         </div>
 
         <div class="dashboard__nav-item" [class.dashboard__nav-item--active]="activeTab === 'payment-cards'" (click)="navigateToTab('payment-cards')">
-            <div class="dashboard__nav-text">Payment Cards</div>
+            <div class="dashboard__nav-text">{{ "billing.dashboard.payment_cards" | transloco }}</div>
         </div>
 
         <div class="dashboard__nav-item" [class.dashboard__nav-item--active]="activeTab === 'billing'" (click)="navigateToTab('billing')">
-            <div class="dashboard__nav-text">Subscription</div>
+            <div class="dashboard__nav-text">{{ "billing.dashboard.subscription" | transloco }}</div>
         </div>
     </nav>
 

@@ -1,7 +1,7 @@
 import { CommonModule } from "@angular/common";
 import { ChangeDetectorRef, Component, OnInit } from "@angular/core";
 import { Router } from "@angular/router";
-import { TranslocoModule } from "@jsverse/transloco";
+import { TranslocoModule, TranslocoService } from "@jsverse/transloco";
 import { BillingService, PricingPlan } from "../../services/billing.service";
 import { WalletService } from "../../wallet.service";
 
@@ -32,6 +32,7 @@ interface CryptoPaymentDisplayData {
 })
 export class ZelfKeysBillingComponent implements OnInit {
     activeSubscription: any = null;
+    activationMessage: string = "";
     cryptoPaymentData: CryptoPaymentDisplayData | null = null;
     currentPlan: string = "free";
     error: string | null = null;
@@ -42,13 +43,15 @@ export class ZelfKeysBillingComponent implements OnInit {
     paymentPollingInterval: any = null;
     plans: PricingPlan[] = [];
     shareables: any = null;
+    showActivationMessage: boolean = false;
     showCryptoPayment: boolean = false;
 
     constructor(
         private billingService: BillingService,
         private _walletService: WalletService,
         private _router: Router,
-        private _changeDetectorRef: ChangeDetectorRef
+        private _changeDetectorRef: ChangeDetectorRef,
+        private _translocoService: TranslocoService
     ) {
         this.shareables = {
             wallet: {},
@@ -86,9 +89,11 @@ export class ZelfKeysBillingComponent implements OnInit {
             .getAvailablePlans()
             .then((response) => {
                 this.loadingPlans = false;
+                this.updateLoadingState();
 
                 if (response.success && response.plans) {
                     this.plans = this.billingService.transformApiPlansToPricingPlans(response.plans);
+                    console.log("✅ Plans loaded successfully:", this.plans);
                     return;
                 }
 
@@ -99,6 +104,7 @@ export class ZelfKeysBillingComponent implements OnInit {
 
                 this.error = "Failed to load subscription plans";
                 this.loadingPlans = false;
+                this.updateLoadingState();
             });
     }
 
@@ -107,9 +113,11 @@ export class ZelfKeysBillingComponent implements OnInit {
             .getActiveSubscription()
             .then((response) => {
                 this.loadingCurrentPlan = false;
+                this.updateLoadingState();
 
                 if (!response.success || !response.data) {
                     this.currentPlan = "free";
+                    this.billingService.currentPlan = "free"; // Update billing service
                     this.hasActiveSubscription = false;
                     this.activeSubscription = null;
 
@@ -120,22 +128,30 @@ export class ZelfKeysBillingComponent implements OnInit {
                 this.hasActiveSubscription = true;
                 this.activeSubscription = response.data;
 
-                console.log("🔍 Active subscription loaded:", {
-                    stripeDataStatus: response.data.stripeData?.status,
-                    cancelAtPeriodEnd: response.data.stripeData?.cancelAtPeriodEnd,
-                    cancelledAt: response.data.stripeData?.cancelledAt,
-                });
+                // Extract plan from subscription data
+                const subscription = response.data;
+                let planId: string | null = null;
 
-                // Extract plan from stripeData
-                const stripeData = response.data.stripeData;
-                if (stripeData && stripeData.plan) {
-                    // Find the plan that matches the Stripe price ID
-                    const currentPlan = this.plans.find((plan) => {
-                        // Check if the plan has a priceId that matches the Stripe plan
-                        return plan.priceId === stripeData.plan;
-                    });
+                // Check for crypto payment first
+                if (subscription.paymentMethod === "crypto" && subscription.cryptoData) {
+                    planId = subscription.cryptoData.plan || "basic";
+                }
+                // Check for Stripe payment
+                else if (subscription.paymentMethod === "stripe" && subscription.stripeData) {
+                    const stripeData = subscription.stripeData;
+                    if (stripeData.plan) {
+                        // Find the plan that matches the Stripe price ID
+                        const currentPlan = this.plans.find((plan) => {
+                            // Check if the plan has a priceId that matches the Stripe plan
+                            return plan.priceId === stripeData.plan;
+                        });
+                        planId = currentPlan?.id || "basic";
+                    }
+                }
 
-                    this.currentPlan = currentPlan?.id || "basic";
+                if (planId) {
+                    this.currentPlan = planId;
+                    this.billingService.currentPlan = this.currentPlan; // Update billing service
 
                     // Update the plans array to mark current plan
                     this.plans = this.plans.map((plan) => ({
@@ -144,20 +160,38 @@ export class ZelfKeysBillingComponent implements OnInit {
                     }));
                 } else {
                     this.currentPlan = "free";
+                    this.billingService.currentPlan = "free"; // Update billing service
                 }
             })
             .catch((error) => {
-                console.error("Error loading current plan:", error);
                 this.currentPlan = "free";
+                this.billingService.currentPlan = "free"; // Update billing service
                 this.hasActiveSubscription = false;
                 this.activeSubscription = null;
                 this.loadingCurrentPlan = false;
+                this.updateLoadingState();
             });
+    }
+
+    /**
+     * Update the main loading state based on individual loading states
+     */
+    private updateLoadingState(): void {
+        const wasLoading = this.loading;
+        this.loading = this.loadingPlans || this.loadingCurrentPlan;
+
+        if (wasLoading && !this.loading) {
+        }
     }
 
     // Public method for retry button
     public retryLoadPlans(): void {
+        this.loadingPlans = true;
+        this.loadingCurrentPlan = true;
+        this.loading = true;
+        this.error = null;
         this.loadPlans();
+        this.loadCurrentPlan();
     }
 
     selectPlan(planId: string, paymentMethod: "stripe" | "crypto"): void {
@@ -179,14 +213,10 @@ export class ZelfKeysBillingComponent implements OnInit {
      * @param planId - The ID of the plan to subscribe to
      */
     private createCryptoPayment(planId: string): void {
-        console.log(`Creating crypto payment for ${planId} plan`);
-
         this.billingService
             .createCryptoPayment(planId)
             .then((response) => {
                 if (response.data && response.data.success && response.data.paymentAddress) {
-                    console.log("✅ Crypto payment created:", response);
-
                     // Store payment data and show crypto payment interface
                     this.cryptoPaymentData = {
                         planId,
@@ -238,28 +268,30 @@ export class ZelfKeysBillingComponent implements OnInit {
     private checkPaymentStatus(): void {
         if (!this.cryptoPaymentData?.lockedPriceToken) return;
 
-        console.log("🔍 Checking payment status...");
-
         this.billingService
             .confirmCryptoPayment(this.cryptoPaymentData.lockedPriceToken)
             .then((response) => {
-                console.log("📡 Payment check response:", response);
-
                 if (response.success && response.paymentConfirmed) {
-                    console.log("✅ Payment confirmed!", response);
                     this.stopPaymentMonitoring();
 
                     // Show success message
                     if (response.subscriptionCreated) {
                         console.log("🎉 Subscription activated!");
+
+                        // Show activation message and loading
+                        this.showActivationMessage = true;
+                        this.activationMessage = this._translocoService.translate("billing.activation.message");
+
+                        setTimeout(() => {
+                            // Hide crypto payment interface
+                            this.showCryptoPayment = false;
+                            this.cryptoPaymentData = null;
+                            this.showActivationMessage = false;
+
+                            // Reload the whole component
+                            this.ngOnInit();
+                        }, 5000);
                     }
-
-                    // Hide crypto payment interface
-                    this.showCryptoPayment = false;
-                    this.cryptoPaymentData = null;
-
-                    // Refresh subscription data
-                    this.loadCurrentPlan();
                 } else {
                     console.log("⏳ Payment not confirmed yet:", response.message);
                 }
@@ -360,10 +392,12 @@ export class ZelfKeysBillingComponent implements OnInit {
     getSubscriptionStatus(): string {
         if (this.activeSubscription?.paymentMethod === "crypto") {
             const cryptoData = this.getCryptoData();
-            return cryptoData?.status || "Active";
+            return cryptoData?.status || this._translocoService.translate("billing.subscription.active");
         } else {
             // Stripe subscription status
-            return this.isCancelledActive() ? "Cancelled (Active Until Period End)" : this.activeSubscription?.stripeData?.status || "Active";
+            return this.isCancelledActive()
+                ? this._translocoService.translate("billing.subscription.cancelled_active")
+                : this.activeSubscription?.stripeData?.status || this._translocoService.translate("billing.subscription.active");
         }
     }
 
@@ -385,10 +419,46 @@ export class ZelfKeysBillingComponent implements OnInit {
      */
     getEndDateLabel(): string {
         if (this.activeSubscription?.paymentMethod === "crypto") {
-            return "Expires On:";
+            return this._translocoService.translate("billing.subscription.expires_on");
         } else {
-            return this.isCancelledActive() ? "Access Ends:" : "Next Billing:";
+            return this.isCancelledActive()
+                ? this._translocoService.translate("billing.subscription.access_ends")
+                : this._translocoService.translate("billing.subscription.next_billing");
         }
+    }
+
+    /**
+     * Get management note text based on subscription status
+     * @returns Management note string
+     */
+    getManagementNote(): string {
+        return this.isCancelledActive()
+            ? this._translocoService.translate("billing.subscription.manage_note_cancelled")
+            : this._translocoService.translate("billing.subscription.manage_note_active");
+    }
+
+    /**
+     * Get crypto subscription info text
+     * @returns Crypto info string
+     */
+    getCryptoSubscriptionInfo(): string {
+        return this._translocoService.translate("billing.subscription.crypto_subscription_info");
+    }
+
+    /**
+     * Get transaction verified text
+     * @returns Transaction verified string
+     */
+    getTransactionVerifiedText(): string {
+        return this._translocoService.translate("billing.subscription.transaction_verified");
+    }
+
+    /**
+     * Get crypto subscription active title
+     * @returns Crypto subscription title
+     */
+    getCryptoSubscriptionTitle(): string {
+        return this._translocoService.translate("billing.subscription.crypto_subscription_active");
     }
 
     private createCheckoutSession(planId: string): void {

@@ -63,9 +63,11 @@ export class ZelfKeysPasswordsComponent implements OnInit, OnDestroy {
 
     private _subscribeToBillingService(): void {
         this.currentPlan = this._billingService.currentPlan;
+        console.log("🔑 Passwords component - Initial currentPlan:", this.currentPlan);
 
         this._billingService.currentPlan$.pipe(takeUntil(this.destroy$)).subscribe((plan) => {
             this.currentPlan = plan;
+            console.log("🔑 Passwords component - Updated currentPlan:", this.currentPlan);
         });
     }
 

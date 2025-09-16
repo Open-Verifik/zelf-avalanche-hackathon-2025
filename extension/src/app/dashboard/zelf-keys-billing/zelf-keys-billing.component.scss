@@ -1,1113 +1,1181 @@
 .billing-container {
-	max-width: 1000px;
-	margin: 0 auto;
-	padding: 0;
-
-	.billing-header {
-		text-align: center;
-		margin-bottom: 48px;
-
-		.billing-title {
-			font-size: 32px;
-			font-weight: 700;
-			color: #1a1a1a;
-			margin: 0 0 12px 0;
-			letter-spacing: -0.5px;
-		}
-
-		.billing-subtitle {
-			font-size: 18px;
-			color: #666;
-			margin: 0;
-			font-weight: 400;
-		}
-	}
-
-	.loading-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-		padding: 60px 20px;
-		text-align: center;
-
-		.loading-spinner {
-			width: 40px;
-			height: 40px;
-			border: 4px solid #f3f3f3;
-			border-top: 4px solid #667eea;
-			border-radius: 50%;
-			animation: spin 1s linear infinite;
-			margin-bottom: 16px;
-		}
-
-		p {
-			font-size: 16px;
-			color: #666;
-			margin: 0;
-		}
-	}
-
-	.error-container {
-		display: flex;
-		justify-content: center;
-		padding: 60px 20px;
-
-		.error-message {
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			text-align: center;
-			max-width: 400px;
-
-			.error-icon {
-				color: #dc3545;
-				margin-bottom: 16px;
-			}
-
-			p {
-				font-size: 16px;
-				color: #dc3545;
-				margin: 0 0 20px 0;
-			}
-
-			.retry-button {
-				background: #667eea;
-				color: white;
-				border: none;
-				padding: 12px 24px;
-				border-radius: 8px;
-				font-size: 14px;
-				font-weight: 600;
-				cursor: pointer;
-				transition: background-color 0.2s ease;
-
-				&:hover {
-					background: #5a67d8;
-				}
-			}
-		}
-	}
-
-	.subscription-management {
-		display: flex;
-		justify-content: center;
-		margin-bottom: 48px;
-
-		.subscription-card {
-			background: white;
-			border: 2px solid #28a745;
-			border-radius: 20px;
-			padding: 40px;
-			max-width: 600px;
-			width: 100%;
-			box-shadow: 0 8px 32px rgba(40, 167, 69, 0.15);
-			position: relative;
-			overflow: hidden;
-
-			&::before {
-				content: "";
-				position: absolute;
-				top: 0;
-				left: 0;
-				right: 0;
-				height: 4px;
-				background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
-			}
-
-			.subscription-header {
-				display: flex;
-				justify-content: space-between;
-				align-items: center;
-				margin-bottom: 32px;
-				padding-bottom: 24px;
-				border-bottom: 1px solid #e9ecef;
-
-				.subscription-status {
-					display: flex;
-					align-items: center;
-					gap: 12px;
-
-					.status-icon {
-						color: #28a745;
-						width: 24px;
-						height: 24px;
-
-						&.cancelled {
-							color: #fd7e14;
-						}
-					}
-
-					.status-text {
-						font-size: 18px;
-						font-weight: 600;
-						color: #28a745;
-					}
-
-					&.cancelled {
-						.status-text {
-							color: #fd7e14;
-						}
-					}
-				}
-
-				.subscription-plan {
-					font-size: 24px;
-					font-weight: 700;
-					color: #1a1a1a;
-					letter-spacing: -0.5px;
-				}
-			}
-
-			.subscription-details {
-				margin-bottom: 32px;
-
-				.detail-row {
-					display: flex;
-					justify-content: space-between;
-					align-items: center;
-					padding: 12px 0;
-					border-bottom: 1px solid #f8f9fa;
-
-					&:last-child {
-						border-bottom: none;
-					}
-
-					.detail-label {
-						font-size: 14px;
-						font-weight: 600;
-						color: #666;
-						text-transform: uppercase;
-						letter-spacing: 0.5px;
-					}
-
-					.detail-value {
-						font-size: 16px;
-						font-weight: 500;
-						color: #1a1a1a;
-
-						&.status-active {
-							color: #28a745;
-							font-weight: 600;
-						}
-
-						&.status-cancelled {
-							color: #fd7e14;
-							font-weight: 600;
-						}
-					}
-				}
-			}
-
-			.subscription-actions {
-				text-align: center;
-
-				.manage-button {
-					background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-					color: white;
-					border: none;
-					padding: 16px 32px;
-					border-radius: 12px;
-					font-size: 16px;
-					font-weight: 600;
-					cursor: pointer;
-					transition: all 0.3s ease;
-					display: inline-flex;
-					align-items: center;
-					gap: 12px;
-					box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
-					margin-bottom: 16px;
-
-					&:hover {
-						transform: translateY(-2px);
-						box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-					}
-
-					&:active {
-						transform: translateY(0);
-					}
-
-					.button-icon {
-						width: 20px;
-						height: 20px;
-					}
-				}
-
-				.management-note {
-					font-size: 14px;
-					color: #666;
-					line-height: 1.5;
-					margin: 0;
-					max-width: 400px;
-					margin: 0 auto;
-				}
-
-				.crypto-subscription-info {
-					.crypto-info-card {
-						display: flex;
-						gap: 16px;
-						background: #f8f9ff;
-						border: 1px solid #e0e4ff;
-						border-radius: 12px;
-						padding: 20px;
-						text-align: left;
-
-						.info-icon {
-							color: #667eea;
-							flex-shrink: 0;
-							margin-top: 2px;
-						}
-
-						.crypto-info-content {
-							flex: 1;
-
-							h4 {
-								margin: 0 0 8px 0;
-								font-size: 16px;
-								font-weight: 600;
-								color: #1a1a1a;
-							}
-
-							p {
-								margin: 0 0 8px 0;
-								font-size: 14px;
-								color: #666;
-								line-height: 1.5;
-
-								&:last-child {
-									margin-bottom: 0;
-								}
-
-								&.transaction-note {
-									color: #667eea;
-									font-weight: 500;
-								}
-							}
-						}
-					}
-				}
-			}
-
-			.payment-method {
-				display: inline-flex;
-				align-items: center;
-				gap: 6px;
-				font-weight: 500;
-
-				&.crypto {
-					color: #f7931e;
-
-					.demo-badge {
-						background: #667eea;
-						color: white;
-						font-size: 10px;
-						font-weight: 600;
-						padding: 2px 6px;
-						border-radius: 4px;
-						margin-left: 4px;
-						text-transform: uppercase;
-						letter-spacing: 0.5px;
-					}
-				}
-
-				&.stripe {
-					color: #635bff;
-				}
-
-				svg {
-					width: 16px;
-					height: 16px;
-				}
-			}
-
-			.transaction-hash {
-				a {
-					color: #f7931e;
-					text-decoration: none;
-					font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
-					font-size: 13px;
-					display: inline-flex;
-					align-items: center;
-					gap: 4px;
-
-					&:hover {
-						text-decoration: underline;
-					}
-
-					svg {
-						opacity: 0.7;
-					}
-				}
-			}
-		}
-	}
-
-	.crypto-payment-container {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		margin-bottom: 48px;
-
-		.crypto-payment-header {
-			width: 100%;
-			max-width: 600px;
-			margin-bottom: 20px;
-			display: flex;
-			justify-content: flex-start;
-
-			.back-button {
-				display: flex;
-				align-items: center;
-				gap: 8px;
-				background: #f8f9fa;
-				border: 1px solid #e9ecef;
-				border-radius: 8px;
-				padding: 10px 16px;
-				font-size: 14px;
-				font-weight: 500;
-				color: #666;
-				cursor: pointer;
-				transition: all 0.2s ease;
-
-				&:hover {
-					background: #e9ecef;
-					color: #333;
-					transform: translateX(-2px);
-				}
-
-				.back-icon {
-					transition: transform 0.2s ease;
-				}
-
-				&:hover .back-icon {
-					transform: translateX(-2px);
-				}
-			}
-		}
-
-		.crypto-payment-card {
-			background: white;
-			border: 2px solid #f7931e;
-			border-radius: 20px;
-			padding: 40px;
-			max-width: 600px;
-			width: 100%;
-			box-shadow: 0 8px 32px rgba(247, 147, 30, 0.15);
-			position: relative;
-			overflow: hidden;
-
-			&::before {
-				content: "";
-				position: absolute;
-				top: 0;
-				left: 0;
-				right: 0;
-				height: 4px;
-				background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
-			}
-
-			.payment-header {
-				text-align: center;
-				margin-bottom: 32px;
-
-				.payment-title {
-					font-size: 28px;
-					font-weight: 700;
-					color: #1a1a1a;
-					margin-bottom: 16px;
-				}
-
-				.demo-mode-banner {
-					display: flex;
-					align-items: center;
-					justify-content: center;
-					gap: 8px;
-					background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-					color: white;
-					padding: 12px 20px;
-					border-radius: 12px;
-					margin: 16px 0;
-					font-weight: 600;
-					font-size: 14px;
-					text-transform: uppercase;
-					letter-spacing: 0.5px;
-					box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-
-					.demo-icon {
-						animation: pulse 2s infinite;
-					}
-
-					@keyframes pulse {
-						0%,
-						100% {
-							opacity: 1;
-						}
-						50% {
-							opacity: 0.7;
-						}
-					}
-				}
-
-				.payment-subtitle {
-					font-size: 16px;
-					color: #666;
-					margin: 0 0 16px 0;
-				}
-
-				.price-lock-info {
-					display: flex;
-					justify-content: center;
-					gap: 16px;
-					font-size: 14px;
-
-					.lock-text {
-						color: #f7931e;
-						font-weight: 600;
-						padding: 4px 12px;
-						background: #fff5e6;
-						border-radius: 20px;
-						border: 1px solid #f7931e;
-					}
-
-					.rate-text {
-						color: #666;
-						font-weight: 500;
-						padding: 4px 12px;
-						background: #f8f9fa;
-						border-radius: 20px;
-						border: 1px solid #e9ecef;
-					}
-				}
-			}
-
-			.payment-details {
-				.plan-info {
-					text-align: center;
-					margin-bottom: 32px;
-					padding: 20px;
-					background: #fff5e6;
-					border-radius: 12px;
-
-					h3 {
-						font-size: 20px;
-						font-weight: 600;
-						color: #1a1a1a;
-						margin-bottom: 8px;
-					}
-
-					.plan-price {
-						font-size: 24px;
-						font-weight: 700;
-						color: #f7931e;
-						margin: 0;
-					}
-				}
-
-				.payment-address-section {
-					margin-bottom: 32px;
-
-					.address-label {
-						font-size: 14px;
-						font-weight: 600;
-						color: #666;
-						margin-bottom: 8px;
-						text-transform: uppercase;
-						letter-spacing: 0.5px;
-					}
-
-					.address-container {
-						display: flex;
-						gap: 12px;
-						align-items: center;
-						background: #f8f9fa;
-						padding: 16px;
-						border-radius: 12px;
-						border: 1px solid #e9ecef;
-
-						.address-text {
-							flex: 1;
-							font-family: "Courier New", monospace;
-							font-size: 14px;
-							color: #1a1a1a;
-							word-break: break-all;
-						}
-
-						.copy-button {
-							background: #f7931e;
-							color: white;
-							border: none;
-							padding: 8px 12px;
-							border-radius: 8px;
-							font-size: 12px;
-							font-weight: 600;
-							cursor: pointer;
-							display: flex;
-							align-items: center;
-							gap: 4px;
-							transition: background-color 0.2s ease;
-
-							&:hover {
-								background: #e8851c;
-							}
-						}
-					}
-				}
-
-				.qr-code-section {
-					text-align: center;
-					margin-bottom: 32px;
-
-					.qr-label {
-						font-size: 14px;
-						font-weight: 600;
-						color: #666;
-						margin-bottom: 16px;
-						text-transform: uppercase;
-						letter-spacing: 0.5px;
-					}
-
-					.qr-container {
-						display: inline-block;
-						padding: 16px;
-						background: white;
-						border: 2px solid #e9ecef;
-						border-radius: 12px;
-
-						.qr-code {
-							width: 200px;
-							height: 200px;
-							display: block;
-						}
-					}
-				}
-
-				.payment-amount {
-					text-align: center;
-					background: #fff5e6;
-					padding: 20px;
-					border-radius: 12px;
-					border: 2px solid #f7931e;
-
-					.amount-label {
-						font-size: 14px;
-						font-weight: 600;
-						color: #666;
-						margin-bottom: 8px;
-						text-transform: uppercase;
-						letter-spacing: 0.5px;
-					}
-
-					.amount-value {
-						font-size: 32px;
-						font-weight: 700;
-						color: #f7931e;
-						margin: 0 0 8px 0;
-					}
-
-					.usd-equivalent {
-						font-size: 16px;
-						color: #666;
-						font-weight: 500;
-						margin: 0;
-					}
-
-					.original-amount-info {
-						margin-top: 16px;
-						padding-top: 16px;
-						border-top: 1px solid #f7931e;
-
-						.original-label {
-							font-size: 12px;
-							font-weight: 600;
-							color: #666;
-							text-transform: uppercase;
-							letter-spacing: 0.5px;
-							margin-bottom: 8px;
-						}
-
-						.original-values {
-							display: flex;
-							justify-content: center;
-							gap: 16px;
-							margin-bottom: 8px;
-
-							.original-avax,
-							.original-usd {
-								font-size: 14px;
-								color: #999;
-								text-decoration: line-through;
-							}
-						}
-
-						.demo-savings {
-							font-size: 14px;
-							color: #667eea;
-							font-weight: 600;
-							background: #f0f2ff;
-							padding: 4px 12px;
-							border-radius: 20px;
-							display: inline-block;
-							margin-top: 4px;
-						}
-					}
-				}
-			}
-
-			.payment-status {
-				text-align: center;
-				margin: 32px 0;
-				padding: 24px;
-				background: #f8f9fa;
-				border-radius: 12px;
-
-				.status-indicator {
-					display: flex;
-					align-items: center;
-					justify-content: center;
-					gap: 12px;
-					margin-bottom: 12px;
-
-					.loading-spinner {
-						width: 20px;
-						height: 20px;
-						border: 2px solid #f3f3f3;
-						border-top: 2px solid #f7931e;
-						border-radius: 50%;
-						animation: spin 1s linear infinite;
-					}
-
-					span {
-						font-size: 16px;
-						font-weight: 600;
-						color: #f7931e;
-					}
-				}
-
-				.status-note {
-					font-size: 14px;
-					color: #666;
-					margin: 0;
-				}
-			}
-
-			.payment-actions {
-				text-align: center;
-
-				.cancel-button {
-					background: #6c757d;
-					color: white;
-					border: none;
-					padding: 12px 24px;
-					border-radius: 8px;
-					font-size: 14px;
-					font-weight: 600;
-					cursor: pointer;
-					transition: background-color 0.2s ease;
-
-					&:hover {
-						background: #5a6268;
-					}
-				}
-			}
-		}
-	}
-
-	.pricing-grid {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-		gap: 24px;
-		margin-bottom: 48px;
-
-		.pricing-card {
-			background: white;
-			border: 2px solid #e0e0e0;
-			border-radius: 16px;
-			padding: 32px 24px;
-			position: relative;
-			transition: all 0.3s ease;
-			display: flex;
-			flex-direction: column;
-
-			&:hover {
-				transform: translateY(-4px);
-				box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
-				border-color: #667eea;
-			}
-
-			&.popular {
-				border-color: #667eea;
-				box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
-				transform: scale(1.02);
-
-				&:hover {
-					transform: scale(1.02) translateY(-4px);
-				}
-			}
-
-			&.current {
-				border-color: #28a745;
-				background: linear-gradient(135deg, #f8fff9 0%, #f0f8f0 100%);
-			}
-
-			.card-header {
-				display: flex;
-				justify-content: space-between;
-				align-items: flex-start;
-				margin-bottom: 16px;
-
-				.plan-name {
-					font-size: 24px;
-					font-weight: 700;
-					color: #1a1a1a;
-					letter-spacing: -0.5px;
-				}
-
-				.popular-badge {
-					background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-					color: white;
-					font-size: 12px;
-					font-weight: 600;
-					padding: 4px 12px;
-					border-radius: 12px;
-					text-transform: uppercase;
-					letter-spacing: 0.5px;
-				}
-			}
-
-			.plan-pricing {
-				margin-bottom: 16px;
-
-				.price {
-					display: flex;
-					align-items: baseline;
-					gap: 4px;
-
-					.currency {
-						font-size: 24px;
-						font-weight: 600;
-						color: #1a1a1a;
-					}
-
-					.amount {
-						font-size: 48px;
-						font-weight: 700;
-						color: #1a1a1a;
-						line-height: 1;
-					}
-
-					.period {
-						font-size: 18px;
-						color: #666;
-						font-weight: 500;
-					}
-				}
-			}
-
-			.plan-tagline {
-				font-size: 16px;
-				color: #666;
-				margin-bottom: 24px;
-				font-weight: 400;
-			}
-
-			.plan-features {
-				flex: 1;
-				margin-bottom: 32px;
-
-				.feature-item {
-					display: flex;
-					align-items: flex-start;
-					gap: 12px;
-					margin-bottom: 12px;
-
-					.feature-icon {
-						flex-shrink: 0;
-						margin-top: 2px;
-						color: #28a745;
-						width: 16px;
-						height: 16px;
-					}
-
-					.feature-text {
-						font-size: 14px;
-						color: #333;
-						line-height: 1.4;
-					}
-				}
-			}
-
-			.payment-options {
-				display: flex;
-				flex-direction: column;
-				gap: 12px;
-				margin-top: auto;
-
-				.payment-button {
-					width: 100%;
-					padding: 14px 24px;
-					border: none;
-					border-radius: 12px;
-					font-size: 16px;
-					font-weight: 600;
-					cursor: pointer;
-					transition: all 0.2s ease;
-					display: flex;
-					align-items: center;
-					justify-content: center;
-					gap: 8px;
-
-					.payment-icon {
-						width: 20px;
-						height: 20px;
-					}
-
-					&.stripe-button {
-						background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-						color: white;
-						box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
-
-						&:hover {
-							transform: translateY(-2px);
-							box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-						}
-					}
-
-					&.crypto-button {
-						background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
-						color: white;
-						box-shadow: 0 4px 16px rgba(247, 147, 30, 0.3);
-
-						&:hover {
-							transform: translateY(-2px);
-							box-shadow: 0 6px 20px rgba(247, 147, 30, 0.4);
-						}
-					}
-
-					&:active {
-						transform: translateY(0);
-					}
-				}
-			}
-
-			.plan-button {
-				width: 100%;
-				padding: 14px 24px;
-				border: none;
-				border-radius: 12px;
-				font-size: 16px;
-				font-weight: 600;
-				cursor: pointer;
-				transition: all 0.2s ease;
-				margin-top: auto;
-
-				&.upgrade-button {
-					background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-					color: white;
-					box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
-
-					&:hover {
-						transform: translateY(-2px);
-						box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-					}
-
-					&:active {
-						transform: translateY(0);
-					}
-
-					&.pro {
-						background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
-						box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
-
-						&:hover {
-							box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
-						}
-					}
-				}
-
-				&.current-plan {
-					background: #e8f5e8;
-					color: #28a745;
-					border: 2px solid #28a745;
-					cursor: default;
-
-					&:hover {
-						transform: none;
-						box-shadow: none;
-					}
-				}
-
-				&:disabled {
-					opacity: 0.6;
-					cursor: not-allowed;
-				}
-			}
-		}
-	}
-
-	.billing-footer {
-		text-align: center;
-		padding-top: 32px;
-		border-top: 1px solid #e0e0e0;
-
-		.footer-links {
-			margin-bottom: 12px;
-
-			.footer-link {
-				color: #667eea;
-				text-decoration: none;
-				font-size: 14px;
-				font-weight: 500;
-				transition: color 0.2s ease;
-
-				&:hover {
-					color: #5a67d8;
-					text-decoration: underline;
-				}
-			}
-		}
-	}
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 0;
+
+    .billing-header {
+        text-align: center;
+        margin-bottom: 48px;
+
+        .billing-title {
+            font-size: 32px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0 0 12px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .billing-subtitle {
+            font-size: 18px;
+            color: #666;
+            margin: 0;
+            font-weight: 400;
+        }
+    }
+
+    .loading-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 60px 20px;
+        text-align: center;
+
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        p {
+            font-size: 16px;
+            color: #666;
+            margin: 0;
+        }
+    }
+
+    .error-container {
+        display: flex;
+        justify-content: center;
+        padding: 60px 20px;
+
+        .error-message {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            text-align: center;
+            max-width: 400px;
+
+            .error-icon {
+                color: #dc3545;
+                margin-bottom: 16px;
+            }
+
+            p {
+                font-size: 16px;
+                color: #dc3545;
+                margin: 0 0 20px 0;
+            }
+
+            .retry-button {
+                background: #667eea;
+                color: white;
+                border: none;
+                padding: 12px 24px;
+                border-radius: 8px;
+                font-size: 14px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: background-color 0.2s ease;
+
+                &:hover {
+                    background: #5a67d8;
+                }
+            }
+        }
+    }
+
+    .subscription-management {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 48px;
+
+        .subscription-card {
+            background: white;
+            border: 2px solid #28a745;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(40, 167, 69, 0.15);
+            position: relative;
+            overflow: hidden;
+
+            &::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+            }
+
+            .subscription-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 32px;
+                padding-bottom: 24px;
+                border-bottom: 1px solid #e9ecef;
+
+                .subscription-status {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+
+                    .status-icon {
+                        color: #28a745;
+                        width: 24px;
+                        height: 24px;
+
+                        &.cancelled {
+                            color: #fd7e14;
+                        }
+                    }
+
+                    .status-text {
+                        font-size: 18px;
+                        font-weight: 600;
+                        color: #28a745;
+                    }
+
+                    &.cancelled {
+                        .status-text {
+                            color: #fd7e14;
+                        }
+                    }
+                }
+
+                .subscription-plan {
+                    font-size: 24px;
+                    font-weight: 700;
+                    color: #1a1a1a;
+                    letter-spacing: -0.5px;
+                }
+            }
+
+            .subscription-details {
+                margin-bottom: 32px;
+
+                .detail-row {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: 12px 0;
+                    border-bottom: 1px solid #f8f9fa;
+
+                    &:last-child {
+                        border-bottom: none;
+                    }
+
+                    .detail-label {
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: #666;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+
+                    .detail-value {
+                        font-size: 16px;
+                        font-weight: 500;
+                        color: #1a1a1a;
+
+                        &.status-active {
+                            color: #28a745;
+                            font-weight: 600;
+                        }
+
+                        &.status-cancelled {
+                            color: #fd7e14;
+                            font-weight: 600;
+                        }
+                    }
+                }
+            }
+
+            .subscription-actions {
+                text-align: center;
+
+                .manage-button {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    border: none;
+                    padding: 16px 32px;
+                    border-radius: 12px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.3s ease;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 12px;
+                    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+                    margin-bottom: 16px;
+
+                    &:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+                    }
+
+                    &:active {
+                        transform: translateY(0);
+                    }
+
+                    .button-icon {
+                        width: 20px;
+                        height: 20px;
+                    }
+                }
+
+                .management-note {
+                    font-size: 14px;
+                    color: #666;
+                    line-height: 1.5;
+                    margin: 0;
+                    max-width: 400px;
+                    margin: 0 auto;
+                }
+
+                .crypto-subscription-info {
+                    .crypto-info-card {
+                        display: flex;
+                        gap: 16px;
+                        background: #f8f9ff;
+                        border: 1px solid #e0e4ff;
+                        border-radius: 12px;
+                        padding: 20px;
+                        text-align: left;
+
+                        .info-icon {
+                            color: #667eea;
+                            flex-shrink: 0;
+                            margin-top: 2px;
+                        }
+
+                        .crypto-info-content {
+                            flex: 1;
+
+                            h4 {
+                                margin: 0 0 8px 0;
+                                font-size: 16px;
+                                font-weight: 600;
+                                color: #1a1a1a;
+                            }
+
+                            p {
+                                margin: 0 0 8px 0;
+                                font-size: 14px;
+                                color: #666;
+                                line-height: 1.5;
+
+                                &:last-child {
+                                    margin-bottom: 0;
+                                }
+
+                                &.transaction-note {
+                                    color: #667eea;
+                                    font-weight: 500;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            .payment-method {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                font-weight: 500;
+
+                &.crypto {
+                    color: #f7931e;
+
+                    .demo-badge {
+                        background: #667eea;
+                        color: white;
+                        font-size: 10px;
+                        font-weight: 600;
+                        padding: 2px 6px;
+                        border-radius: 4px;
+                        margin-left: 4px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+                }
+
+                &.stripe {
+                    color: #635bff;
+                }
+
+                svg {
+                    width: 16px;
+                    height: 16px;
+                }
+            }
+
+            .transaction-hash {
+                a {
+                    color: #f7931e;
+                    text-decoration: none;
+                    font-family: "Monaco", "Menlo", "Ubuntu Mono", monospace;
+                    font-size: 13px;
+                    display: inline-flex;
+                    align-items: center;
+                    gap: 4px;
+
+                    &:hover {
+                        text-decoration: underline;
+                    }
+
+                    svg {
+                        opacity: 0.7;
+                    }
+                }
+            }
+        }
+    }
+
+    .crypto-payment-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        margin-bottom: 48px;
+
+        .crypto-payment-header {
+            width: 100%;
+            max-width: 600px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: flex-start;
+
+            .back-button {
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                background: #f8f9fa;
+                border: 1px solid #e9ecef;
+                border-radius: 8px;
+                padding: 10px 16px;
+                font-size: 14px;
+                font-weight: 500;
+                color: #666;
+                cursor: pointer;
+                transition: all 0.2s ease;
+
+                &:hover {
+                    background: #e9ecef;
+                    color: #333;
+                    transform: translateX(-2px);
+                }
+
+                .back-icon {
+                    transition: transform 0.2s ease;
+                }
+
+                &:hover .back-icon {
+                    transform: translateX(-2px);
+                }
+            }
+        }
+
+        .crypto-payment-card {
+            background: white;
+            border: 2px solid #f7931e;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(247, 147, 30, 0.15);
+            position: relative;
+            overflow: hidden;
+
+            &::before {
+                content: "";
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                height: 4px;
+                background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+            }
+
+            .payment-header {
+                text-align: center;
+                margin-bottom: 32px;
+
+                .payment-title {
+                    font-size: 28px;
+                    font-weight: 700;
+                    color: #1a1a1a;
+                    margin-bottom: 16px;
+                }
+
+                .demo-mode-banner {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    padding: 12px 20px;
+                    border-radius: 12px;
+                    margin: 16px 0;
+                    font-weight: 600;
+                    font-size: 14px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+
+                    .demo-icon {
+                        animation: pulse 2s infinite;
+                    }
+
+                    @keyframes pulse {
+                        0%,
+                        100% {
+                            opacity: 1;
+                        }
+                        50% {
+                            opacity: 0.7;
+                        }
+                    }
+                }
+
+                .payment-subtitle {
+                    font-size: 16px;
+                    color: #666;
+                    margin: 0 0 16px 0;
+                }
+
+                .price-lock-info {
+                    display: flex;
+                    justify-content: center;
+                    gap: 16px;
+                    font-size: 14px;
+
+                    .lock-text {
+                        color: #f7931e;
+                        font-weight: 600;
+                        padding: 4px 12px;
+                        background: #fff5e6;
+                        border-radius: 20px;
+                        border: 1px solid #f7931e;
+                    }
+
+                    .rate-text {
+                        color: #666;
+                        font-weight: 500;
+                        padding: 4px 12px;
+                        background: #f8f9fa;
+                        border-radius: 20px;
+                        border: 1px solid #e9ecef;
+                    }
+                }
+            }
+
+            .payment-details {
+                .plan-info {
+                    text-align: center;
+                    margin-bottom: 32px;
+                    padding: 20px;
+                    background: #fff5e6;
+                    border-radius: 12px;
+
+                    h3 {
+                        font-size: 20px;
+                        font-weight: 600;
+                        color: #1a1a1a;
+                        margin-bottom: 8px;
+                    }
+
+                    .plan-price {
+                        font-size: 24px;
+                        font-weight: 700;
+                        color: #f7931e;
+                        margin: 0;
+                    }
+                }
+
+                .payment-address-section {
+                    margin-bottom: 32px;
+
+                    .address-label {
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: #666;
+                        margin-bottom: 8px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+
+                    .address-container {
+                        display: flex;
+                        gap: 12px;
+                        align-items: center;
+                        background: #f8f9fa;
+                        padding: 16px;
+                        border-radius: 12px;
+                        border: 1px solid #e9ecef;
+
+                        .address-text {
+                            flex: 1;
+                            font-family: "Courier New", monospace;
+                            font-size: 14px;
+                            color: #1a1a1a;
+                            word-break: break-all;
+                        }
+
+                        .copy-button {
+                            background: #f7931e;
+                            color: white;
+                            border: none;
+                            padding: 8px 12px;
+                            border-radius: 8px;
+                            font-size: 12px;
+                            font-weight: 600;
+                            cursor: pointer;
+                            display: flex;
+                            align-items: center;
+                            gap: 4px;
+                            transition: background-color 0.2s ease;
+
+                            &:hover {
+                                background: #e8851c;
+                            }
+                        }
+                    }
+                }
+
+                .qr-code-section {
+                    text-align: center;
+                    margin-bottom: 32px;
+
+                    .qr-label {
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: #666;
+                        margin-bottom: 16px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+
+                    .qr-container {
+                        display: inline-block;
+                        padding: 16px;
+                        background: white;
+                        border: 2px solid #e9ecef;
+                        border-radius: 12px;
+
+                        .qr-code {
+                            width: 200px;
+                            height: 200px;
+                            display: block;
+                        }
+                    }
+                }
+
+                .payment-amount {
+                    text-align: center;
+                    background: #fff5e6;
+                    padding: 20px;
+                    border-radius: 12px;
+                    border: 2px solid #f7931e;
+
+                    .amount-label {
+                        font-size: 14px;
+                        font-weight: 600;
+                        color: #666;
+                        margin-bottom: 8px;
+                        text-transform: uppercase;
+                        letter-spacing: 0.5px;
+                    }
+
+                    .amount-value {
+                        font-size: 32px;
+                        font-weight: 700;
+                        color: #f7931e;
+                        margin: 0 0 8px 0;
+                    }
+
+                    .usd-equivalent {
+                        font-size: 16px;
+                        color: #666;
+                        font-weight: 500;
+                        margin: 0;
+                    }
+
+                    .original-amount-info {
+                        margin-top: 16px;
+                        padding-top: 16px;
+                        border-top: 1px solid #f7931e;
+
+                        .original-label {
+                            font-size: 12px;
+                            font-weight: 600;
+                            color: #666;
+                            text-transform: uppercase;
+                            letter-spacing: 0.5px;
+                            margin-bottom: 8px;
+                        }
+
+                        .original-values {
+                            display: flex;
+                            justify-content: center;
+                            gap: 16px;
+                            margin-bottom: 8px;
+
+                            .original-avax,
+                            .original-usd {
+                                font-size: 14px;
+                                color: #999;
+                                text-decoration: line-through;
+                            }
+                        }
+
+                        .demo-savings {
+                            font-size: 14px;
+                            color: #667eea;
+                            font-weight: 600;
+                            background: #f0f2ff;
+                            padding: 4px 12px;
+                            border-radius: 20px;
+                            display: inline-block;
+                            margin-top: 4px;
+                        }
+                    }
+                }
+            }
+
+            .payment-status {
+                text-align: center;
+                margin: 32px 0;
+                padding: 24px;
+                background: #f8f9fa;
+                border-radius: 12px;
+
+                .status-indicator {
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 12px;
+                    margin-bottom: 12px;
+
+                    .loading-spinner {
+                        width: 20px;
+                        height: 20px;
+                        border: 2px solid #f3f3f3;
+                        border-top: 2px solid #f7931e;
+                        border-radius: 50%;
+                        animation: spin 1s linear infinite;
+                    }
+
+                    span {
+                        font-size: 16px;
+                        font-weight: 600;
+                        color: #f7931e;
+                    }
+                }
+
+                .status-note {
+                    font-size: 14px;
+                    color: #666;
+                    margin: 0;
+                }
+            }
+
+            .payment-actions {
+                text-align: center;
+
+                .cancel-button {
+                    background: #6c757d;
+                    color: white;
+                    border: none;
+                    padding: 12px 24px;
+                    border-radius: 8px;
+                    font-size: 14px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: background-color 0.2s ease;
+
+                    &:hover {
+                        background: #5a6268;
+                    }
+                }
+            }
+        }
+    }
+
+    .pricing-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 24px;
+        margin-bottom: 48px;
+
+        .pricing-card {
+            background: white;
+            border: 2px solid #e0e0e0;
+            border-radius: 16px;
+            padding: 32px 24px;
+            position: relative;
+            transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+
+            &:hover {
+                transform: translateY(-4px);
+                box-shadow: 0 12px 40px rgba(0, 0, 0, 0.1);
+                border-color: #667eea;
+            }
+
+            &.popular {
+                border-color: #667eea;
+                box-shadow: 0 8px 32px rgba(102, 126, 234, 0.15);
+                transform: scale(1.02);
+
+                &:hover {
+                    transform: scale(1.02) translateY(-4px);
+                }
+            }
+
+            &.current {
+                border-color: #28a745;
+                background: linear-gradient(135deg, #f8fff9 0%, #f0f8f0 100%);
+            }
+
+            .card-header {
+                display: flex;
+                justify-content: space-between;
+                align-items: flex-start;
+                margin-bottom: 16px;
+
+                .plan-name {
+                    font-size: 24px;
+                    font-weight: 700;
+                    color: #1a1a1a;
+                    letter-spacing: -0.5px;
+                }
+
+                .popular-badge {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    font-size: 12px;
+                    font-weight: 600;
+                    padding: 4px 12px;
+                    border-radius: 12px;
+                    text-transform: uppercase;
+                    letter-spacing: 0.5px;
+                }
+            }
+
+            .plan-pricing {
+                margin-bottom: 16px;
+
+                .price {
+                    display: flex;
+                    align-items: baseline;
+                    gap: 4px;
+
+                    .currency {
+                        font-size: 24px;
+                        font-weight: 600;
+                        color: #1a1a1a;
+                    }
+
+                    .amount {
+                        font-size: 48px;
+                        font-weight: 700;
+                        color: #1a1a1a;
+                        line-height: 1;
+                    }
+
+                    .period {
+                        font-size: 18px;
+                        color: #666;
+                        font-weight: 500;
+                    }
+                }
+            }
+
+            .plan-tagline {
+                font-size: 16px;
+                color: #666;
+                margin-bottom: 24px;
+                font-weight: 400;
+            }
+
+            .plan-features {
+                flex: 1;
+                margin-bottom: 32px;
+
+                .feature-item {
+                    display: flex;
+                    align-items: flex-start;
+                    gap: 12px;
+                    margin-bottom: 12px;
+
+                    .feature-icon {
+                        flex-shrink: 0;
+                        margin-top: 2px;
+                        color: #28a745;
+                        width: 16px;
+                        height: 16px;
+                    }
+
+                    .feature-text {
+                        font-size: 14px;
+                        color: #333;
+                        line-height: 1.4;
+                    }
+                }
+            }
+
+            .payment-options {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                margin-top: auto;
+
+                .payment-button {
+                    width: 100%;
+                    padding: 14px 24px;
+                    border: none;
+                    border-radius: 12px;
+                    font-size: 16px;
+                    font-weight: 600;
+                    cursor: pointer;
+                    transition: all 0.2s ease;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 8px;
+
+                    .payment-icon {
+                        width: 20px;
+                        height: 20px;
+                    }
+
+                    &.stripe-button {
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+
+                        &:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+                        }
+                    }
+
+                    &.crypto-button {
+                        background: linear-gradient(135deg, #f7931e 0%, #ff6b35 100%);
+                        color: white;
+                        box-shadow: 0 4px 16px rgba(247, 147, 30, 0.3);
+
+                        &:hover {
+                            transform: translateY(-2px);
+                            box-shadow: 0 6px 20px rgba(247, 147, 30, 0.4);
+                        }
+                    }
+
+                    &:active {
+                        transform: translateY(0);
+                    }
+                }
+            }
+
+            .plan-button {
+                width: 100%;
+                padding: 14px 24px;
+                border: none;
+                border-radius: 12px;
+                font-size: 16px;
+                font-weight: 600;
+                cursor: pointer;
+                transition: all 0.2s ease;
+                margin-top: auto;
+
+                &.upgrade-button {
+                    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                    color: white;
+                    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.3);
+
+                    &:hover {
+                        transform: translateY(-2px);
+                        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+                    }
+
+                    &:active {
+                        transform: translateY(0);
+                    }
+
+                    &.pro {
+                        background: linear-gradient(135deg, #1a1a1a 0%, #333 100%);
+                        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+
+                        &:hover {
+                            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+                        }
+                    }
+                }
+
+                &.current-plan {
+                    background: #e8f5e8;
+                    color: #28a745;
+                    border: 2px solid #28a745;
+                    cursor: default;
+
+                    &:hover {
+                        transform: none;
+                        box-shadow: none;
+                    }
+                }
+
+                &:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                }
+            }
+        }
+    }
+
+    .billing-footer {
+        text-align: center;
+        padding-top: 32px;
+        border-top: 1px solid #e0e0e0;
+
+        .footer-links {
+            margin-bottom: 12px;
+
+            .footer-link {
+                color: #667eea;
+                text-decoration: none;
+                font-size: 14px;
+                font-weight: 500;
+                transition: color 0.2s ease;
+
+                &:hover {
+                    color: #5a67d8;
+                    text-decoration: underline;
+                }
+            }
+        }
+    }
 }
 
 // Animations
 @keyframes spin {
-	0% {
-		transform: rotate(0deg);
-	}
-	100% {
-		transform: rotate(360deg);
-	}
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
 }
 
 // Responsive design
 @media (max-width: 768px) {
-	.billing-container {
-		padding: 0;
+    .billing-container {
+        padding: 0;
 
-		.billing-header {
-			margin-bottom: 32px;
+        .billing-header {
+            margin-bottom: 32px;
 
-			.billing-title {
-				font-size: 28px;
-			}
+            .billing-title {
+                font-size: 28px;
+            }
 
-			.billing-subtitle {
-				font-size: 16px;
-			}
-		}
+            .billing-subtitle {
+                font-size: 16px;
+            }
+        }
 
-		.subscription-management {
-			margin-bottom: 32px;
+        .subscription-management {
+            margin-bottom: 32px;
 
-			.subscription-card {
-				padding: 24px 20px;
+            .subscription-card {
+                padding: 24px 20px;
 
-				.subscription-header {
-					flex-direction: column;
-					align-items: flex-start;
-					gap: 16px;
-					margin-bottom: 24px;
-					padding-bottom: 16px;
+                .subscription-header {
+                    flex-direction: column;
+                    align-items: flex-start;
+                    gap: 16px;
+                    margin-bottom: 24px;
+                    padding-bottom: 16px;
 
-					.subscription-status {
-						.status-text {
-							font-size: 16px;
-						}
-					}
+                    .subscription-status {
+                        .status-text {
+                            font-size: 16px;
+                        }
+                    }
 
-					.subscription-plan {
-						font-size: 20px;
-					}
-				}
+                    .subscription-plan {
+                        font-size: 20px;
+                    }
+                }
 
-				.subscription-details {
-					margin-bottom: 24px;
+                .subscription-details {
+                    margin-bottom: 24px;
 
-					.detail-row {
-						flex-direction: column;
-						align-items: flex-start;
-						gap: 4px;
-						padding: 8px 0;
+                    .detail-row {
+                        flex-direction: column;
+                        align-items: flex-start;
+                        gap: 4px;
+                        padding: 8px 0;
 
-						.detail-label {
-							font-size: 12px;
-						}
+                        .detail-label {
+                            font-size: 12px;
+                        }
 
-						.detail-value {
-							font-size: 14px;
-						}
-					}
-				}
+                        .detail-value {
+                            font-size: 14px;
+                        }
+                    }
+                }
 
-				.subscription-actions {
-					.manage-button {
-						padding: 14px 24px;
-						font-size: 15px;
-						width: 100%;
-						justify-content: center;
-					}
+                .subscription-actions {
+                    .manage-button {
+                        padding: 14px 24px;
+                        font-size: 15px;
+                        width: 100%;
+                        justify-content: center;
+                    }
 
-					.management-note {
-						font-size: 13px;
-					}
-				}
-			}
-		}
+                    .management-note {
+                        font-size: 13px;
+                    }
+                }
+            }
+        }
 
-		.pricing-grid {
-			grid-template-columns: 1fr;
-			gap: 20px;
-			margin-bottom: 32px;
+        .pricing-grid {
+            grid-template-columns: 1fr;
+            gap: 20px;
+            margin-bottom: 32px;
 
-			.pricing-card {
-				padding: 24px 20px;
+            .pricing-card {
+                padding: 24px 20px;
 
-				&.popular {
-					transform: none;
+                &.popular {
+                    transform: none;
 
-					&:hover {
-						transform: translateY(-2px);
-					}
-				}
+                    &:hover {
+                        transform: translateY(-2px);
+                    }
+                }
 
-				.card-header {
-					.plan-name {
-						font-size: 20px;
-					}
-				}
+                .card-header {
+                    .plan-name {
+                        font-size: 20px;
+                    }
+                }
 
-				.plan-pricing {
-					.price {
-						.amount {
-							font-size: 40px;
-						}
-					}
-				}
+                .plan-pricing {
+                    .price {
+                        .amount {
+                            font-size: 40px;
+                        }
+                    }
+                }
 
-				.plan-features {
-					.feature-item {
-						.feature-text {
-							font-size: 13px;
-						}
-					}
-				}
+                .plan-features {
+                    .feature-item {
+                        .feature-text {
+                            font-size: 13px;
+                        }
+                    }
+                }
 
-				.plan-button {
-					padding: 12px 20px;
-					font-size: 15px;
-				}
-			}
-		}
+                .plan-button {
+                    padding: 12px 20px;
+                    font-size: 15px;
+                }
+            }
+        }
 
-		.billing-footer {
-			padding-top: 24px;
+        .billing-footer {
+            padding-top: 24px;
 
-			.footer-links {
-				margin-bottom: 8px;
+            .footer-links {
+                margin-bottom: 8px;
 
-				.footer-link {
-					font-size: 13px;
-				}
-			}
-		}
-	}
+                .footer-link {
+                    font-size: 13px;
+                }
+            }
+        }
+    }
+}
+
+// Activation Success Message Styles
+.activation-success-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 400px;
+    padding: 20px;
+
+    .activation-success-card {
+        background: #ffffff;
+        border-radius: 16px;
+        padding: 48px 32px;
+        text-align: center;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid #e5e7eb;
+        max-width: 500px;
+        width: 100%;
+
+        .success-icon {
+            margin-bottom: 24px;
+            color: #10b981;
+            display: flex;
+            justify-content: center;
+
+            svg {
+                animation: pulse 2s infinite;
+            }
+        }
+
+        .success-title {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin: 0 0 16px 0;
+            letter-spacing: -0.5px;
+        }
+
+        .success-message {
+            font-size: 16px;
+            color: #666;
+            margin: 0 0 32px 0;
+            line-height: 1.5;
+        }
+
+        .loading-spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #10b981;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin: 0 auto;
+        }
+    }
+}
+
+@keyframes pulse {
+    0%,
+    100% {
+        opacity: 1;
+        transform: scale(1);
+    }
+    50% {
+        opacity: 0.8;
+        transform: scale(1.05);
+    }
 }

@@ -38,11 +38,13 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.unsubscriber$ = new Subject();
 
         this._initSubscriptions();
-        this._loadCurrentPlan();
     }
 
     async ngOnInit(): Promise<void> {
         await this._initWallet();
+
+        // Initialize billing service before navigation
+        await this._loadCurrentPlan();
 
         this._initNavigation();
     }
@@ -75,21 +77,45 @@ export class DashboardComponent implements OnInit, OnDestroy {
         });
     }
 
-    private _loadCurrentPlan(): void {
-        this._billingService
-            .getActiveSubscription()
-            .then((response) => {
-                if (!response.success || !response.data) {
-                    this._billingService.currentPlan = "free";
+    private async _loadCurrentPlan(): Promise<void> {
+        try {
+            console.log("🔄 Dashboard - Initializing current plan...");
+            const response = await this._billingService.getActiveSubscription();
 
-                    return;
-                }
+            if (!response.success || !response.data) {
+                this._billingService.currentPlan = "free";
+                console.log("❌ Dashboard - No active subscription found, setting to free");
+                return;
+            }
 
-                this._billingService.currentPlan = response.data.stripeData?.plan || "free";
-            })
-            .catch((error) => {
-                console.error("Error loading current plan:", error);
+            const subscription = response.data;
+            console.log("📋 Dashboard - Subscription data:", {
+                paymentMethod: subscription.paymentMethod,
+                cryptoData: subscription.cryptoData,
+                stripeData: subscription.stripeData,
             });
+
+            // Check for crypto payment first
+            if (subscription.paymentMethod === "crypto" && subscription.cryptoData) {
+                this._billingService.currentPlan = subscription.cryptoData.plan || "basic";
+                console.log("💰 Dashboard - Crypto payment detected, plan:", this._billingService.currentPlan);
+            }
+            // Check for Stripe payment
+            else if (subscription.paymentMethod === "stripe" && subscription.stripeData) {
+                this._billingService.currentPlan = subscription.stripeData.plan || "free";
+                console.log("💳 Dashboard - Stripe payment detected, plan:", this._billingService.currentPlan);
+            }
+            // Fallback
+            else {
+                this._billingService.currentPlan = "free";
+                console.log("❌ Dashboard - No valid payment method found, setting to free");
+            }
+
+            console.log("✅ Dashboard - Current plan initialized:", this._billingService.currentPlan);
+        } catch (error) {
+            console.error("❌ Dashboard - Error loading current plan:", error);
+            this._billingService.currentPlan = "free";
+        }
     }
 
     private async _initWallet(): Promise<void> {

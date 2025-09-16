@@ -1,8 +1,8 @@
 <div class="zelf-keys-notes">
     <div class="zelf-keys-notes__header">
-        <h2>Notes</h2>
+        <h2>{{ "billing.notes.title" | transloco }}</h2>
 
-        <p>Manage your secure notes and key-value pairs</p>
+        <p>{{ "billing.notes.subtitle" | transloco }}</p>
     </div>
 
     <div class="zelf-keys-notes__content">
@@ -10,9 +10,9 @@
         <div *ngIf="loading" class="zelf-keys-notes__loading-state">
             <div class="zelf-keys-notes__loading-spinner"></div>
 
-            <h3>Loading your notes</h3>
+            <h3>{{ "billing.notes.loading.title" | transloco }}</h3>
 
-            <p>Please wait while we fetch your secure data...</p>
+            <p>{{ "billing.notes.loading.message" | transloco }}</p>
         </div>
 
         <!-- Error State -->
@@ -25,9 +25,9 @@
                 </svg>
             </div>
 
-            <h3>Oops! Something went wrong</h3>
+            <h3>{{ "billing.notes.error.title" | transloco }}</h3>
 
-            <p>We couldn't load your notes. {{ error }}</p>
+            <p>{{ "billing.notes.error.message" | transloco }} {{ error }}</p>
 
             <button class="zelf-button zelf-button--black" (click)="onRefresh()">
                 <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
@@ -36,22 +36,22 @@
                     />
                 </svg>
 
-                Try Again
+                {{ "billing.notes.error.try_again" | transloco }}
             </button>
         </div>
 
         <ng-container *ngIf="!loading && !error && currentPlan === 'free'">
             <subscription-banner
                 [route]="['/dashboard/billing']"
-                description="Get advanced security, and more with ZelfKeys Premium"
-                title="Unlock Premium Features"
+                [description]="'billing.notes.premium.description' | transloco"
+                [title]="'billing.notes.premium.title' | transloco"
             ></subscription-banner>
         </ng-container>
 
         <!-- Notes Grid -->
         <div *ngIf="!loading && !error && currentPlan !== 'free'" class="zelf-keys-notes__notes-grid">
             <div class="zelf-keys-notes__list-header" *ngIf="storedNotes.length > 0">
-                <h3>{{ storedNotes.length }} stored note{{ storedNotes.length !== 1 ? "s" : "" }}</h3>
+                <h3>{{ "billing.notes.list.header" | transloco: { count: storedNotes.length } }}</h3>
 
                 <button class="zelf-icon-button zelf-icon-button--anti-flash-white" (click)="onRefresh()" mat-flat-button>
                     <svg xmlns="http://www.w3.org/2000/svg" height="24px" viewBox="0 -960 960 960" width="24px" fill="currentColor">
@@ -76,8 +76,8 @@
                         </svg>
                     </div>
                     <div class="zelf-keys-notes__add-note-content">
-                        <div class="zelf-keys-notes__add-note-title">Add New Note</div>
-                        <div class="zelf-keys-notes__add-note-description">Securely store a new note</div>
+                        <div class="zelf-keys-notes__add-note-title">{{ "billing.notes.add_note.title" | transloco }}</div>
+                        <div class="zelf-keys-notes__add-note-description">{{ "billing.notes.add_note.description" | transloco }}</div>
                     </div>
                 </div>
 

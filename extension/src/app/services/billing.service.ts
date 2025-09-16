@@ -75,7 +75,7 @@ export interface SubscriptionData {
     endDate: string;
     zelfName: string;
     startDate: string;
-    stripeData: {
+    stripeData?: {
         id: string;
         latestInvoice: string;
         customer: string;
@@ -83,7 +83,16 @@ export interface SubscriptionData {
         plan: string;
         cancelledAt: string;
         cancelAtPeriodEnd: boolean;
-    };
+    } | null;
+    cryptoData?: {
+        customer: string;
+        status: string;
+        plan: string;
+        price: number;
+        paymentMethod: string;
+        transactionHash: string;
+        isDemoMode: boolean;
+    } | null;
     paymentMethod: string;
 }
 
@@ -133,11 +142,64 @@ export class BillingService {
      */
     async getActiveSubscription(): Promise<SubscriptionResponse> {
         const apiKeysSessionJWT = await this._walletService.getZelfKeyJWT();
+
         return this._httpWrapper.sendRequest("get", `${this.baseUrl}/api/subscription/active`, null, {
             headers: {
                 Authorization: `Bearer ${apiKeysSessionJWT}`,
             },
         });
+    }
+
+    /**
+     * Initialize current plan based on active subscription
+     * This method should be called when the app starts to set the correct current plan
+     */
+    async initializeCurrentPlan(): Promise<void> {
+        try {
+            console.log("🔄 Initializing current plan...");
+            const response = await this.getActiveSubscription();
+
+            if (response.success && response.data) {
+                const subscription = response.data;
+                console.log("📋 Subscription data:", {
+                    paymentMethod: subscription.paymentMethod,
+                    cryptoData: subscription.cryptoData,
+                    stripeData: subscription.stripeData,
+                });
+
+                // Check for crypto payment first
+                if (subscription.paymentMethod === "crypto" && subscription.cryptoData) {
+                    this.currentPlan = subscription.cryptoData.plan || "basic";
+                    console.log("💰 Crypto payment detected, plan:", this.currentPlan);
+                }
+                // Check for Stripe payment
+                else if (subscription.paymentMethod === "stripe" && subscription.stripeData) {
+                    const stripeData = subscription.stripeData;
+                    if (stripeData.plan) {
+                        // For now, we'll set it to a default premium plan
+                        // In a real implementation, you'd want to map the Stripe price ID to the actual plan ID
+                        this.currentPlan = "pro"; // or "basic" or "enterprise" based on the price ID
+                        console.log("💳 Stripe payment detected, plan:", this.currentPlan);
+                    } else {
+                        this.currentPlan = "free";
+                        console.log("💳 Stripe payment but no plan found, setting to free");
+                    }
+                }
+                // Fallback for other payment methods or missing data
+                else {
+                    this.currentPlan = "free";
+                    console.log("❌ No valid payment method found, setting to free");
+                }
+            } else {
+                this.currentPlan = "free";
+                console.log("❌ No active subscription found, setting to free");
+            }
+
+            console.log("✅ Current plan initialized:", this.currentPlan);
+        } catch (error) {
+            console.error("❌ Error initializing current plan:", error);
+            this.currentPlan = "free";
+        }
     }
 
     /**
@@ -235,7 +297,8 @@ export class BillingService {
         subscriptionCreated?: boolean;
         message?: string;
     }> {
-        const apiKeysSessionJWT = this._walletService.getZelfKeyJWT();
+        const apiKeysSessionJWT = await this._walletService.getZelfKeyJWT();
+
         return this._httpWrapper.sendRequest(
             "post",
             `${this.baseUrl}/api/subscription/confirm-crypto-payment`,
