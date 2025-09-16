@@ -29,6 +29,7 @@ export class FormDetector {
 
     public stopDetection(): void {
         this.observer.disconnect();
+        this.observedFields.clear();
     }
 
     private handleMutations(mutations: MutationRecord[]): void {

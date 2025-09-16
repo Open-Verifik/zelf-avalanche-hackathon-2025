@@ -84,6 +84,16 @@ export class PasswordDetailComponent extends CopyToClipboardBase implements OnIn
     }
 
     onDecryptClick(prefill: boolean = false): void {
+        if (this.decryptedData) {
+            if (prefill) {
+                this.prefillWebsite();
+            } else {
+                this._scrollToSectionService.scrollToSection("password-decrypted-content", "password");
+            }
+
+            return;
+        }
+
         const bottomSheetRef = this._bottomSheet.open(BiometricsBottomSheetComponent, {
             backdropClass: "zelf-backdrop",
             panelClass: "zelf-bottom-sheet-biometrics",

@@ -440,7 +440,7 @@ export class MessageHandler {
                     if (tabs) {
                         await (tabs as any).sendMessage(payload.tabId, {
                             type: "FILL_PASSWORD",
-                            payload: payload,
+                            payload: payload.fillData,
                         });
                     }
                 }

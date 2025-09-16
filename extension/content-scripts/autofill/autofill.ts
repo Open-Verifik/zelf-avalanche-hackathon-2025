@@ -250,8 +250,14 @@ class AutofillContentScript {
         if (document.hidden) {
             // Page is hidden, hide all icons
             this.uiOverlay.hideAllIcons();
+            // Stop form detection
+            this.formDetector.stopDetection();
         } else {
-            // Page is visible, perform immediate fresh scan
+            // Page is visible again
+            // Reset form count to force reprocessing
+            this.lastFormCount = 0;
+            // Start form detection again
+            this.formDetector.startDetection();
             // Force a fresh form detection immediately
             this.formDetector.scanForForms();
             // Process any newly detected forms immediately
@@ -259,10 +265,16 @@ class AutofillContentScript {
                 this.performQuickRescan();
                 this.uiOverlay.repositionAllIcons();
             }, 10); // Very short delay to ensure forms are processed
+            // Schedule additional scans to catch any dynamic content
+            this.scheduleDelayedScans();
         }
     }
 
     private handlePageShow(): void {
+        // Reset form count to force reprocessing
+        this.lastFormCount = 0;
+        // Start form detection again
+        this.formDetector.startDetection();
         // Force a fresh form detection immediately
         this.formDetector.scanForForms();
         // Process any newly detected forms immediately
@@ -270,6 +282,8 @@ class AutofillContentScript {
             this.performQuickRescan();
             this.uiOverlay.repositionAllIcons();
         }, 10); // Very short delay to ensure forms are processed
+        // Schedule additional scans to catch any dynamic content
+        this.scheduleDelayedScans();
     }
 
     private setupScrollThrottling(): void {

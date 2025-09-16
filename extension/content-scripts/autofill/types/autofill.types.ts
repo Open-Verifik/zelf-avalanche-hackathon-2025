@@ -31,12 +31,22 @@ export interface DetectedForm {
 
 export interface AutofillMessage {
     type:
-        | "autofill:service_worker.request_passwords"
+        | "GET_PASSWORDS"
         | "DECRYPT_PASSWORD"
         | "CREATE_PASSWORD"
         | "AUTHENTICATE"
         | "OPEN_BIOMETRICS_MODAL"
-        | "FILL_PASSWORD";
+        | "FILL_PASSWORD"
+        | "WAIT_FOR_FORM_READY"
+        | "FORM_READY"
+        | "SERVICE_WORKER_READY"
+        | "PING"
+        | "CLOSE_POPUP"
+        | "POPUP_READY"
+        | "OPEN_PASSWORD_DECRYPTOR"
+        | "SEND_DECRYPTION_DATA_TO_POPOUT"
+        | "DECRYPTION_RESULT_FROM_POPOUT"
+        | "PASSWORD_DECRYPTOR_DATA";
     payload?: any;
 }
 
@@ -115,4 +125,8 @@ export interface MessagePayload {
     fieldType?: string;
     result?: DecryptionResult;
     tabId?: number;
+    fillData?: {
+        username: string;
+        password: string;
+    };
 }

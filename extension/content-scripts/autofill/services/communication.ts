@@ -1,4 +1,5 @@
 import { AutofillMessage, AutofillResponse, DecryptedPasswordData, PasswordEntry } from "@shared/types/autofill.types";
+import { FormDetector } from "./form-detector";
 
 // Chrome extension API declaration
 declare const chrome: any;
@@ -112,31 +113,57 @@ export class CommunicationService {
     }
 
     private handleMessage(message: any, sendResponse: (response: any) => void): void {
+        console.log("Content script received message:", message);
+
         if (message.type === "SERVICE_WORKER_READY") {
             this.serviceWorkerReadyCallbacks.forEach((callback) => callback());
-        } else if (message.type === "WAIT_FOR_FORM_READY") {
-            this.waitForFormReady(message.payload?.tabId);
-        }
 
-        sendResponse({ success: true });
+            sendResponse({ success: true });
+        } else if (message.type === "WAIT_FOR_FORM_READY") {
+            const fillData = message.payload?.fillData;
+            const tabId = message.payload?.tabId;
+
+            if (!tabId) {
+                console.error("No tab ID provided in WAIT_FOR_FORM_READY message");
+
+                sendResponse({ success: false, error: "No tab ID provided" });
+
+                return;
+            }
+
+            this.waitForFormReady(tabId, fillData);
+
+            sendResponse({ success: true });
+        } else if (message.type === "FILL_PASSWORD") {
+            console.log("Filling password with data:", message.payload);
+
+            this.fillFormFields(message.payload);
+
+            sendResponse({ success: true });
+        } else {
+            console.warn("Unknown message type:", message.type);
+
+            sendResponse({ success: false, error: "Unknown message type" });
+        }
     }
 
-    private waitForFormReady(tabId: number): void {
-        // Wait for document to be ready
+    private waitForFormReady(tabId: number, fillData?: any): void {
+        console.log("Waiting for form ready in tab:", tabId, "with fill data:", fillData);
+
         if (document.readyState !== "complete") {
-            window.addEventListener("load", () => this.checkForFormsAndNotify(tabId));
+            window.addEventListener("load", () => this.checkForFormsAndNotify(tabId, fillData));
+
             return;
         }
 
-        this.checkForFormsAndNotify(tabId);
+        this.checkForFormsAndNotify(tabId, fillData);
     }
 
-    private checkForFormsAndNotify(tabId: number): void {
-        // Check for forms immediately
+    private checkForFormsAndNotify(tabId: number, fillData?: any): void {
         const hasForms = document.querySelectorAll('input[type="password"], input[type="email"], input[type="text"]').length > 0;
 
         if (hasForms) {
-            this.sendFormReadyMessage(tabId);
+            this.sendFormReadyMessage(tabId, fillData);
             return;
         }
 
@@ -147,7 +174,7 @@ export class CommunicationService {
             if (!hasFormsNow) return;
 
             observer.disconnect();
-            this.sendFormReadyMessage(tabId);
+            this.sendFormReadyMessage(tabId, fillData);
         });
 
         observer.observe(document.body, {
@@ -162,21 +189,69 @@ export class CommunicationService {
             observer.disconnect();
             // Only send ready message if we actually found forms
             if (document.querySelectorAll('input[type="password"], input[type="email"], input[type="text"]').length > 0) {
-                this.sendFormReadyMessage(tabId);
+                this.sendFormReadyMessage(tabId, fillData);
             }
         }, 10000);
     }
 
-    private sendFormReadyMessage(tabId: number): void {
+    private sendFormReadyMessage(tabId: number, fillData?: any): void {
         if (typeof chrome !== "undefined" && chrome.runtime) {
             chrome.runtime.sendMessage({
                 type: "FORM_READY",
-                payload: { tabId },
+                payload: { tabId, fillData },
             });
         }
     }
 
     public onServiceWorkerReady(callback: () => void): void {
         this.serviceWorkerReadyCallbacks.push(callback);
+    }
+
+    private fillFormFields(data: { username: string; password: string }): void {
+        console.log("Attempting to fill form fields with:", { username: data.username, password: "***" });
+
+        const fillField = (field: HTMLInputElement, value: string) => {
+            field.value = value;
+            field.dispatchEvent(new Event("input", { bubbles: true }));
+            field.dispatchEvent(new Event("change", { bubbles: true }));
+        };
+
+        const formDetector = new FormDetector();
+        const currentForms = formDetector.getCurrentForms();
+
+        if (currentForms.length === 0) {
+            console.warn("No forms detected");
+            return;
+        }
+
+        let usernameField: HTMLInputElement | null = null;
+        let passwordField: HTMLInputElement | null = null;
+
+        for (const form of currentForms) {
+            for (const field of form.fields) {
+                if (!usernameField && (field.type === "username" || field.type === "email")) {
+                    usernameField = field.element;
+                }
+                if (!passwordField && field.type === "password") {
+                    passwordField = field.element;
+                }
+                if (usernameField && passwordField) break;
+            }
+            if (usernameField && passwordField) break;
+        }
+
+        if (usernameField) {
+            console.log("Found username field:", usernameField);
+            fillField(usernameField, data.username);
+        } else {
+            console.warn("No username field found");
+        }
+
+        if (passwordField) {
+            console.log("Found password field:", passwordField);
+            fillField(passwordField, data.password);
+        } else {
+            console.warn("No password field found");
+        }
     }
 }

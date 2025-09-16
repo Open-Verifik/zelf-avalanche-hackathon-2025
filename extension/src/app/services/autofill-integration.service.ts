@@ -157,16 +157,54 @@ export class AutofillIntegrationService {
 
     public async waitForFormAndFill(tabId: number, fillData: any): Promise<void> {
         try {
+            console.log("Waiting for form and storing fill data for tab:", tabId, fillData);
+
             // Store the fill data for when the form is ready
             this.pendingFillData.set(tabId, fillData);
 
-            // Send WAIT_FOR_FORM_READY message to the content script
-            await this.sendMessageToContentScript({
-                type: "WAIT_FOR_FORM_READY",
-                payload: { tabId },
-            });
+            if (typeof chrome === "undefined" || !chrome.tabs) {
+                throw new Error("Chrome tabs API not available");
+            }
+
+            // First, ensure the content script is injected
+            try {
+                await chrome.scripting.executeScript({
+                    target: { tabId },
+                    files: ["autofill.js"],
+                });
+            } catch (error) {
+                console.log("Content script might already be loaded:", error);
+            }
+
+            // Wait a moment for the content script to initialize
+            await new Promise((resolve) => setTimeout(resolve, 500));
+
+            // Try to send the message multiple times
+            let attempts = 0;
+            const maxAttempts = 3;
+            const retryDelay = 1000; // 1 second between attempts
+
+            while (attempts < maxAttempts) {
+                try {
+                    await chrome.tabs.sendMessage(tabId, {
+                        type: "WAIT_FOR_FORM_READY",
+                        payload: { tabId, fillData },
+                    });
+                    console.log("Successfully sent message to content script");
+                    return;
+                } catch (error) {
+                    attempts++;
+                    if (attempts === maxAttempts) {
+                        throw error;
+                    }
+                    console.log(`Attempt ${attempts} failed, retrying in ${retryDelay}ms...`);
+                    await new Promise((resolve) => setTimeout(resolve, retryDelay));
+                }
+            }
         } catch (error) {
             console.error("Error waiting for form and filling:", error);
+            // Re-throw to allow caller to handle the error
+            throw error;
         }
     }
 
