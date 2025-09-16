@@ -7,6 +7,7 @@ import { Subject, takeUntil } from "rxjs";
 
 import { ChromeService } from "../chrome.service";
 import { HomeHeaderAccountsComponent } from "../home/home-header-accounts/home-header-accounts.component";
+import { BillingService } from "../services/billing.service";
 import { ScrollToSectionService } from "../services/scroll-to-section.service";
 import { WalletModel } from "../wallet";
 import { WalletService } from "../wallet.service";
@@ -26,6 +27,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
     wallet: Partial<WalletModel> = {};
 
     constructor(
+        private _billingService: BillingService,
         private _bottomSheet: MatBottomSheet,
         private _changeDetectionRef: ChangeDetectorRef,
         private _chromeService: ChromeService,
@@ -36,6 +38,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.unsubscriber$ = new Subject();
 
         this._initSubscriptions();
+        this._loadCurrentPlan();
     }
 
     async ngOnInit(): Promise<void> {
@@ -70,6 +73,23 @@ export class DashboardComponent implements OnInit, OnDestroy {
                 this._scrollToDecryptedSection(event.sectionId);
             }
         });
+    }
+
+    private _loadCurrentPlan(): void {
+        this._billingService
+            .getActiveSubscription()
+            .then((response) => {
+                if (!response.success || !response.data) {
+                    this._billingService.currentPlan = "free";
+
+                    return;
+                }
+
+                this._billingService.currentPlan = response.data.stripeData?.plan || "free";
+            })
+            .catch((error) => {
+                console.error("Error loading current plan:", error);
+            });
     }
 
     private async _initWallet(): Promise<void> {

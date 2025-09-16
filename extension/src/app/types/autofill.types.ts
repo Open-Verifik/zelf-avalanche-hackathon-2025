@@ -1,5 +1,5 @@
 export interface AutofillMessage {
-    type: "GET_PASSWORDS" | "CREATE_PASSWORD" | "AUTHENTICATE" | "OPEN_BIOMETRICS_MODAL" | "FILL_PASSWORD";
+    type: "autofill:service_worker.request_passwords" | "CREATE_PASSWORD" | "AUTHENTICATE" | "OPEN_BIOMETRICS_MODAL" | "FILL_PASSWORD";
     payload?: any;
     requestId?: string;
     timestamp?: number;

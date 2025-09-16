@@ -1,6 +1,6 @@
 .zelf-keys-notes {
     padding: 0;
-    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+    font-family: "Poppins", Arial, sans-serif;
 
     &__header {
         text-align: center;
@@ -113,10 +113,6 @@
         svg {
             filter: drop-shadow(0 4px 8px rgba(239, 68, 68, 0.2));
         }
-    }
-
-    &__notes-grid {
-        // Grid container styles
     }
 
     &__list-header {

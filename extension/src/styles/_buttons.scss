@@ -284,6 +284,30 @@
         min-width: 0;
         padding: 4px 12px;
     }
+
+    &--secondary {
+        background-color: transparent !important;
+        border: 2px solid variables.$secondaryColor !important;
+        color: variables.$secondaryColor !important;
+        transition:
+            color 0.3s variables.$smoothBezier,
+            background-color 0.3s variables.$smoothBezier,
+            border-color 0.3s variables.$smoothBezier;
+
+        &:hover {
+            background-color: variables.$secondaryColorLight !important;
+        }
+
+        &:active {
+            background-color: rgba(255, 87, 33, 0.2) !important;
+        }
+
+        &[disabled] {
+            cursor: not-allowed;
+            border-color: variables.$frenchGray !important;
+            color: variables.$gray !important;
+        }
+    }
 }
 
 .zelf-icon-button {

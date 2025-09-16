@@ -2,14 +2,16 @@ import { CommonModule } from "@angular/common";
 import { Component, OnDestroy, OnInit } from "@angular/core";
 import { Router, RouterModule } from "@angular/router";
 import { TranslocoModule } from "@jsverse/transloco";
-import { Subject } from "rxjs";
+import { Subject, takeUntil } from "rxjs";
 import { ChromeService } from "../../chrome.service";
+import { BillingService } from "../../services/billing.service";
 import { NoteDataService } from "../../services/note-data.service";
 import { WalletService } from "../../wallet.service";
-import { DataCardComponent } from "../shared/data-card.component";
+import { DataCardComponent } from "../shared/data-card/data-card.component";
+import { SubscriptionBannerComponent } from "../shared/subscription-banner/subscription-banner.component";
 
 @Component({
-    imports: [CommonModule, TranslocoModule, RouterModule, DataCardComponent],
+    imports: [CommonModule, TranslocoModule, RouterModule, DataCardComponent, SubscriptionBannerComponent],
     selector: "app-zelf-keys-notes",
     standalone: true,
     styleUrls: ["./zelf-keys-notes.component.scss"],
@@ -18,21 +20,25 @@ import { DataCardComponent } from "../shared/data-card.component";
 export class ZelfKeysNotesComponent implements OnInit, OnDestroy {
     private destroy$ = new Subject<void>();
 
+    currentPlan: string = "free";
     error: string | null = null;
-    loading = false;
+    loading = true;
     storedNotes: any[] = [];
 
     constructor(
-        private router: Router,
-        private walletService: WalletService,
-        private chromeService: ChromeService,
-        private noteDataService: NoteDataService
-    ) {}
+        private _billingService: BillingService,
+        private _chromeService: ChromeService,
+        private _noteDataService: NoteDataService,
+        private _router: Router,
+        private _walletService: WalletService
+    ) {
+        this._subscribeToBillingService();
+    }
 
     async ngOnInit(): Promise<void> {
         // Ensure extension is in full screen mode for better user experience
-        if (this.chromeService.isExtension) {
-            await this.chromeService.ensureFullScreen("dashboard/notes");
+        if (this._chromeService.isExtension) {
+            await this._chromeService.ensureFullScreen("dashboard/notes");
         }
 
         this.loadStoredNotes();
@@ -43,12 +49,20 @@ export class ZelfKeysNotesComponent implements OnInit, OnDestroy {
         this.destroy$.complete();
     }
 
+    private _subscribeToBillingService(): void {
+        this.currentPlan = this._billingService.currentPlan;
+
+        this._billingService.currentPlan$.pipe(takeUntil(this.destroy$)).subscribe((plan) => {
+            this.currentPlan = plan;
+        });
+    }
+
     async loadStoredNotes(): Promise<void> {
         this.loading = true;
         this.error = null;
 
         try {
-            const response = await this.walletService.listStoredNotes();
+            const response = await this._walletService.listStoredNotes();
 
             if (response?.data && Array.isArray(response.data)) {
                 this.storedNotes = response.data;
@@ -68,7 +82,7 @@ export class ZelfKeysNotesComponent implements OnInit, OnDestroy {
     }
 
     onAddNote(): void {
-        this.router.navigate(["/dashboard/notes/new"]);
+        this._router.navigate(["/dashboard/notes/new"]);
     }
 
     onRefresh(): void {
@@ -77,8 +91,8 @@ export class ZelfKeysNotesComponent implements OnInit, OnDestroy {
 
     onNoteClick(note: any): void {
         // Store the note data and navigate to detail view
-        this.noteDataService.setCurrentNote(note);
-        this.router.navigate(["/dashboard/notes/detail"]);
+        this._noteDataService.setCurrentNote(note);
+        this._router.navigate(["/dashboard/notes/detail"]);
     }
 
     trackByNote(index: number, note: any): any {

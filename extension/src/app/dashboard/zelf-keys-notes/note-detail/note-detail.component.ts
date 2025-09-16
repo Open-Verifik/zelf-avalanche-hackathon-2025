@@ -11,7 +11,11 @@ import { NoteDataService } from "../../../services/note-data.service";
 import { ScrollToSectionService } from "../../../services/scroll-to-section.service";
 import { WalletService } from "../../../wallet.service";
 import { NoteItem, DecryptedNoteData } from "../../../models/zelf-key-item.model";
-import { BiometricsBottomSheetComponent, BiometricResult, BiometricsBottomSheetData } from "../../shared/biometrics-bottom-sheet.component";
+import {
+    BiometricsBottomSheetComponent,
+    BiometricResult,
+    BiometricsBottomSheetData,
+} from "../../shared/biometrics-bottom-sheet/biometrics-bottom-sheet.component";
 import { MatBottomSheet } from "@angular/material/bottom-sheet";
 import { DecryptedItemData } from "../../../models/zelf-key-item.model";
 
