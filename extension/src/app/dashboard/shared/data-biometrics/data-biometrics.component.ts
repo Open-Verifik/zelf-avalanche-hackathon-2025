@@ -628,9 +628,8 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 
     private async _detectFace(): Promise<void> {
         const videoNgx = this.webcamRef?.nativeVideoElement;
-        if (!videoNgx || this.response.base64Image) {
-            return;
-        }
+
+        if (!videoNgx || this.response.base64Image) return;
 
         // Early return if video is not ready
         if (videoNgx.readyState !== 4) {
@@ -642,11 +641,13 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
             const detection = await faceapi.detectAllFaces(videoNgx, new faceapi.SsdMobilenetv1Options({ minConfidence: 0.4 })).withFaceLandmarks();
 
             const context = this.maskResultCanvasRef?.nativeElement.getContext("2d", { willReadFrequently: true });
+
             if (!context) return;
 
             if (detection.length > 0) {
                 this.lastFace = detection[0];
                 this.errorFace = null;
+                this._changeDetectorRef.markForCheck();
 
                 // Set real dimensions for face positioning calculations (only if changed)
                 if (!this.camera.dimensions.real.width || this.camera.dimensions.real.width !== videoNgx.videoWidth) {
@@ -656,8 +657,9 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
                         offsetX: 0,
                         offsetY: 0,
                     };
+
                     this.face.real = this._getCenterAndRadius(videoNgx.videoHeight, videoNgx.videoWidth);
-                    // Only redraw mask when dimensions change
+
                     this._drawOvalCenterAndMask();
                 }
 
@@ -677,8 +679,12 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
                 if (this.face.successPosition > 0) {
                     // Capture after 1 successful frame (very responsive)
                     this.face.successPosition = 0;
+
                     this._takePicture.next(); // Trigger image capture
+
                     clearInterval(this._intervals.detectFace); // Stop detection after capture
+
+                    this._changeDetectorRef.markForCheck();
                 }
             } else {
                 this.face.successPosition = 0;
@@ -686,7 +692,8 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
                     title: "No face detected",
                     subtitle: "Please look at the camera",
                 };
-                // Redraw mask and draw red oval if no face detected
+                this._changeDetectorRef.markForCheck();
+
                 this._drawOvalCenterAndMask();
                 this._drawStatusOval(context, false);
             }
@@ -694,14 +701,19 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
             this._changeDetectorRef.markForCheck();
         } catch (error: any) {
             console.error("Face detection error:", error);
+            this._changeDetectorRef.markForCheck();
+
             this.error.emit(error);
+
             const context = this.maskResultCanvasRef?.nativeElement.getContext("2d");
+
             if (context) this._drawStatusOval(context, false);
         }
     }
 
     private _setImageOnCanvas(canvas: HTMLCanvasElement, img: HTMLImageElement, dimensions: any, resultDimensions: any): void {
         const context = canvas.getContext("2d");
+
         if (!context) return;
 
         canvas.width = resultDimensions.width;
@@ -1051,6 +1063,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 
     cameraError(error: WebcamInitError): void {
         console.error("Camera error:", error);
+
         this.canNavigate.emit(true);
         this.error.emit(error);
 
@@ -1065,13 +1078,17 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
         }
 
         const img = new Image();
+
         img.src = webcamImage.imageAsDataUrl;
 
         img.onload = async () => {
             if (img.height < this.face.minHeight) {
                 this.camera.isLowQuality = true;
+
                 this.canNavigate.emit(true);
+
                 this.error.emit({ error: "low_quality" });
+
                 return;
             }
 

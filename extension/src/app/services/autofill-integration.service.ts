@@ -1,7 +1,9 @@
 import { Injectable } from "@angular/core";
+import { Router } from "@angular/router";
 
+import { UrlInfo } from "@content/autofill/types/autofill.types";
 import { AutofillMessage, AutofillResponse, MessageSender, SendResponse } from "@shared/types/autofill.types";
-import { AutofillDataService } from "./autofill-data.service";
+import { AutofillDataService, AutofillUrlInfo } from "./autofill-data.service";
 import { PopoutCommunicationService } from "./popout-communication.service";
 
 @Injectable({
@@ -12,8 +14,9 @@ export class AutofillIntegrationService {
     private pendingFillData = new Map<number, any>();
 
     constructor(
-        private autofillDataService: AutofillDataService,
-        private popoutCommunicationService: PopoutCommunicationService
+        private _autofillDataService: AutofillDataService,
+        private _popoutCommunicationService: PopoutCommunicationService,
+        private _router: Router
     ) {
         this.setupMessageListener();
     }
@@ -27,6 +30,30 @@ export class AutofillIntegrationService {
 
                 return true;
             });
+
+            chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+                if (message.type === "NAVIGATE_TO_ROUTE") {
+                    const route = message.payload?.route;
+
+                    if (route) this._router.navigate([`/${route}`]);
+
+                    sendResponse({ success: true });
+                } else if (message.type === "PASSWORD_DECRYPTOR_DATA") {
+                    this._popoutCommunicationService.setDecryptionData(message.payload);
+
+                    this._router.navigateByUrl("/passwords/decrypt", { replaceUrl: true });
+
+                    sendResponse({ success: true });
+                } else if (message.type === "CREATE_PASSWORD") {
+                    this._router.navigate(["/passwords/new"], {
+                        queryParams: { urlInfo: JSON.stringify(message.payload.urlInfo) },
+                    });
+
+                    sendResponse({ success: true });
+                }
+
+                return true;
+            });
         }
 
         this.isListening = true;
@@ -37,15 +64,23 @@ export class AutofillIntegrationService {
             switch (message.type) {
                 case "PING":
                     sendResponse({ success: true });
+
+                    break;
+                case "CREATE_PASSWORD":
+                    this.handleCreatePassword(message.payload, sendResponse);
+
                     break;
                 case "AUTOFILL_CREATE_PASSWORD_DATA":
                     await this.handleAutofillCreatePasswordData(message.payload, sendResponse);
+
                     break;
                 case "PASSWORD_DECRYPTOR_DATA":
                     await this.handlePasswordDecryptorData(message.payload, sendResponse);
+
                     break;
                 case "FORM_READY":
                     await this.handleFormReady(message.payload, sendResponse);
+
                     break;
                 default:
                     sendResponse({ success: false, error: "Unknown message type" });
@@ -62,7 +97,7 @@ export class AutofillIntegrationService {
     private async handleAutofillCreatePasswordData(payload: { urlInfo: any }, sendResponse: SendResponse): Promise<void> {
         try {
             // Forward the URL info to the AutofillDataService
-            this.autofillDataService.setUrlInfo(payload.urlInfo);
+            this._autofillDataService.setUrlInfo(payload.urlInfo);
 
             sendResponse({ success: true });
         } catch (error) {
@@ -80,7 +115,7 @@ export class AutofillIntegrationService {
     ): Promise<void> {
         try {
             // Set the decryption data in the popout communication service
-            this.popoutCommunicationService.setDecryptionData({
+            this._popoutCommunicationService.setDecryptionData({
                 passwordId: payload.passwordId,
                 publicData: payload.publicData,
                 fieldId: payload.fieldId,
@@ -156,6 +191,18 @@ export class AutofillIntegrationService {
         } catch (error) {
             console.error("Error handling form ready:", error);
             sendResponse({ success: false, error: (error as Error).message });
+        }
+    }
+
+    private handleCreatePassword(payload: { urlInfo: UrlInfo }, sendResponse: SendResponse): void {
+        try {
+            this._autofillDataService.setUrlInfo(payload.urlInfo as AutofillUrlInfo);
+        } catch (error) {
+            console.error("Error handling create password:", error);
+
+            const errorMessage = error instanceof Error ? error.message : "Failed to handle create password";
+
+            sendResponse({ success: false, error: errorMessage });
         }
     }
 }

@@ -76,17 +76,18 @@ export class CommunicationService {
         return new Promise((resolve, reject) => {
             console.log("Sending message to background script:", message);
 
-            // Check if we're in a Chrome extension context
             if (typeof chrome !== "undefined" && chrome.runtime) {
-                // Add timeout to prevent hanging
                 const timeout = setTimeout(() => {
                     console.error("Message timeout after 10 seconds");
+
                     reject(new Error("Message timeout - background script did not respond"));
                 }, 10000);
 
                 chrome.runtime.sendMessage(message, (response: any) => {
                     clearTimeout(timeout);
+
                     console.log("Received response from background script:", response);
+
                     if (chrome.runtime.lastError) {
                         console.error("Chrome runtime error:", chrome.runtime.lastError);
                         reject(new Error(chrome.runtime.lastError.message));
@@ -101,21 +102,19 @@ export class CommunicationService {
     }
 
     public setupMessageListener(): void {
-        // Listen for messages from the background script
         if (typeof chrome !== "undefined" && chrome.runtime) {
             chrome.runtime.onMessage.addListener((message: any, sender: any, sendResponse: any) => {
                 this.handleMessage(message, sendResponse);
-                return true; // Keep message channel open for async response
+
+                return true;
             });
         }
     }
 
     private handleMessage(message: any, sendResponse: (response: any) => void): void {
-        // Handle any incoming messages from background script
         if (message.type === "SERVICE_WORKER_READY") {
             this.serviceWorkerReadyCallbacks.forEach((callback) => callback());
         } else if (message.type === "WAIT_FOR_FORM_READY") {
-            // Store the tab ID and wait for forms to be ready
             this.waitForFormReady(message.payload?.tabId);
         }
 
@@ -123,37 +122,52 @@ export class CommunicationService {
     }
 
     private waitForFormReady(tabId: number): void {
-        // Check if forms are already present
+        // Wait for document to be ready
+        if (document.readyState !== "complete") {
+            window.addEventListener("load", () => this.checkForFormsAndNotify(tabId));
+            return;
+        }
+
+        this.checkForFormsAndNotify(tabId);
+    }
+
+    private checkForFormsAndNotify(tabId: number): void {
+        // Check for forms immediately
         const hasForms = document.querySelectorAll('input[type="password"], input[type="email"], input[type="text"]').length > 0;
 
         if (hasForms) {
-            // Forms are already ready, send immediate response
             this.sendFormReadyMessage(tabId);
-        } else {
-            // Wait for forms to appear
-            const observer = new MutationObserver((mutations) => {
-                const hasFormsNow = document.querySelectorAll('input[type="password"], input[type="email"], input[type="text"]').length > 0;
-                if (hasFormsNow) {
-                    observer.disconnect();
-                    this.sendFormReadyMessage(tabId);
-                }
-            });
-
-            observer.observe(document.body, {
-                childList: true,
-                subtree: true,
-            });
-
-            // Timeout after 10 seconds
-            setTimeout(() => {
-                observer.disconnect();
-                this.sendFormReadyMessage(tabId);
-            }, 10000);
+            return;
         }
+
+        // Set up mutation observer for dynamic form loading
+        const observer = new MutationObserver((mutations) => {
+            const hasFormsNow = document.querySelectorAll('input[type="password"], input[type="email"], input[type="text"]').length > 0;
+
+            if (!hasFormsNow) return;
+
+            observer.disconnect();
+            this.sendFormReadyMessage(tabId);
+        });
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true,
+            attributes: true,
+            attributeFilter: ["type"], // Watch for input type changes
+        });
+
+        // Timeout after 10 seconds
+        setTimeout(() => {
+            observer.disconnect();
+            // Only send ready message if we actually found forms
+            if (document.querySelectorAll('input[type="password"], input[type="email"], input[type="text"]').length > 0) {
+                this.sendFormReadyMessage(tabId);
+            }
+        }, 10000);
     }
 
     private sendFormReadyMessage(tabId: number): void {
-        // Send message back to the extension
         if (typeof chrome !== "undefined" && chrome.runtime) {
             chrome.runtime.sendMessage({
                 type: "FORM_READY",
