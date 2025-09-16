@@ -383,22 +383,24 @@ export class UIOverlay {
 
     private async handleIconClick(field: FormField): Promise<void> {
         // Prevent multiple simultaneous fetches
-        if (this.isFetchingPasswords) {
-            return;
-        }
+        if (this.isFetchingPasswords) return;
 
         this.currentField = field;
         this.currentFieldType = field.type;
+
         this.hideMenu();
 
         // Disable all icons during fetch
         this.updateAllIconsLoadingState(true);
 
         const website = this.extractHostname(window.location.href);
-        this.showMenuWithLoading(field, website);
 
+        this.showMenuWithLoading(field, website);
         this.isFetchingPasswords = true;
+
         try {
+            // Clear cache for this website before fetching to ensure fresh data
+            this.passwordManager.clearCacheForWebsite(website);
             const passwords = await this.fetchPasswordsWithTimeout(website);
             this.updateMenuWithPasswords(passwords);
         } catch (error) {

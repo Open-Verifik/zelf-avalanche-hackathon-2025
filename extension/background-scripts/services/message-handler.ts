@@ -4,12 +4,20 @@ import { BackgroundCredentialManager } from "./background-credential-manager";
 import { BrowserApiUtil } from "./browser-api-util";
 
 export class MessageHandler {
+    private static instance: MessageHandler;
     private credentialManager: BackgroundCredentialManager;
     private pendingDecryptionRequests?: Map<string, number>;
     private pendingPopupRoute?: string;
     private pendingDecryptionData?: DecryptionRequest;
 
-    constructor(private browserApi: BrowserApiUtil) {
+    public static getInstance(browserApi: BrowserApiUtil): MessageHandler {
+        if (!MessageHandler.instance) {
+            MessageHandler.instance = new MessageHandler(browserApi);
+        }
+        return MessageHandler.instance;
+    }
+
+    private constructor(private browserApi: BrowserApiUtil) {
         this.credentialManager = BackgroundCredentialManager.getInstance(this.browserApi);
     }
 
@@ -113,8 +121,8 @@ export class MessageHandler {
             console.log("MessageHandler: Handling message:", message.type);
             switch (message.type) {
                 case "GET_PASSWORDS":
-                    await this.handleGetPasswords(message.payload || {}, sendResponse);
-
+                    const passwords = await this.credentialManager.getPasswords(message.payload?.website || "");
+                    sendResponse({ success: true, data: passwords });
                     break;
                 case "CREATE_PASSWORD":
                     await this.handleCreatePassword(message.payload || {}, sendResponse);

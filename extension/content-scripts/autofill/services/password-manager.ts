@@ -10,13 +10,10 @@ export class PasswordManager {
     }
 
     public async getPasswordsForWebsite(website: string): Promise<PasswordEntry[]> {
-        if (this.cachedPasswords.has(website)) return this.cachedPasswords.get(website)!;
-
         try {
             const passwords = await this.communicationService.getPasswords(website);
-
+            // Update cache but don't rely on it for retrieval
             this.cachedPasswords.set(website, passwords);
-
             return passwords;
         } catch (error) {
             console.error("Error fetching passwords for website:", website, error);

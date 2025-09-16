@@ -13,7 +13,7 @@ const extensionLifecycle = new ExtensionLifecycle(browserApi);
 extensionLifecycle.initialize();
 
 // Initialize the message handler
-const messageHandler = new MessageHandler(browserApi);
+const messageHandler = MessageHandler.getInstance(browserApi);
 
 if (!browserApi.has("runtime")) {
     console.error("[ZELF_KEYS] Runtime API not available - extension cannot function");
