@@ -8,12 +8,13 @@ import { MatProgressSpinnerModule } from "@angular/material/progress-spinner";
 import { Router, RouterModule } from "@angular/router";
 import { TranslocoModule } from "@jsverse/transloco";
 import * as faceapi from "@vladmandic/face-api";
+import { WebcamComponent, WebcamImage, WebcamInitError, WebcamModule } from "ngx-webcam";
+import { Observable, Subject, takeUntil } from "rxjs";
+
 import { HttpWrapperService } from "app/http-wrapper.service";
 import { Wallet } from "app/wallet";
 import { ZelfLoaderComponent } from "app/zelf-loader/zelf-loader.component";
 import { environment } from "environments/environment";
-import { WebcamComponent, WebcamImage, WebcamInitError, WebcamModule } from "ngx-webcam";
-import { Observable, Subject, takeUntil } from "rxjs";
 import { DataPassingService } from "../../../services/data-passing.service";
 import { WalletService } from "../../../wallet.service";
 
@@ -28,15 +29,15 @@ export interface BiometricData {
     standalone: true,
     imports: [
         CommonModule,
-        FormsModule,
         FlexLayoutModule,
+        FormsModule,
         MatButtonModule,
         MatProgressBarModule,
         MatProgressSpinnerModule,
+        RouterModule,
         TranslocoModule,
         WebcamModule,
         ZelfLoaderComponent,
-        RouterModule,
     ],
     templateUrl: "./data-biometrics.component.html",
     styleUrls: ["./data-biometrics.component.scss"],
@@ -49,6 +50,7 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
 
     @Input() isDecryptMode: boolean = false;
     @Input() itemData: any = {};
+
     @Output() canNavigate: EventEmitter<boolean> = new EventEmitter<boolean>();
     @Output() error: EventEmitter<any> = new EventEmitter<any>();
     @Output() imageCaptured: EventEmitter<string> = new EventEmitter<string>();
@@ -330,10 +332,14 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
         try {
             // Always wait for the wallet service to load the models
             this._walletService.faceapi$.pipe(takeUntil(this.unsubscriber$)).subscribe(async (isLoaded) => {
+                this.canNavigate.emit(false);
+
+                this.camera.isLoading = !isLoaded;
+
                 if (!isLoaded) return;
 
-                this.camera.isLoading = false;
                 await this._setMaxVideoDimensions();
+                this._setupResizeListener();
                 this._startNgxVideoInterval();
             });
         } catch (error) {
@@ -342,22 +348,17 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
         }
     }
 
-    private async _setMaxVideoDimensions(): Promise<void> {
-        const maxWidth = 800;
-        const maxHeight = 600;
-
-        // Set initial video dimensions
-        this.camera.dimensions.video.width = maxWidth;
-        this.camera.dimensions.video.height = maxHeight;
-
-        // Set result dimensions
-        this.camera.dimensions.result.width = maxWidth;
-        this.camera.dimensions.result.height = maxHeight;
-
-        // Initialize face dimensions
-        this.face.video = this._getCenterAndRadius(maxHeight, maxWidth);
-
-        this._changeDetectorRef.markForCheck();
+    private _setupResizeListener(): void {
+        // Use the exact same debounced approach as working version
+        let resizeTimeout: any;
+        window.addEventListener("resize", () => {
+            clearTimeout(resizeTimeout);
+            resizeTimeout = setTimeout(async () => {
+                this.canNavigate.emit(false);
+                await this._setMaxVideoDimensions();
+                this._startNgxVideoInterval();
+            }, 300);
+        });
     }
 
     private _startNgxVideoInterval(): void {
@@ -396,20 +397,16 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
     };
 
     private _setVideoDimensions(videoElement: HTMLVideoElement) {
-        const containerWidth = this.dataBiometricsContainerRef?.nativeElement?.clientWidth || 800;
-        const containerHeight = Math.round(containerWidth * 0.5625);
+        const actualWidth = videoElement.clientWidth;
+        const actualHeight = videoElement.clientHeight;
 
-        videoElement.style.objectFit = "cover";
-        videoElement.style.objectPosition = "center";
-        videoElement.style.transform = "scaleX(1)";
-
-        this.camera.dimensions.video.width = containerWidth;
-        this.camera.dimensions.video.height = containerHeight;
+        this.camera.dimensions.video.height = actualHeight;
+        this.camera.dimensions.video.width = actualWidth;
         this.camera.dimensions.result = { height: 0, width: 0, offsetX: 0, offsetY: 0 };
 
-        this._setResultDimensions("result", containerHeight, containerWidth);
+        this._setResultDimensions("result", actualHeight, actualWidth);
 
-        this.face.video = this._getCenterAndRadius(containerHeight, containerWidth);
+        this.face.video = this._getCenterAndRadius(actualHeight, actualWidth);
 
         const maskResultCanvas = this.maskResultCanvasRef?.nativeElement;
 
@@ -421,42 +418,112 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
         this._changeDetectorRef.markForCheck();
     }
 
+    private _calculateDisplayDimensions() {
+        // Get the bottom sheet container
+        const bottomSheetElement = document.querySelector(".zelf-bottom-sheet-biometrics");
+        if (!bottomSheetElement) return { isLandscape: false, width: 0, height: 0 };
+
+        // Get exact container dimensions
+        const containerHeight = bottomSheetElement.clientHeight;
+        const containerWidth = bottomSheetElement.clientWidth;
+
+        // Always use landscape calculation with conservative height
+        const availableWidth = containerWidth * 0.9; // 90% of width
+        const availableHeight = containerHeight * 0.7; // 70% of height
+
+        const targetAspectRatio = 16 / 9;
+
+        // Always calculate as landscape - start with height and calculate width
+        let finalHeight = availableHeight;
+        let finalWidth = finalHeight * targetAspectRatio;
+
+        // If width exceeds available space, scale down based on width
+        if (finalWidth > availableWidth) {
+            finalWidth = availableWidth;
+            finalHeight = finalWidth / targetAspectRatio;
+        }
+
+        // Round to prevent subpixel rendering issues
+        finalWidth = Math.floor(finalWidth);
+        finalHeight = Math.floor(finalHeight);
+
+        return {
+            isLandscape: true, // Always treat as landscape
+            width: finalWidth,
+            height: finalHeight,
+        };
+    }
+
+    private async _setMaxVideoDimensions(): Promise<void> {
+        const displayDimensions = this._calculateDisplayDimensions();
+
+        this.camera.isLoading = true;
+        this._changeDetectorRef.markForCheck();
+
+        return await new Promise((resolve) => {
+            setTimeout(() => {
+                // Set the video dimensions directly
+                this.camera.dimensions.video.width = displayDimensions.width;
+                this.camera.dimensions.video.height = displayDimensions.height;
+                this.camera.dimensions.video.max = {
+                    width: displayDimensions.width,
+                    height: displayDimensions.height,
+                };
+
+                this.camera.configuration = {
+                    height: { ideal: 1080 }, // Always use landscape height
+                    width: { ideal: 1920 }, // Always use landscape width
+                    facingMode: "user",
+                };
+
+                this.camera.dimensions.result = { height: 0, width: 0, offsetX: 0, offsetY: 0 };
+                this.camera.isLoading = false;
+
+                this.webcamRef?.videoResize();
+
+                this._changeDetectorRef.markForCheck();
+
+                resolve();
+            });
+        });
+    }
+
     private _getCenterAndRadius(
         height: number,
         width: number
     ): { center: { x: number; y: number }; radius: { x: number; y: number }; margin: { x: number; y: number } } {
-        const center = {
-            x: width / 2,
-            y: height / 2,
+        const aspectRatio = 0.75; // Match working version
+
+        const data = {
+            center: {
+                x: width / 2,
+                y: height / 2,
+            },
+            radius: {
+                x: 0,
+                y: 0,
+            },
+            margin: {
+                y: height * 0.05,
+                x: 0,
+            },
         };
 
-        const margin = {
-            y: height * 0.05,
-            x: 0,
-        };
+        data.margin.x = data.margin.y * 0.8;
+        data.radius.y = height * 0.42;
+        data.radius.x = data.radius.y * aspectRatio;
 
-        margin.x = margin.y * 0.8;
-
-        const radius = {
-            y: height * 0.378, // Reduced by 10% (0.42 * 0.9 = 0.378)
-            x: 0,
-        };
-
-        // Use the actual aspect ratio of the container (16:9 = 0.5625) and make it 25% wider
-        const containerAspectRatio = height / width;
-        radius.x = radius.y * containerAspectRatio * 1.25; // 25% wider
-
-        // Ensure the oval fits within the container
-        if (radius.x * 2 >= width) {
-            radius.x = width * 0.48;
-            radius.y = radius.x / containerAspectRatio;
+        if (data.radius.x * 2 >= width) {
+            data.radius.x = width * 0.48;
+            data.radius.y = data.radius.x / aspectRatio;
         }
 
-        return { center, radius, margin };
+        return data;
     }
 
     private _setResultDimensions(type: string, height: number, width: number): void {
         const dimensions = this.camera.dimensions[type as keyof typeof this.camera.dimensions] as any;
+
         if (!dimensions) return;
 
         dimensions.height = height;
@@ -466,38 +533,31 @@ export class DataBiometricsComponent implements OnInit, OnDestroy {
     }
 
     private _drawOvalCenterAndMask(): void {
-        const maskResultCanvas = this.maskResultCanvasRef?.nativeElement;
-        if (!maskResultCanvas) {
-            return;
-        }
-
-        const ctx = maskResultCanvas.getContext("2d");
-        if (!ctx) {
-            return;
-        }
-
         const videoDim = this.camera.dimensions.video;
-        if (!videoDim.width || !videoDim.height) {
-            return;
-        }
-        maskResultCanvas.width = videoDim.width;
+        const maskResultCanvas = this.maskResultCanvasRef?.nativeElement;
+
+        if (!maskResultCanvas || !videoDim.width || !videoDim.height) return;
+
         maskResultCanvas.height = videoDim.height;
+        maskResultCanvas.width = videoDim.width;
+
+        const ctx: CanvasRenderingContext2D = maskResultCanvas.getContext("2d");
+
+        if (!ctx) return;
+
+        ctx.clearRect(0, 0, videoDim.width || 0, videoDim.height || 0);
+
+        ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
+        ctx.fillRect(0, 0, videoDim.width || 0, videoDim.height || 0);
+        ctx.globalCompositeOperation = "destination-out";
 
         const { center, radius } = this.face.video || { center: { x: 0, y: 0 }, radius: { x: 0, y: 0 } };
 
-        ctx.clearRect(0, 0, maskResultCanvas.width, maskResultCanvas.height);
-
-        ctx.fillStyle = "rgba(255, 255, 255, 0.75)";
-        ctx.fillRect(0, 0, maskResultCanvas.width, maskResultCanvas.height);
-
-        ctx.globalCompositeOperation = "destination-out";
-
         ctx.fillStyle = "rgba(255, 255, 255, 1)";
         ctx.beginPath();
-        ctx.ellipse(center.x, center.y, radius.x, radius.y, 0, 0, 2 * Math.PI);
+        ctx.ellipse(center?.x, center?.y, radius.x, radius.y, 0, 0, 2 * Math.PI);
         ctx.fill();
         ctx.closePath();
-
         ctx.globalCompositeOperation = "source-over";
     }
 

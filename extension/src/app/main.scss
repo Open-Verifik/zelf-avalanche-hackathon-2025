@@ -1205,10 +1205,11 @@ h3 {
 .zelf-bottom-sheet-biometrics {
     .mat-bottom-sheet-container {
         background-color: variables.$seaSalt !important;
+        max-height: 90vh !important;
+        max-width: 90vw !important;
+        min-height: 90vh !important;
         padding: 0 !important; // Remove all padding for biometrics
         width: 90vw !important;
-        max-width: 90vw !important;
-        max-height: 90vh !important;
     }
 }
 

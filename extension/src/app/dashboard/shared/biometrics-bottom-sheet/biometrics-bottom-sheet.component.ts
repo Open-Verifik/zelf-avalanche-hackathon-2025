@@ -1,9 +1,9 @@
-import { Component, Inject } from "@angular/core";
 import { CommonModule } from "@angular/common";
+import { Component, Inject } from "@angular/core";
 import { MAT_BOTTOM_SHEET_DATA, MatBottomSheetRef } from "@angular/material/bottom-sheet";
-import { DataBiometricsComponent } from "../data-biometrics/data-biometrics.component";
 
 import { DecryptedItemData } from "../../../models/zelf-key-item.model";
+import { DataBiometricsComponent } from "../data-biometrics/data-biometrics.component";
 
 export interface BiometricResult {
     faceBase64: string;
