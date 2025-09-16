@@ -1,5 +1,7 @@
-const { ethers } = require("ethers");
-require("dotenv").config();
+import { ethers } from "ethers";
+import dotenv from "dotenv";
+
+dotenv.config();
 
 /**
  * Avalanche NFT Module - Mint NFTs from ZelfKey IPFS links
@@ -791,7 +793,7 @@ const getMasterWalletInfo = async (network = "mainnet") => {
     }
 };
 
-module.exports = {
+export {
     mintNFTFromZelfKey,
     batchMintNFTsFromZelfKey,
     getNFTInfo,

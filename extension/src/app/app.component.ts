@@ -8,17 +8,31 @@ import { ChromeService } from "./chrome.service";
 import { HttpWrapperService } from "./http-wrapper.service";
 import { PopoutCommunicationService } from "./services/popout-communication.service";
 import { WalletService } from "./wallet.service";
+import { LicenseService } from "./services/license.service";
+import { ZelfLoaderComponent } from "./zelf-loader/zelf-loader.component";
 
 @Component({
     encapsulation: ViewEncapsulation.None,
     selector: "app-root",
     standalone: false,
     styleUrls: ["./app.component.scss", "./main.scss"],
-    template: `<div class="flex flex-col flex-auto main-div" [ngClass]="isPopout ? 'main-div--popout' : ''">
-        <div class="flex flex-col flex-auto">
-            <router-outlet></router-outlet>
+    template: `
+        <!-- Loading Screen -->
+        <div *ngIf="isLoading" class="app-loading-screen">
+            <zelf-loader [diameter]="120" [absolute]="true"></zelf-loader>
+            <div class="app-loading-text">
+                <h3>Loading ZelfKeys</h3>
+                <p>Initializing your secure environment...</p>
+            </div>
         </div>
-    </div>`,
+
+        <!-- Main App Content -->
+        <div *ngIf="!isLoading" class="flex flex-col flex-auto main-div" [ngClass]="isPopout ? 'main-div--popout' : ''">
+            <div class="flex flex-col flex-auto">
+                <router-outlet></router-outlet>
+            </div>
+        </div>
+    `,
 })
 export class AppComponent implements OnInit, OnDestroy {
     private unsubscriber$ = new Subject<void>();
@@ -26,13 +40,15 @@ export class AppComponent implements OnInit, OnDestroy {
 
     apiUrl: string = environment.apiUrl;
     isPopout: boolean = false;
+    isLoading: boolean = true;
 
     constructor(
         private _httpWrapperService: HttpWrapperService,
         private _walletService: WalletService,
         private _chromeService: ChromeService,
         private _popoutCommunicationService: PopoutCommunicationService,
-        private _router: Router
+        private _router: Router,
+        private _licenseService: LicenseService
     ) {
         this.isPopout = this._chromeService.isPopout;
 
@@ -52,6 +68,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
         // Listen for navigation messages from background script
         this.setupNavigationListener();
+
+        // Hide loading screen after a short delay to ensure license loading is complete
+        this.hideLoadingScreen();
     }
 
     private checkForPendingDecryption(): void {
@@ -115,5 +134,15 @@ export class AppComponent implements OnInit, OnDestroy {
                 this._chromeService.setItem("publicKey", this.publicKey);
                 this._httpWrapperService.setPublicKey(this.publicKey);
             });
+    }
+
+    private async hideLoadingScreen(): Promise<void> {
+        // Wait for license loading to complete
+        await this._licenseService.waitForLicenseLoading();
+
+        // Add a small delay for smooth transition
+        setTimeout(() => {
+            this.isLoading = false;
+        }, 500);
     }
 }

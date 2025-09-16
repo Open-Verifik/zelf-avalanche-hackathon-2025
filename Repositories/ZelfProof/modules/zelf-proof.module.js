@@ -15,46 +15,46 @@ import { getEncryptionInstance } from "./zelf-auth.module.js";
  * @author Miguel Trevino <miguel@zelf.world>
  */
 const encrypt = async (data) => {
-	try {
-		const axios = await getEncryptionInstance();
+    try {
+        const axios = await getEncryptionInstance();
 
-		const { publicData, faceBase64, metadata, password, identifier, requireLiveness, tolerance, verifierKey, livenessLevel, os } = data;
+        const { publicData, faceBase64, metadata, password, identifier, requireLiveness, tolerance, verifierKey, livenessLevel, os } = data;
 
-		const encryptedResponse = await axios.post("/api/zelf-proof/encrypt", {
-			publicData,
-			faceBase64,
-			metadata,
-			password: password || undefined,
-			identifier,
-			requireLiveness,
-			tolerance,
-			verifierKey: verifierKey || undefined,
-			livenessLevel: livenessLevel || "REGULAR",
-			os: os || "DESKTOP",
-		});
+        const encryptedResponse = await axios.post("/api/zelf-proof/encrypt", {
+            publicData,
+            faceBase64,
+            metadata,
+            password: password || undefined,
+            identifier,
+            requireLiveness,
+            tolerance,
+            verifierKey: verifierKey || undefined,
+            livenessLevel: livenessLevel || "REGULAR",
+            os: os || "DESKTOP",
+        });
 
-		const zelfProof = encryptedResponse.data.zelfProof;
+        const zelfProof = encryptedResponse.data.zelfProof;
 
-		return { zelfProof };
-	} catch (exception) {
-		const _error = exception.response?.data;
+        return { zelfProof };
+    } catch (exception) {
+        const _error = exception.response?.data;
 
-		console.log({ exception, data: exception.response?.data });
+        console.log({ exception, data: exception.response?.data });
 
-		let error = new Error(_error?.message || "Something went wrong");
+        let error = new Error(_error?.message || "Something went wrong");
 
-		switch (_error?.code || _error?.message) {
-			case "ERR_INVALID_IMAGE":
-				error.status = 400;
+        switch (_error?.code || _error?.message) {
+            case "ERR_INVALID_IMAGE":
+                error.status = 400;
 
-				break;
+                break;
 
-			default:
-				break;
-		}
+            default:
+                break;
+        }
 
-		throw error;
-	}
+        throw error;
+    }
 };
 
 /**
@@ -73,38 +73,38 @@ const encrypt = async (data) => {
  * @author Miguel Trevino <miguel@zelf.world>
  */
 const encryptQRCode = async (data) => {
-	try {
-		const axios = await getEncryptionInstance();
+    try {
+        const axios = await getEncryptionInstance();
 
-		const { publicData, faceBase64, metadata, password, identifier, requireLiveness, tolerance, verifierKey, os, livenessLevel } = data;
+        const { publicData, faceBase64, metadata, password, identifier, requireLiveness, tolerance, verifierKey, os, livenessLevel } = data;
 
-		const encryptedResponse = await axios.post("/api/zelf-proof/encrypt-qr-code", {
-			publicData,
-			faceBase64,
-			metadata,
-			password: password || undefined,
-			identifier,
-			requireLiveness,
-			livenessLevel: livenessLevel || "REGULAR",
-			tolerance,
-			verifierKey: verifierKey || undefined,
-			os,
-		});
+        const encryptedResponse = await axios.post("/api/zelf-proof/encrypt-qr-code", {
+            publicData,
+            faceBase64,
+            metadata,
+            password: password || undefined,
+            identifier,
+            requireLiveness,
+            livenessLevel: livenessLevel || "REGULAR",
+            tolerance,
+            verifierKey: verifierKey || undefined,
+            os,
+        });
 
-		if (!encryptedResponse?.data) return encryptedResponse;
+        if (!encryptedResponse?.data) return encryptedResponse;
 
-		return encryptedResponse?.data;
-	} catch (exception) {
-		console.log({ exception, data: exception.response?.data });
+        return encryptedResponse?.data;
+    } catch (exception) {
+        console.log({ exception, data: exception.response?.data });
 
-		const error = _formattingError(exception.response?.data);
+        const error = _formattingError(exception.response?.data);
 
-		let _error = new Error(error.message || "Something went wrong");
+        let _error = new Error(error.message || "Something went wrong");
 
-		_error.status = error.status || 500;
+        _error.status = error.status || 500;
 
-		throw _error;
-	}
+        throw _error;
+    }
 };
 
 /**
@@ -119,29 +119,30 @@ const encryptQRCode = async (data) => {
  * @author Miguel Trevino <miguel@zelf.world>
  */
 const decrypt = async (data) => {
-	try {
-		const axios = await getEncryptionInstance();
+    try {
+        const axios = await getEncryptionInstance();
 
-		const { zelfProof, faceBase64, os, password, verifierKey } = data;
+        const { zelfProof, faceBase64, os, password, verifierKey } = data;
 
-		const encryptedResponse = await axios.post("/api/zelf-proof/decrypt", {
-			faceBase64,
-			os,
-			password,
-			zelfProof,
-			verifierKey,
-		});
+        const encryptedResponse = await axios.post("/api/zelf-proof/decrypt", {
+            faceBase64,
+            os,
+            password,
+            zelfProof,
+            verifierKey,
+        });
 
-		return encryptedResponse?.data;
-	} catch (exception) {
-		const error = _formattingError(exception.response?.data);
+        return encryptedResponse?.data;
+    } catch (exception) {
+        console.log({ exception, data: exception.response?.data });
+        const error = _formattingError(exception.response?.data);
 
-		let _error = new Error(error.message);
+        let _error = new Error(error.message);
 
-		_error.status = error.status;
+        _error.status = error.status;
 
-		throw _error;
-	}
+        throw _error;
+    }
 };
 
 /**
@@ -153,26 +154,26 @@ const decrypt = async (data) => {
  * @author Miguel Trevino <miguel@zelf.world>
  */
 const preview = async (data) => {
-	try {
-		const axios = await getEncryptionInstance();
+    try {
+        const axios = await getEncryptionInstance();
 
-		const { zelfProof, verifierKey } = data;
+        const { zelfProof, verifierKey } = data;
 
-		const encryptedResponse = await axios.post("/api/zelf-proof/preview", {
-			zelfProof,
-			verifierKey,
-		});
+        const encryptedResponse = await axios.post("/api/zelf-proof/preview", {
+            zelfProof,
+            verifierKey,
+        });
 
-		return encryptedResponse?.data;
-	} catch (exception) {
-		const error = _formattingError(exception.response?.data);
+        return encryptedResponse?.data;
+    } catch (exception) {
+        const error = _formattingError(exception.response?.data);
 
-		let _error = new Error(error.message);
+        let _error = new Error(error.message);
 
-		_error.status = error.status;
+        _error.status = error.status;
 
-		throw _error;
-	}
+        throw _error;
+    }
 };
 
 /**
@@ -181,19 +182,19 @@ const preview = async (data) => {
  * @returns {Object} Formatted error object
  */
 const _formattingError = (error = {}) => {
-	if (error?.code) {
-		error.code = error.code.toUpperCase();
-	}
+    if (error?.code) {
+        error.code = error.code.toUpperCase();
+    }
 
-	if (error?.message) {
-		error.message = error.message.toUpperCase();
-	}
+    if (error?.message) {
+        error.message = error.message.toUpperCase();
+    }
 
-	if (error?.error) {
-		error.message = error.error;
-	}
+    if (error?.error) {
+        error.message = error.error;
+    }
 
-	return error;
+    return error;
 };
 
 export { encrypt, encryptQRCode, decrypt, preview };

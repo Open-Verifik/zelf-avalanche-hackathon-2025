@@ -78,6 +78,45 @@ const validateOwnership = async (zelfProof, faceBase64, masterPassword) => {
     return decryptedResponse.publicData;
 };
 
+/**
+ * Create and store NFT receipt data to IPFS
+ * @param {Object} NFT - NFT transaction data
+ * @param {string} identifier - Identifier for the NFT
+ * @param {Object} publicData - Public data for categorization
+ * @returns {Promise<Object>} IPFS storage result
+ */
+const createNFTReceipt = async (NFT, identifier, publicData) => {
+    try {
+        if (!NFT) {
+            console.warn("⚠️ No NFT data provided, skipping receipt creation");
+            return null;
+        }
+
+        const NFTJSON = JSON.stringify(NFT, null, 2);
+        const base64Data = Buffer.from(NFTJSON).toString("base64");
+
+        const receiptIPFS = await pinata.pinFile(base64Data, `${identifier}_nft_transaction.json`, "application/json", {
+            transactionHash: NFT.transactionHash,
+            receipt: JSON.stringify({
+                cost: NFT.cost,
+                owner: NFT.owner,
+                contractAddress: NFT.contractAddress,
+                metadataUrl: NFT.metadataUrl,
+                tokenId: NFT.tokenId,
+            }),
+            identifier,
+            metadata: JSON.stringify(NFT.metadata),
+            explorerUrl: NFT.explorerUrl,
+            category: `${publicData.category}_nft_transaction`,
+        });
+
+        return receiptIPFS;
+    } catch (ipfsError) {
+        console.warn("⚠️ Failed to pin NFT receipt to IPFS:", ipfsError.message);
+        return null;
+    }
+};
+
 const _store = async (publicData, metadata, faceBase64, identifier, authToken) => {
     const { zelfQR } = await ZelfProofModule.encryptQRCode({
         publicData,
@@ -89,7 +128,7 @@ const _store = async (publicData, metadata, faceBase64, identifier, authToken) =
         os: "DESKTOP",
     });
 
-    const zelfKey = await ZelfProofModule.encrypt({
+    const { zelfProof } = await ZelfProofModule.encrypt({
         publicData,
         metadata,
         faceBase64,
@@ -105,11 +144,19 @@ const _store = async (publicData, metadata, faceBase64, identifier, authToken) =
         qrCodeIPFS = await pinata.pinFile(zelfQR, `${identifier}.png`, "image/png", {
             ...publicData,
             identifier,
-            zelfProof: zelfKey.zelfProof,
+            zelfProof,
         });
     } catch (ipfsError) {
         console.warn("⚠️ Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
     }
+
+    /**
+     * zelfQR,
+        url: qrCodeIPFS.url,
+        name: identifier,
+        publicData,
+        zelfProof,
+     */
 
     const NFT =
         config.avalanche.createNFT && qrCodeIPFS
@@ -119,38 +166,18 @@ const _store = async (publicData, metadata, faceBase64, identifier, authToken) =
                       url: qrCodeIPFS.url,
                       name: identifier,
                       publicData,
-                      zelfProof: zelfKey.zelfProof,
+                      zelfProof,
                   },
                   authToken
               )
             : null;
 
-    try {
-        const NFTJSON = JSON.stringify(NFT, null, 2);
-
-        const base64Data = Buffer.from(NFTJSON).toString("base64");
-
-        await pinata.pinFile(base64Data, `${identifier}_nft_transaction.json`, "application/json", {
-            transactionHash: NFT.transactionHash,
-            receipt: JSON.stringify({
-                cost: NFT.cost,
-                owner: NFT.owner,
-                contractAddress: NFT.contractAddress,
-                metadataUrl: NFT.metadataUrl,
-                tokenId: NFT.tokenId,
-            }),
-            identifier,
-            metadata: JSON.stringify(NFT.metadata),
-            explorerUrl: NFT.explorerUrl,
-            category: `${publicData.category}_nft_transaction`,
-        });
-    } catch (ipfsError) {
-        console.warn("⚠️ Failed to pin QR code to IPFS, continuing without IPFS:", ipfsError.message);
-    }
+    // Create and store NFT receipt data
+    await createNFTReceipt(NFT, identifier, publicData);
 
     return {
         success: true,
-        zelfProof: zelfKey.zelfProof,
+        zelfProof,
         zelfQR, // Encrypted string
         NFT,
         ipfs: qrCodeIPFS

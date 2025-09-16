@@ -1,6 +1,4 @@
 import { PinataSDK } from "pinata";
-import { Blob } from "buffer";
-import dotenv from "dotenv";
 import FormData from "form-data";
 import axios from "axios";
 
@@ -8,8 +6,8 @@ const pinataJwt = process.env.PINATA_JWT;
 const pinataGateway = process.env.PINATA_GATEWAY_URL;
 
 const pinata = new PinataSDK({
-	pinataJwt,
-	pinataGateway,
+    pinataJwt,
+    pinataGateway,
 });
 
 const os = process.env.ENVOS;
@@ -17,54 +15,54 @@ const os = process.env.ENVOS;
 import * as pinataWeb3 from "pinata-web3";
 
 const web3Instance = new pinataWeb3.PinataSDK({
-	pinataJwt,
-	pinataGateway,
+    pinataJwt,
+    pinataGateway,
 });
 
 const upload = async (base64Image, filename = "image.png", mimeType = "image/png", metadata = {}) => {
-	try {
-		// Upload the file to Pinata
-		const uploadResponse = await pinata.upload.base64(base64Image).addMetadata({
-			name: filename,
-			keyValues: metadata,
-		});
+    try {
+        // Upload the file to Pinata
+        const uploadResponse = await pinata.upload.base64(base64Image).addMetadata({
+            name: filename,
+            keyValues: metadata,
+        });
 
-		const expiresIn = 1800;
+        const expiresIn = 1800;
 
-		const url = await pinata.gateways.createSignedURL({
-			cid: uploadResponse.cid,
-			expires: expiresIn,
-			pinned: false,
-			web3: false,
-		});
+        const url = await pinata.gateways.createSignedURL({
+            cid: uploadResponse.cid,
+            expires: expiresIn,
+            pinned: false,
+            web3: false,
+        });
 
-		return { ...uploadResponse, url, urlExpiresIn: expiresIn, metadata };
-	} catch (error) {
-		console.error("Error uploading file:", error);
-	}
+        return { ...uploadResponse, url, urlExpiresIn: expiresIn, metadata };
+    } catch (error) {
+        console.error("Error uploading file:", error);
+    }
 
-	return null;
+    return null;
 };
 
 const retrieve = async (cid, expires = 1800) => {
-	if (!cid) return null;
+    if (!cid) return null;
 
-	try {
-		const pinnedFiles = await web3Instance.listFiles().cid(cid);
+    try {
+        const pinnedFiles = await web3Instance.listFiles().cid(cid);
 
-		const url = await pinata.gateways.createSignedURL({
-			cid,
-			expires,
-		});
+        const url = await pinata.gateways.createSignedURL({
+            cid,
+            expires,
+        });
 
-		return { url, pinnedFiles };
-	} catch (exception) {
-		const error = new Error(exception.message || "file_not_found");
+        return { url, pinnedFiles };
+    } catch (exception) {
+        const error = new Error(exception.message || "file_not_found");
 
-		error.status = exception.status || 404;
+        error.status = exception.status || 404;
 
-		throw error; // Rethrow to ensure higher-level code catches this.
-	}
+        throw error; // Rethrow to ensure higher-level code catches this.
+    }
 };
 
 /**
@@ -76,107 +74,109 @@ const retrieve = async (cid, expires = 1800) => {
  * @returns ipfs file
  */
 const pinFile = async (base64Image, filename = "image.png", mimeType = "image/png", metadata = {}) => {
-	if (os === "Win") return await pinFileWindows(base64Image, filename, mimeType, metadata);
+    if (os === "Win") return await pinFileWindows(base64Image, filename, mimeType, metadata);
 
-	try {
-		const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, "");
+    try {
+        const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, "");
 
-		// Upload the file to Pinata
-		const uploadResponse = await web3Instance.upload.base64(base64Data).addMetadata({
-			name: filename,
-			keyValues: metadata,
-		});
+        // Upload the file to Pinata
+        const uploadResponse = await web3Instance.upload.base64(base64Data).addMetadata({
+            name: filename,
+            keyValues: metadata,
+        });
 
-		return {
-			url: `https://${pinataGateway}/ipfs/${uploadResponse.IpfsHash}`,
-			...uploadResponse,
-			Keyvalues: undefined,
-			pinned: true,
-			web3: true,
-			name: filename,
-			metadata: uploadResponse.Keyvalues,
-		};
-	} catch (error) {
-		console.error(error);
-	}
+        return {
+            url: `https://${pinataGateway}/ipfs/${uploadResponse.IpfsHash}`,
+            ...uploadResponse,
+            Keyvalues: undefined,
+            pinned: true,
+            web3: true,
+            name: filename,
+            metadata: uploadResponse.Keyvalues,
+        };
+    } catch (error) {
+        console.error(error);
+    }
 
-	return null;
+    return null;
 };
 
 const pinFileWindows = async (base64Image, filename = "image.png", mimeType = "image/png", metadata = {}) => {
-	const PINATA_API_KEY = process.env.PINATA_API_KEY;
+    const PINATA_API_KEY = process.env.PINATA_API_KEY;
 
-	const PINATA_SECRET_API_KEY = process.env.PINATA_API_SECRET;
+    const PINATA_SECRET_API_KEY = process.env.PINATA_SECRET_API_KEY || process.env.PINATA_API_SECRET;
 
-	try {
-		const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, "");
+    try {
+        const base64Data = base64Image.replace(/^data:image\/\w+;base64,/, "");
 
-		const formData = new FormData();
+        const formData = new FormData();
 
-		const buffer = Buffer.from(base64Data, "base64");
-		formData.append("file", buffer, filename);
+        const buffer = Buffer.from(base64Data, "base64");
+        formData.append("file", buffer, filename);
 
-		if (metadata) {
-			formData.append(
-				"pinataMetadata",
-				JSON.stringify({
-					name: filename,
-					keyvalues: metadata,
-				})
-			);
-		}
+        if (metadata) {
+            formData.append(
+                "pinataMetadata",
+                JSON.stringify({
+                    name: filename,
+                    keyvalues: metadata,
+                })
+            );
+        }
 
-		const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
-			headers: {
-				...formData.getHeaders(),
-				pinata_api_key: PINATA_API_KEY,
-				pinata_secret_api_key: PINATA_SECRET_API_KEY,
-			},
-		});
+        const response = await axios.post("https://api.pinata.cloud/pinning/pinFileToIPFS", formData, {
+            headers: {
+                ...formData.getHeaders(),
+                pinata_api_key: PINATA_API_KEY,
+                pinata_secret_api_key: PINATA_SECRET_API_KEY,
+            },
+        });
 
-		const uploadResponse = response.data;
+        const uploadResponse = response.data;
 
-		return {
-			url: `https://${pinataGateway}/ipfs/${uploadResponse.IpfsHash}`,
-			...uploadResponse,
-			pinned: true,
-			web3: true,
-			name: filename,
-			metadata,
-		};
-	} catch (error) {
-		console.error(error);
-		return null;
-	}
+        // Use Pinata gateway or fallback to the working custom gateway
+        const gateway = pinataGateway || "chocolate-occasional-kite-546.mypinata.cloud";
+        return {
+            url: `https://${gateway}/ipfs/${uploadResponse.IpfsHash}`,
+            ...uploadResponse,
+            pinned: true,
+            web3: true,
+            name: filename,
+            metadata,
+        };
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
 };
 
 const filter = async (property = "name", value) => {
-	let files;
+    let files;
 
-	switch (property) {
-		case "name":
-			files = await web3Instance.listFiles().name(value);
-			break;
+    switch (property) {
+        case "name":
+            files = await web3Instance.listFiles().name(value);
+            break;
 
-		default:
-			files = await web3Instance.listFiles().keyValue(property, value);
+        default:
+            files = await web3Instance.listFiles().keyValue(property, value);
 
-			break;
-	}
+            break;
+    }
 
-	if (!files.length) return [];
+    if (!files.length) return [];
 
-	for (let index = 0; index < files.length; index++) {
-		const file = files[index];
+    for (let index = 0; index < files.length; index++) {
+        const file = files[index];
 
-		file.url = `https://${pinataGateway}/ipfs/${file.ipfs_pin_hash}`;
-	}
+        file.url = `https://${pinataGateway}/ipfs/${file.ipfs_pin_hash}`;
+    }
 
-	return files;
+    return files;
 };
 
 const unPinFiles = async (CIDs = []) => {
-	return await web3Instance.unpin(CIDs);
+    return await web3Instance.unpin(CIDs);
 };
 
 export { upload, retrieve, pinFile, pinFileWindows, filter, unPinFiles };
