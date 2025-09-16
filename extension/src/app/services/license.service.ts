@@ -24,6 +24,22 @@ export class LicenseService {
             return this._loadingPromise;
         }
 
+        // Check if license is already loaded in memory
+        if (this._licenseData) {
+            return Promise.resolve();
+        }
+
+        // Check if license exists in localStorage
+        const storedLicense = await this.getLicenseFromStorage();
+
+        if (storedLicense && this._isLicenseValid(storedLicense)) {
+            this._licenseData = storedLicense;
+            console.log("✅ License loaded from localStorage:", storedLicense);
+            return Promise.resolve();
+        } else if (storedLicense && !this._isLicenseValid(storedLicense)) {
+            console.log("⚠️ Stored license is expired, refreshing from server...");
+        }
+
         this._isLoading = true;
         this._loadingPromise = this._loadLicense();
 
@@ -34,17 +50,16 @@ export class LicenseService {
         try {
             const response = await this._httpWrapperService.sendRequest("get", `${environment.keysApiUrl}/api/license/zelfkeys`);
 
-            if (response?.success && response?.data?.license) {
+            if (response?.data?.success && response?.data?.license) {
                 // Save license to localStorage
                 const licenseData = {
                     license: response.data.license,
-                    rawLicense: response.data.rawLicense,
-                    rawZelfAccount: response.data.rawZelfAccount,
                     timestamp: new Date().toISOString(),
                     source: "zelf-main-server",
                 };
 
-                await this._chromeService.setItem("zelfKeysLicense", JSON.stringify(licenseData));
+                await this._chromeService.setItem("zelfKeysLicense", licenseData);
+
                 this._licenseData = licenseData;
                 console.log("✅ License loaded during app initialization:", licenseData);
             }
@@ -97,5 +112,36 @@ export class LicenseService {
         if (this._loadingPromise) {
             await this._loadingPromise;
         }
+    }
+
+    /**
+     * Check if stored license is still valid (not expired)
+     */
+    private _isLicenseValid(licenseData: any): boolean {
+        if (!licenseData || !licenseData.timestamp) {
+            return false;
+        }
+
+        // Check if license is older than 24 hours
+        const licenseTime = new Date(licenseData.timestamp).getTime();
+        const currentTime = new Date().getTime();
+        const twentyFourHours = 24 * 60 * 60 * 1000; // 24 hours in milliseconds
+
+        return currentTime - licenseTime < twentyFourHours;
+    }
+
+    /**
+     * Force refresh license from server (bypasses cache)
+     */
+    async refreshLicense(): Promise<void> {
+        // Clear cached data
+        this._licenseData = null;
+        this._loadingPromise = null;
+
+        // Force reload from server
+        this._isLoading = true;
+        this._loadingPromise = this._loadLicense();
+
+        await this._loadingPromise;
     }
 }

@@ -5,6 +5,8 @@ export const environment = {
     apiUrl: "https://api.zelf.world",
     captchaKey: "6LcAhbIqAAAAANEZltlDqWutQ_kcujZ7IUKIQiK1",
     keysApiUrl: "http://localhost:3010",
+    // Feature flags
+    enableDynamicDomain: false, // Set to true to enable dynamic domain from license
     // apiUrl: "https://api.zelf.world",
     // testnetAddress: "tb1phkg7rlfp8d6zkk699rlacnwyuc9g2jh02ehscztncuew4c4y5mkstxw2c9",
     testnetAddress: "",

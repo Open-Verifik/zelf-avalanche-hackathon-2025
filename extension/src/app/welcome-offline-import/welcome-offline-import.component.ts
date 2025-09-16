@@ -13,6 +13,7 @@ import { CaptchaService } from "app/captcha.service";
 import { WelcomeAvailableContentComponent } from "app/welcome-available/welcome-available-content.component";
 import { ZelfNamePipe } from "app/pipes/zelf-name.pipe";
 import { WalletModel } from "app/wallet";
+import { getCurrentDomain } from "../utils/domain.utils";
 
 @Component({
     imports: [
@@ -41,6 +42,7 @@ export class WelcomeOfflineImportComponent {
     invalidReferral: boolean = false;
     loading: boolean = false;
     loadingReferral: boolean = false;
+    currentDomain: string = "zelf"; // Default fallback
     qrCodeImage = "./assets/images/qr-preload.png";
     referralForm!: UntypedFormGroup;
     zelfNameObject: any;
@@ -56,7 +58,10 @@ export class WelcomeOfflineImportComponent {
         private _zelfNameService: ZelfNameService
     ) {}
 
-    ngOnInit(): void {
+    async ngOnInit(): Promise<void> {
+        // Load current domain from license
+        this.currentDomain = await getCurrentDomain();
+
         this._initForm();
     }
 
@@ -164,7 +169,7 @@ export class WelcomeOfflineImportComponent {
 
         this.loading = true;
 
-        const zelfName = `${this.form.value.zelfName}.zelf`;
+        const zelfName = `${this.form.value.zelfName}.${this.currentDomain}`;
 
         let captchaToken = "";
 
@@ -218,9 +223,9 @@ export class WelcomeOfflineImportComponent {
         this.loadingReferral = true;
 
         const zelfName = referralNameCtrl.value
-            ? referralNameCtrl.value.endsWith(".zelf")
+            ? referralNameCtrl.value.endsWith(`.${this.currentDomain}`)
                 ? referralNameCtrl.value
-                : `${referralNameCtrl.value}.zelf`
+                : `${referralNameCtrl.value}.${this.currentDomain}`
             : "";
 
         let captchaToken = "";

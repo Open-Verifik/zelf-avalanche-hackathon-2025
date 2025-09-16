@@ -14,6 +14,7 @@ import { ChromeService } from "app/chrome.service";
 import { VaultService } from "app/vault.service";
 import { WalletService } from "app/wallet.service";
 import { ZelfNameService } from "app/zelf-name-service.service";
+import { getCurrentDomain } from "../utils/domain.utils";
 
 @Component({
     animations: [swipeLeft],
@@ -31,6 +32,7 @@ export class WelcomeOnboardingComponent implements OnInit, OnDestroy, AfterConte
     form!: UntypedFormGroup;
     loading: boolean = false;
     showHomeButton: boolean = false;
+    currentDomain: string = "zelf"; // Default fallback
 
     constructor(
         private _captchaService: CaptchaService,
@@ -63,6 +65,9 @@ export class WelcomeOnboardingComponent implements OnInit, OnDestroy, AfterConte
 
     async ngOnInit(): Promise<void> {
         await this._walletService.setWalletsToColdStorage();
+
+        // Load current domain from license
+        this.currentDomain = await getCurrentDomain();
 
         this._initCarousel();
     }
@@ -134,7 +139,7 @@ export class WelcomeOnboardingComponent implements OnInit, OnDestroy, AfterConte
 
         this.loading = true;
 
-        const zelfName = `${this.form.value.zelfName}.zelf`.toLowerCase();
+        const zelfName = `${this.form.value.zelfName}.${this.currentDomain}`.toLowerCase();
 
         let captchaToken = "";
 

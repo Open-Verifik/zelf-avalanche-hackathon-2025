@@ -3,6 +3,7 @@ import { Component, Input } from "@angular/core";
 
 @Component({
     selector: "zelf-loader",
+    standalone: true,
     imports: [NgClass, NgStyle],
     templateUrl: "./zelf-loader.component.html",
     styleUrl: "./zelf-loader.component.scss",

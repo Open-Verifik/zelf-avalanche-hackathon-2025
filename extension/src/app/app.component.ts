@@ -11,6 +11,8 @@ import { AutofillIntegrationService } from "./services/autofill-integration.serv
 import { PopoutCommunicationService } from "./services/popout-communication.service";
 import { WalletService } from "./wallet.service";
 import { LicenseService } from "./services/license.service";
+import { DomainService } from "./services/domain.service";
+import { initializeDomainService } from "./utils/domain.utils";
 
 @Component({
     encapsulation: ViewEncapsulation.None,
@@ -50,7 +52,8 @@ export class AppComponent implements OnInit, OnDestroy {
         private _router: Router,
         private _licenseService: LicenseService,
         private _walletService: WalletService,
-        private _injector: Injector
+        private _injector: Injector,
+        private _domainService: DomainService
     ) {
         this._initializeRequiredServices();
 
@@ -63,6 +66,9 @@ export class AppComponent implements OnInit, OnDestroy {
 
     ngOnInit(): void {
         this._getPublicKey();
+
+        // Initialize domain service
+        // initializeDomainService(this._domainService);
 
         // Check if we're in a popup and have pending decryption data
         this.checkForPendingDecryption();
@@ -133,9 +139,12 @@ export class AppComponent implements OnInit, OnDestroy {
         // Wait for license loading to complete
         await this._licenseService.waitForLicenseLoading();
 
-        // Add a small delay for smooth transition
+        // If license was loaded from cache, show it immediately
+        // If loaded from server, add a small delay for smooth transition
+        const delay = this._licenseService.hasLicense() ? 100 : 500;
+
         setTimeout(() => {
             this.isLoading = false;
-        }, 500);
+        }, delay);
     }
 }

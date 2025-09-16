@@ -10,6 +10,7 @@ import { ChromeService } from "app/chrome.service";
 import { WalletModel } from "app/wallet";
 import { WalletService } from "app/wallet.service";
 import { ZelfNameService } from "app/zelf-name-service.service";
+import { getCurrentDomain } from "../utils/domain.utils";
 
 @Component({
     imports: [
@@ -39,6 +40,7 @@ export class WelcomeRecoverComponent implements OnInit {
     zelfName: string = "";
     oldZelfNameObject: any;
     newZelfNameObject: any;
+    currentDomain: string = "zelf"; // Default fallback
 
     constructor(
         private _captchaService: CaptchaService,
@@ -52,6 +54,9 @@ export class WelcomeRecoverComponent implements OnInit {
     }
 
     async ngOnInit(): Promise<void> {
+        // Load current domain from license
+        this.currentDomain = await getCurrentDomain();
+
         this.oldZelfNameObject = new WalletModel(await this._zelfNameService.getZelfNameObject());
 
         if (!this.oldZelfNameObject?.available) {
@@ -152,7 +157,7 @@ export class WelcomeRecoverComponent implements OnInit {
 
         this.form.patchValue({ zelfName: query });
 
-        this.newZelfNameObject = await this._queryForZelfObject(query + ".zelf");
+        this.newZelfNameObject = await this._queryForZelfObject(query + `.${this.currentDomain}`);
     }
 
     returnToForm(): void {
@@ -172,11 +177,11 @@ export class WelcomeRecoverComponent implements OnInit {
 
         if (!query) return;
 
-        this.newZelfNameObject = await this._queryForZelfObject(query + ".zelf");
+        this.newZelfNameObject = await this._queryForZelfObject(query + `.${this.currentDomain}`);
     }
 
     async startReservation(): Promise<void> {
-        await this._zelfNameService.setNewZelfName(this.newZelfNameObject?.name || this.form.value.zelfName + ".zelf");
+        await this._zelfNameService.setNewZelfName(this.newZelfNameObject?.name || this.form.value.zelfName + `.${this.currentDomain}`);
         await this._zelfNameService.setFlow("recover");
 
         this._router.navigate(["/security/password"], { queryParams: { return: "/welcome/recover" } });

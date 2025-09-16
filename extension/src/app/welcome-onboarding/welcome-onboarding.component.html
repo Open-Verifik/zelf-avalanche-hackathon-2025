@@ -53,7 +53,7 @@
                 autocomplete="off"
             />
 
-            <p class="zelf-input__postfix">.zelf</p>
+            <p class="zelf-input__postfix">{{ currentDomain }}</p>
 
             <button mat-icon-button type="submit" class="zelf-icon-button zelf-icon-button--black" [disabled]="form.invalid || loading">
                 <ng-container *ngIf="!loading">
