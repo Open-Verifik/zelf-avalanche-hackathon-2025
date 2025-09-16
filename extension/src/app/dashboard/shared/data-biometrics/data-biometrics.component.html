@@ -39,11 +39,14 @@
                 <canvas #maskResult class="data-biometrics-container__face-mask data-biometrics-container__face-mask--full-width"></canvas>
 
                 <canvas #toSend hidden="true"></canvas>
+            </div>
 
-                <!-- Loading Overlay -->
-                <div *ngIf="response.isLoading" class="data-biometrics-container__loading-overlay" fxLayout="column" fxLayoutAlign="center center">
-                    <zelf-loader [diameter]="120"></zelf-loader>
-                    <div class="data-biometrics-container__processing-message">Processing your biometric data...</div>
+            <!-- Loading Overlay -->
+            <div *ngIf="response.isLoading" class="data-biometrics-container__loading-overlay" fxLayout="column" fxLayoutAlign="center center">
+                <zelf-loader [diameter]="120"></zelf-loader>
+
+                <div class="data-biometrics-container__processing-message">
+                    {{ response.isLoading ? "Processing your biometric data..." : "Analyzing your face..." }}
                 </div>
             </div>
 

@@ -30,7 +30,13 @@ export interface DetectedForm {
 }
 
 export interface AutofillMessage {
-    type: "GET_PASSWORDS" | "DECRYPT_PASSWORD" | "CREATE_PASSWORD" | "AUTHENTICATE" | "OPEN_BIOMETRICS_MODAL" | "FILL_PASSWORD";
+    type:
+        | "autofill:service_worker.request_passwords"
+        | "DECRYPT_PASSWORD"
+        | "CREATE_PASSWORD"
+        | "AUTHENTICATE"
+        | "OPEN_BIOMETRICS_MODAL"
+        | "FILL_PASSWORD";
     payload?: any;
 }
 

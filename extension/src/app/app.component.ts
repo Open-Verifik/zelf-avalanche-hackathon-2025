@@ -1,4 +1,4 @@
-import { Component, OnDestroy, OnInit, ViewEncapsulation } from "@angular/core";
+import { Component, Injector, OnDestroy, OnInit, ViewEncapsulation } from "@angular/core";
 import { Router } from "@angular/router";
 import { Subject, takeUntil } from "rxjs";
 
@@ -6,6 +6,8 @@ import { environment } from "environments/environment";
 
 import { ChromeService } from "./chrome.service";
 import { HttpWrapperService } from "./http-wrapper.service";
+import { AutofillDataService } from "./services/autofill-data.service";
+import { AutofillIntegrationService } from "./services/autofill-integration.service";
 import { PopoutCommunicationService } from "./services/popout-communication.service";
 import { WalletService } from "./wallet.service";
 
@@ -21,19 +23,22 @@ import { WalletService } from "./wallet.service";
     </div>`,
 })
 export class AppComponent implements OnInit, OnDestroy {
-    private unsubscriber$ = new Subject<void>();
     private publicKey!: string;
+    private unsubscriber$ = new Subject<void>();
 
     apiUrl: string = environment.apiUrl;
     isPopout: boolean = false;
 
     constructor(
-        private _httpWrapperService: HttpWrapperService,
-        private _walletService: WalletService,
         private _chromeService: ChromeService,
+        private _httpWrapperService: HttpWrapperService,
         private _popoutCommunicationService: PopoutCommunicationService,
-        private _router: Router
+        private _router: Router,
+        private _walletService: WalletService,
+        private _injector: Injector
     ) {
+        this._initializeRequiredServices();
+
         this.isPopout = this._chromeService.isPopout;
 
         this._chromeService.isPopout$.pipe(takeUntil(this.unsubscriber$)).subscribe((isPopout) => {
@@ -52,6 +57,11 @@ export class AppComponent implements OnInit, OnDestroy {
 
         // Listen for navigation messages from background script
         this.setupNavigationListener();
+    }
+
+    ngOnDestroy(): void {
+        this.unsubscriber$.next();
+        this.unsubscriber$.complete();
     }
 
     private checkForPendingDecryption(): void {
@@ -73,31 +83,15 @@ export class AppComponent implements OnInit, OnDestroy {
     }
 
     private setupNavigationListener(): void {
-        if (typeof chrome !== "undefined" && chrome.runtime) {
-            chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-                if (message.type === "NAVIGATE_TO_ROUTE") {
-                    const route = message.payload?.route;
-                    if (route) {
-                        console.log("AppComponent: Received navigation request to:", route);
-                        this._router.navigate([`/${route}`]);
-                    }
-                    sendResponse({ success: true });
-                } else if (message.type === "PASSWORD_DECRYPTOR_DATA") {
-                    console.log("AppComponent: Received decryption data from background script:", message.payload);
-                    // Set the decryption data in the service
-                    this._popoutCommunicationService.setDecryptionData(message.payload);
-                    // Navigate to the decrypt route
-                    this._router.navigateByUrl("/passwords/decrypt", { replaceUrl: true });
-                    sendResponse({ success: true });
-                }
-                return true;
-            });
-        }
+        if (typeof chrome === "undefined" || !chrome.runtime) return;
     }
 
-    ngOnDestroy(): void {
-        this.unsubscriber$.next();
-        this.unsubscriber$.complete();
+    /**
+     * These services are required and must be initialized along with the application.
+     */
+    private _initializeRequiredServices(): void {
+        this._injector.get(AutofillIntegrationService);
+        this._injector.get(AutofillDataService);
     }
 
     _getPublicKey(): void {

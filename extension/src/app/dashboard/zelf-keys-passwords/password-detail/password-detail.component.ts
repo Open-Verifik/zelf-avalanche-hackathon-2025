@@ -37,14 +37,14 @@ export class PasswordDetailComponent extends CopyToClipboardBase implements OnIn
 
     constructor(
         private _autofillIntegrationService: AutofillIntegrationService,
+        private _bottomSheet: MatBottomSheet,
         private _passwordDataService: PasswordDataService,
         private _router: Router,
         private _scrollToSectionService: ScrollToSectionService,
         private _walletService: WalletService,
         public _chromeService: ChromeService,
         public _snackBar: MatSnackBar,
-        public _translocoService: TranslocoService,
-        private _bottomSheet: MatBottomSheet
+        public _translocoService: TranslocoService
     ) {
         super(_chromeService, _snackBar, _translocoService);
     }
@@ -83,7 +83,7 @@ export class PasswordDetailComponent extends CopyToClipboardBase implements OnIn
         }
     }
 
-    onDecryptClick(): void {
+    onDecryptClick(prefill: boolean = false): void {
         const bottomSheetRef = this._bottomSheet.open(BiometricsBottomSheetComponent, {
             backdropClass: "zelf-backdrop",
             panelClass: "zelf-bottom-sheet-biometrics",
@@ -95,34 +95,29 @@ export class PasswordDetailComponent extends CopyToClipboardBase implements OnIn
         });
 
         bottomSheetRef.afterDismissed().subscribe((result: BiometricResult | undefined) => {
-            if (result) {
-                this.onBiometricsSuccess(result);
-            }
-        });
-    }
+            if (!result) return;
 
-    onBiometricsSuccess(biometricData: BiometricResult): void {
-        if (biometricData.retrievedData) {
-            // The retrievedData is now a DecryptedItemData structure
-            const decryptedItem = biometricData.retrievedData;
+            const decryptedItem = result.retrievedData;
+
+            if (!decryptedItem) return;
 
             this.decryptedData = {
-                username: decryptedItem.metadata.username || "",
-                password: decryptedItem.metadata.password || "",
-                website: (decryptedItem.publicData as any)?.website || "",
                 category: decryptedItem.publicData?.category,
                 difficulty: decryptedItem.difficulty,
+                password: decryptedItem.metadata.password || "",
                 timestamp: decryptedItem.publicData?.timestamp,
                 type: (decryptedItem.publicData as any)?.type,
+                username: decryptedItem.metadata.username || "",
+                website: (decryptedItem.publicData as any)?.website || "",
                 zelfName: decryptedItem.publicData?.zelfName,
             };
 
-            // Trigger scroll to decrypted content section
-            this._scrollToSectionService.scrollToSection("password-decrypted-content", "password");
-        } else {
-            console.error("No retrieved data found in biometrics response");
-            this.error = "Failed to retrieve password data";
-        }
+            if (prefill) {
+                this.prefillWebsite();
+            } else {
+                this._scrollToSectionService.scrollToSection("password-decrypted-content", "password");
+            }
+        });
     }
 
     async decryptPassword(biometricData: any): Promise<void> {

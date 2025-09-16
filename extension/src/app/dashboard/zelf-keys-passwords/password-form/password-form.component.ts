@@ -2,30 +2,30 @@ import { CommonModule } from "@angular/common";
 import { ChangeDetectorRef, Component, DestroyRef, OnInit } from "@angular/core";
 import { takeUntilDestroyed } from "@angular/core/rxjs-interop";
 import { FormBuilder, FormGroup, ReactiveFormsModule, Validators } from "@angular/forms";
+import { MatBottomSheet } from "@angular/material/bottom-sheet";
 import { ActivatedRoute, Router, RouterModule } from "@angular/router";
 import { TranslocoModule } from "@jsverse/transloco";
-import { MatBottomSheet } from "@angular/material/bottom-sheet";
+
 import { Wallet } from "app/wallet";
 import { WalletService } from "app/wallet.service";
 import { ChromeService } from "../../../chrome.service";
 import { AutofillDataService, AutofillUrlInfo } from "../../../services/autofill-data.service";
 import { DataPassingService } from "../../../services/data-passing.service";
 import {
-    BiometricsBottomSheetComponent,
     BiometricResult,
+    BiometricsBottomSheetComponent,
     BiometricsBottomSheetData,
 } from "../../shared/biometrics-bottom-sheet/biometrics-bottom-sheet.component";
 
 @Component({
+    imports: [CommonModule, TranslocoModule, RouterModule, ReactiveFormsModule],
     selector: "app-password-form",
     standalone: true,
-    imports: [CommonModule, TranslocoModule, RouterModule, ReactiveFormsModule],
-    templateUrl: "./password-form.component.html",
     styleUrls: ["./password-form.component.scss"],
+    templateUrl: "./password-form.component.html",
 })
 export class PasswordFormComponent implements OnInit {
     passwordForm!: FormGroup;
-
     view?: string;
     shareables: any;
     wallet!: Wallet;
@@ -62,14 +62,14 @@ export class PasswordFormComponent implements OnInit {
 
     private initializeForm(): void {
         this.passwordForm = this.formBuilder.group({
-            url: ["https://google.com", [Validators.required]],
-            title: ["Google Personal", [Validators.required]],
             email: ["juliet@google.com", [Validators.required, Validators.email]],
-            password: ["mypassword123", [Validators.required]],
-            notes: ["My google account"],
             folder: ["My Favorites"],
             insideFolder: [true],
             masterPassword: [""],
+            notes: ["My google account"],
+            password: ["mypassword123", [Validators.required]],
+            title: ["Google Personal", [Validators.required]],
+            url: ["https://google.com", [Validators.required]],
         });
 
         // Subscribe to form changes to update validation
@@ -149,43 +149,35 @@ export class PasswordFormComponent implements OnInit {
         this.router.navigate(["/dashboard/passwords"]);
     }
 
-    onBiometricsSuccess(biometricData: BiometricResult): void {
-        // Navigate to result page after successful biometrics
+    onBiometricsSuccess(): void {
         this.router.navigate(["/dashboard/passwords/result"]);
     }
 
-    onBiometricsCancel(): void {
-        // Bottom sheet handles its own dismissal
-    }
-
     async onSave(): Promise<void> {
-        if (!this.formValid) {
-            return;
-        }
+        if (!this.formValid) return;
 
         const formValue = this.passwordForm.value;
 
-        // Transform password data to match backend API expectations
         this.transformedPasswordData = {
-            url: formValue.url,
-            title: formValue.title,
             email: formValue.email,
-            password: formValue.password,
-            notes: formValue.notes,
             folder: formValue.folder,
             insideFolder: formValue.insideFolder,
             masterPassword: formValue.masterPassword,
+            notes: formValue.notes,
+            password: formValue.password,
+            title: formValue.title,
             type: "passwords",
+            url: formValue.url,
         };
 
         await this.dataPassingService.storeData("passwords", this.transformedPasswordData);
 
-        // Show biometrics bottom sheet instead of navigating
         this._openBiometricsBottomSheet();
     }
 
     private setupAutofillSubscription(): void {
         this.autofillDataService.urlInfo$.pipe(takeUntilDestroyed(this._destroyRef)).subscribe((urlInfo: AutofillUrlInfo | null) => {
+            console.log(`🚀 ~ PasswordFormComponent ~ setupAutofillSubscription ~ urlInfo:`, urlInfo);
             if (!urlInfo) return;
 
             this.populateFormFromAutofill(urlInfo);
@@ -195,14 +187,13 @@ export class PasswordFormComponent implements OnInit {
     }
 
     private populateFormFromAutofill(urlInfo: AutofillUrlInfo): void {
-        // Update the form with autofill data
         this.passwordForm.patchValue({
             url: urlInfo.href,
             title: urlInfo.title || this.generateTitleFromUrl(urlInfo),
         });
 
-        // Trigger change detection
         this._changeDetectorRef.detectChanges();
+
         this.checkFormValidity();
     }
 
@@ -224,11 +215,9 @@ export class PasswordFormComponent implements OnInit {
         });
 
         bottomSheetRef.afterDismissed().subscribe((result: BiometricResult | undefined) => {
-            if (result) {
-                this.onBiometricsSuccess(result);
-            } else {
-                this.onBiometricsCancel();
-            }
+            if (!result) return;
+
+            this.onBiometricsSuccess();
         });
     }
 }

@@ -10,15 +10,11 @@ export class PasswordManager {
     }
 
     public async getPasswordsForWebsite(website: string): Promise<PasswordEntry[]> {
-        // Check cache first
-        if (this.cachedPasswords.has(website)) {
-            return this.cachedPasswords.get(website)!;
-        }
+        if (this.cachedPasswords.has(website)) return this.cachedPasswords.get(website)!;
 
         try {
             const passwords = await this.communicationService.getPasswords(website);
 
-            // Cache the results
             this.cachedPasswords.set(website, passwords);
 
             return passwords;
@@ -31,13 +27,13 @@ export class PasswordManager {
     public async decryptPassword(passwordId: string): Promise<{ username: string; password: string } | null> {
         try {
             const result = await this.communicationService.decryptPassword(passwordId);
-            if (result && result.metadata) {
-                return {
-                    username: result.metadata.username,
-                    password: result.metadata.password,
-                };
-            }
-            return null;
+
+            if (!result || !result.metadata) return null;
+
+            return {
+                username: result.metadata.username,
+                password: result.metadata.password,
+            };
         } catch (error) {
             console.error("Error decrypting password:", error);
             return null;

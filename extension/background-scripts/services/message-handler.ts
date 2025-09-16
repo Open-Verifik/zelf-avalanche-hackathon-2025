@@ -1,3 +1,4 @@
+import { AutofillMessage } from "@shared/types/autofill.types";
 import { DecryptionRequest, MessagePayload, MessageSender, SendResponse } from "../../content-scripts/autofill/types/autofill.types";
 import { BackgroundCredentialManager } from "./background-credential-manager";
 import { BrowserApiUtil } from "./browser-api-util";
@@ -99,7 +100,11 @@ export class MessageHandler {
         }
     }
 
-    async handleAutofillMessage(message: { type: string; payload?: MessagePayload }, sender: MessageSender, sendResponse: SendResponse) {
+    async handleAutofillMessage(
+        message: { type: AutofillMessage["type"]; payload?: MessagePayload },
+        sender: MessageSender,
+        sendResponse: SendResponse
+    ) {
         const timeout = setTimeout(() => {
             sendResponse({ success: false, error: "Request timeout" });
         }, 8000);
@@ -152,6 +157,7 @@ export class MessageHandler {
                 case "POPUP_READY":
                     if (this.pendingPopupRoute) {
                         this.navigatePopupToRoute(this.pendingPopupRoute);
+
                         this.pendingPopupRoute = undefined;
                     }
 
@@ -160,6 +166,10 @@ export class MessageHandler {
                     }
 
                     sendResponse({ success: true });
+
+                    break;
+                case "WAIT_FOR_FORM_READY":
+                    await this.handleWaitForFormReady(message.payload || {}, sender, sendResponse);
 
                     break;
                 case "FORM_READY":
@@ -190,20 +200,16 @@ export class MessageHandler {
 
     private async handleCreatePassword(payload: MessagePayload, sendResponse: SendResponse) {
         try {
-            // Get the URL info from the message payload
             const urlInfo = payload?.urlInfo || null;
 
-            // Open the extension tab first
             const tabId = await this.openExtensionUI("dashboard/passwords/new");
 
             if (tabId) {
-                // Wait for tab to be ready, then send message to Angular app
                 await this.waitForTabAndSendMessage(tabId, {
-                    type: "AUTOFILL_CREATE_PASSWORD_DATA",
+                    type: "CREATE_PASSWORD",
                     payload: { urlInfo },
                 });
 
-                // Notify content scripts that service worker is ready after opening extension UI
                 this.notifyContentScriptsServiceWorkerReady();
             }
 
@@ -216,6 +222,7 @@ export class MessageHandler {
     private async handleAuthenticate(sendResponse: SendResponse) {
         try {
             const isAuthenticated = await this.credentialManager.isAuthenticated();
+
             sendResponse({ success: isAuthenticated });
         } catch (error) {
             sendResponse({ success: false, error: (error as Error).message });
@@ -224,10 +231,8 @@ export class MessageHandler {
 
     private async handleOpenBiometricsModal(payload: MessagePayload, sender: MessageSender) {
         try {
-            // Open the extension popup/sidebar to the biometrics modal
             await this.openExtensionUI("biometrics");
 
-            // Notify content scripts that service worker is ready after opening extension UI
             this.notifyContentScriptsServiceWorkerReady();
         } catch (error) {
             console.error("Error opening biometrics modal:", error);
@@ -294,6 +299,7 @@ export class MessageHandler {
 
             if (page === "dashboard/passwords/decrypt" || page === "passwords/decrypt") {
                 this.pendingPopupRoute = page;
+
                 return this.openPopup();
             }
 
@@ -389,6 +395,33 @@ export class MessageHandler {
         return newTab.id;
     }
 
+    /**
+     * Handle wait for form ready request
+     * Forwards the request to the content script of the specified tab
+     */
+    private async handleWaitForFormReady(payload: MessagePayload, sender: MessageSender, sendResponse: SendResponse): Promise<void> {
+        try {
+            if (!sender.tab?.id) {
+                throw new Error("No tab ID provided for form wait request");
+            }
+
+            const tabs = this.browserApi.tabs;
+            if (!tabs) {
+                throw new Error("Tabs API not available");
+            }
+
+            await (tabs as any).sendMessage(sender.tab.id, {
+                type: "WAIT_FOR_FORM_READY",
+                payload,
+            });
+
+            sendResponse({ success: true });
+        } catch (error) {
+            console.error("MessageHandler: Error handling wait for form ready:", error);
+            sendResponse({ success: false, error: (error as Error).message });
+        }
+    }
+
     private async handleFormReady(payload: MessagePayload, sendResponse: SendResponse) {
         try {
             console.log("MessageHandler: Form ready for tab:", payload.tabId);
@@ -400,6 +433,17 @@ export class MessageHandler {
                     type: "FORM_READY",
                     payload: payload,
                 });
+
+                // If we have fill data for this tab, send it to the content script
+                if (payload.tabId) {
+                    const tabs = this.browserApi.tabs;
+                    if (tabs) {
+                        await (tabs as any).sendMessage(payload.tabId, {
+                            type: "FILL_PASSWORD",
+                            payload: payload,
+                        });
+                    }
+                }
             }
 
             sendResponse({ success: true });
