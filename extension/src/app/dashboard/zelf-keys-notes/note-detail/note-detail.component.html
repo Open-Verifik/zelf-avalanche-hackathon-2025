@@ -8,21 +8,21 @@
                 />
             </svg>
         </button>
-        <h2 class="note-detail__title">Note Details</h2>
+        <h2 class="note-detail__title">{{ "billing.notes.detail.title" | transloco }}</h2>
     </div>
 
     <!-- Loading State -->
     <div *ngIf="loading" class="loading-state">
         <div class="spinner"></div>
-        <p>Loading note details...</p>
+        <p>{{ "billing.notes.detail.loading" | transloco }}</p>
     </div>
 
     <!-- Error State -->
     <div *ngIf="error && !loading" class="error-state">
         <div class="icon">⚠️</div>
-        <h3>Error loading note</h3>
+        <h3>{{ "billing.notes.detail.error.title" | transloco }}</h3>
         <p>{{ error }}</p>
-        <button class="btn-secondary" (click)="onBackToList()">Go Back</button>
+        <button class="btn-secondary" (click)="onBackToList()">{{ "billing.notes.detail.error.go_back" | transloco }}</button>
     </div>
 
     <!-- Note Details -->
@@ -32,8 +32,8 @@
             <div class="note-detail__header-info">
                 <div class="note-detail__icon">📝</div>
                 <div class="note-detail__title-info">
-                    <h3 class="note-detail__note-title">{{ note.publicData.title || "Untitled Note" }}</h3>
-                    <p class="note-detail__subtitle">{{ note.publicData.folder || "No folder" }}</p>
+                    <h3 class="note-detail__note-title">{{ note.publicData.title || ("billing.notes.detail.untitled" | transloco) }}</h3>
+                    <p class="note-detail__subtitle">{{ note.publicData.folder || ("billing.notes.detail.no_folder" | transloco) }}</p>
                 </div>
             </div>
         </div>
@@ -45,21 +45,21 @@
             [disabled]="decrypting"
             *ngIf="!showBiometrics"
         >
-            {{ decrypting ? "Decrypting..." : "Decrypt Note" }}
+            {{ decrypting ? ("billing.notes.detail.decrypt.decrypting" | transloco) : ("billing.notes.detail.decrypt.button" | transloco) }}
         </button>
 
         <!-- Note Information -->
         <div class="note-detail__info-section">
-            <h4 class="note-detail__section-title">Note Information</h4>
+            <h4 class="note-detail__section-title">{{ "billing.notes.detail.info.title" | transloco }}</h4>
 
             <div class="zelf-action-row">
-                <p class="zelf-action-row__label">Note ID</p>
+                <p class="zelf-action-row__label">{{ "billing.notes.detail.info.note_id" | transloco }}</p>
                 <div class="zelf-action-row__value note-detail__id-field">
                     <span class="note-detail__hash">{{ note.id || "N/A" }}</span>
                     <button
                         class="zelf-icon-button zelf-icon-button--40 zelf-icon-button--anti-flash-white zelf-icon-button--border-soft"
                         (click)="onCopyNoteId()"
-                        title="Copy note ID"
+                        [title]="'billing.notes.detail.info.copy_id' | transloco"
                     >
                         <ng-container *ngTemplateOutlet="clipboardIcon"></ng-container>
                     </button>
@@ -67,21 +67,21 @@
             </div>
 
             <div class="zelf-action-row">
-                <p class="zelf-action-row__label">Type</p>
+                <p class="zelf-action-row__label">{{ "billing.notes.detail.info.type" | transloco }}</p>
                 <div class="zelf-action-row__value">
                     <span>{{ note.publicData.type || "N/A" }}</span>
                 </div>
             </div>
 
             <div class="zelf-action-row">
-                <p class="zelf-action-row__label">Folder</p>
+                <p class="zelf-action-row__label">{{ "billing.notes.detail.info.folder" | transloco }}</p>
                 <div class="zelf-action-row__value">
-                    <span>{{ note.publicData.folder || "No folder" }}</span>
+                    <span>{{ note.publicData.folder || ("billing.notes.detail.no_folder" | transloco) }}</span>
                 </div>
             </div>
 
             <div class="note-detail__image-row">
-                <h4 class="note-detail__section-title">ZelfProof</h4>
+                <h4 class="note-detail__section-title">{{ "billing.notes.detail.zelfproof.title" | transloco }}</h4>
                 <div class="note-detail__image-container">
                     <img [src]="note.url" [alt]="note.publicData.title || 'Note image'" class="note-detail__image" (error)="onImageError($event)" />
                 </div>
@@ -94,7 +94,7 @@
                                     fill="#181818"
                                 />
                             </svg>
-                            <span>Download ZelfProof</span>
+                            <span>{{ "billing.notes.detail.zelfproof.download" | transloco }}</span>
                         </div>
                     </button>
                 </div>
@@ -103,16 +103,18 @@
 
         <!-- Decrypted Content -->
         <div *ngIf="decryptedData" class="note-detail__decrypted-section" id="note-decrypted-content">
-            <h4 class="note-detail__section-title">Decrypted Content</h4>
+            <h4 class="note-detail__section-title">{{ "billing.notes.detail.decrypted.title" | transloco }}</h4>
 
             <div class="zelf-action-row">
-                <p class="zelf-action-row__label">Title</p>
+                <p class="zelf-action-row__label">{{ "billing.notes.detail.decrypted.title_field" | transloco }}</p>
                 <div class="zelf-action-row__value note-detail__title-field">
-                    <span class="note-detail__content-text">{{ decryptedData.title || "No title" }}</span>
+                    <span class="note-detail__content-text">{{
+                        decryptedData.title || ("billing.notes.detail.decrypted.no_title" | transloco)
+                    }}</span>
                     <button
                         class="zelf-icon-button zelf-icon-button--40 zelf-icon-button--anti-flash-white zelf-icon-button--border-soft"
                         (click)="onCopyNoteTitle()"
-                        title="Copy title"
+                        [title]="'billing.notes.detail.decrypted.copy_title' | transloco"
                     >
                         <ng-container *ngTemplateOutlet="clipboardIcon"></ng-container>
                     </button>
@@ -120,13 +122,15 @@
             </div>
 
             <div class="zelf-action-row">
-                <p class="zelf-action-row__label">Content</p>
+                <p class="zelf-action-row__label">{{ "billing.notes.detail.decrypted.content" | transloco }}</p>
                 <div class="zelf-action-row__value note-detail__content-field">
-                    <div class="note-detail__content-text note-detail__content-text--multiline">{{ decryptedData.content || "No content" }}</div>
+                    <div class="note-detail__content-text note-detail__content-text--multiline">
+                        {{ decryptedData.content || ("billing.notes.detail.decrypted.no_content" | transloco) }}
+                    </div>
                     <button
                         class="zelf-icon-button zelf-icon-button--40 zelf-icon-button--anti-flash-white zelf-icon-button--border-soft"
                         (click)="onCopyNoteContent()"
-                        title="Copy content"
+                        [title]="'billing.notes.detail.decrypted.copy_content' | transloco"
                     >
                         <ng-container *ngTemplateOutlet="clipboardIcon"></ng-container>
                     </button>

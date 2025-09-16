@@ -7,7 +7,7 @@
                 />
             </svg>
         </button>
-        <h2>Add Payment Card</h2>
+        <h2>{{ isNewCard ? ("billing.payment_cards.form.title.add" | transloco) : ("billing.payment_cards.form.title.edit" | transloco) }}</h2>
     </div>
 
     <div class="form-content">
@@ -22,7 +22,7 @@
                                 class="zelf-input__control"
                                 id="bankName"
                                 name="bankName"
-                                placeholder="Payment Card Name"
+                                [placeholder]="'billing.payment_cards.form.card_number.placeholder' | transloco"
                                 required
                                 type="text"
                             />
@@ -44,11 +44,11 @@
                     <div class="card-number">{{ getMaskedCardNumber() || "•••• •••• •••• ••••" }}</div>
                     <div class="card-details">
                         <div class="card-holder">
-                            <span class="label">Card Holder</span>
-                            <span class="value">{{ cardData.cardName || "CARD HOLDER" }}</span>
+                            <span class="label">{{ "billing.payment_cards.card.card_holder" | transloco }}</span>
+                            <span class="value">{{ cardData.cardName || ("billing.payment_cards.card.no_card_holder" | transloco) }}</span>
                         </div>
                         <div class="card-expiry">
-                            <span class="label">Expires</span>
+                            <span class="label">{{ "billing.payment_cards.card.expires" | transloco }}</span>
                             <span class="value">{{ cardData.expiryMonth || "MM" }}/{{ cardData.expiryYear || "YY" }}</span>
                         </div>
                     </div>
@@ -57,7 +57,7 @@
 
             <!-- Card Information Section -->
             <div class="form-section">
-                <label class="form-label">Card Information</label>
+                <label class="form-label">{{ "billing.payment_cards.form.card_number.label" | transloco }}</label>
 
                 <div class="field-row">
                     <div class="field-group">
@@ -69,7 +69,7 @@
                                 (ngModelChange)="checkFormValidity()"
                                 name="cardName"
                                 id="cardName"
-                                placeholder="Card Holder Name"
+                                [placeholder]="'billing.payment_cards.form.card_holder.placeholder' | transloco"
                                 required
                             />
                         </div>
@@ -83,7 +83,7 @@
                                 (ngModelChange)="onCardNumberChange()"
                                 name="cardNumber"
                                 id="cardNumber"
-                                placeholder="Card Number"
+                                [placeholder]="'billing.payment_cards.form.card_number.placeholder' | transloco"
                                 maxlength="19"
                                 required
                             />
@@ -127,7 +127,7 @@
                                 (ngModelChange)="checkFormValidity()"
                                 name="expiryYear"
                                 id="expiryYear"
-                                placeholder="YY"
+                                [placeholder]="'billing.payment_cards.form.expiry_year.placeholder' | transloco"
                                 min="2024"
                                 max="2030"
                                 required
@@ -143,7 +143,7 @@
                                 (ngModelChange)="onCvvChange()"
                                 name="cvv"
                                 id="cvv"
-                                placeholder="CVV"
+                                [placeholder]="'billing.payment_cards.form.cvv.placeholder' | transloco"
                                 maxlength="4"
                                 required
                             />
@@ -155,7 +155,7 @@
             <!-- Folder Section -->
             <div class="form-section">
                 <div class="folder-toggle">
-                    <label class="form-label">Store in Folder</label>
+                    <label class="form-label">{{ "billing.payment_cards.form.folder.label" | transloco }}</label>
                     <div
                         class="zelf-toggle"
                         [class.zelf-toggle--active]="cardData.insideFolder"
@@ -163,7 +163,7 @@
                         tabindex="0"
                         role="switch"
                         [attr.aria-checked]="cardData.insideFolder"
-                        [attr.aria-label]="'Toggle folder storage'"
+                        [attr.aria-label]="'billing.payment_cards.form.folder.aria_label' | transloco"
                     >
                         <div class="zelf-toggle__track"></div>
                         <div class="zelf-toggle__thumb"></div>
@@ -172,7 +172,13 @@
 
                 <div *ngIf="cardData.insideFolder" class="folder-input">
                     <div class="zelf-input zelf-input--wide">
-                        <input type="text" class="zelf-input__control" [(ngModel)]="cardData.folder" name="folder" placeholder="Folder name" />
+                        <input
+                            type="text"
+                            class="zelf-input__control"
+                            [(ngModel)]="cardData.folder"
+                            name="folder"
+                            [placeholder]="'billing.payment_cards.form.folder.placeholder' | transloco"
+                        />
                     </div>
                 </div>
             </div>
@@ -188,7 +194,7 @@
                             [(ngModel)]="cardData.masterPassword"
                             (ngModelChange)="checkFormValidity()"
                             class="zelf-input__control"
-                            placeholder="Enter your master password"
+                            [placeholder]="'billing.payment_cards.form.master_password.placeholder' | transloco"
                         />
                         <button
                             type="button"
@@ -228,18 +234,21 @@
                             </svg>
                         </button>
                     </div>
-                    <small class="form-hint"
-                        >We require the {{ wallet.name }} password to encrypt and store your card details. Biometric verification is always
-                        required.</small
-                    >
+                    <small class="form-hint">{{ "billing.payment_cards.form.master_password.hint" | transloco: { walletName: wallet.name } }}</small>
                 </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="form-actions">
-                <button type="button" class="zelf-button zelf-button--white" (click)="onCancel()">Cancel</button>
+                <button type="button" class="zelf-button zelf-button--white" (click)="onCancel()">
+                    {{ "billing.payment_cards.form.buttons.cancel" | transloco }}
+                </button>
                 <button type="submit" class="zelf-button zelf-button--black" [disabled]="!formValid">
-                    {{ isNewCard ? "Create Card" : "Update Card" }}
+                    {{
+                        isNewCard
+                            ? ("billing.payment_cards.form.buttons.create" | transloco)
+                            : ("billing.payment_cards.form.buttons.update" | transloco)
+                    }}
                 </button>
             </div>
         </form>

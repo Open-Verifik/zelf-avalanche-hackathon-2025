@@ -473,6 +473,153 @@
             "payment_cards": "Cartes de Paiement",
             "subscription": "Abonnement"
         },
+        "payment_cards": {
+            "title": "Cartes de Paiement",
+            "subtitle": "Stocker de manière sécurisée les informations de vos cartes de paiement",
+            "loading": {
+                "title": "Chargement de vos cartes de paiement",
+                "message": "Veuillez patienter pendant que nous récupérons vos données sécurisées..."
+            },
+            "error": {
+                "title": "Oups ! Quelque chose s'est mal passé",
+                "message": "Nous n'avons pas pu charger vos cartes de paiement.",
+                "try_again": "Réessayer"
+            },
+            "premium": {
+                "title": "Débloquer les Fonctionnalités Premium",
+                "description": "Obtenez une sécurité avancée et plus avec ZelfKeys Premium"
+            },
+            "list": {
+                "header": "{{ count }} carte{{ count !== 1 ? 's' : '' }} stockée{{ count !== 1 ? 's' : '' }}"
+            },
+            "add_card": {
+                "title": "Ajouter une Nouvelle Carte",
+                "description": "Stocker de manière sécurisée une nouvelle carte de paiement"
+            },
+            "card": {
+                "card_holder": "Titulaire de Carte",
+                "expires": "Expire",
+                "card_number": "Numéro de Carte",
+                "expiry_date": "Date d'Expiration",
+                "card_type": "Type de Carte",
+                "cvv": "CVV",
+                "billing_address": "Adresse de Facturation",
+                "notes": "Notes",
+                "no_card_holder": "Aucun titulaire",
+                "no_expiry": "Aucune date d'expiration",
+                "no_card_number": "Aucun numéro de carte",
+                "no_card_type": "Aucun type de carte",
+                "no_cvv": "Aucun CVV",
+                "no_billing_address": "Aucune adresse de facturation",
+                "no_notes": "Aucune note"
+            },
+            "detail": {
+                "title": "Détails de Carte de Paiement",
+                "loading": "Chargement des détails de carte de paiement...",
+                "error": {
+                    "title": "Erreur lors du chargement de la carte de paiement",
+                    "go_back": "Retour"
+                },
+                "decrypt": {
+                    "button": "Déchiffrer la Carte",
+                    "decrypting": "Déchiffrement..."
+                },
+                "info": {
+                    "title": "Informations de Carte",
+                    "card_number": "Numéro de Carte",
+                    "card_holder": "Titulaire de Carte",
+                    "expiry_date": "Date d'Expiration",
+                    "card_type": "Type de Carte",
+                    "cvv": "CVV",
+                    "billing_address": "Adresse de Facturation",
+                    "notes": "Notes",
+                    "copy_card_number": "Copier le numéro de carte",
+                    "copy_card_holder": "Copier le titulaire",
+                    "copy_expiry": "Copier la date d'expiration",
+                    "copy_card_type": "Copier le type de carte",
+                    "copy_cvv": "Copier le CVV",
+                    "copy_billing_address": "Copier l'adresse de facturation",
+                    "copy_notes": "Copier les notes"
+                },
+                "zelfproof": {
+                    "title": "ZelfProof",
+                    "download": "Télécharger ZelfProof"
+                },
+                "decrypted": {
+                    "title": "Informations de Carte Déchiffrées",
+                    "card_number": "Numéro de Carte",
+                    "card_holder": "Titulaire de Carte",
+                    "expiry_date": "Date d'Expiration",
+                    "card_type": "Type de Carte",
+                    "cvv": "CVV",
+                    "billing_address": "Adresse de Facturation",
+                    "notes": "Notes",
+                    "show_card_number": "Afficher le numéro de carte",
+                    "hide_card_number": "Masquer le numéro de carte",
+                    "show_cvv": "Afficher le CVV",
+                    "hide_cvv": "Masquer le CVV",
+                    "copy_card_number": "Copier le numéro de carte",
+                    "copy_card_holder": "Copier le titulaire",
+                    "copy_expiry": "Copier la date d'expiration",
+                    "copy_card_type": "Copier le type de carte",
+                    "copy_cvv": "Copier le CVV",
+                    "copy_billing_address": "Copier l'adresse de facturation",
+                    "copy_notes": "Copier les notes"
+                }
+            },
+            "form": {
+                "title": {
+                    "add": "Ajouter une Nouvelle Carte de Paiement",
+                    "edit": "Modifier la Carte de Paiement"
+                },
+                "card_number": {
+                    "label": "Numéro de Carte *",
+                    "placeholder": "1234 5678 9012 3456"
+                },
+                "card_holder": {
+                    "label": "Nom du Titulaire *",
+                    "placeholder": "Entrez le nom du titulaire"
+                },
+                "expiry_month": {
+                    "label": "Mois d'Expiration *",
+                    "placeholder": "MM"
+                },
+                "expiry_year": {
+                    "label": "Année d'Expiration *",
+                    "placeholder": "AAAA"
+                },
+                "card_type": {
+                    "label": "Type de Carte *",
+                    "placeholder": "Sélectionnez le type de carte"
+                },
+                "cvv": {
+                    "label": "CVV *",
+                    "placeholder": "123"
+                },
+                "billing_address": {
+                    "label": "Adresse de Facturation",
+                    "placeholder": "Entrez l'adresse de facturation (optionnel)"
+                },
+                "notes": {
+                    "label": "Notes",
+                    "placeholder": "Entrez des notes (optionnel)"
+                },
+                "folder": {
+                    "label": "Stocker dans un Dossier",
+                    "placeholder": "Nom du dossier",
+                    "aria_label": "Basculer le stockage en dossier"
+                },
+                "master_password": {
+                    "placeholder": "Entrez votre mot de passe principal",
+                    "hint": "Nous avons besoin du mot de passe {{ walletName }} pour chiffrer et stocker vos identifiants. La vérification biométrique est toujours requise."
+                },
+                "buttons": {
+                    "cancel": "Annuler",
+                    "create": "Créer la Carte",
+                    "update": "Mettre à jour la Carte"
+                }
+            }
+        },
         "notes": {
             "title": "Notes",
             "subtitle": "Gérez vos notes sécurisées et paires clé-valeur",
@@ -495,7 +642,267 @@
             "add_note": {
                 "title": "Ajouter une Nouvelle Note",
                 "description": "Stocker de manière sécurisée une nouvelle note"
+            },
+            "detail": {
+                "title": "Détails de la Note",
+                "loading": "Chargement des détails de la note...",
+                "error": {
+                    "title": "Erreur lors du chargement de la note",
+                    "go_back": "Retour"
+                },
+                "untitled": "Note Sans Titre",
+                "no_folder": "Aucun dossier",
+                "decrypt": {
+                    "button": "Déchiffrer la Note",
+                    "decrypting": "Déchiffrement..."
+                },
+                "info": {
+                    "title": "Informations de la Note",
+                    "note_id": "ID de Note",
+                    "type": "Type",
+                    "folder": "Dossier",
+                    "copy_id": "Copier l'ID de note"
+                },
+                "zelfproof": {
+                    "title": "ZelfProof",
+                    "download": "Télécharger ZelfProof"
+                },
+                "decrypted": {
+                    "title": "Contenu Déchiffré",
+                    "title_field": "Titre",
+                    "content": "Contenu",
+                    "no_title": "Aucun titre",
+                    "no_content": "Aucun contenu",
+                    "copy_title": "Copier le titre",
+                    "copy_content": "Copier le contenu"
+                }
+            },
+            "form": {
+                "title": {
+                    "add": "Ajouter une Nouvelle Note",
+                    "edit": "Modifier la Note"
+                },
+                "title_field": {
+                    "label": "Titre de la Note *",
+                    "placeholder": "Entrez le titre de la note"
+                },
+                "content": {
+                    "label": "Contenu de la Note *",
+                    "placeholder": "Écrivez votre note ici... Vous pouvez inclure plusieurs paragraphes, listes, ou tout autre contenu que vous devez mémoriser de manière sécurisée.",
+                    "hint": "Le contenu de votre note sera chiffré et stocké de manière sécurisée. Vous pouvez écrire autant que nécessaire."
+                },
+                "folder": {
+                    "label": "Organiser dans un Dossier",
+                    "placeholder": "Entrez le nom du dossier",
+                    "aria_label": "Basculer l'organisation des dossiers"
+                },
+                "master_password": {
+                    "placeholder": "Entrez votre mot de passe principal",
+                    "hint": "Nous avons besoin du mot de passe {{ walletName }} pour chiffrer et stocker vos identifiants. La vérification biométrique est toujours requise."
+                },
+                "buttons": {
+                    "cancel": "Annuler",
+                    "create": "Créer la Note",
+                    "update": "Mettre à jour la Note"
+                }
             }
+        },
+        "passwords": {
+            "title": "Mots de Passe",
+            "subtitle": "Gérez vos mots de passe sécurisés et identifiants",
+            "loading": {
+                "title": "Chargement de vos mots de passe",
+                "message": "Veuillez patienter pendant que nous récupérons vos données sécurisées..."
+            },
+            "error": {
+                "title": "Oups ! Quelque chose s'est mal passé",
+                "message": "Nous n'avons pas pu charger vos mots de passe.",
+                "try_again": "Réessayer"
+            },
+            "premium": {
+                "title": "Débloquer les Fonctionnalités Premium",
+                "description": "Obtenez une sécurité avancée et plus avec ZelfKeys Premium"
+            },
+            "list": {
+                "header": "{{ count }} mot de passe{{ count !== 1 ? 's' : '' }} stocké{{ count !== 1 ? 's' : '' }}"
+            },
+            "add_password": {
+                "title": "Ajouter un Nouveau Mot de Passe",
+                "description": "Stocker de manière sécurisée un nouveau mot de passe"
+            },
+            "search": {
+                "placeholder": "Rechercher des mots de passe..."
+            },
+            "no_results": {
+                "title": "Aucun mot de passe trouvé",
+                "message": "Essayez d'ajuster vos termes de recherche"
+            },
+            "detail": {
+                "title": "Détails du Mot de Passe",
+                "loading": "Chargement des détails du mot de passe...",
+                "error": {
+                    "title": "Erreur lors du chargement du mot de passe",
+                    "go_back": "Retour"
+                },
+                "untitled": "Mot de Passe Sans Titre",
+                "no_username": "Aucun nom d'utilisateur",
+                "no_website": "Aucun site web",
+                "no_category": "Aucune catégorie",
+                "no_zelf_name": "Aucun nom zelf",
+                "unknown_date": "Date inconnue",
+                "decrypt": {
+                    "button": "Déchiffrer le mot de passe",
+                    "decrypting": "Déchiffrement...",
+                    "launch_fill": "Ouvrir et remplir"
+                },
+                "info": {
+                    "title": "Informations du Mot de Passe",
+                    "website": "Site Web",
+                    "username": "Nom d'Utilisateur",
+                    "category": "Catégorie",
+                    "created": "Créé",
+                    "zelf_name": "Nom Zelf",
+                    "ipfs_hash": "Hash IPFS",
+                    "copy_url": "Copier l'URL du site web",
+                    "launch_website": "Ouvrir le site web",
+                    "prefill_autofill": "Pré-remplir l'autocomplétion"
+                },
+                "zelfproof": {
+                    "title": "ZelfProof",
+                    "download": "Télécharger ZelfProof"
+                },
+                "decrypted": {
+                    "title": "Contenu Déchiffré",
+                    "website": "Site Web",
+                    "username": "Nom d'Utilisateur",
+                    "password": "Mot de Passe",
+                    "notes": "Notes",
+                    "difficulty": "Difficulté",
+                    "show_password": "Afficher le mot de passe",
+                    "hide_password": "Masquer le mot de passe",
+                    "copy_website": "Copier le site web",
+                    "copy_password": "Copier le mot de passe"
+                }
+            },
+            "form": {
+                "title": "Ajouter un Mot de Passe",
+                "website": {
+                    "label": "URL du Site Web *",
+                    "placeholder": "https://exemple.com"
+                },
+                "title_field": {
+                    "label": "Titre *",
+                    "placeholder": "Entrez le titre"
+                },
+                "email": {
+                    "label": "E-mail *",
+                    "placeholder": "Entrez l'e-mail"
+                },
+                "password": {
+                    "label": "Mot de Passe *",
+                    "placeholder": "Entrez le mot de passe"
+                },
+                "folder": {
+                    "label": "Organiser dans un Dossier",
+                    "placeholder": "Entrez le nom du dossier",
+                    "aria_label": "Basculer l'organisation des dossiers"
+                },
+                "notes": {
+                    "label": "Notes",
+                    "placeholder": "Entrez des notes (optionnel)"
+                },
+                "master_password": {
+                    "label": "Mot de Passe Principal *",
+                    "placeholder": "Entrez votre mot de passe principal",
+                    "hint": "Nous avons besoin du mot de passe {{ walletName }} pour chiffrer et stocker vos identifiants. La vérification biométrique est toujours requise."
+                },
+                "buttons": {
+                    "save": "Enregistrer le Mot de Passe",
+                    "cancel": "Annuler"
+                }
+            }
+        }
+    },
+    "start": {
+        "title": "Bienvenue sur ZelfKeys",
+        "subtitle": "Votre gestionnaire de mots de passe sécurisé",
+        "features": {
+            "install_extension": {
+                "title": "INSTALLEZ NOTRE<br />EXTENSION",
+                "description": "Obtenez notre extension dans votre navigateur préféré"
+            },
+            "secure_passwords": {
+                "title": "SÉCURISEZ VOS<br />MOTS DE PASSE",
+                "description": "Ajoutez vos mots de passe, cartes de paiement et notes."
+            },
+            "autocomplete": {
+                "title": "AUTOCOMPLÉTEZ<br />VOS INFORMATIONS",
+                "description": "Remplissez automatiquement vos mots de passe stockés après une vérification biométrique rapide."
+            }
+        },
+        "cta": {
+            "button": "Sécuriser mon premier mot de passe"
+        }
+    },
+    "password_result": {
+        "title": "Résultat du Stockage du Mot de Passe",
+        "loading": "Chargement du résultat...",
+        "sections": {
+            "success": {
+                "title": "🎉 Stockage Réussi !",
+                "message": "Mot de passe stocké avec succès !"
+            },
+            "details": {
+                "title": "📝 Détails du Mot de Passe Stocké",
+                "labels": {
+                    "website": "Site Web",
+                    "username": "Nom d'Utilisateur",
+                    "type": "Type",
+                    "category": "Catégorie",
+                    "zelf_name": "Nom Zelf",
+                    "timestamp": "Horodatage"
+                }
+            },
+            "nft": {
+                "title": "🖼️ NFT Créé",
+                "labels": {
+                    "token_id": "ID du Token",
+                    "cost": "Coût",
+                    "contract": "Contrat",
+                    "transaction": "Transaction"
+                }
+            },
+            "ipfs": {
+                "title": "🌐 Stockage IPFS",
+                "labels": {
+                    "hash": "Hash IPFS",
+                    "gateway_url": "URL de la Passerelle",
+                    "file_size": "Taille du Fichier",
+                    "uploaded": "Téléchargé"
+                },
+                "gateway_link": "Voir sur IPFS Gateway"
+            },
+            "zelfproof": {
+                "title": "🔐 ZelfProof Généré",
+                "labels": {
+                    "string": "Chaîne ZelfProof",
+                    "qr_code": "Code QR"
+                },
+                "copy_hint": "Cliquez pour copier"
+            },
+            "debug": {
+                "title": "🔍 Informations de Débogage"
+            },
+            "next_steps": {
+                "title": "Prochaines Étapes",
+                "success_message": "Votre mot de passe est maintenant stocké en toute sécurité. Vous pouvez le voir dans votre liste de mots de passe ou en ajouter un autre.",
+                "error_message": "Veuillez examiner les détails de l'erreur ci-dessus et réessayer. Si le problème persiste, contactez le support.",
+                "unknown_message": "Le système n'a pas pu déterminer le statut. Veuillez vérifier la réponse de l'API ci-dessus pour plus de détails."
+            }
+        },
+        "actions": {
+            "back_to_passwords": "Retour aux Mots de Passe",
+            "add_another": "Ajouter un Autre Mot de Passe"
         }
     }
 }

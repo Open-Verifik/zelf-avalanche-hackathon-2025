@@ -11,9 +11,9 @@
                 </svg>
             </div>
 
-            <div class="start-content__card-title">INSTALL OUR<br />EXTENSION</div>
+            <div class="start-content__card-title" [innerHTML]="'start.features.install_extension.title' | transloco"></div>
 
-            <div class="start-content__card-description">Get our extension in your prefer browser</div>
+            <div class="start-content__card-description">{{ "start.features.install_extension.description" | transloco }}</div>
         </div>
 
         <div class="start-content__feature-card" [routerLink]="['../passwords']">
@@ -26,9 +26,9 @@
                 </svg>
             </div>
 
-            <div class="start-content__card-title">SECURE YOUR<br />PASSWORDS</div>
+            <div class="start-content__card-title" [innerHTML]="'start.features.secure_passwords.title' | transloco"></div>
 
-            <div class="start-content__card-description">Add your passwords, payment cards, and notes.</div>
+            <div class="start-content__card-description">{{ "start.features.secure_passwords.description" | transloco }}</div>
         </div>
 
         <div class="start-content__feature-card" [routerLink]="['../passwords']">
@@ -41,16 +41,16 @@
                 </svg>
             </div>
 
-            <div class="start-content__card-title">AUTO-COMPLETE<br />YOUR INFO</div>
+            <div class="start-content__card-title" [innerHTML]="'start.features.autocomplete.title' | transloco"></div>
 
-            <div class="start-content__card-description">Autofill your stored passwords automatically after a quick biometric verification.</div>
+            <div class="start-content__card-description">{{ "start.features.autocomplete.description" | transloco }}</div>
         </div>
     </div>
 
     <!-- Call to Action Button -->
     <div class="start-content__cta-section">
         <button class="zelf-button zelf-button--black start-content__cta-button" [routerLink]="['../passwords']">
-            <span class="zelf-button__text">Secure my first password</span>
+            <span class="zelf-button__text">{{ "start.cta.button" | transloco }}</span>
         </button>
     </div>
 </div>

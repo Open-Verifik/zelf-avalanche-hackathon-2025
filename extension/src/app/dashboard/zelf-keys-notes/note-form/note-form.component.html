@@ -7,14 +7,14 @@
                 />
             </svg>
         </button>
-        <h2>{{ isNewNote ? "Add New Note" : "Edit Note" }}</h2>
+        <h2>{{ isNewNote ? ("billing.notes.form.title.add" | transloco) : ("billing.notes.form.title.edit" | transloco) }}</h2>
     </div>
 
     <div class="form-content">
         <form (ngSubmit)="onSave()" #noteForm="ngForm">
             <!-- Title Section -->
             <div class="form-section">
-                <label for="title" class="form-label">Note Title *</label>
+                <label for="title" class="form-label">{{ "billing.notes.form.title_field.label" | transloco }}</label>
                 <div class="zelf-input zelf-input--wide">
                     <input
                         type="text"
@@ -23,7 +23,7 @@
                         [(ngModel)]="noteData.title"
                         (ngModelChange)="checkFormValidity()"
                         class="zelf-input__control"
-                        placeholder="Enter note title"
+                        [placeholder]="'billing.notes.form.title_field.placeholder' | transloco"
                         required
                     />
                 </div>
@@ -31,7 +31,7 @@
 
             <!-- Note Content Section -->
             <div class="form-section">
-                <label for="content" class="form-label">Note Content *</label>
+                <label for="content" class="form-label">{{ "billing.notes.form.content.label" | transloco }}</label>
                 <div class="zelf-input zelf-input--wide zelf-input--textarea">
                     <textarea
                         id="content"
@@ -39,18 +39,18 @@
                         [(ngModel)]="noteData.content"
                         (ngModelChange)="checkFormValidity()"
                         class="zelf-input__control"
-                        placeholder="Write your note here... You can include multiple paragraphs, lists, or any other content you need to remember securely."
+                        [placeholder]="'billing.notes.form.content.placeholder' | transloco"
                         rows="8"
                         required
                     ></textarea>
                 </div>
-                <small class="form-hint">Your note content will be encrypted and stored securely. You can write as much as you need.</small>
+                <small class="form-hint">{{ "billing.notes.form.content.hint" | transloco }}</small>
             </div>
 
             <!-- Folder Section -->
             <div class="form-section">
                 <div class="folder-toggle">
-                    <label class="form-label">Organize in Folder</label>
+                    <label class="form-label">{{ "billing.notes.form.folder.label" | transloco }}</label>
                     <div
                         class="zelf-toggle"
                         [class.zelf-toggle--active]="noteData.insideFolder"
@@ -58,7 +58,7 @@
                         tabindex="0"
                         role="switch"
                         [attr.aria-checked]="noteData.insideFolder"
-                        [attr.aria-label]="'Toggle folder organization'"
+                        [attr.aria-label]="'billing.notes.form.folder.aria_label' | transloco"
                     >
                         <div class="zelf-toggle__track"></div>
                         <div class="zelf-toggle__thumb"></div>
@@ -67,7 +67,13 @@
 
                 <div *ngIf="noteData.insideFolder" class="folder-input">
                     <div class="zelf-input zelf-input--wide">
-                        <input type="text" [(ngModel)]="noteData.folder" id="folder" class="zelf-input__control" placeholder="Enter folder name" />
+                        <input
+                            type="text"
+                            [(ngModel)]="noteData.folder"
+                            id="folder"
+                            class="zelf-input__control"
+                            [placeholder]="'billing.notes.form.folder.placeholder' | transloco"
+                        />
                     </div>
                 </div>
             </div>
@@ -83,7 +89,7 @@
                             [(ngModel)]="noteData.masterPassword"
                             (ngModelChange)="checkFormValidity()"
                             class="zelf-input__control"
-                            placeholder="Enter your master password"
+                            [placeholder]="'billing.notes.form.master_password.placeholder' | transloco"
                         />
                         <button
                             type="button"
@@ -123,18 +129,17 @@
                             </svg>
                         </button>
                     </div>
-                    <small class="form-hint"
-                        >We require the {{ wallet.name }} password to encrypt and store your credentials. Biometric verification is always
-                        required.</small
-                    >
+                    <small class="form-hint">{{ "billing.notes.form.master_password.hint" | transloco: { walletName: wallet.name } }}</small>
                 </div>
             </div>
 
             <!-- Action Buttons -->
             <div class="form-actions">
-                <button type="button" class="zelf-button zelf-button--white" (click)="onCancel()">Cancel</button>
+                <button type="button" class="zelf-button zelf-button--white" (click)="onCancel()">
+                    {{ "billing.notes.form.buttons.cancel" | transloco }}
+                </button>
                 <button type="submit" class="zelf-button zelf-button--black" [disabled]="!formValid">
-                    {{ isNewNote ? "Create Note" : "Update Note" }}
+                    {{ isNewNote ? ("billing.notes.form.buttons.create" | transloco) : ("billing.notes.form.buttons.update" | transloco) }}
                 </button>
             </div>
         </form>

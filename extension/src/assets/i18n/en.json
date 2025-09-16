@@ -484,6 +484,153 @@
             "payment_cards": "Payment Cards",
             "subscription": "Subscription"
         },
+        "payment_cards": {
+            "title": "Payment Cards",
+            "subtitle": "Securely store your payment card information",
+            "loading": {
+                "title": "Loading your payment cards",
+                "message": "Please wait while we fetch your secure data..."
+            },
+            "error": {
+                "title": "Oops! Something went wrong",
+                "message": "We couldn't load your payment cards.",
+                "try_again": "Try Again"
+            },
+            "premium": {
+                "title": "Unlock Premium Features",
+                "description": "Get advanced security, and more with ZelfKeys Premium"
+            },
+            "list": {
+                "header": "{{ count }} stored card{{ count !== 1 ? 's' : '' }}"
+            },
+            "add_card": {
+                "title": "Add New Card",
+                "description": "Securely store a new payment card"
+            },
+            "card": {
+                "card_holder": "Card Holder",
+                "expires": "Expires",
+                "card_number": "Card Number",
+                "expiry_date": "Expiry Date",
+                "card_type": "Card Type",
+                "cvv": "CVV",
+                "billing_address": "Billing Address",
+                "notes": "Notes",
+                "no_card_holder": "No card holder",
+                "no_expiry": "No expiry date",
+                "no_card_number": "No card number",
+                "no_card_type": "No card type",
+                "no_cvv": "No CVV",
+                "no_billing_address": "No billing address",
+                "no_notes": "No notes"
+            },
+            "detail": {
+                "title": "Payment Card Details",
+                "loading": "Loading payment card details...",
+                "error": {
+                    "title": "Error loading payment card",
+                    "go_back": "Go Back"
+                },
+                "decrypt": {
+                    "button": "Decrypt Card",
+                    "decrypting": "Decrypting..."
+                },
+                "info": {
+                    "title": "Card Information",
+                    "card_number": "Card Number",
+                    "card_holder": "Card Holder",
+                    "expiry_date": "Expiry Date",
+                    "card_type": "Card Type",
+                    "cvv": "CVV",
+                    "billing_address": "Billing Address",
+                    "notes": "Notes",
+                    "copy_card_number": "Copy card number",
+                    "copy_card_holder": "Copy card holder",
+                    "copy_expiry": "Copy expiry date",
+                    "copy_card_type": "Copy card type",
+                    "copy_cvv": "Copy CVV",
+                    "copy_billing_address": "Copy billing address",
+                    "copy_notes": "Copy notes"
+                },
+                "zelfproof": {
+                    "title": "ZelfProof",
+                    "download": "Download ZelfProof"
+                },
+                "decrypted": {
+                    "title": "Decrypted Card Information",
+                    "card_number": "Card Number",
+                    "card_holder": "Card Holder",
+                    "expiry_date": "Expiry Date",
+                    "card_type": "Card Type",
+                    "cvv": "CVV",
+                    "billing_address": "Billing Address",
+                    "notes": "Notes",
+                    "show_card_number": "Show card number",
+                    "hide_card_number": "Hide card number",
+                    "show_cvv": "Show CVV",
+                    "hide_cvv": "Hide CVV",
+                    "copy_card_number": "Copy card number",
+                    "copy_card_holder": "Copy card holder",
+                    "copy_expiry": "Copy expiry date",
+                    "copy_card_type": "Copy card type",
+                    "copy_cvv": "Copy CVV",
+                    "copy_billing_address": "Copy billing address",
+                    "copy_notes": "Copy notes"
+                }
+            },
+            "form": {
+                "title": {
+                    "add": "Add New Payment Card",
+                    "edit": "Edit Payment Card"
+                },
+                "card_number": {
+                    "label": "Card Number *",
+                    "placeholder": "1234 5678 9012 3456"
+                },
+                "card_holder": {
+                    "label": "Card Holder Name *",
+                    "placeholder": "Enter card holder name"
+                },
+                "expiry_month": {
+                    "label": "Expiry Month *",
+                    "placeholder": "MM"
+                },
+                "expiry_year": {
+                    "label": "Expiry Year *",
+                    "placeholder": "YYYY"
+                },
+                "card_type": {
+                    "label": "Card Type *",
+                    "placeholder": "Select card type"
+                },
+                "cvv": {
+                    "label": "CVV *",
+                    "placeholder": "123"
+                },
+                "billing_address": {
+                    "label": "Billing Address",
+                    "placeholder": "Enter billing address (optional)"
+                },
+                "notes": {
+                    "label": "Notes",
+                    "placeholder": "Enter notes (optional)"
+                },
+                "folder": {
+                    "label": "Store in Folder",
+                    "placeholder": "Folder name",
+                    "aria_label": "Toggle folder storage"
+                },
+                "master_password": {
+                    "placeholder": "Enter your master password",
+                    "hint": "We require the {{ walletName }} password to encrypt and store your credentials. Biometric verification is always required."
+                },
+                "buttons": {
+                    "cancel": "Cancel",
+                    "create": "Create Card",
+                    "update": "Update Card"
+                }
+            }
+        },
         "notes": {
             "title": "Notes",
             "subtitle": "Manage your secure notes and key-value pairs",
@@ -506,7 +653,267 @@
             "add_note": {
                 "title": "Add New Note",
                 "description": "Securely store a new note"
+            },
+            "detail": {
+                "title": "Note Details",
+                "loading": "Loading note details...",
+                "error": {
+                    "title": "Error loading note",
+                    "go_back": "Go Back"
+                },
+                "untitled": "Untitled Note",
+                "no_folder": "No folder",
+                "decrypt": {
+                    "button": "Decrypt Note",
+                    "decrypting": "Decrypting..."
+                },
+                "info": {
+                    "title": "Note Information",
+                    "note_id": "Note ID",
+                    "type": "Type",
+                    "folder": "Folder",
+                    "copy_id": "Copy note ID"
+                },
+                "zelfproof": {
+                    "title": "ZelfProof",
+                    "download": "Download ZelfProof"
+                },
+                "decrypted": {
+                    "title": "Decrypted Content",
+                    "title_field": "Title",
+                    "content": "Content",
+                    "no_title": "No title",
+                    "no_content": "No content",
+                    "copy_title": "Copy title",
+                    "copy_content": "Copy content"
+                }
+            },
+            "form": {
+                "title": {
+                    "add": "Add New Note",
+                    "edit": "Edit Note"
+                },
+                "title_field": {
+                    "label": "Note Title *",
+                    "placeholder": "Enter note title"
+                },
+                "content": {
+                    "label": "Note Content *",
+                    "placeholder": "Write your note here... You can include multiple paragraphs, lists, or any other content you need to remember securely.",
+                    "hint": "Your note content will be encrypted and stored securely. You can write as much as you need."
+                },
+                "folder": {
+                    "label": "Organize in Folder",
+                    "placeholder": "Enter folder name",
+                    "aria_label": "Toggle folder organization"
+                },
+                "master_password": {
+                    "placeholder": "Enter your master password",
+                    "hint": "We require the {{ walletName }} password to encrypt and store your credentials. Biometric verification is always required."
+                },
+                "buttons": {
+                    "cancel": "Cancel",
+                    "create": "Create Note",
+                    "update": "Update Note"
+                }
             }
+        },
+        "passwords": {
+            "title": "Passwords",
+            "subtitle": "Manage your secure passwords and credentials",
+            "loading": {
+                "title": "Loading your passwords",
+                "message": "Please wait while we fetch your secure data..."
+            },
+            "error": {
+                "title": "Oops! Something went wrong",
+                "message": "We couldn't load your passwords.",
+                "try_again": "Try Again"
+            },
+            "premium": {
+                "title": "Unlock Premium Features",
+                "description": "Get advanced security, and more with ZelfKeys Premium"
+            },
+            "list": {
+                "header": "{{ count }} stored password{{ count !== 1 ? 's' : '' }}"
+            },
+            "add_password": {
+                "title": "Add New Password",
+                "description": "Securely store a new password"
+            },
+            "search": {
+                "placeholder": "Search passwords..."
+            },
+            "no_results": {
+                "title": "No passwords found",
+                "message": "Try adjusting your search terms"
+            },
+            "detail": {
+                "title": "Password Details",
+                "loading": "Loading password details...",
+                "error": {
+                    "title": "Error loading password",
+                    "go_back": "Go Back"
+                },
+                "untitled": "Untitled Password",
+                "no_username": "No username",
+                "no_website": "No website",
+                "no_category": "No category",
+                "no_zelf_name": "No zelf name",
+                "unknown_date": "Unknown date",
+                "decrypt": {
+                    "button": "Decrypt password",
+                    "decrypting": "Decrypting...",
+                    "launch_fill": "Launch and fill"
+                },
+                "info": {
+                    "title": "Password Information",
+                    "website": "Website",
+                    "username": "Username",
+                    "category": "Category",
+                    "created": "Created",
+                    "zelf_name": "Zelf Name",
+                    "ipfs_hash": "IPFS Hash",
+                    "copy_url": "Copy website URL",
+                    "launch_website": "Launch website",
+                    "prefill_autofill": "Prefill autofill"
+                },
+                "zelfproof": {
+                    "title": "ZelfProof",
+                    "download": "Download ZelfProof"
+                },
+                "decrypted": {
+                    "title": "Decrypted Content",
+                    "website": "Website",
+                    "username": "Username",
+                    "password": "Password",
+                    "notes": "Notes",
+                    "difficulty": "Difficulty",
+                    "show_password": "Show password",
+                    "hide_password": "Hide password",
+                    "copy_website": "Copy website",
+                    "copy_password": "Copy password"
+                }
+            },
+            "form": {
+                "title": "Add Password",
+                "website": {
+                    "label": "Website URL *",
+                    "placeholder": "https://example.com"
+                },
+                "title_field": {
+                    "label": "Title *",
+                    "placeholder": "Enter title"
+                },
+                "email": {
+                    "label": "Email *",
+                    "placeholder": "Enter email"
+                },
+                "password": {
+                    "label": "Password *",
+                    "placeholder": "Enter password"
+                },
+                "folder": {
+                    "label": "Organize in Folder",
+                    "placeholder": "Enter folder name",
+                    "aria_label": "Toggle folder organization"
+                },
+                "notes": {
+                    "label": "Notes",
+                    "placeholder": "Enter notes (optional)"
+                },
+                "master_password": {
+                    "label": "Master Password *",
+                    "placeholder": "Enter your master password",
+                    "hint": "We require the {{ walletName }} password to encrypt and store your credentials. Biometric verification is always required."
+                },
+                "buttons": {
+                    "save": "Save Password",
+                    "cancel": "Cancel"
+                }
+            }
+        }
+    },
+    "start": {
+        "title": "Welcome to ZelfKeys",
+        "subtitle": "Your secure password manager",
+        "features": {
+            "install_extension": {
+                "title": "INSTALL OUR<br />EXTENSION",
+                "description": "Get our extension in your prefer browser"
+            },
+            "secure_passwords": {
+                "title": "SECURE YOUR<br />PASSWORDS",
+                "description": "Add your passwords, payment cards, and notes."
+            },
+            "autocomplete": {
+                "title": "AUTO-COMPLETE<br />YOUR INFO",
+                "description": "Autofill your stored passwords automatically after a quick biometric verification."
+            }
+        },
+        "cta": {
+            "button": "Secure my first password"
+        }
+    },
+    "password_result": {
+        "title": "Password Storage Result",
+        "loading": "Loading result...",
+        "sections": {
+            "success": {
+                "title": "🎉 Storage Successful!",
+                "message": "Password stored successfully!"
+            },
+            "details": {
+                "title": "📝 Stored Password Details",
+                "labels": {
+                    "website": "Website",
+                    "username": "Username",
+                    "type": "Type",
+                    "category": "Category",
+                    "zelf_name": "Zelf Name",
+                    "timestamp": "Timestamp"
+                }
+            },
+            "nft": {
+                "title": "🖼️ NFT Created",
+                "labels": {
+                    "token_id": "Token ID",
+                    "cost": "Cost",
+                    "contract": "Contract",
+                    "transaction": "Transaction"
+                }
+            },
+            "ipfs": {
+                "title": "🌐 IPFS Storage",
+                "labels": {
+                    "hash": "IPFS Hash",
+                    "gateway_url": "Gateway URL",
+                    "file_size": "File Size",
+                    "uploaded": "Uploaded"
+                },
+                "gateway_link": "View on IPFS Gateway"
+            },
+            "zelfproof": {
+                "title": "🔐 ZelfProof Generated",
+                "labels": {
+                    "string": "ZelfProof String",
+                    "qr_code": "QR Code"
+                },
+                "copy_hint": "Click to copy"
+            },
+            "debug": {
+                "title": "🔍 Debug Information"
+            },
+            "next_steps": {
+                "title": "Next Steps",
+                "success_message": "Your password is now securely stored. You can view it in your passwords list or add another password.",
+                "error_message": "Please review the error details above and try again. If the problem persists, contact support.",
+                "unknown_message": "The system couldn't determine the status. Please check the API response above for details."
+            }
+        },
+        "actions": {
+            "back_to_passwords": "Back to Passwords",
+            "add_another": "Add Another Password"
         }
     }
 }

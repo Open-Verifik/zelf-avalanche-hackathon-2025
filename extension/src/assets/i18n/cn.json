@@ -472,6 +472,153 @@
             "payment_cards": "支付卡",
             "subscription": "订阅"
         },
+        "payment_cards": {
+            "title": "支付卡",
+            "subtitle": "安全存储您的支付卡信息",
+            "loading": {
+                "title": "正在加载您的支付卡",
+                "message": "请稍候，我们正在获取您的安全数据..."
+            },
+            "error": {
+                "title": "糟糕！出了点问题",
+                "message": "我们无法加载您的支付卡。",
+                "try_again": "重试"
+            },
+            "premium": {
+                "title": "解锁高级功能",
+                "description": "通过ZelfKeys Premium获得高级安全性和更多功能"
+            },
+            "list": {
+                "header": "{{ count }} 个存储的卡片"
+            },
+            "add_card": {
+                "title": "添加新卡片",
+                "description": "安全存储新的支付卡"
+            },
+            "card": {
+                "card_holder": "持卡人",
+                "expires": "过期",
+                "card_number": "卡号",
+                "expiry_date": "过期日期",
+                "card_type": "卡片类型",
+                "cvv": "CVV",
+                "billing_address": "账单地址",
+                "notes": "备注",
+                "no_card_holder": "无持卡人",
+                "no_expiry": "无过期日期",
+                "no_card_number": "无卡号",
+                "no_card_type": "无卡片类型",
+                "no_cvv": "无CVV",
+                "no_billing_address": "无账单地址",
+                "no_notes": "无备注"
+            },
+            "detail": {
+                "title": "支付卡详情",
+                "loading": "正在加载支付卡详情...",
+                "error": {
+                    "title": "加载支付卡时出错",
+                    "go_back": "返回"
+                },
+                "decrypt": {
+                    "button": "解密卡片",
+                    "decrypting": "正在解密..."
+                },
+                "info": {
+                    "title": "卡片信息",
+                    "card_number": "卡号",
+                    "card_holder": "持卡人",
+                    "expiry_date": "过期日期",
+                    "card_type": "卡片类型",
+                    "cvv": "CVV",
+                    "billing_address": "账单地址",
+                    "notes": "备注",
+                    "copy_card_number": "复制卡号",
+                    "copy_card_holder": "复制持卡人",
+                    "copy_expiry": "复制过期日期",
+                    "copy_card_type": "复制卡片类型",
+                    "copy_cvv": "复制CVV",
+                    "copy_billing_address": "复制账单地址",
+                    "copy_notes": "复制备注"
+                },
+                "zelfproof": {
+                    "title": "ZelfProof",
+                    "download": "下载ZelfProof"
+                },
+                "decrypted": {
+                    "title": "解密的卡片信息",
+                    "card_number": "卡号",
+                    "card_holder": "持卡人",
+                    "expiry_date": "过期日期",
+                    "card_type": "卡片类型",
+                    "cvv": "CVV",
+                    "billing_address": "账单地址",
+                    "notes": "备注",
+                    "show_card_number": "显示卡号",
+                    "hide_card_number": "隐藏卡号",
+                    "show_cvv": "显示CVV",
+                    "hide_cvv": "隐藏CVV",
+                    "copy_card_number": "复制卡号",
+                    "copy_card_holder": "复制持卡人",
+                    "copy_expiry": "复制过期日期",
+                    "copy_card_type": "复制卡片类型",
+                    "copy_cvv": "复制CVV",
+                    "copy_billing_address": "复制账单地址",
+                    "copy_notes": "复制备注"
+                }
+            },
+            "form": {
+                "title": {
+                    "add": "添加新支付卡",
+                    "edit": "编辑支付卡"
+                },
+                "card_number": {
+                    "label": "卡号 *",
+                    "placeholder": "1234 5678 9012 3456"
+                },
+                "card_holder": {
+                    "label": "持卡人姓名 *",
+                    "placeholder": "输入持卡人姓名"
+                },
+                "expiry_month": {
+                    "label": "过期月份 *",
+                    "placeholder": "MM"
+                },
+                "expiry_year": {
+                    "label": "过期年份 *",
+                    "placeholder": "YYYY"
+                },
+                "card_type": {
+                    "label": "卡片类型 *",
+                    "placeholder": "选择卡片类型"
+                },
+                "cvv": {
+                    "label": "CVV *",
+                    "placeholder": "123"
+                },
+                "billing_address": {
+                    "label": "账单地址",
+                    "placeholder": "输入账单地址（可选）"
+                },
+                "notes": {
+                    "label": "备注",
+                    "placeholder": "输入备注（可选）"
+                },
+                "folder": {
+                    "label": "存储到文件夹",
+                    "placeholder": "文件夹名称",
+                    "aria_label": "切换文件夹存储"
+                },
+                "master_password": {
+                    "placeholder": "输入您的主密码",
+                    "hint": "我们需要{{ walletName }}密码来加密和存储您的凭据。始终需要生物识别验证。"
+                },
+                "buttons": {
+                    "cancel": "取消",
+                    "create": "创建卡片",
+                    "update": "更新卡片"
+                }
+            }
+        },
         "notes": {
             "title": "笔记",
             "subtitle": "管理您的安全笔记和键值对",
@@ -494,7 +641,267 @@
             "add_note": {
                 "title": "添加新笔记",
                 "description": "安全存储新笔记"
+            },
+            "detail": {
+                "title": "笔记详情",
+                "loading": "正在加载笔记详情...",
+                "error": {
+                    "title": "加载笔记时出错",
+                    "go_back": "返回"
+                },
+                "untitled": "无标题笔记",
+                "no_folder": "无文件夹",
+                "decrypt": {
+                    "button": "解密笔记",
+                    "decrypting": "正在解密..."
+                },
+                "info": {
+                    "title": "笔记信息",
+                    "note_id": "笔记ID",
+                    "type": "类型",
+                    "folder": "文件夹",
+                    "copy_id": "复制笔记ID"
+                },
+                "zelfproof": {
+                    "title": "ZelfProof",
+                    "download": "下载ZelfProof"
+                },
+                "decrypted": {
+                    "title": "解密内容",
+                    "title_field": "标题",
+                    "content": "内容",
+                    "no_title": "无标题",
+                    "no_content": "无内容",
+                    "copy_title": "复制标题",
+                    "copy_content": "复制内容"
+                }
+            },
+            "form": {
+                "title": {
+                    "add": "添加新笔记",
+                    "edit": "编辑笔记"
+                },
+                "title_field": {
+                    "label": "笔记标题 *",
+                    "placeholder": "输入笔记标题"
+                },
+                "content": {
+                    "label": "笔记内容 *",
+                    "placeholder": "在这里写您的笔记...您可以包含多个段落、列表或任何其他您需要安全记住的内容。",
+                    "hint": "您的笔记内容将被加密并安全存储。您可以写任意多的内容。"
+                },
+                "folder": {
+                    "label": "组织到文件夹",
+                    "placeholder": "输入文件夹名称",
+                    "aria_label": "切换文件夹组织"
+                },
+                "master_password": {
+                    "placeholder": "输入您的主密码",
+                    "hint": "我们需要{{ walletName }}密码来加密和存储您的凭据。始终需要生物识别验证。"
+                },
+                "buttons": {
+                    "cancel": "取消",
+                    "create": "创建笔记",
+                    "update": "更新笔记"
+                }
             }
+        },
+        "passwords": {
+            "title": "密码",
+            "subtitle": "管理您的安全密码和凭据",
+            "loading": {
+                "title": "正在加载您的密码",
+                "message": "请稍候，我们正在获取您的安全数据..."
+            },
+            "error": {
+                "title": "糟糕！出了点问题",
+                "message": "我们无法加载您的密码。",
+                "try_again": "重试"
+            },
+            "premium": {
+                "title": "解锁高级功能",
+                "description": "通过ZelfKeys Premium获得高级安全性和更多功能"
+            },
+            "list": {
+                "header": "{{ count }} 个存储的密码"
+            },
+            "add_password": {
+                "title": "添加新密码",
+                "description": "安全存储新密码"
+            },
+            "search": {
+                "placeholder": "搜索密码..."
+            },
+            "no_results": {
+                "title": "未找到密码",
+                "message": "尝试调整搜索词"
+            },
+            "detail": {
+                "title": "密码详情",
+                "loading": "正在加载密码详情...",
+                "error": {
+                    "title": "加载密码时出错",
+                    "go_back": "返回"
+                },
+                "untitled": "无标题密码",
+                "no_username": "无用户名",
+                "no_website": "无网站",
+                "no_category": "无分类",
+                "no_zelf_name": "无zelf名称",
+                "unknown_date": "未知日期",
+                "decrypt": {
+                    "button": "解密密码",
+                    "decrypting": "正在解密...",
+                    "launch_fill": "打开并填充"
+                },
+                "info": {
+                    "title": "密码信息",
+                    "website": "网站",
+                    "username": "用户名",
+                    "category": "分类",
+                    "created": "创建时间",
+                    "zelf_name": "Zelf名称",
+                    "ipfs_hash": "IPFS哈希",
+                    "copy_url": "复制网站URL",
+                    "launch_website": "打开网站",
+                    "prefill_autofill": "预填充自动完成"
+                },
+                "zelfproof": {
+                    "title": "ZelfProof",
+                    "download": "下载ZelfProof"
+                },
+                "decrypted": {
+                    "title": "解密内容",
+                    "website": "网站",
+                    "username": "用户名",
+                    "password": "密码",
+                    "notes": "备注",
+                    "difficulty": "难度",
+                    "show_password": "显示密码",
+                    "hide_password": "隐藏密码",
+                    "copy_website": "复制网站",
+                    "copy_password": "复制密码"
+                }
+            },
+            "form": {
+                "title": "添加密码",
+                "website": {
+                    "label": "网站URL *",
+                    "placeholder": "https://example.com"
+                },
+                "title_field": {
+                    "label": "标题 *",
+                    "placeholder": "输入标题"
+                },
+                "email": {
+                    "label": "电子邮件 *",
+                    "placeholder": "输入电子邮件"
+                },
+                "password": {
+                    "label": "密码 *",
+                    "placeholder": "输入密码"
+                },
+                "folder": {
+                    "label": "组织到文件夹",
+                    "placeholder": "输入文件夹名称",
+                    "aria_label": "切换文件夹组织"
+                },
+                "notes": {
+                    "label": "备注",
+                    "placeholder": "输入备注（可选）"
+                },
+                "master_password": {
+                    "label": "主密码 *",
+                    "placeholder": "输入您的主密码",
+                    "hint": "我们需要{{ walletName }}密码来加密和存储您的凭据。始终需要生物识别验证。"
+                },
+                "buttons": {
+                    "save": "保存密码",
+                    "cancel": "取消"
+                }
+            }
+        }
+    },
+    "start": {
+        "title": "欢迎使用 ZelfKeys",
+        "subtitle": "您的安全密码管理器",
+        "features": {
+            "install_extension": {
+                "title": "安装我们的<br />扩展程序",
+                "description": "在您喜欢的浏览器中获取我们的扩展程序"
+            },
+            "secure_passwords": {
+                "title": "保护您的<br />密码",
+                "description": "添加您的密码、支付卡和笔记。"
+            },
+            "autocomplete": {
+                "title": "自动填写<br />您的信息",
+                "description": "在快速生物识别验证后自动填写您存储的密码。"
+            }
+        },
+        "cta": {
+            "button": "保护我的第一个密码"
+        }
+    },
+    "password_result": {
+        "title": "密码存储结果",
+        "loading": "正在加载结果...",
+        "sections": {
+            "success": {
+                "title": "🎉 存储成功！",
+                "message": "密码存储成功！"
+            },
+            "details": {
+                "title": "📝 已存储密码详情",
+                "labels": {
+                    "website": "网站",
+                    "username": "用户名",
+                    "type": "类型",
+                    "category": "类别",
+                    "zelf_name": "Zelf名称",
+                    "timestamp": "时间戳"
+                }
+            },
+            "nft": {
+                "title": "🖼️ NFT已创建",
+                "labels": {
+                    "token_id": "代币ID",
+                    "cost": "成本",
+                    "contract": "合约",
+                    "transaction": "交易"
+                }
+            },
+            "ipfs": {
+                "title": "🌐 IPFS存储",
+                "labels": {
+                    "hash": "IPFS哈希",
+                    "gateway_url": "网关URL",
+                    "file_size": "文件大小",
+                    "uploaded": "已上传"
+                },
+                "gateway_link": "在IPFS网关上查看"
+            },
+            "zelfproof": {
+                "title": "🔐 ZelfProof已生成",
+                "labels": {
+                    "string": "ZelfProof字符串",
+                    "qr_code": "二维码"
+                },
+                "copy_hint": "点击复制"
+            },
+            "debug": {
+                "title": "🔍 调试信息"
+            },
+            "next_steps": {
+                "title": "下一步",
+                "success_message": "您的密码现在已安全存储。您可以在密码列表中查看它或添加另一个密码。",
+                "error_message": "请查看上面的错误详情并重试。如果问题持续存在，请联系支持。",
+                "unknown_message": "系统无法确定状态。请查看上面的API响应以获取详情。"
+            }
+        },
+        "actions": {
+            "back_to_passwords": "返回密码",
+            "add_another": "添加另一个密码"
         }
     }
 }
